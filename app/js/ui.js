@@ -76,7 +76,10 @@ export const formTitle = (form) => FORM_NAMES[form] ?? '';
 export function nodeTitle(node) {
   if (node.type === 'warmup') return node.title ?? '';
   if (node.type === 'letter') return letterTitle(node.letter);
-  if (node.type === 'form') return `${letterTitle(node.letter)} — ${formTitle(node.form)}`;
+  // **وعقدةُ شكل الموقع مجموعةٌ لا حرفاً** (الجلسة ٣): محطةُ الشكل الواحد تمشي على
+  // مجموعات اقرأ السبع، فعنوانُ عقدتها عنوانُ مجموعتها ووجهُها شكلُ أوّل حروفها —
+  // ويبقى السطرُ الثاني لحرفٍ مفردٍ إن جاء يوماً.
+  if (node.type === 'form') return node.title ?? `${letterTitle(node.letter)} — ${formTitle(node.form)}`;
   if (node.type === 'join') return node.title ?? '';
   if (node.type === 'fade') return node.title ?? '';
   if (node.type === 'sentence') return node.title ?? '';
@@ -94,12 +97,16 @@ export function nodeWhere(node) {
  * وجه العقدة على الخريطة: الحرف نفسه، أو أيقونةٌ تدلّ على نوعها.
  *
  * **ولغةُ الواجهة عندنا SVG خطيّ** لا إيموجي (مهمة «أيقونات لا إيموجي» في اقرأ،
- * `DESIGN.md §٦`): وجهُ محطةٍ لا بيانَ له في المنهج أيقونتُنا الخطية — والرمزُ
- * المصوَّر لِما يأتي من بيانات (وجوهُ محطاتٍ تصفها الجلسةُ ٣).
+ * `DESIGN.md §٦`): وجهُ محطةٍ لا بيانَ له في المنهج أيقونتُنا الخطية.
+ *
+ * **ووجوهُ عقد الجلسة ٣ من مادّتها لا من بنك رموز**: الحرفُ نفسُه لعقدة الحرف،
+ * وشكلُه في موقعه لعقدة الشكل (`ـبـ`) — وهو أنطقُ من رمزٍ مصوَّر في تطبيق كتابة،
+ * ولا يحتاج `app/emoji/` الذي لا وجودَ له هنا. والبوابةُ أيقونتُها الخطية.
  */
 export function nodeFace(node) {
-  if (node.type === 'letter' || node.type === 'form') return node.letter;
-  if (node.type === 'gate') return node.gate.face;
+  if (node.type === 'letter') return node.letter;
+  if (node.type === 'form') return node.face ?? node.letter;
+  if (node.type === 'gate') return node.gate.face ?? icon('gate');
   if (node.type === 'warmup') return node.face ?? icon('pen');
   if (node.type === 'join') return node.face ?? icon('link');
   if (node.type === 'fade' || node.type === 'sentence') return node.face ?? icon('ear');
@@ -313,6 +320,10 @@ const ICONS = {
   // حلقتان متشابكتان — وجهُ محطات الوصل: حرفان يتصلان بلا رفع القلم
   link: '<path d="M9.6 14.4a3.6 3.6 0 0 1 0-5.1l2.6-2.5a3.6 3.6 0 0 1 5.1 5.1l-1.3 1.3"/>'
     + '<path d="M14.4 9.6a3.6 3.6 0 0 1 0 5.1l-2.6 2.5a3.6 3.6 0 0 1-5.1-5.1l1.3-1.3"/>',
+  // بوّابةٌ بقوسها — وجهُ البوابات الثلاث (الجلسة ٣): معلَمُها في `LANDMARKS` مصغَّراً
+  // إلى صندوق الأيقونات، فوجهُ البوابة ومَعلَمُها رسمٌ واحد لا رسمان يفترقان.
+  gate: '<path d="M3 20.5h18"/><path d="M5.5 20.5V11a6.5 6.5 0 0 1 13 0v9.5"/>'
+    + '<path d="M12 20.5V4.5"/><path d="M8.8 20.5v-8a3.2 3.2 0 0 1 6.4 0v8"/>',
   // شجرةُ الجذر — جذعٌ يتفرّع: وجهُ محطة العائلة الصرفية (لغةُ الواجهة SVG لا إيموجي)
   roots: '<path d="M12 21v-8"/><path d="M12 15 7.5 10.5"/><path d="m12 15 4.5-4.5"/>'
     + '<path d="M12 12 8.5 6"/><path d="m12 12 3.5-6"/><circle cx="7.5" cy="9.6" r="1.5"/>'

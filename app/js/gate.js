@@ -42,7 +42,9 @@ export function renderGate(gateId) {
     accent: PAUSE_ACCENT,
     leaveAsk: 'تريد الخروج قبل إتمام البوابة؟',
     header: h('div', { class: 'gate-head' },
-      faceEl(gate.face, 'gate-face'),
+      // **وجهُ البوابة أيقونتُها الخطية** (الجلسة ٣): بياناتُ المنهج بلا رمزٍ مصوَّر
+      // — لا بنكَ رموزٍ في هذا التطبيق، ولغةُ الواجهة SVG خطيّ (`DESIGN.md §٦`).
+      faceEl(gate.face ?? icon('gate'), 'gate-face'),
       h('div', {},
         h('h2', {}, gate.title),
         h('p', { class: 'hint' }, gate.hint),

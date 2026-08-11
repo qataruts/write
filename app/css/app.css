@@ -809,6 +809,9 @@ button {
 .dot--done {
   filter: none;
   opacity: 1;
+  border-color: var(--ok);
+  background: color-mix(in srgb, var(--ok) 14%, var(--mix));
+}
 
 /* ————— الاحتفالُ الختامي ونجومُه — من لوح البذرة ————— */
 

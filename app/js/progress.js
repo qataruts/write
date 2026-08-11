@@ -377,13 +377,19 @@ export function studiedLetters() {
   return out;
 }
 
-/** أشكالُ المواقع التي أتمّها: [{letter, form}] — ومعها المعزولُ من درسه. */
+/**
+ * أشكالُ المواقع التي أتمّها: [{letter, form}] — ومعها المعزولُ من درسه.
+ *
+ * **وعقدةُ الشكل تحمل حروفَ مجموعةٍ لا حرفاً واحداً** (منهجُ الجلسة ٣: محطةُ الشكل
+ * الواحد تمشي على مجموعات اقرأ السبع) — ويبقى `letter` مقروءاً إن جاءت عقدةُ حرفٍ
+ * مفرد يوماً، فمصدرٌ واحد لا مصدران.
+ */
 export function studiedForms() {
   const out = studiedLetters().map((letter) => ({ letter, form: FORMS.ISOLATED }));
   for (const node of allNodes()) {
-    if (node.type === 'form' && node.letter && node.form && isDone(node.id)) {
-      out.push({ letter: node.letter, form: node.form });
-    }
+    if (node.type !== 'form' || !node.form || !isDone(node.id)) continue;
+    const letters = node.letters || (node.letter ? [node.letter] : []);
+    for (const letter of letters) out.push({ letter, form: node.form });
   }
   return out;
 }

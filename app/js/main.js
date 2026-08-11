@@ -205,7 +205,7 @@ function gateEl(section, next, folded) {
     accent: accentForKind('gate'),
     mark: MARKS.gate,
     label: `${section.gate.title}${unlocked ? '' : ' — مقفلة'}`,
-    badge: section.gate.face,
+    badge: section.gate.face ?? icon('gate'),
     title: section.gate.title,
     sub: open ? 'اجتزتَها — الطريق مفتوح' : section.gate.hint,
     meta: unlocked ? (open ? '✓ مجتازة' : 'عشرة تمارين') : [icon('lock'), ' مقفلة'],

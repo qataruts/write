@@ -84,13 +84,18 @@ def taught_letters():
     **ومطالبةٌ تُطلقها من نفسها**: المنهجُ اليومَ هيكلٌ فارغ (تملؤه الجلسة ٣ اشتقاقاً
     من بيانات اقرأ)، فلا تغطيةَ تُطالَب. فإذا امتلأ ولم يُعرَف منه حرفٌ **حمِرَ الفاحص**
     وطالب بوصله — بلا سطرٍ يُضاف يومئذٍ ولا انتباهٍ يُرجى.
+
+    **وقد أطلقتها فعلاً يومَ امتلأ** (الجلسة ٣): صار `curriculum.js` مولَّداً بصيغة
+    JSON خالصة (`"letter": "ب"`) بعد أن كان هيكلاً بيد، فلم يعرفه هذا القارئ وحمِر
+    كما وُعد — ولم يُنقَص شيءٌ من حراسته: تُقرأ الصيغتان معاً، فما يُكتب بيدٍ يوماً
+    يُقرأ كما يُقرأ المولَّد.
     """
     src = CURRICULUM.read_text(encoding="utf-8")
     block = re.search(r"export const STAGES = \[(.*?)\n\];", src, re.S)
     body = block.group(1).strip() if block else ""
     if not body:
         return None
-    return set(re.findall(r"letter:\s*'(.)'", body))
+    return set(re.findall(r"""["']?letter["']?\s*:\s*["'](.)["']""", body))
 
 
 def dist(a, b) -> float:
