@@ -34,6 +34,81 @@ const results = [];
 const log = document.getElementById('log');
 const frame = document.getElementById('app');
 
+/* ————— **حارسُ التعاقب** (الجلسة ٤ج — بلاغُ ميدان «احسب» الأول، `calc@ad59c56`) —————
+
+   حرّاسُ البذرة كانوا **يعدّون التشغيلات ولا يقيسون التعاقب**: خمسةٌ وستون فحصاً أخضر
+   عند احسب وأذنُ المالك تسمع صوتين معاً وثالثاً مقطوشاً. فيُبدَّل عنصرُ الصوت بشاهدٍ
+   يسجّل **لحظتَي بدء كل تشغيلٍ وتمامه**، ومنهما يُحكَم: لا لحظةَ فيها صوتان معاً، ولا
+   جملةً تُقطَع قبل تمامها إلا بإسكاتٍ مقصود، ولا انتقالاً يسبق تمامَ الكلام. */
+/* **ومدّةُ الملفّ الوهميّ ٩٠٠ مللي** — فوق أطولِ مهلةٍ ثابتة في شاشاتنا (`review.js`
+   ينتقل بعد ٧٥٠ ويعيد بعد ٤٥٠): بذلك يصير **العطبُ الأصليّ مرئياً للحارس** — من
+   انتظر مهلةً بدل `ended` يقطع الجملةَ في منتصفها فيُقرأ «مقطوشاً»، ولولا ذلك لَمرّ.
+   (والمهلةُ الأطولُ من المدّة يكشفها أخوه في `check_speech.mjs` بمدّتين مختلفتين.) */
+let audioMs = 900;
+const timeline = [];    // {key, doc, t0, t1} — لحظاتُ كل تشغيلٍ بالمللي، و`doc` نافذتُه
+const failKeys = new Set();   // مفاتيحُ يتعثّر تحميلُها عمداً (فحصُ الاحتياط)
+
+/** إغلاقُ ما بقي مفتوحاً — فلا فجوةٌ تُقرأ تراكباً على ما بعدها. */
+const closeOpen = () => {
+  for (const row of timeline) if (row.t1 === Infinity) row.t1 = performance.now();
+};
+
+/**
+ * أزواجُ التشغيل المتقاطعة في مدىً من الزمن — «صوتان معاً» بحرفه.
+ *
+ * **والمقابلةُ داخلَ المستند الواحد** (درسُ احسب الثاني): صفحةُ الفحص ونافذةُ التطبيق
+ * مستندان، ومستندٌ يُغادَر لا يموت لحظتَه — فتتقاطع مؤقّتاتُه مع أوّل جملةٍ في الوارد.
+ * وذلك **نافذتان في اختبار لا صوتان في أذن طفل**، فلا يُقابَل صوتُ هذا بصوت ذاك،
+ * **كي لا يحمرّ الحارسُ على الصواب**. وما داخل المستند الواحد يُقابَل كلُّه.
+ */
+const overlaps = (from = 0) => {
+  const bad = [];
+  for (const doc of new Set(timeline.map((r) => r.doc))) {
+    const rows = timeline.filter((r) => r.doc === doc && r.t0 >= from).sort((a, b) => a.t0 - b.t0);
+    for (let i = 1; i < rows.length; i++) {
+      if (rows[i].t0 < rows[i - 1].t1 - 1) bad.push(`${rows[i - 1].key}+${rows[i].key}`);
+    }
+  }
+  return bad;
+};
+
+/** يزرع الشاهدَ في نافذةٍ (صفحةُ الفحص أو نافذةُ التطبيق) — مرّةً واحدة لكلٍّ. */
+function hookAudio(w, doc) {
+  if (!w || w.__audioHooked) return;
+  w.__audioHooked = true;
+  w.Audio = class extends w.EventTarget {
+    constructor(src = '') { super(); this.preload = ''; this.currentTime = 0; this.src = src; }
+    set src(v) {
+      this._src = v || '';
+      this.__key = (String(this._src).split('/').pop() || '').split('?')[0].replace('.mp3', '');
+    }
+    get src() { return this._src; }
+    play() {
+      if (failKeys.has(this.__key)) {
+        setTimeout(() => this.dispatchEvent(new w.Event('error')), 0);
+        return Promise.reject(new Error('audio'));
+      }
+      this.__row = { key: this.__key, doc, t0: performance.now(), t1: Infinity };
+      timeline.push(this.__row);
+      this.__timer = setTimeout(() => {
+        this.__close();
+        this.dispatchEvent(new w.Event('ended'));
+      }, audioMs);
+      return Promise.resolve();
+    }
+    /** الإسكاتُ يُنهي المدى فعلاً (لا يبقى مفتوحاً فيُقرأ تراكباً على ما بعده). */
+    __close() {
+      clearTimeout(this.__timer);
+      if (this.__row && this.__row.t1 === Infinity) this.__row.t1 = performance.now();
+    }
+    pause() { this.__close(); }
+    load() {}
+    removeAttribute() { this.src = ''; }
+  };
+}
+const APP_DOC = 'تطبيق';   // نافذةُ الطفل · وصفحةُ الفحص نافذةٌ أخرى لا تُقابَل بها
+hookAudio(window, 'قياس');
+
 function ok(cond, msg) {
   results.push({ ok: !!cond, msg });
   const line = document.createElement('div');
@@ -55,6 +130,7 @@ const send = () => fetch('/result', { method: 'POST', body: JSON.stringify(resul
     await new Promise((r) => frame.addEventListener('load', r, { once: true }));
     const win = frame.contentWindow;
     const doc = frame.contentDocument;
+    hookAudio(win, APP_DOC);           // شاهدُ الصوت في نافذة الطفل — قبل أن تنطق شاشة
     win.addEventListener('error', (e) => errors.push(String(e.message)));
     win.addEventListener('unhandledrejection', (e) => errors.push(String(e.reason)));
     await wait(1200);
@@ -102,7 +178,81 @@ const send = () => fetch('/result', { method: 'POST', body: JSON.stringify(resul
     ok(external.length === 0,
       `وكلُّ ما جُلب من أصل التطبيق نفسِه (${external.length ? external.join('، ') : 'صفرُ مصدرٍ خارجيّ'})`);
 
-    // ————— ٧) وأخيراً: لا خطأ جافاسكربت واحد —————
+    // ————— ٧) تعاقبُ الصوت: صوتٌ واحدٌ في الجوّ، والانتقالُ بعد تمامه —————
+    //
+    // **والقناةُ تُقاس في متصفّحٍ حقيقيّ بمؤقّتاته** — لا بمحاكاةٍ في node (تلك في
+    // `check_speech.mjs`، وهما أخوان): تُستورَد `js/audio.js` نفسُها في هذه الصفحة
+    // وتُساق بشاهد الصوت أعلاه بمؤقّتات المتصفّح لا بمحاكاةٍ.
+    const audio = await import('/js/audio.js');
+    const seqFrom = performance.now();
+
+    // أ) نداءان في اللحظة نفسِها — وهو عينُ ما وقع في ميدان احسب
+    const both = await Promise.all([audio.play('أَلِفْ'), audio.play('بَاءْ')]);
+    const rows = timeline.filter((r) => r.t0 >= seqFrom);
+    const cut = rows.filter((r) => r.t1 - r.t0 < audioMs * 0.9);
+    ok(rows.length === 2 && cut.length === 0 && both.every((h) => h === true),
+      `نداءان في اللحظة نفسِها يُسمَعان **تامَّين بالتتابع** (${rows.length} جملةً، `
+      + `أقصرُها ${rows.length ? Math.round(Math.min(...rows.map((r) => r.t1 - r.t0))) : 0}ms `
+      + `من ${audioMs})${cut.length ? ` — **مقطوشٌ: ${cut.map((r) => r.key).join('، ')}**` : ''}`);
+    // **ولا يُقرأ «لا تراكبَ» من لا شيء**: الشرطُ مادّةٌ مقيسةٌ **ثم** خلوُّها من التقاطع —
+    // فمَن أطلق ولم ينتظر يرجع قبل أن يبدأ صوتٌ، فيقيس الحارسُ صفراً ويقول «سليم».
+    // (أمسك هذا الحارسُ نفسَه يومَ جُرّب سالباً: كان يخضرّ على صفر.)
+    ok(rows.length === 2 && overlaps(seqFrom).length === 0,
+      `ولا لحظةَ فيها صوتان يعملان معاً (${rows.length} جملةً مقيسة)${overlaps(seqFrom).length
+        ? ` — **تراكب: ${overlaps(seqFrom).join('، ')}**` : ''}`);
+
+    // ب) **وعدُ `play` يتمّ بتمام الكلام** — به تنتظر الشاشةُ قبل أن تنتقل
+    const waitFrom = performance.now();
+    await audio.play('جِيمْ');
+    const moved = performance.now();
+    const line = timeline.find((r) => r.t0 >= waitFrom);
+    ok(line && moved >= line.t1 && line.t1 - line.t0 >= audioMs * 0.9,
+      `ووعدُ \`play\` **يتمّ بتمام الكلام** لا بمهلةٍ ثابتة: سُمع `
+      + `${line ? Math.round(line.t1 - line.t0) : '؟'}ms من ${audioMs}، وعاد بعد تمامه بـ`
+      + `${line ? Math.round(moved - line.t1) : '؟'}ms`);
+
+    // ج) الإسكاتُ يُفرغ الطابور ولا يعطّله (نقرةُ الطفل الناقلة)
+    const mark = timeline.length;
+    const dropped = [audio.play('دَالْ'), audio.play('هَاءْ')];
+    audio.stop();
+    await Promise.all(dropped);
+    ok(timeline.length === mark,
+      `والإسكاتُ يُفرغ الطابور: ما صُفّ قبله لا يُشغَّل بعده (${timeline.length - mark} تشغيلاً بعده)`);
+    await audio.play('وَاوْ');
+    ok(timeline.length === mark + 1, 'والقناةُ تعمل بعد الإسكات (إفراغٌ لا تعطيل)');
+
+    // د) **الاحتياطُ عند تعثّر الملف مهلةٌ محسوبة لا تجميد**: القناةُ تمضي ولا تقف
+    failKeys.add(audio.keyFor('زَايْ'));
+    const stuckFrom = performance.now();
+    const raced = await Promise.race([
+      audio.play('زَايْ').then(() => 'مضت'),
+      wait(9000).then(() => 'تجمّدت'),
+    ]);
+    const stuckMs = performance.now() - stuckFrom;
+    // **والمقدارُ شرطٌ كالمضيّ**: «مهلةٌ محسوبة» لا تعني رجوعاً فورياً — من رجع في
+    // صفرٍ لم ينتظر شيئاً، وهو العطبُ نفسُه لا علاجُه.
+    ok(raced === 'مضت' && stuckMs >= audio.estimateMs('زَايْ') * 0.4,
+      `وملفٌّ يتعثّر **يمضي بمهلةٍ محسوبة لا يجمّد القناة ولا يدهسها** `
+      + `(${Math.round(stuckMs)}ms، والحدُّ المقدَّر ${audio.estimateMs('زَايْ')}ms)`);
+    failKeys.clear();
+
+    // هـ) **وعلى مسار الطفل نفسِه**: نافذةُ التطبيق — لا لحظةَ فيها صوتان معاً.
+    //     ولا شاشةَ ناطقةً بعد (الجلسة ٥ أولاها)، **فالحكمُ يستيقظ من تلقائه**:
+    //     يومَ تُشغَّل أوّلُ جملةٍ في نافذة التطبيق يصير هذا السطرُ قياساً حقيقياً.
+    closeOpen();
+    const appRows = timeline.filter((r) => r.doc === APP_DOC);
+    const myRows = timeline.length - appRows.length;
+    const clashes = overlaps(0).length;
+    // **والجملُ المقصودةُ تُعَدّ**: أربعٌ يجب أن تُسمَع في هذا القسم (أَلِفْ · بَاءْ · جِيمْ ·
+    // وَاوْ) — ودَالْ وهَاءْ أُسقطتا بالإسكات عمداً، وزَايْ تعثّرت عمداً. فمن قاس أقلَّ
+    // منها لم يقس القناةَ أصلاً، **ولا يُقرأ خلوُّه من التراكب سلامة**.
+    ok(myRows >= 4 && clashes === 0,
+      `ولا لحظةَ في الرحلة كلِّها يعمل فيها صوتان معاً (${appRows.length} تشغيلاً في نافذة الطفل`
+      + `${appRows.length ? '' : ' — لا شاشةَ ناطقةً بعد، والقياسُ يستيقظ يومَ تنطق أولاها'}`
+      + `، و${myRows} في قياس القناة)`
+      + (clashes ? ` — **تراكب: ${overlaps(0).slice(0, 3).join('، ')}**` : ''));
+
+    // ————— ٨) وأخيراً: لا خطأ جافاسكربت واحد —————
     win.location.hash = '#/';
     await wait(500);
     ok(errors.length === 0,
