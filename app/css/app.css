@@ -943,6 +943,35 @@ button {
 .dev-row, .row { display: flex; flex-wrap: wrap; gap: .5rem; justify-content: center; }
 .dev .btn { min-height: 2.6rem; padding: .35rem .9rem; font-size: .9rem; }
 
+/* **لوحُ مسجّل الأحداث** (`app/js/probe.js` — الجلسة م١، خلف `?dev=1` وحدَها).
+
+   و**قاعدتُه الأولى ألّا يبتلع نقرة**: `pointer-events: none` عليه وعلى كلّ ما فيه،
+   فالمقيسُ عندنا هو النقرُ نفسُه — ومقياسٌ يغيّر المقيسَ ليس مقياساً. ولذلك أيضاً
+   يقف في زاويةٍ لا يزاحم فيها زرَّ العودة (صدرُ الشاشة) ولا أفعالَها (ذيلُها). */
+.probe {
+  position: fixed;
+  inset-block-end: 0;
+  inset-inline-start: 0;
+  z-index: 19;                    /* **دون الرسالة العابرة (٢٠)**: لوحُ تشخيصٍ لا يحجب
+                                     جوابَ التطبيق نفسِه — أمسكت ذلك لقطةٌ بالعين */
+  max-width: min(34rem, 92vw);
+  max-height: 40vh;
+  overflow: hidden;
+  padding: .4rem .6rem;
+  border-start-end-radius: var(--radius-btn);
+  background: color-mix(in srgb, var(--ink) 88%, transparent);
+  color: var(--paper);
+  font-size: .72rem;
+  line-height: 1.5;
+  pointer-events: none;
+}
+
+.probe * { pointer-events: none; }
+.probe small { display: block; margin-top: .3rem; opacity: .7; }
+.probe-line { margin-top: .2rem; }
+.probe-line--ok { color: #9fe0a0; }
+.probe-line--bad { color: #ffb3a7; }
+
 .audit { text-align: start; }
 .audit h3 { margin: 1.5rem 0 .5rem; font-size: 1.05rem; }
 .audit-row { display: flex; flex-wrap: wrap; gap: .5rem; }
@@ -992,6 +1021,16 @@ button {
 
 /* ————— رسالة عابرة ————— */
 
+/* **والرسالةُ تُقرأ ولا تُلمَس** — عيبُ بذرةٍ كشفه قياسُ الجلسة م١ (بلاغُ الميدان ١):
+   شريطٌ مثبَّتٌ في ذيل المنظور بـ`z-index: 20` **يبتلع كلَّ نقرةٍ تحته** ٢٫٢ ثانية.
+   وقياسُه في مشهد الميدان بعينه (آيباد طولي): طفلٌ ينقر محطةً مقفلة فتظهر الرسالة،
+   ثم يمدّ يدَه إلى عقدةٍ أخرى **في ذيل المنظور فلا تستجيب** — قيست عقدةُ «حرف د»
+   تحتها بعينها — حتى إذا سحب الشاشةَ مضت المهلةُ فذهبت الرسالةُ فعملت النقرة.
+   وهو نصُّ البلاغ: «أحياناً لا يعمل — يلزم سحبُ الشاشة ثم النقر». وأيُّ زرٍّ يقع في
+   ذيل المنظور تُصيبه العلّةُ نفسُها، والشاشةُ تُسحَب فيتبدّل مَن تحتها.
+   و`role="status"` لا يُنقَر أصلاً، فلا يُفقد بهذا شيء.
+   **والعيبُ قائمٌ في اقرأ نفسِه فيُعاد إليه** (مقيَّدٌ في `docs/SEED.md`، نظيرُ
+   `.btn--ghost` وتقييدِ `/result`). */
 .toast {
   position: fixed;
   inset-inline: 1rem;
@@ -1005,6 +1044,7 @@ button {
   text-align: center;
   box-shadow: var(--shadow);
   z-index: 20;
+  pointer-events: none;
   animation: rise .25s ease;
 }
 

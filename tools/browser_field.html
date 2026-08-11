@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>بلاغُ الميدان ١ على الشاشة — «اُكْتُبْ» الجلسة م١</title>
+<!--
+  **صفحةُ الجلسة م١**: إصلاحان من بلاغ ميدانٍ بطفلةٍ حقيقية على آيباد (١١ أغسطس ٢٠٢٦).
+
+  §١ — **جوابُ الجبهة**: نقرُ محطةٍ بلغها الطفلُ ولم تُبنَ شاشتُها كان يصمت لغير
+       `?dev=1`. والمقيسُ هنا أنّ الجوابَ **مرئيٌّ لكلّ مستعمل**: هزّةٌ ورسالةٌ تُقرأ
+       ولا انتقال — على البطاقة وعلى عقدة الخريطة وعلى العنوان المكتوب، **وبصفر
+       تشغيلٍ صوتيّ** (عهدُ البند: صفر إضافة صوتية).
+
+  §٢ — **قياسُ زرّ العودة** (تشخيصٌ قبل إصلاح): البلاغُ «النقر على العودة أحياناً لا
+       يعمل — يلزم سحبُ الشاشة ثم النقر». والفرضياتُ تُفحَص لا تُخمَّن، وهذه الصفحةُ
+       تفحص ما **يُفحَص في متصفّح على مقاسات آيباد**:
+         · **هدفٌ مغطّى**: مَن العنصرُ الأعلى فوق مركز الزرّ؟ (`elementFromPoint`)
+           في أربع حالاتٍ للشاشة — ومنها **الرسالةُ العابرة ظاهرة**.
+         · **مقاسُ الهدف**: كم يقيس زرُّ العودة بالبكسل؟ (`DESIGN §٤`)
+         · **حالةُ مؤشّرٍ عالقة**: إصبعٌ نزل على اللوح ولم يُرفَع — أيمنع النقرَ؟
+         · **كم يُسحَب في الشاشة أصلاً** (فرضيةُ زخم التمرير تُقاس بوجود ما يُسحَب).
+       وما لا يُفحَص إلا على الجهاز (ابتلاعُ WebKit للّمسة قبل أن تبلغ الصفحة)
+       يقيسه **مسجّلُ الأحداث** `app/js/probe.js` هناك — وهذه الصفحةُ تشهد أنّ
+       المسجّلَ يقرأ صادقاً: نقرةٌ تامّة تُقرأ تامّة، ونقرةٌ محجوبةٌ تُقرأ محجوبة،
+       **ولوحُه لا يبتلع نقرة**.
+-->
+<style>
+  body { font: 15px/1.7 system-ui, sans-serif; margin: 0; background: #111; color: #eee; }
+  #log { padding: 1rem; white-space: pre-wrap; }
+  iframe { width: 768px; height: 1024px; border: 0; position: fixed; inset-inline-end: 0; top: 0; }
+  .ok { color: #7ec97e; } .bad { color: #e08a80; } .measure { color: #9ec5ff; }
+</style>
+</head>
+<body>
+<div id="log"></div>
+<iframe id="app" src="about:blank"></iframe>
+<script type="module">
+const results = [];
+const log = document.getElementById('log');
+const frame = document.getElementById('app');
+
+function ok(cond, msg) {
+  results.push({ ok: !!cond, msg });
+  const line = document.createElement('div');
+  line.className = cond ? 'ok' : 'bad';
+  line.textContent = (cond ? '✓ ' : '✗ ') + msg;
+  log.append(line);
+}
+/** قراءةٌ لا حكم: رقمٌ يُقاس ويُقيَّد في بلاغ الجلسة — يُميَّز بعلامته فلا يُقرأ حكماً. */
+function measure(msg) {
+  results.push({ ok: true, msg: `📏 ${msg}` });
+  const line = document.createElement('div');
+  line.className = 'measure';
+  line.textContent = '📏 ' + msg;
+  log.append(line);
+}
+
+const errors = [];
+window.addEventListener('error', (e) => errors.push(String(e.message)));
+window.addEventListener('unhandledrejection', (e) => errors.push(String(e.reason)));
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const send = () => fetch('/result', { method: 'POST', body: JSON.stringify(results) });
+
+let win;
+let doc;
+
+/** اسمُ العنصر كما يُقرأ في تقرير القياس. */
+const name = (el) => !el ? 'لا شيء'
+  : `${el.tagName.toLowerCase()}${el.className && typeof el.className === 'string'
+    ? '.' + el.className.split(/\s+/).join('.') : ''}`;
+
+/**
+ * العنصرُ الأعلى فوق مركز صندوقٍ ما — سؤالُ «أهدفٌ مغطّى؟» بحرفه.
+ *
+ * **وخارجُ المنظور ليس مغطّى**: عنصرٌ مركزُه تحت حافّة الشاشة يردّ `elementFromPoint`
+ * فيه `null`، فلو عُدَّ تغطيةً لأنذر الحارسُ بما ليس عطباً — وإنذارٌ كاذبٌ يُفقد
+ * الحارسَ صدقَه يومَ يصدُق. فيُفصَل الحالان بحرفهما.
+ */
+function topmostOver(el) {
+  const box = el.getBoundingClientRect();
+  const x = box.left + box.width / 2;
+  const y = box.top + box.height / 2;
+  const offscreen = x < 0 || y < 0 || x > win.innerWidth || y > win.innerHeight;
+  const hit = offscreen ? null : doc.elementFromPoint(x, y);
+  return { hit, offscreen, covered: !offscreen && !(hit === el || el.contains(hit)), x, y, box };
+}
+
+/** وصفُ ما ابتلع النقرةَ — «الزرّ ⇐ مَن فوقه» فيُقرأ العطبُ بعلّته لا بعدده. */
+const eatenBy = (el) => `${(el.getAttribute('aria-label') || el.textContent.trim()).slice(0, 22)}`
+  + ` ⇐ ${name(topmostOver(el).hit)}`;
+
+/** نقرةٌ مصنوعة على مركز عنصر — نزولٌ ورفعٌ ونقرة، كما تصل من إصبعٍ حقيقيّ. */
+function tap(el) {
+  const { x, y } = topmostOver(el);
+  const of = (type, Ctor, extra = {}) => new win[Ctor](type, {
+    bubbles: true, cancelable: true, composed: true, clientX: x, clientY: y, ...extra,
+  });
+  const target = doc.elementFromPoint(x, y) || el;
+  target.dispatchEvent(of('pointerdown', 'PointerEvent', { pointerId: 7, pointerType: 'touch', isPrimary: true }));
+  target.dispatchEvent(of('pointerup', 'PointerEvent', { pointerId: 7, pointerType: 'touch', isPrimary: true }));
+  target.dispatchEvent(of('click', 'MouseEvent'));
+}
+
+const toastEl = () => doc.getElementById('toast');
+const toastShown = () => {
+  const el = toastEl();
+  return el && !el.hidden ? el.textContent : '';
+};
+
+(async () => {
+  try {
+    // ————— تهيئةُ الحال: طفلٌ أتمّ التهيئة وبلغ أوّل حرف (حالُ الميدان بعينها) —————
+    localStorage.clear();
+    const progress = await import('/js/progress.js');
+    const warmups = progress.allNodes().filter((n) => n.type === 'warmup');
+    for (const node of warmups) progress.setStars(node.id, 3);
+
+    frame.src = '/';
+    await new Promise((r) => frame.addEventListener('load', r, { once: true }));
+    win = frame.contentWindow;
+    doc = frame.contentDocument;
+    win.addEventListener('error', (e) => errors.push(String(e.message)));
+    win.addEventListener('unhandledrejection', (e) => errors.push(String(e.reason)));
+
+    // **صفرُ إضافةٍ صوتية — مقيسةً لا مُدَّعاة**: شاهدٌ يعدّ كلَّ تشغيلٍ في نافذة التطبيق.
+    let plays = 0;
+    const RealAudio = win.Audio;
+    win.Audio = class extends RealAudio {
+      play() { plays++; return Promise.resolve(); }
+    };
+    await wait(600);
+
+    // ————— §١ جوابُ الجبهة: محطةٌ بلغها الطفلُ ولم تُبنَ شاشتُها —————
+    log.append(Object.assign(document.createElement('h3'), { textContent: '§١ جوابُ الجبهة' }));
+
+    const next = progress.nextNode();
+    ok(next && next.type === 'letter',
+      `جبهةُ الطفل بعد التهيئة الستّ محطةُ حرف (${next && next.type}/${next && next.part})`
+      + ' — وهي الحالُ التي وقف عندها الميدان');
+
+    const card = doc.querySelector('main.map .continue:not(.continue--review)');
+    ok(Boolean(card), 'وبطاقةُ «تابع من هنا» على الخريطة');
+
+    // (١) البطاقة: هزّةٌ ورسالةٌ ولا انتقال
+    tap(card);
+    await wait(60);
+    const cardSaid = toastShown();
+    ok(cardSaid.includes('قَرِيبًا'),
+      `نقرُ «تابع من هنا» **يجيب كلَّ مستعمل**: «${cardSaid || 'لا شيء'}»`);
+    ok(card.classList.contains('shake'), 'ويهتزّ الزرُّ هزّةَ المقفل نفسَها');
+    ok(win.location.hash === '' || win.location.hash === '#/',
+      `ولا ينتقل إلى شاشةٍ بيضاء — الخريطةُ باقية (${win.location.hash || 'بلا عنوان'})`);
+    ok(Boolean(doc.querySelector('main.map')), 'والخريطةُ تحت يده كما كانت');
+
+    // (٢) عقدةُ الخريطة نفسُها
+    toastEl().hidden = true;
+    const node = doc.querySelector('main.map .node--open, main.map .node--next');
+    ok(Boolean(node), 'وعلى الدرب عقدةٌ مفتوحةٌ لم تُبنَ شاشتُها');
+    tap(node);
+    await wait(60);
+    const nodeSaid = toastShown();
+    ok(nodeSaid.includes('قَرِيبًا'), `ونقرُ العقدة يجيب مثلَه: «${nodeSaid || 'لا شيء'}»`);
+    ok(node.classList.contains('shake'), 'ويهتزّ كما يهتزّ المقفل');
+
+    // (٣) العنوانُ المكتوب (مَن جاءه من عنوانٍ محفوظ لا من نقرة)
+    toastEl().hidden = true;
+    win.location.hash = `#/letter/${encodeURIComponent(next.part)}`;
+    await wait(300);
+    const hashSaid = toastShown();
+    ok(hashSaid.includes('قَرِيبًا'),
+      `والعنوانُ المكتوب `+ `#/letter/… يجيب كذلك: «${hashSaid || 'لا شيء'}»`);
+    ok(Boolean(doc.querySelector('main.map')), 'ويردّه إلى خريطته لا إلى بياض');
+
+    // (٤) والمقفلُ يبقى مقفلاً بجوابه هو — فلا يبتلع الجوابُ الجديد جوابَ القفل
+    toastEl().hidden = true;
+    win.location.hash = '#/';
+    await wait(300);
+    const locked = doc.querySelector('main.map .node--locked');
+    if (locked) {
+      tap(locked);
+      await wait(60);
+      const lockedSaid = toastShown();
+      ok(lockedSaid.includes('أكمِل'),
+        `والمقفلُ يقول قولَه هو لا قولَ الجبهة: «${lockedSaid || 'لا شيء'}»`);
+
+      /* **ومشهدُ الميدان بعينه يُقاس هنا**: الرسالةُ ظاهرةٌ الآن (٢٫٢ ثانية) والطفلُ
+         يمدّ يدَه إلى عقدةٍ أخرى — فأيُّ عقدةٍ تقع تحت الرسالة **تبتلع نقرتَه**.
+         وهذا صنفُ «النقرُ أحياناً لا يعمل ويلزم سحبُ الشاشة ثم النقر» بحرفه: السحبُ
+         يُمضي المهلةَ فتذهب الرسالةُ وتصير النقرةُ تعمل. */
+      for (const [size, w, h] of [['طولي', 768, 1024], ['عرضي بمنظور متصفّح', 1024, 590]]) {
+        frame.style.width = `${w}px`;
+        frame.style.height = `${h}px`;
+        await wait(150);
+        tap(locked);                       // الرسالةُ تُعاد فمهلتُها ٢٫٢ ثانية
+        await wait(60);
+        const mapActs = [...doc.querySelectorAll('main.map button, main.map a')]
+          .filter((el) => el.getBoundingClientRect().width && !topmostOver(el).offscreen);
+        const eaten = mapActs.filter((el) => topmostOver(el).covered);
+        ok(eaten.length === 0,
+          `**ورسالةُ المقفل لا تبتلع نقرةً على الخريطة** (${size}: ${mapActs.length} فعلاً في المنظور)`
+          + (eaten.length ? ` — ابتُلع: ${eaten.map(eatenBy).join(' · ')}` : ''));
+      }
+      frame.style.width = '768px';
+      frame.style.height = '1024px';
+      await wait(150);
+    } else {
+      ok(false, 'لا عقدةَ مقفلةٌ على الخريطة — تعذّر تمييزُ الجوابين');
+    }
+
+    ok(plays === 0, `🔇 **وصفرُ تشغيلٍ صوتيّ** في جواب الجبهة كلِّه (${plays})`);
+
+    // ————— §٢ قياسُ زرّ العودة (تشخيصُ البلاغ الثاني) —————
+    log.append(Object.assign(document.createElement('h3'), { textContent: '§٢ قياسُ زرّ العودة' }));
+
+    const parts = Object.keys((await import('/js/warmups.js')).WARMUPS);
+    const backBtn = () => doc.querySelector('main ~ *, .topbar')
+      && doc.querySelector('[aria-label="عودةٌ إلى الخريطة"]');
+    const surfaceEl = () => doc.querySelector('.pen-surface');
+
+    // مقاساتُ الآيباد كاملةً (تطبيقٌ مثبَّت) — **ومعها منظورٌ أقصر** يحاكي متصفّح
+    // سفاري: شريطُه فوق الصفحة وشريطُ التثبيت تحته يقضمان من الطول، والبلاغُ جاء
+    // **من المتصفّح عبر الشبكة المحلية** لا من مثبَّت. فيُقاس الفائضُ في الحالين.
+    const SIZES = [['آيباد ٩٫٧ طولي', 768, 1024], ['آيباد ٩٫٧ طولي بمنظور متصفّح', 768, 830],
+      ['آيباد ٩٫٧ عرضي', 1024, 768], ['آيباد ٩٫٧ عرضي بمنظور متصفّح', 1024, 590]];
+
+    for (const [label, w, h] of SIZES) {
+      frame.style.width = `${w}px`;
+      frame.style.height = `${h}px`;
+      win.location.hash = `#/warmup/${encodeURIComponent(parts[0])}`;
+      await wait(450);
+      win.scrollTo(0, 0);
+      await wait(120);
+
+      const back = backBtn();
+      if (!back) { ok(false, `${label}: لا زرَّ عودةٍ على الشاشة`); continue; }
+      const box = back.getBoundingClientRect();
+      measure(`${label}: زرُّ العودة ${Math.round(box.width)}×${Math.round(box.height)} بكسل`
+        + ` عند (${Math.round(box.left)}، ${Math.round(box.top)})`);
+
+      const content = doc.documentElement.scrollHeight;
+      const scrollable = Math.max(0, content - win.innerHeight);
+      measure(`${label}: محتوى الشاشة ${content} بكسل في منظورٍ ${win.innerHeight}`
+        + ` ⇐ ما يُسحَب ${scrollable} بكسل`
+        + (scrollable ? ' — فللزخم موضعٌ هنا، والشريطُ اللاصق يلصق' : ' — فلا زخمَ تمريرٍ أصلاً'));
+
+      // **والشريطُ لاصق**: حقيقةٌ يحتاجها التشخيص — الزرُّ يقع في شريطٍ `sticky`،
+      // وحسابُ منطقة لمسه على WebKit يُعاد عند التمرير (فرضيةُ «المنطقةُ بائتة»).
+      if (label === SIZES[0][0]) {
+        const bar = back.closest('.topbar');
+        measure(`الشريطُ الحاملُ للزرّ: position=${win.getComputedStyle(bar).position}`
+          + ` · لمسُ الصفحة touch-action=${win.getComputedStyle(doc.documentElement).touchAction}`
+          + ` · ولوحُ الكتابة ${win.getComputedStyle(surfaceEl() || bar).touchAction}`);
+      }
+
+      // (أ) الحالُ المبتدأة: أفوق مركزِ الزرّ أحدٌ؟
+      const fresh = topmostOver(back);
+      ok(!fresh.covered,
+        `${label} · مبتدأةً: فوق مركز زرّ العودة **${fresh.covered ? name(fresh.hit) : 'نفسُه'}**`);
+
+      // (ب) وأثناء الكتابة: إصبعٌ نزل على اللوح ولم يُرفَع (رفعٌ ضائعٌ أو إلغاءٌ لم يصل)
+      const surface = surfaceEl();
+      if (surface) {
+        const sbox = surface.getBoundingClientRect();
+        surface.dispatchEvent(new win.PointerEvent('pointerdown', {
+          bubbles: true, cancelable: true, composed: true, pointerId: 21, pointerType: 'touch',
+          isPrimary: true, clientX: sbox.left + sbox.width / 2, clientY: sbox.top + sbox.height / 2,
+        }));
+        await wait(60);
+        const during = topmostOver(back);
+        ok(!during.covered,
+          `${label} · وإصبعٌ عالقٌ على اللوح: فوق مركز الزرّ **${during.covered ? name(during.hit) : 'نفسُه'}**`);
+        win.location.hash = `#/warmup/${encodeURIComponent(parts[0])}`;   // تثبيتُ العنوان قبل القياس
+        await wait(120);
+        tap(back);
+        await wait(200);
+        ok(win.location.hash === '#/' || win.location.hash === '',
+          `${label} · والنقرُ يعود بالطفل إلى الخريطة رغم الإصبع العالق (${win.location.hash || 'بلا عنوان'})`);
+      }
+
+      // (ج) والرسالةُ العابرة ظاهرة: أتغطّي فعلَ الشاشة؟ (وهي مثبتةٌ في ذيل المنظور)
+      win.location.hash = `#/warmup/${encodeURIComponent(parts[0])}`;
+      await wait(400);
+      const bar = toastEl();
+      bar.hidden = false;
+      bar.textContent = 'رسالةٌ عابرةٌ للقياس';
+      await wait(60);
+      const acts = [...doc.querySelectorAll('main.warmup .foot .btn'), backBtn()]
+        .filter((el) => el && !topmostOver(el).offscreen);
+      const hidden = acts.filter((el) => topmostOver(el).covered);
+      ok(hidden.length === 0,
+        `${label} · ورسالةٌ عابرةٌ ظاهرة: لا تغطّي فعلاً من أفعال الشاشة (${acts.length} في المنظور)`
+        + (hidden.length ? ` — غطّت: ${hidden.map(eatenBy).join('، ')}` : ''));
+      bar.hidden = true;
+    }
+
+    // (د) ختامُ المحطة: زرُّ «→ الخريطة» في الذيل — يُقاس مقاسُه وغطاؤه ونقرتُه
+    frame.style.width = '768px';
+    frame.style.height = '1024px';
+    win.location.hash = `#/warmup/${encodeURIComponent(parts[0])}`;
+    await wait(450);
+    const { WARMUPS } = await import('/js/warmups.js');
+    const shapes = WARMUPS[parts[0]].shapes;
+    let pointerId = 40;
+    const toClient = ([x, y]) => {
+      const rect = surfaceEl().getBoundingClientRect();
+      const size = Math.min(rect.width, rect.height);
+      return {
+        clientX: rect.left + (rect.width - size) / 2 + (x / 1000) * size,
+        clientY: rect.top + (rect.height - size) / 2 + (y / 1000) * size,
+      };
+    };
+    const fire = (type, point, id) => surfaceEl().dispatchEvent(new win.PointerEvent(type, {
+      bubbles: true, cancelable: true, composed: true,
+      pointerId: id, pointerType: 'touch', isPrimary: true, ...toClient(point),
+    }));
+    for (const shape of shapes) {
+      for (const stroke of shape.ref.strokes) {
+        const id = ++pointerId;
+        fire('pointerdown', stroke.points[0], id);
+        for (const p of stroke.points.slice(1)) fire('pointermove', p, id);
+        await wait(40);
+        fire('pointerup', stroke.points[stroke.points.length - 1], id);
+        await wait(60);
+      }
+      await wait(560);
+    }
+    const footBack = [...doc.querySelectorAll('main.warmup .foot .btn')]
+      .find((b) => b.textContent.includes('الخريطة'));
+    ok(Boolean(footBack), 'وبعد ختام المحطة زرُّ «→ الخريطة» في ذيلها');
+    if (footBack) {
+      const fbox = footBack.getBoundingClientRect();
+      measure(`ختامُ المحطة: زرُّ الذيل ${Math.round(fbox.width)}×${Math.round(fbox.height)} بكسل`);
+      const over = topmostOver(footBack);
+      ok(!over.covered, `وفوق مركزه **${over.covered ? name(over.hit) : 'نفسُه'}**`);
+      tap(footBack);
+      await wait(200);
+      ok(win.location.hash === '#/' || win.location.hash === '',
+        `ونقرتُه تعود بالطفل إلى الخريطة (${win.location.hash || 'بلا عنوان'})`);
+    }
+
+    // ————— §٣ مسجّلُ الأحداث: أيقرأ صادقاً؟ ولا يبتلع نقرة؟ —————
+    log.append(Object.assign(document.createElement('h3'), { textContent: '§٣ مسجّلُ الأحداث' }));
+
+    // نافذةٌ ثانية بـ`?dev=1` — فالمسجّلُ لا يُركَّب لغيرها
+    const devFrame = document.createElement('iframe');
+    devFrame.src = '/?dev=1';
+    devFrame.style.cssText = 'width:768px;height:1024px;border:0;position:fixed;inset-inline-end:0;top:0';
+    document.body.append(devFrame);
+    await new Promise((r) => devFrame.addEventListener('load', r, { once: true }));
+    const devWin = devFrame.contentWindow;
+    const devDoc = devFrame.contentDocument;
+    devWin.addEventListener('error', (e) => errors.push(String(e.message)));
+    await wait(600);
+
+    ok(!doc.getElementById('probe'), 'ولا لوحَ للمسجّل في تجربة الطفل (بلا ‎?dev=1‎)');
+    const panel = devDoc.getElementById('probe');
+    ok(Boolean(panel), 'ولوحُه ظاهرٌ خلف ‎?dev=1‎');
+
+    const probe = await import('/js/probe.js');
+    const TABLE = [
+      [{ onButton: true, sameTarget: true, up: 90, click: 120 }, 'done'],
+      [{ onButton: true, sameTarget: true, cancel: true, up: 90 }, 'cancel'],
+      [{ onButton: true, sameTarget: true, up: 0 }, 'no-up'],
+      [{ onButton: true, sameTarget: true, up: 90, click: 0 }, 'no-click'],
+      [{ onButton: true, sameTarget: false, up: 90, click: 120 }, 'target-changed'],
+      [{ onButton: false, nearest: 0, sameTarget: true, up: 90, click: 120 }, 'covered'],
+      [{ onButton: false, nearest: 18, sameTarget: true, up: 90, click: 120 }, 'no-button'],
+    ];
+    const wrong = TABLE.filter(([touch, want]) => probe.readTouch(touch) !== want);
+    ok(wrong.length === 0,
+      `وحكمُه دالّةٌ نقيّة: ${TABLE.length} حالاتٍ كلٌّ بحكمها (تامّة · ملغاة · بلا رفع · بلا نقرة`
+      + ' · هدفٌ تبدّل · مغطّى · أخطأته اليد)'
+      + (wrong.length ? ` — خالفت: ${wrong.map(([, w]) => w).join('، ')}` : ''));
+
+    // **ولوحُه لا يبتلع نقرة** — مقيساً بالإصابة لا بنصّ CSS
+    const pbox = panel.getBoundingClientRect();
+    const under = devDoc.elementFromPoint(pbox.left + pbox.width / 2, pbox.top + pbox.height / 2);
+    ok(under !== panel && !panel.contains(under),
+      `ولا يبتلع لوحُه نقرةً: فوق مركزه يقع **${name(under)}** لا اللوح`);
+
+    // نقرةٌ تامّةٌ على زرّ حقيقيّ ⇐ يقرؤها تامّة
+    const devDoc2 = devDoc;
+    const devWinTap = (el) => {
+      const b = el.getBoundingClientRect();
+      const x = b.left + b.width / 2;
+      const y = b.top + b.height / 2;
+      const of = (type, Ctor, extra = {}) => new devWin[Ctor](type, {
+        bubbles: true, cancelable: true, composed: true, clientX: x, clientY: y, ...extra,
+      });
+      const target = devDoc2.elementFromPoint(x, y) || el;
+      target.dispatchEvent(of('pointerdown', 'PointerEvent', { pointerId: 9, pointerType: 'touch', isPrimary: true }));
+      target.dispatchEvent(of('pointerup', 'PointerEvent', { pointerId: 9, pointerType: 'touch', isPrimary: true }));
+      target.dispatchEvent(of('click', 'MouseEvent'));
+    };
+    const parentBtn = devDoc.querySelector('[aria-label="لوحة وليّ الأمر"]');
+    devWinTap(parentBtn);
+    await wait(900);
+    const readAfter = () => [...devDoc.querySelectorAll('#probe .probe-line')].map((l) => l.dataset.verdict);
+    ok(readAfter()[0] === 'done',
+      `والنقرةُ التامّة يقرؤها تامّة (${readAfter()[0] || 'لا سطر'})`);
+
+    // **ومجرَّبٌ سالباً على نفسه**: زرٌّ يُغطّى بغطاءٍ شفّاف ⇐ يقرأ «لا زرَّ تحت الإصبع»
+    devWin.location.hash = '#/';
+    await wait(400);
+    const victim = devDoc.querySelector('main.map .continue');
+    const vbox = victim.getBoundingClientRect();
+    const cover = devDoc.createElement('div');
+    cover.style.cssText = `position:fixed;left:${vbox.left}px;top:${vbox.top}px;`
+      + `width:${vbox.width}px;height:${vbox.height}px;z-index:99;background:transparent`;
+    devDoc.body.append(cover);
+    devWinTap(victim);
+    await wait(900);
+    ok(readAfter()[0] === 'covered',
+      `**ومجرَّبٌ سالباً**: زرٌّ تحت غطاءٍ شفّاف يقرؤه «هدفٌ مغطّى» (${readAfter()[0] || 'لا سطر'})`);
+    cover.remove();
+
+    // ————— سلامةُ الصفحة —————
+    ok(doc.documentElement.scrollWidth <= win.innerWidth + 1,
+      `ولا فائضَ أفقيّ (${doc.documentElement.scrollWidth} ≤ ${win.innerWidth})`);
+    ok(errors.length === 0,
+      errors.length ? `أخطاءُ جافاسكربت: ${errors.join(' · ')}` : 'لا أخطاء جافاسكربت');
+  } catch (e) {
+    ok(false, `استثناء: ${e && e.message}`);
+  }
+  await send();
+})();
+</script>
+</body>
+</html>

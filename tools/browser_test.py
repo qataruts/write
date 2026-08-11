@@ -43,6 +43,7 @@ PAGES = {
     "/__pen.html": TOOLS / "browser_pen.html",
     "/__paths.html": TOOLS / "browser_paths.html",
     "/__warmup.html": TOOLS / "browser_warmup.html",
+    "/__field.html": TOOLS / "browser_field.html",
 }
 # سَوقةُ الصفحات: `--suite <اسم>` يختار أيَّها يُشغَّل، والافتراضُ فحصُ القشرة.
 SUITES = {
@@ -50,6 +51,7 @@ SUITES = {
     "pen": "/__pen.html",          # الجلسة ١: خصوصيةُ القلم — صفرُ طلباتٍ في دورة كتابة
     "paths": "/__paths.html",      # الجلسة ٢: كلُّ حرفٍ يُعرض من مساره ويُحكم عليه
     "warmup": "/__warmup.html",    # الجلسة ٤: إصبعٌ يعبر محطات التهيئة الستّ بقفلها
+    "field": "/__field.html",      # الجلسة م١: جوابُ الجبهة + قياسُ زرّ العودة (بلاغُ الميدان ١)
 }
 # نافذة Chrome بلا واجهة تحجز ٨٧ بكسلاً لإطارٍ وهميّ فوق المنظور — فلولا تعويضها لقِسنا
 # جهازاً أقصر من الجهاز. والصفحة تعيد منظورها الحقيقي، والعدّاء يرفض أي انحرافٍ عن المطلوب.
@@ -218,7 +220,7 @@ def main():
     ap.add_argument("--shots", metavar="PNG", help="لقطة للمراجعة البصرية بدل تشغيل الاختبارات")
     ap.add_argument("--show", action="store_true", help="متصفّح مرئي")
     ap.add_argument("--suite", choices=sorted(SUITES), default="shell",
-                    help="أيُّ صفحةِ فحصٍ تُشغَّل (القشرة · القلم)")
+                    help="أيُّ صفحةِ فحصٍ تُشغَّل (القشرة · القلم · المسارات · التهيئة · الميدان)")
     args = ap.parse_args()
 
     results = []

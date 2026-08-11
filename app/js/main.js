@@ -12,13 +12,14 @@
 import * as progress from './progress.js';
 import * as audio from './audio.js';
 import * as install from './install.js';
+import * as probe from './probe.js';
 import { renderReview } from './review.js';
 import { renderGate } from './gate.js';
 import { renderParent, skillsText } from './parent.js';
 import { renderPenDev, releasePen } from './pendev.js';
 import { renderWarmup, releaseWarmup } from './warmup.js';
 import {
-  h, icon, faceEl, toast, go, arNum, starsRow, topbar, brandMark,
+  h, icon, faceEl, toast, go, arNum, starsRow, topbar, brandMark, shake,
   nodeTitle, nodeFace, nodeWhere, accentForKind, landmark, DEV,
 } from './ui.js';
 
@@ -77,16 +78,19 @@ function renderMap() {
   const sections = progress.journey();
 
   if (next) {
-    main.append(h('button', {
+    // **وبطاقةُ «تابع من هنا» أوّلُ ما تناله يدُ الطفل** — فهي أوّلُ مَن يجيب حين
+    // تكون جبهتُه محطةً لم تُبنَ شاشتُها بعد (`comingSoon` أدناه، بلاغُ الميدان ١).
+    const card = h('button', {
       class: 'continue',
       css: { '--accent': accentForKind(next.type) },
-      onclick: () => openNode(next),
+      onclick: () => (awaitingScreen(next.type) ? comingSoon(next.type, card) : openNode(next)),
     },
       faceEl(nodeFace(next), 'continue-face'),
       h('span', { class: 'continue-text' },
         h('b', {}, nodeTitle(next)),
         h('small', {}, `تابع من هنا · ${nodeWhere(next)}`)),
-    ));
+    );
+    main.append(card);
   } else if (sections.length) {
     main.append(h('p', { class: 'note' },
       icon('party'), ' أتممتَ الرحلة كلها — من أول خطٍّ إلى الإملاء!'));
@@ -310,10 +314,14 @@ function nodeButton(node, next) {
     'aria-label': `${label} — ${open ? (stars ? `${arNum(stars)} نجوم · يمكن إعادته` : 'مفتوح') : 'مقفل'}`,
     onclick: () => {
       if (!open) {
-        btn.classList.remove('shake');
-        void btn.offsetWidth;          // إعادة تشغيل الحركة
-        btn.classList.add('shake');
+        shake(btn);
         toast('أكمِل ما قبله أولاً', 'smile');
+        return;
+      }
+      // **جبهةُ الرحلة تجيب كما يجيب المقفل** (بلاغُ الميدان ١): محطةٌ مفتوحةٌ لم
+      // تُبنَ شاشتُها بعدُ **لا تصمت** — الهزّةُ نفسُها والرسالةُ تُقرأ، ولا انتقالَ.
+      if (awaitingScreen(node.type)) {
+        comingSoon(node.type, btn);
         return;
       }
       openNode(node);
@@ -353,6 +361,29 @@ const SCREENS = {
   fade: 'خفوت النموذج والإملاء — الجلسة ٩',
   sentence: 'الجمل القصيرة — الجلسة ٩',
 };
+
+// ————— جوابُ الجبهة (بلاغُ الميدان ١، ١١ أغسطس ٢٠٢٦ — الجلسة م١) —————
+//
+// **العلّة من الميدان**: «المجموعة الثانية وصلتْ لها لكنّ أوّل حصةٍ لم تفتح». وكان
+// الجوابُ خلف `DEV` وحدَه، فنقرةُ الطفل **تصمت** — والصمتُ يُقرأ عطباً: بدا التطبيقُ
+// معطّلاً وهو يعمل كما بُني. **والصمتُ للطفل أسوأُ من الخطأ**: المقفلُ عنده يهتزّ
+// ويجيب، فمحطةٌ بلغها ولم تُبنَ شاشتُها أحقُّ بالجواب لا أهونُ.
+//
+// وهو **جوابُ المقفل نفسُه** (هزّةٌ ورسالةٌ تُقرأ) لأنه من جنسه: بابٌ لم يُفتح بعدُ.
+// **ولا صوتَ يُضاف** — سطرُ شاشةٍ يُقرأ، و`audio_queue.json` لا يُمَسّ.
+const SOON = 'قَرِيبًا… هذه المحطةُ تُعَدُّ لك';
+
+/** أمحطةٌ مفتوحةٌ لم تُبنَ شاشتُها بعد؟ — من جرد `SCREENS` وحدَه، فلا قائمةَ ثانية تشيخ. */
+const awaitingScreen = (type) => Boolean(SCREENS[type]);
+
+/**
+ * جوابُ الجبهة: هزّةٌ ورسالةٌ — **ولا انتقالَ** إلى شاشةٍ ترُدّ الطفلَ من حيث أتى.
+ * وفي `?dev=1` وحدَها يُزاد مَن يملك الشاشةَ ومتى — ذاك للبانِي لا للطفل.
+ */
+function comingSoon(type, el) {
+  if (el) shake(el);
+  toast(DEV ? `${SOON} — ${SCREENS[type]}` : SOON, 'smile');
+}
 
 let renderToken = 0;
 
@@ -401,8 +432,10 @@ async function render() {
     // تردّ `null` بدونها فيعود الطفلُ إلى خريطته.
     screen = renderPenDev() || renderMap();
   } else if (SCREENS[name]) {
-    // نوعٌ مُعلَنٌ لم تُكتب شاشتُه بعد: يعود إلى الخريطة، ويُقال السببُ في ‎?dev=1‎
-    if (DEV) toast(`لا شاشة بعدُ: ${SCREENS[name]}`);
+    // نوعٌ مُعلَنٌ لم تُكتب شاشتُه بعد: يعود إلى الخريطة — **ويُجيب كلَّ مستعمل**
+    // كما تجيب أزرارُ الخريطة (بلاغُ الميدان ١). ولا زرَّ هنا يُهَزّ: مَن بلغ هذا
+    // الطريقَ جاءه من عنوانٍ محفوظ لا من نقرة، فالرسالةُ وحدَها جوابُه.
+    comingSoon(name, null);
     screen = renderMap();
   } else {
     screen = renderMap();
@@ -471,6 +504,11 @@ if (progress.PREVIEW) {
 // جهازَه فيعطي رسالتَه — زرٌّ حقيقيّ حيث يسمح النظام، وخطوتا سفاري حيث لا يسمح —
 // **ويصمت في التطبيق المثبَّت وفي المعاينة** (شريطان فوق الشاشة ضجيجٌ على المقيّم).
 if (!progress.PREVIEW) install.mount();
+
+// **ومسجّلُ الأحداث خلف `?dev=1` وحدَها** (الجلسة م١): عدّةُ تشخيصٍ للبلاغ الثاني من
+// الميدان — «النقرُ على العودة أحياناً لا يعمل على الآيباد». لا يراه طفلٌ أبداً،
+// **ولا يبتلع نقرةً** (لوحُه `pointer-events: none`)، ولا يخرج منه شيءٌ من الجهاز.
+if (DEV) probe.mount();
 
 // **والعودةُ من الخلفية بمقياس ١** (منقولٌ من اقرأ، `read@9220ab1`): iPadOS يسترجع
 // التطبيقَ المثبَّت بعد زيارة تطبيقٍ آخر **مكبَّراً** أحياناً — عيبُ استرجاعٍ معروف في

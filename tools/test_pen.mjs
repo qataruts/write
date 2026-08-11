@@ -47,8 +47,12 @@ const codeOf = (src) => src
 const NET = ['fetch(', 'XMLHttpRequest', 'sendBeacon', 'WebSocket', 'EventSource',
   'FormData', 'navigator.connection', 'http://', 'https://', '.upload', 'importScripts'];
 
-/** ما يمرّ به مسارُ الطفل — ويُحرَس نصُّه حرفاً. */
-const CARRIERS = ['pen.js', 'pendev.js'];
+/** ما يمرّ به مسارُ الطفل — ويُحرَس نصُّه حرفاً.
+ *
+ * **و`probe.js` منهم** (الجلسة م١): مسجّلُ الأحداث خلف `?dev=1` يقرأ **موضعَ لمسة
+ * الطفل** (`clientX/clientY` و`elementFromPoint`) ليقول أين وقعت النقرةُ ومَن كان
+ * فوقها — فهو حاملُ موضعٍ وإن لم يكن حاملَ مسار، وحقُّه حراسةُ الحاملين. */
+const CARRIERS = ['pen.js', 'pendev.js', 'probe.js'];
 const netTokens = (code) => NET.filter((token) => code.includes(token));
 
 console.log('\n— ١) الخصوصية: مسارُ الطفل لا يجد طريقاً خارج الجهاز —');
@@ -83,10 +87,12 @@ ok(!/localStorage|indexedDB|IDBDatabase|document\.cookie/.test(penCode),
 // تُضاف (أُضيفت `paths.js` في الجلسة ٢)، فتنفلت من الحارس صامتةً. والجردُ يجدها
 // يومَ تُكتب — نظيرُ جرد `test_selftests.mjs`.
 const modules = readdirSync(new URL('js/', APP)).filter((f) => f.endsWith('.js')).sort();
-const tracking = modules.filter((f) => /pointermove|setPointerCapture|getCoalescedEvents/
+// **وقراءةُ الموضع حملٌ كتتبّع الحركة** (الجلسة م١): مَن قرأ `clientX` فقد أخذ من
+// إصبع الطفل مكانَه — ولو لم يتتبّعه. فيدخل الجردَ بها كما يدخله بأسر المؤشّر.
+const tracking = modules.filter((f) => /pointermove|setPointerCapture|getCoalescedEvents|clientX/
   .test(codeOf(read(`js/${f}`))));
 ok(tracking.every((f) => CARRIERS.includes(f)),
-  `ولا يتتبّع حركةَ القلم ملفٌّ خارج حامليه (${tracking.join('، ') || 'لا أحد'})`);
+  `ولا يتتبّع حركةَ القلم ولا يقرأ موضعَ لمسته ملفٌّ خارج حامليه (${tracking.join('، ') || 'لا أحد'})`);
 
 // ————— ٢. عدّةُ المعايرة: الحكمُ يُثبَت حالةً حالة —————
 
