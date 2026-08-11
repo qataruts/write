@@ -187,9 +187,21 @@ const skipVerdict = pen.judge(refOf(skipped), skipped.strokes);
 ok(!skipVerdict.accepted && skipVerdict.metrics.coverage < 0.5,
   `وقفزٌ فوق السنّة لا يرث تغطيتَها (${skipVerdict.metrics.coverage.toFixed(2)})`
   + ' — الطيّةُ رخصةٌ في قراءة الموضع لا إعفاءٌ من الكتابة');
-ok(traces.cases.filter((c) => c.ref === 'tooth' || c.ref === 'lam-medial')
-  .every((c) => seen.get(c.id).accepted === c.expect.accept),
-  'وحالاتُ الطيّة الخمسُ كلُّها على حكمها — تتبّعاً وحُرّاً ومعكوسةً وقفزاً وعلى حرفٍ حقيقيّ');
+// **والمعيارُ يُثبَت على مادّته** (مراجعةُ المدير الثانية): «العودةُ على الأثر الرطب»
+// مجمَّدةٌ على **ب/وسطي وب/نهائي الحقيقيّين** — أوسعِ فجوةِ ضلعين في المنهج وأضيقِ
+// قوسٍ فيه — لا على السنّ الاصطناعية وحدَها. ولكلٍّ معكوسُه يُرَدّ.
+const fold = traces.cases.filter((c) => refOf(c).strokes.some((s) => s.folds?.length));
+ok(fold.length >= 9 && fold.every((c) => seen.get(c.id).accepted === c.expect.accept),
+  `وحالاتُ الطيّة كلُّها على حكمها (${fold.length}): تتبّعاً وحُرّاً وقفزاً، **وعودةً على`
+  + ' الأثر الرطب على ب/وسطي وب/نهائي**، ومعكوساتُها تُرَدّ');
+// **والإعلانُ هو الفارق حيث ادُّعي**: كلُّ حالةٍ تُعلن `needsFold` (أيْ أنّ القلمَ
+// عاد فيها على أثره) تُرفَض `reverse` إن نُزعت الصفةُ من مسارها — ومَن تتبّع النموذجَ
+// بضلعيه لا يحتاجها فلا يُدَّعى له بها.
+for (const item of fold.filter((c) => c.expect.needsFold)) {
+  const bare = pen.judge(strip(refOf(item)), item.strokes);
+  ok(!bare.accepted && bare.primary === pen.FAULTS.REVERSE,
+    `  و«${item.id}» بنزع الإعلان: ${bare.accepted ? 'تُقبَل — فالإعلانُ حلية!' : `تُرفَض «${bare.primary}»`}`);
+}
 
 // ————— ٣. الشروطُ الأربعة أربعة: لكلٍّ وجهاه —————
 

@@ -152,6 +152,17 @@ for (const { ch, form, max } of room) {
 // بنسبة الطول)، ثم يُحكَم عليه مرّتين — بالإعلان وبلا الإعلان. **فالفارقُ يُرى**:
 // لا إحداثيَّ يتبدّل، وإنما صفةُ الطيّة تُنزَع فيعود الحكمُ إلى ما كان.
 
+/**
+ * **العودةُ على الأثر الرطب**: يصعد ضلعَ الطيّة الصاعد ثم **ينزل عليه هو** — لا على
+ * ضلعها النازل ولا بينهما. وهي أطبعُ ما تفعله يدُ طفل، وبها امتُحن المحرّكُ في
+ * مراجعة المدير الثانية للجلسة ٢ب فسقط على ب بوجهيها.
+ */
+function retrace(points, fold) {
+  const rising = points.slice(fold.from, fold.apex + 1);
+  return [...points.slice(0, fold.from + 1), ...rising.slice(1),
+    ...[...rising].reverse().slice(1), ...points.slice(fold.to + 1)];
+}
+
 /** خطُّ الطفل على طيّةٍ: يصعد بين الضلعين ثم يعود عليه. */
 function spine(points, fold, steps = 24) {
   const up = pen.prepare(points.slice(fold.from, fold.apex + 1));
@@ -169,22 +180,33 @@ const unfold = (ref) => ({
   ...ref,
   strokes: ref.strokes.map((s) => ({ start: s.start, points: s.points })),
 });
-const freeHand = (ref) => [
-  ...ref.strokes.map((s) => walk(s.folds?.length ? spine(s.points, s.folds[0]) : s.points)),
+const byHand = (make) => (ref) => [
+  ...ref.strokes.map((s) => walk(s.folds?.length ? make(s.points, s.folds[0]) : s.points)),
   ...taps(ref),
 ];
+const freeHand = byHand(spine);
+const wetHand = byHand(retrace);
+const gapOf = (ref) => Math.max(...ref.strokes.flatMap((s) => (s.folds || []).map((f) => Math.hypot(
+  s.points[f.from][0] - s.points[f.to][0], s.points[f.from][1] - s.points[f.to][1]))));
 
 console.log('\n— ٥) الطيّةُ المعلَنة: السنّةُ على خطٍّ واحد —');
 const folded = shapes.filter(({ ref }) => ref.strokes.some((s) => s.folds?.length));
 ok(folded.length > 0,
   `المطويُّ من الأشكال ${folded.length}: ${folded.map((f) => f.ch + '/' + f.form).join('، ')}`
   + ' — وإعلانُه من مفرق الهيكل آلياً لا بيد');
+// **ووجهان لليد الواحدة**: خطٌّ **بين** الضلعين، و**عودةٌ على الأثر الرطب** فوق الضلع
+// الصاعد نفسِه. والثاني هو الذي أسقط المحرّكَ في مراجعة المدير الثانية: كان بعدُ الطفل
+// يُقاس إلى ضلعٍ لم يمشِه (ب/وسطي `wander` وفجوةُ ضلعيه ١٦٠ > سماحة ٩٠)، وتقدّمُه
+// يُقرأ على ضلعٍ ليس عليه فيقف ثم يقفز (ب/نهائي `reverse` كاذباً). **وحبرُ الطيّة واحد.**
 for (const { ch, form, ref } of folded) {
-  const free = pen.judge(ref, freeHand(ref));
-  const bare = pen.judge(unfold(ref), freeHand(ref));
-  ok(free.accepted && !bare.accepted && bare.primary === pen.FAULTS.REVERSE,
-    `${ch} ${curriculum.FORM_NAMES[form]}: على خطٍّ واحد ${free.accepted ? 'تُقبَل' : `تُرفَض «${free.primary}»`}`
-    + ` — وبنزع الإعلان ${bare.accepted ? 'تُقبَل أيضاً، فالإعلانُ حلية!' : `تُرفَض «${bare.primary}»`}`);
+  for (const [what, hand] of [['بين الضلعين', freeHand], ['على الأثر الرطب', wetHand]]) {
+    const free = pen.judge(ref, hand(ref));
+    const bare = pen.judge(unfold(ref), hand(ref));
+    ok(free.accepted && !bare.accepted && bare.primary === pen.FAULTS.REVERSE,
+      `${ch} ${curriculum.FORM_NAMES[form]} (فجوةُ ضلعيه ${Math.round(gapOf(ref))}) ${what}:`
+      + ` ${free.accepted ? 'تُقبَل' : `تُرفَض «${free.primary}»`}`
+      + ` — وبنزع الإعلان ${bare.accepted ? 'تُقبَل أيضاً، فالإعلانُ حلية!' : `تُرفَض «${bare.primary}»`}`);
+  }
 }
 // **وأضيقُ المطويّات مدىً هو موضعُ الامتحان**: عند مضاعفة السماحة تتّسع دائرةُ البداية
 // حتى تبتلع طرفَي الشكل القصير، **فيسقط الشرطُ الأول من نفسه** ويبقى الحكمُ كلُّه على

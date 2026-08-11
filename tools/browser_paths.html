@@ -112,10 +112,19 @@ function walk(points, back) {
       return [...points.slice(0, fold.from + 1), ...mid,
         ...[...mid].reverse().slice(1), ...points.slice(fold.to + 1)];
     }
-    const freeHand = (ref) => ({
+    /**
+     * **العودةُ على الأثر الرطب**: يصعد ضلعَ الطيّة الصاعد ثم **ينزل عليه هو** —
+     * أطبعُ ما تفعله يدُ طفل، وبها أسقطت مراجعةُ المدير الثانية المحرّكَ على ب بوجهيها.
+     */
+    function retrace(points, fold) {
+      const rising = points.slice(fold.from, fold.apex + 1);
+      return [...points.slice(0, fold.from + 1), ...rising.slice(1),
+        ...[...rising].reverse().slice(1), ...points.slice(fold.to + 1)];
+    }
+    const byHand = (make) => (ref) => ({
       dots: ref.dots,
       strokes: ref.strokes.map((s) => (s.folds?.length
-        ? { points: spine(s.points, s.folds[0]) } : s)),
+        ? { points: make(s.points, s.folds[0]) } : s)),
     });
     const letters = Object.keys(PATHS);
     ok(letters.length > 0, `المساراتُ في التطبيق: ${letters.length} حرفاً (${letters.join('، ')})`);
@@ -215,14 +224,18 @@ function walk(points, back) {
         // الطفلُ على ضلعَي النموذج، وفي الصندوق الفارغ يكتب السنّةَ **خطّاً واحداً
         // صعوداً ونزولاً** كما تُكتب حقّاً. وهنا تُكتب **بإصبعٍ حقيقيّ** على اللوح —
         // فيمرّ خطُّها بتبسيط النقاط وإطارِ الرسم، لا بـ`judge` وحدها.
+        // **ووجهان لليد الواحدة**: خطٌّ بين الضلعين، وعودةٌ على الأثر الرطب فوق
+        // الضلع الصاعد نفسِه — والثاني هو الذي أسقط المحرّك في مراجعة المدير الثانية.
         if (ref.strokes.some((s) => s.folds?.length)) {
-          await writeAll(freeHand(ref), false);
-          const free = readout();
-          ok(/✓ مقبول/.test(free),
-            `${ch} ${FORM_NAMES[form]}: **السنّةُ على خطٍّ واحد** تُقبَل بإصبعٍ حقيقيّ`
-            + `${/✓ مقبول/.test(free) ? '' : ' — ' + free.split('\n')[0]}`);
-          press('أعِد');
-          await wait(40);
+          for (const [what, make] of [['بين الضلعين', spine], ['على الأثر الرطب', retrace]]) {
+            await writeAll(byHand(make)(ref), false);
+            const free = readout();
+            ok(/✓ مقبول/.test(free),
+              `${ch} ${FORM_NAMES[form]}: **السنّةُ على خطٍّ واحد ${what}** تُقبَل بإصبعٍ حقيقيّ`
+              + `${/✓ مقبول/.test(free) ? '' : ' — ' + free.split('\n')[0]}`);
+            press('أعِد');
+            await wait(40);
+          }
         }
       }
     }

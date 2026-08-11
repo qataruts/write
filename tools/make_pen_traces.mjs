@@ -182,18 +182,44 @@ const TOOTH_LINE = prepare([...TOOTH_ARM_IN, ...TOOTH_SPINE.slice(1),
   ...[...TOOTH_SPINE].reverse().slice(1), ...TOOTH_ARM_OUT.slice(1)]);
 
 /**
- * **ل/وسطي من المنهج بعينه** — وهو الشكلُ الذي أثبتت عليه مراجعةُ المدير نقضَ عهد
- * `child-drift` (سقط برجفة ٤٠ من سماحة ٩٠ قبل الإعلان). فيدخل العدّةَ شاهداً مجمَّداً
- * على أنّ رجفةَ نصف السماحة تُقبَل عليه.
+ * **ثلاثةُ أشكالٍ من المنهج بعينها** — وهي المطويّاتُ الثلاث: ل/وسطي (العمود)
+ * وب/وسطي (السنّة) وب/نهائي (التُّوَيْج). ولكلٍّ سببُ دخوله العدّةَ شاهداً مجمَّداً:
+ *   · **ل/وسطي**: أثبتت عليه مراجعةُ المدير نقضَ عهد `child-drift` (سقط برجفة ٤٠
+ *     من سماحة ٩٠ قبل الإعلان).
+ *   · **ب/وسطي وب/نهائي**: أثبتت عليهما مراجعتُه الثانية أنّ **العودةَ على الأثر
+ *     الرطب** — وهي أطبعُ ما تفعله يدُ طفل — كانت تُردّ: الأولى `wander` (فجوةُ
+ *     ضلعيها ١٦٠ وسماحةُ الانحراف ٩٠)، والثانية `reverse` كاذباً على قوسٍ ضيّق.
+ *     **فالمعيارُ يُثبَت على مادّته**، وفجوتاهما أوسعُ وأضيقُ ما في المنهج اليوم.
  *
- * ⚠ **وهو المسارُ الوحيد في العدّة الذي لا يُولَد هنا** بل يُنسَخ من `app/js/paths.js`
- * (تؤلّفه عدّةُ المسارات) — **وذلك رباطٌ مقصود**: يومَ يتبدّل مسارُ ل/وسطي يحمرّ
- * الفحصُ الذاتي حتى تُعاد العدّةُ عليه، فلا يبقى شاهدٌ على شكلٍ زال. وحكمُ المحرّك
- * على المسارات الستّة عشرة كلِّها (والأرضيةُ الحيّة لاحتمال الرجفة) في
- * `tools/test_paths.mjs` لا هنا.
+ * ⚠ **وهي المساراتُ الوحيدة في العدّة التي لا تُولَد هنا** بل تُنسَخ من
+ * `app/js/paths.js` (تؤلّفه عدّةُ المسارات) — **وذلك رباطٌ مقصود**: يومَ يتبدّل
+ * أحدُها يحمرّ الفحصُ الذاتي حتى تُعاد العدّةُ عليه، فلا يبقى شاهدٌ على شكلٍ زال.
+ * وحكمُ المحرّك على المسارات الستّة عشرة كلِّها (والأرضيةُ الحيّة لاحتمال الرجفة)
+ * في `tools/test_paths.mjs` لا هنا.
  */
 const LAM_MEDIAL = PATHS['ل'].medial;
 const LAM_POLY = prepare(LAM_MEDIAL.strokes[0].points);
+const BA_MEDIAL = PATHS['ب'].medial;
+const BA_FINAL = PATHS['ب'].final;
+
+/**
+ * **العودةُ على الأثر الرطب**: يصعد الطفلُ ضلعَ الطيّة الصاعد ثم **ينزل عليه هو**
+ * — لا على ضلعها النازل ولا بينهما. وهي أطبعُ ما تفعله اليد، وبها امتُحن المحرّكُ
+ * في مراجعة المدير الثانية. ويُبنى الخطُّ **من المسار نفسِه** فلا يُكتب بيد.
+ */
+function retrace(ref) {
+  const stroke = ref.strokes[0];
+  const fold = stroke.folds[0];
+  const rising = stroke.points.slice(fold.from, fold.apex + 1);
+  return prepare([
+    ...stroke.points.slice(0, fold.from + 1),
+    ...rising.slice(1),
+    ...[...rising].reverse().slice(1),
+    ...stroke.points.slice(fold.to + 1),
+  ]);
+}
+const dotsOf = (ref, rand) => ref.dots
+  .flatMap((d) => Array.from({ length: d.count || 1 }, () => tap(d.at, rand)));
 
 /**
  * الحالاتُ العشر — لكل شرطٍ من الشروط الأربعة وجهُه الموجب ووجهُه السالب.
@@ -300,7 +326,7 @@ function build() {
     })], 'tooth');
 
   rand = rng(1515);
-  add('fold-single-line', { accept: true },
+  add('fold-single-line', { accept: true, needsFold: true },
     '**سنّةٌ على خطٍّ واحد** — كما تُكتب حقّاً في «اكتبه وحدك»: يصعد ثم يعود على أثره '
     + 'بين ضلعَي النموذج. كانت تُرفَض `reverse` قبل إعلان الطيّة',
     [walk(TOOTH_LINE, { jitter: 5, rand })], 'tooth');
@@ -321,24 +347,59 @@ function build() {
       ...walk(prepare(TOOTH_ARM_OUT), { jitter: 3, rand })]], 'tooth');
 
   rand = rng(1818);
-  add('lam-medial-drift', { accept: true },
+  add('lam-medial-drift', { accept: true, needsFold: true },
     `**ل/وسطي برجفة ${Math.round(TOLERANCE.lateral * 0.5)}** — الشكلُ الذي نقض عهدَ `
     + '`child-drift` في مراجعة المدير (سقط برجفة ٤٠)، وقد عاد فوقه بإعلان الطيّة',
     [walk(LAM_POLY, {
       jitter: 4, sway: (r) => Math.sin(r * Math.PI * 2) * TOLERANCE.lateral * 0.5, rand,
     })], 'lam-medial');
 
+  // **والمعيارُ يُثبَت على مادّته** (مراجعةُ المدير الثانية للجلسة ٢ب): «العودةُ على
+  // الأثر الرطب» تُجمَّد على **ب/وسطي وب/نهائي الحقيقيّين** — أوسعِ فجوةِ ضلعين في
+  // المنهج (١٦٠) وأضيقِ قوسٍ فيه — لا على السنّ الاصطناعية وحدَها.
+
+  rand = rng(1919);
+  add('ba-medial-retrace', { accept: true, needsFold: true },
+    '**ب/وسطي: العودةُ على الأثر الرطب** — يصعد ضلعَ السنّة الصاعد وينزل عليه هو. '
+    + 'كانت تُردّ `wander`: فجوةُ الضلعين ١٦٠ وسماحةُ الانحراف ٩٠',
+    [walk(retrace(BA_MEDIAL), { jitter: 4, rand }), ...dotsOf(BA_MEDIAL, rand)], 'ba-medial');
+
+  rand = rng(2020);
+  add('ba-medial-reversed', { accept: false, fault: 'start-end' },
+    'ب/وسطي معكوسةً — والطيّةُ لا تُبيح عكسَ الحركة ولو كان حبرُها واحداً',
+    [walk(prepare(BA_MEDIAL.strokes[0].points), { from: 1, to: 0, jitter: 4, rand }),
+      ...dotsOf(BA_MEDIAL, rand)], 'ba-medial');
+
+  rand = rng(2121);
+  add('ba-final-retrace', { accept: true, needsFold: true },
+    '**ب/نهائي: العودةُ على الأثر الرطب** على تُوَيْجها — أضيقُ قوسٍ في المنهج. '
+    + 'كانت تُردّ `reverse` كاذباً وفجوةُ ضلعيها ٨٠ داخلَ السماحة',
+    [walk(retrace(BA_FINAL), { jitter: 4, rand }), ...dotsOf(BA_FINAL, rand)], 'ba-final');
+
+  rand = rng(2222);
+  add('ba-final-reversed', { accept: false, fault: 'start-end' },
+    'ب/نهائي معكوسةً — تُوَيْجُها المطويّ لا يُبيح البدءَ من الطرف الآخر',
+    [walk(prepare(BA_FINAL.strokes[0].points), { from: 1, to: 0, jitter: 4, rand }),
+      ...dotsOf(BA_FINAL, rand)], 'ba-final');
+
   return {
     what: 'عدّةُ معايرة محرّك القلم — مساراتٌ مسجّلة تُدخَل على المحرّك آلياً (METHOD.md §٣.٩)',
     refs_note: 'ثلاثةُ أشكالٍ هندسيةٍ محسوبة للعدّة وحدها لا حروف: `sample` مركّبٌ يجمع أصنافَ '
       + 'الشروط الأربعة، و`ring` شكلٌ مغلق تُحرَس به ثغرةُ ذيل الحلقة، و`tooth` سنّةٌ '
-      + '**بطيّةٍ معلنة** تُحرَس بها طيّةُ الجلسة ٢ب. ومعها `lam-medial` وحدَه منقولاً من '
-      + 'app/js/paths.js — شاهدٌ على الشكل الذي نقض عهدَ child-drift في مراجعة المدير، '
-      + 'ويحمرّ الفحصُ الذاتيّ إن تبدّل مسارُه. وحكمُ المحرّك على مسارات الحروف كلِّها '
-      + 'في tools/test_paths.mjs.',
+      + '**بطيّةٍ معلنة** تُحرَس بها طيّةُ الجلسة ٢ب. ومعها **مطويّاتُ المنهج الثلاث** '
+      + '(lam-medial وba-medial وba-final) منقولةً من app/js/paths.js — فالمعيارُ يُثبَت '
+      + 'على مادّته، ويحمرّ الفحصُ الذاتيّ إن تبدّل مسارُ أحدها. وحكمُ المحرّك على '
+      + 'مسارات الحروف كلِّها في tools/test_paths.mjs.',
     generator: 'tools/make_pen_traces.mjs',
     warning: 'مساراتٌ مصنوعة لا مساراتُ أطفال — ميدانُ الطفل ومساراتُه الحقيقية في الجلسة ١٢',
-    refs: { sample: SAMPLE, ring: RING, tooth: TOOTH, 'lam-medial': LAM_MEDIAL },
+    refs: {
+      sample: SAMPLE,
+      ring: RING,
+      tooth: TOOTH,
+      'lam-medial': LAM_MEDIAL,
+      'ba-medial': BA_MEDIAL,
+      'ba-final': BA_FINAL,
+    },
     cases,
   };
 }
