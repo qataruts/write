@@ -40,6 +40,12 @@ APP = ROOT / "app"
 TOOLS = Path(__file__).resolve().parent
 PAGES = {
     "/__test.html": TOOLS / "browser_test.html",
+    "/__pen.html": TOOLS / "browser_pen.html",
+}
+# سَوقةُ الصفحات: `--suite <اسم>` يختار أيَّها يُشغَّل، والافتراضُ فحصُ القشرة.
+SUITES = {
+    "shell": "/__test.html",       # الجلسة ٠: التطبيق يفتح بلا خطأ جافاسكربت واحد
+    "pen": "/__pen.html",          # الجلسة ١: خصوصيةُ القلم — صفرُ طلباتٍ في دورة كتابة
 }
 # نافذة Chrome بلا واجهة تحجز ٨٧ بكسلاً لإطارٍ وهميّ فوق المنظور — فلولا تعويضها لقِسنا
 # جهازاً أقصر من الجهاز. والصفحة تعيد منظورها الحقيقي، والعدّاء يرفض أي انحرافٍ عن المطلوب.
@@ -131,9 +137,19 @@ def make_server(port: int, results: list):
             super().do_GET()
 
         def do_POST(self):
+            # **النتيجةُ من `/result` وحدَه** (الجلسة ١): كان أيُّ POST يُقرأ نتيجةً،
+            # فأمسك ذلك حارسُ خصوصية القلم يومَ جُرِّب سالباً — زُرع في `pen.js` رفعٌ
+            # لمسار الطفل، فحلّت حمولتُه محلَّ نتائج الفحص وانهار العدّاء بدل أن
+            # يحمرّ. والرفعُ المزروع الآن يُعدّ في العدّاد ويسقط الفحصُ كما ينبغي.
             raw = self.rfile.read(int(self.headers.get("Content-Length", 0)))
+            if self.path.partition("?")[0] != "/result":
+                self.send_response(404)
+                self.end_headers()
+                return
             try:
-                results[:] = json.loads(raw.decode("utf-8"))
+                payload = json.loads(raw.decode("utf-8"))
+                if isinstance(payload, list) and all(isinstance(r, dict) for r in payload):
+                    results[:] = payload
             except json.JSONDecodeError:
                 pass
             self.send_response(204)
@@ -188,6 +204,8 @@ def main():
     ap.add_argument("--timeout", type=int, default=140, help="ثوانٍ قبل الاستسلام")
     ap.add_argument("--shots", metavar="PNG", help="لقطة للمراجعة البصرية بدل تشغيل الاختبارات")
     ap.add_argument("--show", action="store_true", help="متصفّح مرئي")
+    ap.add_argument("--suite", choices=sorted(SUITES), default="shell",
+                    help="أيُّ صفحةِ فحصٍ تُشغَّل (القشرة · القلم)")
     args = ap.parse_args()
 
     results = []
@@ -200,7 +218,9 @@ def main():
         if args.shots:
             out = Path(args.shots).resolve()
             out.unlink(missing_ok=True)   # وإلا لعُدَّت لقطةُ تشغيلٍ سابق نجاحاً فوريّاً
-            proc = run_chrome(f"{base}/?dev=1", profile,
+            # اللقطةُ تتبع السَّوقة: لقطةُ القلم لوحُه لا خريطتُه
+            where = "/?dev=1#/pen" if args.suite == "pen" else "/?dev=1"
+            proc = run_chrome(f"{base}{where}", profile,
                               [f"--screenshot={out}", "--window-size=980,1400", "--hide-scrollbars"],
                               args.show)
             deadline = time.time() + args.timeout
@@ -210,12 +230,12 @@ def main():
             print(f"اللقطة: {out}" if out.exists() else "تعذّرت اللقطة")
             return 0 if out.exists() else 1
 
-        proc = run_chrome(f"{base}/__test.html", profile, ["--hide-scrollbars"], args.show)
+        proc = run_chrome(f"{base}{SUITES[args.suite]}", profile, ["--hide-scrollbars"], args.show)
         deadline = time.time() + args.timeout
         while time.time() < deadline:
             time.sleep(0.5)
             if results and results[-1].get("msg", "").startswith(
-                    ("لا أخطاء جافاسكربت", "استثناء", "انتهت المهلة")):
+                    ("لا أخطاء جافاسكربت", "أخطاءُ جافاسكربت", "استثناء", "انتهت المهلة")):
                 break
         proc.kill()
     finally:

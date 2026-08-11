@@ -1196,3 +1196,125 @@ button {
 
 /* جسدُ الشاشة الداخلية (الجلسةُ والبوابة) — حاويةٌ يُبدَّل ما فيها بلا قفزٍ في التخطيط */
 .lesson-body { min-height: 12rem; }
+
+/* ————— لوحُ الكتابة (`app/js/pen.js` · DESIGN §٨) —————
+   ورقةٌ مربّعة يُرسم فيها النموذجُ وحبرُ الطفل من الشبكة المعيارية ١٠٠٠×١٠٠٠ نفسِها.
+   والألوانُ من اللوح لا غير: النموذجُ حبرٌ خافت، وقلمُ الطفل بلون مرحلته (`--accent`)،
+   والإرشادُ لونُ النجمة — **ولا لونَ خطأٍ أحمر ألبتّة**: الإخفاقُ إرشادٌ لا رفض. */
+
+.pen-box {
+  --pen-accent: var(--accent, var(--accent-letters));
+  position: relative;
+  width: min(100%, 26rem);
+  margin: 1rem auto;
+  aspect-ratio: 1;
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+/* **لمسُ اللوح كتابةٌ لا تمرير**: بلا `touch-action: none` يسحب الإصبعُ الصفحةَ
+   بدل أن يكتب، ويُلغي المتصفّحُ سلسلةَ المؤشّر في منتصف الحرف. */
+.pen-surface {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.pen-stroke {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 26;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: .18;
+}
+
+.pen-dot { fill: var(--ink); opacity: .18; }
+.pen-dot--on { opacity: .42; }
+
+/* **مؤشّرُ التقدّم الحركيّ** (مخالفةُ اكتب المعلَنة لاقرأ، METHOD §٥): المسارُ يتلوّن
+   تحت قلم الطفل — يرى أين هو من الحركة، فالكتابةُ فعلٌ ممتدّ لا نقرة. */
+.pen-stroke--trail {
+  stroke: var(--pen-accent);
+  opacity: .38;
+  transition: stroke-dashoffset .06s linear;
+}
+
+/* حبرُ الطفل — يظهر تحت إصبعه دائماً، حتى في المحاولة التي لا تُقبل */
+.pen-line {
+  fill: none;
+  stroke: var(--pen-accent);
+  stroke-width: 22;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: opacity .5s ease;
+}
+
+.pen-line--kept { stroke: var(--ink); opacity: .9; }
+.pen-line--fade { opacity: 0; }
+
+/* نقطةُ البداية وسهمُ الاتجاه: لسانُ الإرشاد كلُّه (METHOD §٣.٤) */
+.pen-start {
+  fill: none;
+  stroke: var(--star);
+  stroke-width: 10;
+  opacity: .85;
+}
+
+.pen-arrow { fill: var(--star); opacity: .55; }
+
+/* رأسُ القلم في العرض المتحرك — لا يُرى إلا وهو يمشي (والإخفاءُ هنا لا بسمة
+   `hidden`: لا تُخفي عنصرَ SVG على كل متصفّح، وقد أمسكت لقطةُ اللوح ذلك). */
+.pen-head { display: none; fill: var(--pen-accent); opacity: .9; }
+.pen-box--playing .pen-head { display: inline; }
+.pen-box--complete .pen-guide { display: none; }
+
+/* الخطوةُ تحكم ما يُرى: موجَّهٌ فخافتٌ فصندوقٌ فارغ (METHOD §٥) */
+.pen-box--faint .pen-model { opacity: .45; }
+.pen-box--faint .pen-arrow { opacity: 0; }
+.pen-box--free .pen-model,
+.pen-box--free .pen-stroke--trail { opacity: 0; }
+.pen-box--free .pen-arrow { opacity: 0; }
+.pen-box--free .pen-start { opacity: .3; }
+.pen-box--playing .pen-start { opacity: 0; }
+
+/* الومضةُ عند الخطأ: نقطةُ البداية تكبر مرّتين ويظهر السهم — بلا لونٍ صارخ ولا هزّة */
+.pen-box--hint .pen-start { animation: pen-pulse 1.1s ease-out 2; }
+.pen-box--hint .pen-arrow { animation: pen-show 1.1s ease-out 2; }
+
+@keyframes pen-pulse {
+  0% { r: 40; opacity: .85; }
+  55% { r: 78; opacity: .35; }
+  100% { r: 40; opacity: .85; }
+}
+
+@keyframes pen-show {
+  0%, 100% { opacity: .25; }
+  50% { opacity: .9; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pen-box--hint .pen-start,
+  .pen-box--hint .pen-arrow { animation: none; opacity: .95; }
+  .pen-stroke--trail { transition: none; }
+}
+
+/* لوحُ قراءةِ المطوّر تحت اللوح (?dev=1) — أرقامُ حكمٍ لا شاشةُ طفل */
+.dev-readout {
+  margin: .8rem auto 0;
+  max-width: 26rem;
+  padding: .6rem .9rem;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-btn);
+  color: var(--ink-soft);
+  font-family: var(--font-ui);
+  font-size: .9rem;
+  line-height: 1.7;
+  text-align: start;
+}

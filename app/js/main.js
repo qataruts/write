@@ -14,6 +14,7 @@ import * as audio from './audio.js';
 import { renderReview } from './review.js';
 import { renderGate } from './gate.js';
 import { renderParent, skillsText } from './parent.js';
+import { renderPenDev, releasePen } from './pendev.js';
 import {
   h, icon, faceEl, toast, go, arNum, starsRow, topbar, brandMark,
   nodeTitle, nodeFace, nodeWhere, accentForKind, landmark, DEV,
@@ -111,6 +112,7 @@ function renderMap() {
     main.append(h('div', { class: 'dev' },
       h('div', { class: 'dev-title' }, 'أدوات التجربة (?dev=1) — لا تظهر للطفل'),
       h('div', { class: 'dev-row' },
+        h('button', { class: 'btn', onclick: () => go('#/pen') }, 'محرّك القلم'),
         h('button', { class: 'btn', onclick: () => fillAll(1) }, 'أنجِز الكل بنجمة'),
         h('button', { class: 'btn', onclick: () => fillAll(3) }, 'أنجِز الكل بثلاث'),
         h('button', {
@@ -355,6 +357,9 @@ let renderToken = 0;
 
 async function render() {
   audio.stop();
+  // إطلاقُ لوح الكتابة مع كل رسمة — نظيرُ `recorder.release()` في اقرأ: لا يبقى
+  // للوحٍ غادره الطفلُ أثرٌ معلَّقٌ على النافذة.
+  releasePen();
   const token = ++renderToken;
   const [name, arg1] = location.hash.replace(/^#\/?/, '').split('/');
 
@@ -380,6 +385,10 @@ async function render() {
     }
   } else if (name === 'parent') {
     screen = renderParent(render);
+  } else if (name === 'pen') {
+    // صفحةُ تجربة محرّك القلم (الجلسة ١) — خلف `?dev=1` وحدها، و`renderPenDev`
+    // تردّ `null` بدونها فيعود الطفلُ إلى خريطته.
+    screen = renderPenDev() || renderMap();
   } else if (SCREENS[name]) {
     // نوعٌ مُعلَنٌ لم تُكتب شاشتُه بعد: يعود إلى الخريطة، ويُقال السببُ في ‎?dev=1‎
     if (DEV) toast(`لا شاشة بعدُ: ${SCREENS[name]}`);
