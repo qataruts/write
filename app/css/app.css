@@ -1,0 +1,1198 @@
+/* «اُكْتُبْ» — تنسيق الواجهة على دستور التصميم `docs/DESIGN.md`.
+   **لوحُ اقرأ نفسُه** (بذرةُ `FAMILY.md §٥`) بألوانه وأهدافِ لمسه، وما تفرّع منه
+   معلَنٌ في `docs/SEED.md`.
+   دفتر أطفال دافئ هادئ: ورق كريمي، حبر بُنّي، لون مطفأ واحد لكل مرحلة،
+   والبهجة من الحركة اللطيفة والمكافأة لا من صراخ الألوان.
+   RTL كاملة، أزرار كبيرة تناسب إصبع طفل (الفعل الرئيس ≥ ٦٤ بكسل). */
+
+/* ————— الخطوط الثلاثة — مضمّنة محلياً (PWA، لا شبكة) ————— */
+/* (وخطُّ المصحف من البذرة لم يُنقَل: لا نصَّ مصحف في «اُكْتُبْ».) */
+/* ملفا Noto وBaloo متغيّرا الوزن: ملف واحد يغطي 400–700. */
+
+@font-face {
+  font-family: 'Noto Naskh Arabic';
+  src: url('../fonts/NotoNaskhArabic-arabic.woff2') format('woff2');
+  font-weight: 400 700;
+  font-display: swap;
+  unicode-range: U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0897-08E1,
+    U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74,
+    U+FE76-FEFC;
+}
+
+@font-face {
+  font-family: 'Noto Naskh Arabic';
+  src: url('../fonts/NotoNaskhArabic-latin.woff2') format('woff2');
+  font-weight: 400 700;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+2000-206F, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Baloo Bhaijaan 2';
+  src: url('../fonts/BalooBhaijaan2-arabic.woff2') format('woff2');
+  font-weight: 400 700;
+  font-display: swap;
+  unicode-range: U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0897-08E1,
+    U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74,
+    U+FE76-FEFC;
+}
+
+@font-face {
+  font-family: 'Baloo Bhaijaan 2';
+  src: url('../fonts/BalooBhaijaan2-latin.woff2') format('woff2');
+  font-weight: 400 700;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+2000-206F, U+FEFF, U+FFFD;
+}
+
+/* خطّ العلامة «اُكْتُبْ» حصراً — لا يُكتب به نصٌّ ولا مادّةُ قراءة (DESIGN §٣).
+   مقطع العربية وحدَه: العلامةُ ستةُ حروفٍ عربية، ولا لاتينيّ فيها. */
+@font-face {
+  font-family: 'Marhey';
+  src: url('../fonts/Marhey-arabic.woff2') format('woff2');
+  font-weight: 400 700;
+  font-display: swap;
+  unicode-range: U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0897-08E1,
+    U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74,
+    U+FE76-FEFC;
+}
+
+/* ————— اللوح اللوني (DESIGN §٢ — مصدر الحقيقة الوحيد للألوان) ————— */
+
+:root {
+  --paper: #FAF4E8;             /* خلفية الصفحات (ورق دافئ) */
+  --paper-deep: #F3EAD8;
+  --card: #FFFDF8;              /* البطاقات */
+  --ink: #3D3428;               /* النص الأساسي (بني داكن، لا #000) */
+  --ink-soft: #786A55;          /* نص ثانوي (أدكن من قيمة اللوح الأولى ليبلغ AA ≥ 4.5) */
+  --accent-letters: #317873;    /* مرحلة الحروف (أخضر مزرقّ مطفأ) */
+  --accent-skills: #8B6FAE;     /* المهارات (بنفسجي مطفأ) */
+  --accent-stories: #C77E4F;    /* القصص (طيني دافئ) */
+  --accent-quran: #356B4F;      /* القرآنية (أخضر مصحفي) */
+  --accent-garden: #7FA05C;     /* البساتين (زيتوني ناعم) */
+  --star: #DFAE3F;              /* النجوم (ذهبي مطفأ) — وهو لون الفعل الرئيس */
+  --ok: #5E9A61;                /* صواب — مطفأ */
+  --err: #C4605A;               /* خطأ — لا يصرخ */
+
+  /* مشتقات للنص الصغير فوق الخلفيات الفاتحة (الأصول أعلاه للأشكال والحروف الكبيرة) */
+  --star-text: #7D611E;
+  --ok-text: #3E7242;
+  --err-text: #9E463F;
+
+  --line: #EDE3D2;
+  --locked: #CBC1B0;
+  --mix: #fff;                  /* قاعدة مزج التفتيح — الليلي يقلبها إلى البطاقة */
+  --on-accent: #fff;            /* نص فوق لون المرحلة (المراحل الفاتحة تقلبه حبراً) */
+
+  --radius: 22px;               /* البطاقات 20–24 (DESIGN §٤) */
+  --radius-btn: 16px;           /* الأزرار 16 — مدوّر صديق لا كبسولات */
+  --node-size: 5.4rem;
+  --shadow: 0 2px 8px rgba(61, 52, 40, .08);
+
+  /* ألوان علامة «اُكْتُبْ» — من لوح البذرة كما هي، ولا تدخل الشاشات: موضعُها
+     العلامةُ وأيقونتُها وحدَهما. **وهويتُها اللونية النهائية للجلسة ١١** (welcome
+     والتثبيت والنشر) — فحتى تُحسم، علامةُ العائلة واحدةٌ لا علامتان. */
+  --brand-1: #F7B733;
+  --brand-2: #F5A524;
+  --brand-3: #E8590C;
+  --brand-word: var(--brand-3);  /* حبر الكلمة على الورق — الليليّ يفتحه */
+
+  --font-ui: 'Baloo Bhaijaan 2', 'Noto Naskh Arabic', 'Geeza Pro', system-ui, sans-serif;
+  --font-letter: 'Noto Naskh Arabic', 'Geeza Pro', 'Traditional Arabic', serif;
+  --font-brand: 'Marhey', 'Baloo Bhaijaan 2', 'Geeza Pro', sans-serif;
+
+  --accent: var(--accent-letters);
+}
+
+/* الوضع الليلي: نفس اللوح على ورق داكن دافئ (لا أسود) — DESIGN §٧ */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #2A241C;
+    --paper-deep: #241F18;
+    --card: #352E24;
+    --ink: #F0E8DA;
+    --ink-soft: #BFB0A0;
+    --accent-letters: #6FB3AD;
+    --accent-skills: #B49BD1;
+    --accent-stories: #DFA478;
+    --accent-quran: #7FB597;
+    --accent-garden: #A3C480;
+    --star: #E5BC5F;
+    --ok: #8CC08E;
+    --err: #E09287;
+    --star-text: #E5BC5F;
+    --ok-text: #A8D2AA;
+    --err-text: #EBAFA5;
+    --line: #4A4136;
+    --locked: #6B6053;
+    --mix: var(--card);
+    --on-accent: #2A241C;
+    --shadow: 0 2px 8px rgba(0, 0, 0, .4);
+    /* حبر العلامة على الورق الداكن: البرتقاليّ العميق يغرق فيه، فيُفتح إلى ذهبيّه */
+    --brand-word: var(--brand-1);
+  }
+}
+
+/* المراحل الفاتحة: نصّها فوق لونها حبرٌ داكن (يبقى داكناً في الليلي عمداً —
+   الألوان الليلية كلها فاتحة). اللون لا يحمل المعنى وحده في الحالتين. */
+.station--join, .node--join, .station--form, .node--form {
+  --on-accent: #3D3428;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  overflow-x: hidden;   /* لا تمرير أفقي أبداً (DESIGN §٤) */
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  font-family: var(--font-ui);
+  font-size: clamp(16px, 2.4vw, 19px);
+  line-height: 1.7;
+  color: var(--ink);
+  background: linear-gradient(180deg, var(--paper) 0%, var(--paper-deep) 100%) fixed;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+  border: 0;
+  background: none;
+}
+
+:focus-visible { outline: 3px solid var(--accent, var(--accent-letters)); outline-offset: 3px; }
+
+.boot { padding: 3rem 1rem; text-align: center; color: var(--ink-soft); }
+
+.app {
+  max-width: 60rem;
+  margin: 0 auto;
+  padding: 0 1rem 3rem;
+}
+
+/* ————— الشريط العلوي ————— */
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding: 1rem .25rem;
+  background: linear-gradient(180deg, var(--paper) 70%, transparent);
+}
+
+.topbar h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  letter-spacing: .5px;
+}
+
+.topbar .spacer { flex: 1; }
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .45rem .9rem;
+  border-radius: 14px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+  font-size: .95rem;
+  white-space: nowrap;
+}
+
+.pill--stars { color: var(--star-text); font-weight: 700; }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  min-height: 3rem;
+  padding: .5rem 1.25rem;
+  border-radius: var(--radius-btn);
+  background: var(--card);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+  transition: transform .15s ease;
+}
+
+.btn:active { transform: scale(.96); }
+
+.btn--primary {
+  background: var(--star);
+  border-color: transparent;
+  color: #3D3428;
+  font-weight: 700;
+}
+
+.btn--ghost { background: transparent; border-color: transparent; box-shadow: none; color: var(--ink-soft); }
+
+/* **زرُّ الأيقونة هدفُ لمسٍ لا حبرٌ** (أمسكه `browser_test.py` يومَ كُتب): الزرُّ
+   الذي لا نصَّ فيه — كزرّ لوحة وليّ الأمر — كان يقيس ٤٢ بكسلاً عرضاً، فحشوتُه
+   الأفقية مقيسةٌ على نصٍّ لا على أيقونة. و`DESIGN §٤` يشترط ≥ ٤٨ للثانوي. فصار
+   له عرضٌ أدنى كارتفاعه — **مربّعٌ لا شريط**، فيصدُق الهدفُ على إصبع طفل.
+   (وهو انحرافٌ معلَنٌ عن لوح البذرة، مقيَّدٌ في `docs/SEED.md` — والعيبُ قائمٌ في
+   اقرأ نفسِه، فيُعاد إليه كما يُعاد كلُّ ما تُصلحه العائلة.) */
+.btn--ghost { min-width: 3rem; padding-inline: .5rem; }
+
+.btn--wide { width: 100%; }
+
+/* الفعل الرئيس في الشاشة ≥ ٦٤ بكسل (DESIGN §٤) */
+.next, .continue { min-height: 4rem; }
+
+/* ————— خريطة الرحلة: درب متعرج بمعالم المراحل ————— */
+
+.continue {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  width: 100%;
+  margin-bottom: 1.25rem;
+  padding: .9rem 1.1rem;
+  border-radius: var(--radius);
+  background: var(--star);
+  color: #3D3428;
+  box-shadow: var(--shadow);
+  text-align: start;
+  transition: transform .15s ease;
+}
+
+.continue:active { transform: scale(.98); }
+.continue .continue-face { font-family: var(--font-letter); font-size: 2rem; line-height: 1.4; }
+.continue .continue-text { display: flex; flex-direction: column; }
+.continue b { font-size: 1.1rem; }
+.continue small { opacity: .8; }
+
+/* بطاقة مراجعة اليوم: بطاقة هادئة بحافة المهارات — لا تنافس «تابع من هنا» الذهبية */
+.continue--review {
+  background: var(--card);
+  color: var(--ink);
+  border-inline-start: 6px solid var(--accent-skills);
+}
+
+.continue--review small { color: var(--ink-soft); opacity: 1; }
+
+.continue--done {
+  border-inline-start-color: var(--ok);
+  color: var(--ok-text);
+}
+
+.station {
+  position: relative;
+  margin-bottom: 1.5rem;
+  padding: 1rem 1rem 1.25rem;
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: var(--shadow);
+  border-inline-start: 6px solid var(--accent, var(--accent-letters));
+}
+
+.station--locked { opacity: .62; filter: saturate(.35); }
+.station--done {
+  background: linear-gradient(180deg, var(--card) 60%, color-mix(in srgb, var(--ok) 8%, var(--card)));
+}
+
+/* معلم المحطة (بيت/جسر/قبة/بستان) — زخرفة صامتة بلون المرحلة */
+.station-mark {
+  position: absolute;
+  inset-inline-end: .9rem;
+  bottom: .5rem;
+  width: 3.75rem;
+  opacity: .35;
+  pointer-events: none;
+}
+
+.station-mark svg { display: block; width: 100%; height: auto; }
+
+.station-head {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  margin-bottom: 1rem;
+}
+
+.station-num {
+  display: grid;
+  place-items: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  flex: none;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 16%, var(--mix));
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.station-head h2 { margin: 0; font-size: 1.15rem; }
+
+.station-letters {
+  margin: 0;
+  font-family: var(--font-letter);
+  font-size: 1.15rem;
+  line-height: 1.9;
+  color: var(--ink-soft);
+  letter-spacing: .35rem;
+}
+
+.station-meta { margin-inline-start: auto; text-align: end; font-size: .9rem; color: var(--ink-soft); }
+.station-meta b { color: var(--star-text); }
+
+/* الخريطة الكسولة: ما بَعُد عن جبهة الطفل بطاقةُ عنوانٍ وحدها، تُفرد بنقرة.
+   العنوان والنجوم والقفل تبقى كما هي — يتغيّر ما تحتها لا ما يقرؤه الطفل. */
+.station--folded { padding-bottom: 1rem; }
+.station--folded .station-head { margin-bottom: 0; }
+
+.station-head--fold {
+  width: 100%;
+  min-height: 3.25rem;
+  padding: 0;
+  text-align: start;
+}
+
+/* علامة الفرد: دائرةٌ تُشبه رقم المحطة فتُقرأ زرّاً — لا سهمٌ باهت يضيع على طفل */
+.fold-sign {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 2rem;
+  height: 2rem;
+  margin-inline-start: .5rem;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 14%, var(--mix));
+  color: var(--ink-soft);
+  font-size: 1.05rem;
+  transition: transform .15s ease;
+}
+
+.station-head--fold:active .fold-sign { transform: translateY(2px); }
+
+.track {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .85rem 1.1rem;
+  align-items: flex-start;
+  margin: 0;
+  padding: 0 0 .5rem;
+  list-style: none;
+}
+
+/* تعرّج الدرب: موجة لطيفة تكسر استواء الصف (المعنى: رحلة لا شبكة) */
+.track li { position: relative; padding-top: var(--wave, 0rem); }
+.track li:nth-child(4n+2) { --wave: 1.1rem; --tilt: -14deg; }
+.track li:nth-child(4n+3) { --wave: 1.65rem; --tilt: -7deg; }
+.track li:nth-child(4n)   { --wave: .55rem; --tilt: 13deg; }
+.track li:nth-child(4n+5) { --tilt: 7deg; }
+
+/* خيط الرحلة: يُرسم في الفراغ الذي يسبق العقدة (جهة اليمين في RTL) ويميل مع الموجة */
+.track li + li::before {
+  content: '';
+  position: absolute;
+  top: calc(var(--wave, 0rem) + var(--node-size) / 2);
+  inset-inline-end: 96%;
+  width: 1.5rem;
+  border-top: 3px dotted var(--line);
+  transform: rotate(var(--tilt, 0deg));
+}
+
+.node {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .3rem;
+  width: var(--node-size);
+  padding: 0;
+}
+
+/* معلم «إعادة» على العقدة المنجَزة (الحزمة ١١): سهمٌ دائريّ على حافة وجهها — يدلّ
+   أن المنجَز يبقى مفتوحاً للّعب، ولا يزاحم الحرفَ في وسط الدائرة. */
+.node-replay {
+  position: absolute;
+  top: -.15rem;
+  inset-inline-start: -.15rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--paper);
+  color: color-mix(in srgb, var(--accent) 72%, var(--ink));
+  box-shadow: var(--shadow);
+  pointer-events: none;
+}
+
+.node-replay svg { width: .85rem; height: .85rem; display: block; }
+
+.node-face {
+  display: grid;
+  place-items: center;
+  width: var(--node-size);
+  height: var(--node-size);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 12%, var(--mix));
+  border: 3px solid color-mix(in srgb, var(--accent) 45%, var(--mix));
+  color: color-mix(in srgb, var(--accent) 78%, var(--ink));
+  font-family: var(--font-letter);
+  font-size: 2.4rem;
+  line-height: 1;
+  transition: transform .15s ease, box-shadow .2s ease;
+}
+
+.node:active .node-face { transform: scale(.93); }
+
+.node--words .node-face { font-family: var(--font-ui); font-size: 2rem; }
+
+.node--done .node-face {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
+}
+
+.node--next .node-face {
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 28%, transparent);
+  animation: pulse 1.8s ease-in-out infinite;
+}
+
+.node--locked .node-face {
+  background: color-mix(in srgb, var(--locked) 30%, var(--mix));
+  border-color: var(--locked);
+  color: var(--locked);
+}
+
+.node--locked .node-lock { font-size: .95rem; }
+
+.node-stars {
+  display: flex;
+  gap: .1rem;
+  font-size: .85rem;
+  line-height: 1;
+  color: var(--locked);
+}
+
+.node-stars .on { color: var(--star); }
+
+.shake { animation: shake .4s ease; }
+.pop { animation: pop .22s ease-out; }
+
+@keyframes pulse {
+  50% { box-shadow: 0 0 0 10px color-mix(in srgb, var(--accent) 0%, transparent); }
+}
+
+@keyframes shake {
+  25% { transform: translateX(-6px); }
+  50% { transform: translateX(6px); }
+  75% { transform: translateX(-3px); }
+}
+
+/* وثبة الصواب: تُعلن الإصابة بالحركة حيث لا صوت (DESIGN §٥.٢) */
+@keyframes pop {
+  40% { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+
+/* خيط الدرب بين المحطات: انعطافة صغيرة يمنة ويسرة */
+.trail {
+  display: flex;
+  justify-content: center;
+  height: 2.25rem;
+  margin: -.5rem 0;
+  opacity: .8;
+  pointer-events: none;
+}
+
+.trail svg { height: 100%; }
+.trail--flip svg { transform: scaleX(-1); }
+
+/* ————— الشخصية المرشدة «نوري» ————— */
+
+.mascot { display: block; pointer-events: none; }
+.mascot svg { display: block; width: 100%; height: auto; }
+
+.mascot--hello { width: 4rem; margin: 0 auto .25rem; }
+.mascot--cheer { width: 5.5rem; margin: 0 auto .5rem; animation: pop .5s ease; }
+
+/* ————— علامة التطبيق «اُكْتُبْ» —————
+
+   الكلمةُ مشكولةً بخطّها حصراً (DESIGN §٣). **وطائرُ العلامة مُعلَّقٌ بعلّته**
+   (`brandMark` في `ui.js`): في اقرأ يحطّ على ألفٍ كسرتُها تحتها، وألفُ «اُكْتُبْ»
+   ضمّتُها فوقها فيحجبها — وتركيبٌ آخر قرارُ تصميمٍ تملكه الجلسة ١١. وقواعدُ موضعه
+   باقيةٌ هنا لا محذوفة، فإذا حُسم التركيب لم تُكتب من جديد. */
+
+.brand {
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+  margin: 0;
+  font-family: 'Marhey', var(--font-ui);
+  font-weight: 700;
+  font-size: 1.6rem;
+  line-height: 1.9;               /* المشكولُ يحتاج هواءً فوقه وتحته (DESIGN §٣) */
+  color: var(--accent-letters);
+  letter-spacing: 0;
+}
+
+.brand-word { display: inline-block; }
+
+/* موضعُ الطائر حين يُحسم تركيبُه — حاطّاً على أول الكلمة (يمينَها في RTL). */
+.brand-bird {
+  position: absolute;
+  inset-inline-start: auto;
+  inset-inline-end: -.12em;
+  bottom: 1.02em;
+  width: 1.05em;
+  height: 1.05em;
+  pointer-events: none;
+}
+
+/* ————— شاشة داخلية (درس/كلمات) ————— */
+
+.screen { text-align: center; }
+
+.screen-card {
+  padding: 1.5rem 1.25rem 2rem;
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: var(--shadow);
+  border-top: 6px solid var(--accent, var(--accent-letters));
+}
+
+.giant {
+  display: grid;
+  place-items: center;
+  width: min(15rem, 62vw);
+  height: min(15rem, 62vw);
+  margin: 1rem auto;
+  border-radius: 24px;
+  background: color-mix(in srgb, var(--accent) 10%, var(--mix));
+  border: 4px solid color-mix(in srgb, var(--accent) 35%, var(--mix));
+  color: color-mix(in srgb, var(--accent) 78%, var(--ink));
+  font-family: var(--font-letter);
+  font-size: min(9rem, 38vw);   /* الحرف المفرد ≥ ٩٦ بكسل (DESIGN §٣) */
+  line-height: 1;
+  transition: transform .15s ease;
+}
+
+.giant:active { transform: scale(.96); }
+
+/* حبر الحرف مرفوعاً إلى مركز الصندوق بصرياً — القيمة تُقاس بحبر الحرف نفسِه في
+   `ui.js` (giantInk)، والرفعة على الحبر لا على الصندوق كي لا تصطدم بوثبة الضغط. */
+.giant-ink {
+  display: block;
+  transform: translateY(var(--letter-lift, 0));
+}
+
+.hint { color: var(--ink-soft); margin: .25rem 0 1.25rem; }
+
+.note {
+  margin: 1.5rem auto 0;
+  padding: .85rem 1rem;
+  max-width: 34rem;
+  border-radius: var(--radius-btn);
+  background: color-mix(in srgb, var(--ink) 6%, var(--card));
+  color: var(--ink-soft);
+  font-size: .95rem;
+}
+
+/* الكلمة المصوّرة (كلمة المثال في الدرس) */
+.word-emoji { font-size: 2.2rem; line-height: 1.2; }
+.word-text { font-family: var(--font-letter); font-size: 2rem; line-height: 1.9; }
+
+/* ————— درس الحرف: شريط الخطوات ————— */
+
+.steps {
+  display: flex;
+  justify-content: center;
+  gap: .25rem;
+  margin: 0 0 1.25rem;
+  padding: 0;
+  list-style: none;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .2rem;
+  flex: 1 1 0;
+  max-width: 7rem;
+  color: var(--ink-soft);
+  font-size: .8rem;
+  line-height: 1.3;
+}
+
+.step-dot {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--ink) 5%, var(--card));
+  border: 2px solid var(--line);
+  font-size: .95rem;
+  font-weight: 700;
+}
+
+.step--now { color: var(--ink); font-weight: 700; }
+.step--now .step-dot {
+  background: color-mix(in srgb, var(--accent) 14%, var(--mix));
+  border-color: var(--accent);
+  color: var(--ink);
+}
+
+.step--done { color: var(--ink-soft); }
+.step--done .step-dot { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+
+.step-name { white-space: nowrap; }
+
+@media (max-width: 26rem) {
+  .step-name { display: none; }
+  .steps { gap: .6rem; }
+}
+
+/* ————— درس الحرف: الخطوات ————— */
+
+.lesson h2 { margin: .25rem 0 .5rem; font-size: 1.35rem; }
+.lesson .sub { margin: 1.75rem 0 .6rem; font-size: 1rem; color: var(--ink-soft); }
+.lesson .foot { margin-top: 1.25rem; }
+.lesson .next { max-width: 22rem; margin: 1.5rem auto 0; }
+
+/* شقّا الخطوة (`heroStep` في `ui.js`): في الطولي — وهو المرجع الأول — يذوبان فلا
+   يبقى لهما أثرٌ في التخطيط، ولا يصطفّان جنباً إلى جنب إلا في العرضيّ القصير (أسفلَه). */
+.hero-side, .hero-rest { display: contents; }
+
+/* أشكال الحرف الأربعة */
+.forms {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: .5rem;
+}
+
+.form-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .15rem;
+  padding: .6rem .25rem;
+  border-radius: var(--radius-btn);
+  background: color-mix(in srgb, var(--accent) 8%, var(--mix));
+  border: 2px solid color-mix(in srgb, var(--accent) 22%, var(--mix));
+  color: var(--ink-soft);
+  font-size: .8rem;
+}
+
+.form-face {
+  font-family: var(--font-letter);
+  font-size: 2.2rem;
+  line-height: 1.4;
+  color: color-mix(in srgb, var(--accent) 78%, var(--ink));
+}
+
+/* كلمة المثال والحرف الملوَّن فيها */
+.example { margin-top: 1.75rem; }
+
+.example-word {
+  display: inline-flex;
+  align-items: center;
+  gap: .9rem;
+  padding: .7rem 1.4rem;
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--accent) 8%, var(--mix));
+  border: 2px solid color-mix(in srgb, var(--accent) 25%, var(--mix));
+  transition: transform .15s ease;
+}
+
+.example-word:active { transform: scale(.97); }
+.example-word .word-text { font-size: 2.4rem; line-height: 1.9; }
+.example .hint { margin: .5rem 0 0; font-size: .9rem; }
+
+.lit { color: color-mix(in srgb, var(--accent) 78%, var(--ink)); font-weight: 700; }
+
+/* بلاطة حرف مشكول (الحركات · ميّز بأذنك) */
+.vrow { gap: .75rem; margin-top: 1rem; }
+
+.vchip {
+  display: flex;
+  flex: 0 0 auto;                  /* لا تضيق البلاطة فينكسر اسم الحركة حرفاً حرفاً */
+  flex-direction: column;
+  align-items: center;
+  gap: .1rem;
+  min-width: 6.5rem;
+  padding: .8rem .75rem;
+  white-space: nowrap;
+  border-radius: 20px;
+  background: var(--card);
+  border: 3px solid color-mix(in srgb, var(--accent) 25%, var(--mix));
+  box-shadow: var(--shadow);
+  color: var(--ink-soft);
+  font-size: .85rem;
+  transition: transform .15s ease, border-color .2s ease, background .2s ease;
+}
+
+.vchip:active { transform: scale(.95); }
+
+.vchip-face {
+  font-family: var(--font-letter);
+  font-size: 3rem;
+  line-height: 1.5;
+  color: color-mix(in srgb, var(--accent) 78%, var(--ink));
+}
+
+.vchip--big { min-width: 6.5rem; }
+.vchip--big .vchip-face { font-size: 3.6rem; }
+
+.vchip.good {
+  background: color-mix(in srgb, var(--ok) 14%, var(--mix));
+  border-color: var(--ok);
+}
+.vchip.good .vchip-face { color: var(--ok-text); }
+
+.vchip.bad { background: color-mix(in srgb, var(--err) 12%, var(--mix)); border-color: var(--err); }
+
+/* لوح التتبّع */
+.trace {
+  display: block;
+  width: min(20rem, 78vw);
+  height: min(20rem, 78vw);
+  margin: 1rem auto 0;
+  border-radius: 24px;
+  background: color-mix(in srgb, var(--accent) 6%, var(--mix));
+  border: 3px dashed color-mix(in srgb, var(--accent) 30%, var(--mix));
+  touch-action: none;              /* الإصبع يرسم ولا يمرّر الصفحة */
+  cursor: crosshair;
+}
+
+/* ————— شريطُ خطوات الجلسة (`dots` في `review.js`) — من لوح البذرة ————— */
+
+/* شريط كلمات المجموعة: صورة كل كلمة، الحالية محاطة والمنجَزة خضراء */
+.dots {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: .4rem;
+  margin: 0 0 1.25rem;
+  padding: 0;
+  list-style: none;
+}
+
+.dot {
+  display: grid;
+  place-items: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--ink) 5%, var(--card));
+  border: 2px solid var(--line);
+  font-size: 1.1rem;
+  line-height: 1;
+  filter: grayscale(1);
+  opacity: .55;
+}
+
+.dot--now {
+  filter: none;
+  opacity: 1;
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, var(--mix));
+  transform: scale(1.15);
+}
+
+.dot--done {
+  filter: none;
+  opacity: 1;
+
+/* ————— الاحتفالُ الختامي ونجومُه — من لوح البذرة ————— */
+
+/* الاحتفال الختامي */
+.celebrate { padding: 1rem 0 .5rem; }
+
+.celebrate-face {
+  display: grid;
+  place-items: center;
+  width: 6.5rem;
+  height: 6.5rem;
+  margin: 0 auto 1rem;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-family: var(--font-letter);
+  font-size: 3.6rem;
+  line-height: 1;
+  animation: pop .5s ease;
+}
+
+.big-stars {
+  display: flex;
+  justify-content: center;
+  gap: .4rem;
+  font-size: 3rem;
+  line-height: 1.2;
+  color: var(--locked);
+}
+
+.big-stars .on { color: var(--star); animation: pop .5s ease backwards; }
+.big-stars .on:nth-child(2) { animation-delay: .18s; }
+.big-stars .on:nth-child(3) { animation-delay: .36s; }
+
+@keyframes pop {
+  from { transform: scale(.2); opacity: 0; }
+  70% { transform: scale(1.15); }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* ————— ترويسةُ شاشة البوابة، و«ليس بعدُ» — من لوح البذرة ————— */
+/* (وقواعدُ `contrast-head` من اقرأ لم تُنقَل: لا محطةَ «ميّز بين» في اكتب.) */
+
+.contrast-head .vchip small,
+.pair .vchip--pair small { display: block; margin-top: .15rem; color: var(--ink-soft); font-size: .8rem; }
+
+/* ترويسة شاشة البوابة ومحطة «ميّز بين»: وجهُها واسمُها فوق شريط الخطوات */
+.gate-head {
+  display: flex;
+  align-items: center;
+  gap: .85rem;
+  margin-bottom: .9rem;
+  padding-bottom: .8rem;
+  border-bottom: 2px dashed color-mix(in srgb, var(--accent) 35%, transparent);
+  text-align: start;
+}
+
+.gate-head h2 { margin: 0 0 .15rem; font-size: 1.2rem; }
+.gate-head .hint { margin: 0; }
+
+.gate-face {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 3.2rem;
+  height: 3.2rem;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 16%, var(--mix));
+  font-size: 1.7rem;
+  line-height: 1;
+}
+
+/* «ليس بعدُ»: وجهٌ هادئ لا احتفال — لا عقاب في الإخفاق ولا حفاوة به */
+.celebrate--again .celebrate-face {
+  background: color-mix(in srgb, var(--accent) 18%, var(--mix));
+  color: var(--ink);
+  animation: none;
+}
+
+/* ————— أنواعُ محطات «اُكْتُبْ» (METHOD §٤) — زينةٌ فوق `.station` الأساس ————— */
+
+/* التهيئة الحركية: خطوطٌ ومنحنيات قبل أيّ حرف — حدُّها مقطَّعٌ كخطّ التمرين */
+.station--warmup {
+  border-inline-start-style: dashed;
+  background: linear-gradient(180deg, var(--card) 55%, color-mix(in srgb, var(--accent) 7%, var(--mix)));
+}
+
+.station--warmup .station-letters,
+.station--join .station-letters,
+.station--fade .station-letters,
+.station--sentence .station-letters { font-family: var(--font-ui); font-size: .9rem; letter-spacing: 0; line-height: 1.7; }
+
+.node--warmup .node-face,
+.node--join .node-face,
+.node--fade .node-face,
+.node--sentence .node-face { font-size: 2.1rem; }
+
+/* أشكالُ المواقع: الحرفُ نفسُه موزوناً في مواضعه — حدٌّ مزدوج يميّزه عن معزوله */
+.station--form { border-inline-start-style: double; border-inline-start-width: 7px; }
+
+/* البوابة: قوسٌ يقف قبل المفصل */
+.station--gate {
+  border-inline-start-width: 8px;
+  background: linear-gradient(180deg, var(--card) 45%, color-mix(in srgb, var(--accent) 14%, var(--mix)));
+}
+
+.station--gate .station-letters { font-family: var(--font-ui); font-size: .9rem; letter-spacing: 0; line-height: 1.7; }
+.station--gate .station-num { font-size: 1.6rem; }
+.node--gate .node-face { font-family: var(--font-ui); font-size: 2rem; }
+
+/* ————— أدوات المطوّر (?dev=1) ————— */
+
+.dev {
+  margin-top: 1.5rem;
+  padding: .9rem 1rem;
+  border: 2px dashed var(--err);
+  border-radius: var(--radius-btn);
+  color: var(--ink-soft);
+  font-size: .9rem;
+}
+
+.dev-title { color: var(--err-text); font-weight: 700; margin-bottom: .5rem; }
+.dev-row, .row { display: flex; flex-wrap: wrap; gap: .5rem; justify-content: center; }
+.dev .btn { min-height: 2.6rem; padding: .35rem .9rem; font-size: .9rem; }
+
+.audit { text-align: start; }
+.audit h3 { margin: 1.5rem 0 .5rem; font-size: 1.05rem; }
+.audit-row { display: flex; flex-wrap: wrap; gap: .5rem; }
+
+.chip {
+  min-height: 3rem;
+  padding: .4rem 1rem;
+  border-radius: 14px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+  font-family: var(--font-letter);
+  font-size: 1.3rem;
+}
+
+.chip:active { transform: scale(.95); }
+.chip--missing { border: 2px solid var(--err); }
+
+/* ————— لوحة وليّ الأمر: النسخة الاحتياطية والتحكّم في الرحلة (الحزمة ١١) —————
+   شاشةُ بالغٍ خلف بوابة: صفوفٌ من قائمةٍ وزرّ، وتأكيدٌ يظهر في مكانه قبل كل فعل
+   يكتب فوق رحلة الطفل. بمفردات التنسيق القائمة (note · chip · row) لا بلوحٍ جديد. */
+
+.parent-tool { justify-content: flex-start; margin-top: .6rem; align-items: center; }
+
+/* القائمة: هدف لمسٍ ككل أزرار اللوحة، ولا تفيض عن الشاشة الضيقة */
+.pick {
+  max-width: min(22rem, 100%);
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+/* «استعِد من ملف»: الزرّ ظاهرٌ ومدخل الملف داخله — فلا زرٌّ كاذب يدّعي فعلاً لا يفعله */
+.file-label { display: inline-flex; align-items: center; cursor: pointer; }
+.file-pick { width: 0; height: 0; opacity: 0; position: absolute; pointer-events: none; }
+
+.confirm-slot:empty { display: none; }
+.confirm { margin-top: .75rem; text-align: start; }
+.confirm .hint { margin: .35rem 0 0; }
+
+.note--bad {
+  margin-top: .75rem;
+  border: 2px solid var(--err);
+  color: var(--err-text);
+  text-align: start;
+}
+
+/* ————— رسالة عابرة ————— */
+
+.toast {
+  position: fixed;
+  inset-inline: 1rem;
+  bottom: 1.25rem;
+  max-width: 26rem;
+  margin: 0 auto;
+  padding: .8rem 1.1rem;
+  border-radius: var(--radius-btn);
+  background: var(--ink);
+  color: var(--paper);
+  text-align: center;
+  box-shadow: var(--shadow);
+  z-index: 20;
+  animation: rise .25s ease;
+}
+
+@keyframes rise { from { opacity: 0; transform: translateY(12px); } }
+
+/* ————— تفضيلات المستخدم ————— */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
+}
+
+@media (max-width: 26rem) {
+  :root { --node-size: 4.6rem; }
+  .station { padding: .85rem .7rem 1rem; }
+}
+
+/* ————— الوضع العرضي القصير (بلاغ المالك بصور الآيباد، ٦ أغسطس ٢٠٢٦) —————
+
+   الطولي هو المرجع الأول ولا يُمسّ. أما العرضيّ فيفيض عمودياً فيحوج الطفل إلى سحبٍ
+   ليبلغ «تابع» — والعرض عنده فائضٌ ضائع. فهنا وحدَه: الخطوة شقّان جنباً إلى جنب،
+   والإيقاع الرأسي يُشدّ، والصناديق المربّعة تُقاس بالارتفاع كما تُقاس بالعرض.
+   والحدّ ٦٨rem يشمل الآيباد كلَّه عرضياً (٧٤٤ · ٧٦٨ · ٨٢٠ · ١٠٢٤) ويترك ما فوقه بسعته. */
+
+@media (orientation: landscape) and (max-height: 68rem) {
+  .hero-step {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(1rem, 3vw, 2.5rem);
+  }
+  .hero-side, .hero-rest { display: block; }
+  .hero-side { flex: 0 0 auto; }
+  .hero-rest { flex: 1 1 24rem; min-width: 0; max-width: 34rem; }
+
+  /* الصناديق المربّعة: الارتفاع قيدٌ كالعرض، وإلا خنق الحرفُ الكبيرُ ما تحته */
+  .giant {
+    width: min(15rem, 62vw, 46vh);
+    height: min(15rem, 62vw, 46vh);
+    margin: .5rem auto;
+    font-size: min(9rem, 38vw, 26vh);
+  }
+  .trace { width: min(20rem, 78vw, 44vh); height: min(20rem, 78vw, 44vh); margin-top: .5rem; }
+
+  /* إيقاعٌ أضيق — بلا مساس بأهداف اللمس (DESIGN §٤: الرئيس ≥ ٦٤ بكسل) */
+  .topbar { padding-top: .5rem; padding-bottom: .5rem; }
+  .app { padding-bottom: 1.25rem; }
+  .screen-card { padding: 1rem 1.25rem 1.25rem; }
+  .steps { margin-bottom: .75rem; }
+  .mascot--hello { width: 3rem; }
+  .lesson .sub { margin-top: 1rem; }
+  .lesson .next { margin-top: 1rem; }
+  .lesson .foot { margin-top: .75rem; }
+  .example { margin-top: 1rem; }
+  .rule { margin-top: .75rem; }
+  .vrow { margin-top: .5rem; }
+}
+
+/* ═════ مهمة «أيقونات لا إيموجي» (أمر المالك، ٧ أغسطس ٢٠٢٦) ═════
+   يُضاف في ذيل الملف حصراً تحت هذا العنوان (ترسيمُ التوازي مع الحزمة ١١).
+
+   قاعدتان لا ثالثة:
+     • **رمزُ البيانات** صورةٌ من `app/emoji/` (Twemoji) داخل صندوقه القديم نفسِه —
+       فمقاسُه ولونُ صندوقه وموضعُه كما كانت، ولا يتبدّل إلا مَن يرسمه: ملفُّنا
+       لا خطُّ الجهاز. ومقاسُه `1em` فيتبع `font-size` المكتوب أعلاه لكل موضع،
+       فلا رقمَ يُكرَّر هنا ولا رقمَ يتخلّف عن أخيه إذا تغيّر.
+     • **رمزُ الواجهة** أيقونةٌ خطية تتبع لون نصّها ومقاسَه (`currentColor`/`em`)،
+       كمعالم المحطات وأيقونة الميكروفون قبلها. */
+
+.emoji {
+  width: 1em;
+  height: 1em;
+  display: inline-block;
+  vertical-align: -.14em;
+}
+
+/* الصندوقُ الكبير (صورةُ السؤال وبطاقةُ الكلمة ووجهُ الاحتفال): رسمُ Twemoji يملأ
+   مربّعَه إلى حافّته، وحبرُ الإيموجي في خطّ النظام يترك حوله هواءً. فلولا هذا
+   التعويضُ لكبرت الصورةُ عمّا كانت وأدخلت الشاشةَ في سحبٍ رأسيّ (`--device`). */
+.pic-emoji .emoji,
+.celebrate-face .emoji,
+.continue-face .emoji,
+.node-face .emoji,
+.station-num .emoji { width: .86em; height: .86em; vertical-align: -.08em; }
+
+/* أيقونةُ الواجهة — خطٌّ بلا ملء يتبع لون نصّه (لغةُ المعالم، DESIGN §٦) */
+.ui-icon {
+  display: inline-block;
+  width: 1.05em;
+  height: 1.05em;
+  vertical-align: -.16em;
+  flex: none;
+}
+
+.ui-icon svg { width: 100%; height: 100%; display: block; }
+
+/* في الأزرار: الأيقونة أخفُّ قليلاً من النصّ فلا تسرق منه البصر (DESIGN §٥.١) */
+.btn .ui-icon { opacity: .92; }
+
+/* وجهُ العقدة والمحطة حين يكون أيقونةً خطية (لعبةُ الكلمات وسلّمُ الجمل والمكتبة
+   وسهمُ المراجعة): يتبع لونَ المحطة لا لون النصّ، كما كان وجهُها الملوّن. */
+.node-face > .ui-icon,
+.station-num > .ui-icon,
+.continue-face > .ui-icon { width: .88em; height: .88em; color: var(--accent, currentColor); }
+
+/* أذنُ الصورة وقفلُ العقدة شارتان مقيستان بالبكسل من قبلُ — تبقيان على مقاسهما
+   والأيقونةُ حبرُهما (ولونُ القفل لون نصّه لا لون المحطة: نذيرٌ لا وجه). */
+.pic-ear .ui-icon { width: 1.25rem; height: 1.25rem; vertical-align: 0; }
+.node-lock .ui-icon { width: 1em; height: 1em; color: currentColor; vertical-align: 0; }
+
+/* الرسالةُ العابرة: أيقونتُها قبل نصّها بفاصلٍ يسير */
+.toast .ui-icon { margin-inline-end: .35rem; }
+
+/* وثبةُ الفرح في سطر الإتقان وسطرِ الختام: بلون النجمة (وهو لون الاحتفال في اللوح) */
+.hint .ui-icon,
+.note .ui-icon { color: var(--star); }
+
+/* ————— بابُ التعريف · شريطُ تحميل الأصوات · شريطُ المعاينة — من لوح البذرة ————— */
+
+}
+
+/* بابُ التعريف في ذيل الخريطة (أمر المالك، ١٢ أغسطس ٢٠٢٦): سطرٌ هادئ للراشد —
+   لا زرَّ فعلٍ يزاحم درسَ الطفل، ولا لونَ نجمةٍ يجذب إصبعَه. */
+.map-about {
+  display: block;
+  margin: 2.5rem auto .5rem;
+  text-align: center;
+  font-size: .95rem;
+  color: var(--ink-soft);
+  text-decoration: none;
+  padding: .5rem;
+}
+
+.map-about:hover { text-decoration: underline; }
+
+/* **شريطُ تحميل الأصوات** (أمر المالك، ١٣ أغسطس ٢٠٢٦): الخزنُ كان يجري صامتاً فلا
+   يعرف وليُّ الأمر أتمَّ أم لا. والشريطُ يتحرّك ببلاغات عامل الخدمة بعد كل دفعة —
+   لا بتقديرٍ منّا — ومعه زرٌّ يبدأ التحميل الآن. */
+.dl { display: flex; flex-direction: column; gap: .5rem; margin: .75rem 0; }
+
+.dl-bar {
+  height: 10px;
+  border-radius: 999px;
+  background: var(--line);
+  overflow: hidden;
+}
+
+.dl-fill {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: 999px;
+  background: var(--accent-letters);
+  transition: width .3s ease;
+}
+
+.dl-bar--done .dl-fill { background: var(--accent-quran); }
+
+.dl .btn { align-self: flex-start; }
+
+/* **شريطُ وضع المعاينة**: يعلن أنّ ما يُرى ليس تجربةَ الطفل — فالقفلُ التسلسليّ
+   جوهرُ المنهج، ولا يُترك المقيّمُ يظنّ أنّه أُلغي. */
+.preview-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .5rem 1rem;
+  padding: .6rem 1rem;
+  background: var(--accent-quran);
+  color: var(--paper);
+  font-size: .95rem;
+  line-height: 1.5;
+}
+
+.preview-bar .btn {
+  min-height: 2.25rem;
+  padding: .25rem .9rem;
+  font-size: .9rem;
+  color: var(--paper);
+  border-color: color-mix(in srgb, var(--paper) 55%, transparent);
+}
+
+/* ————— أصنافٌ تستعملها لوحةُ وليّ الأمر — من لوح البذرة ————— */
+
+/* بطاقةُ وسمٍ بلا وجهٍ كبير: الكلمةُ نسخاً وإملاءً (نظيرُ بطاقة العائلة في اقرأ) */
+.vchip--tag {
+  min-width: 0;
+  padding: .45rem .8rem;
+  border-width: 2px;
+  border-color: color-mix(in srgb, var(--chip, var(--accent)) 45%, var(--mix));
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: .95rem;
+}
+
+/* جسدُ الشاشة الداخلية (الجلسةُ والبوابة) — حاويةٌ يُبدَّل ما فيها بلا قفزٍ في التخطيط */
+.lesson-body { min-height: 12rem; }

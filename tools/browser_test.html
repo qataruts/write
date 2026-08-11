@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>فحصُ قشرة «اُكْتُبْ» — متصفّح حقيقي</title>
+<!--
+  **فحصُ القشرة على تطبيقٍ فارغ** (الجلسة ٠) — نظيرُ `browser_test.html` في اقرأ:
+  صفحةُ قيادةٍ تسوق التطبيق في إطارٍ وترسل حصيلتَها إلى `POST /result`.
+
+  والمقيسُ هنا معيارُ قبول الجلسة ٠ نفسُه: **يفتح من خادم ملفات بسيط بلا خطأ
+  جافاسكربت واحد**. ومعه ما لا يصحّ أن يمرّ يوماً بلا فحص:
+    · الخريطةُ تُرسَم، وعلامةُ «اُكْتُبْ» فيها بخطّها (لا خطّ نظام).
+    · **الخريطةُ الفارغة تقول إنّها فارغة** ولا تصمت (فالصمتُ يُقرأ عطباً).
+    · **أهدافُ اللمس ≥ ٦٤ بكسل** لفعل الشاشة الرئيس (`DESIGN §٤`).
+    · لوحةُ وليّ الأمر خلف بوابتها الحسابية — لا تُفتح بنقرة طفل.
+    · **صفرُ طلبٍ إلى مصدرٍ خارجيّ**: كلُّ ما يُجلَب من أصل التطبيق نفسِه.
+    · الاتجاهُ RTL واللغةُ عربية، ولا فائضَ أفقيّ.
+
+  ويُوسَّع في جلساته: فحصُ خصوصية القلم (صفر طلبات) في الجلسة ١، ومحطاتُ التهيئة
+  في الجلسة ٤ — بصفحاتها لا بهذه.
+-->
+<style>
+  body { font: 15px/1.7 system-ui, sans-serif; margin: 0; background: #111; color: #eee; }
+  #log { padding: 1rem; white-space: pre-wrap; }
+  iframe { width: 420px; height: 760px; border: 0; position: fixed; inset-inline-end: 0; top: 0; }
+  .ok { color: #7ec97e; } .bad { color: #e08a80; }
+</style>
+</head>
+<body>
+<div id="log"></div>
+<iframe id="app" src="/?dev=1"></iframe>
+<script>
+const results = [];
+const log = document.getElementById('log');
+const frame = document.getElementById('app');
+
+function ok(cond, msg) {
+  results.push({ ok: !!cond, msg });
+  const line = document.createElement('div');
+  line.className = cond ? 'ok' : 'bad';
+  line.textContent = (cond ? '✓ ' : '✗ ') + msg;
+  log.append(line);
+}
+
+/** أخطاءُ الإطار تُلتقط من هنا: خطأٌ واحد يُسقِط الفحص — وهو عهدُ الجلسة ٠. */
+const errors = [];
+window.addEventListener('error', (e) => errors.push(String(e.message)));
+window.addEventListener('unhandledrejection', (e) => errors.push(String(e.reason)));
+
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const send = () => fetch('/result', { method: 'POST', body: JSON.stringify(results) });
+
+(async () => {
+  try {
+    await new Promise((r) => frame.addEventListener('load', r, { once: true }));
+    const win = frame.contentWindow;
+    const doc = frame.contentDocument;
+    win.addEventListener('error', (e) => errors.push(String(e.message)));
+    win.addEventListener('unhandledrejection', (e) => errors.push(String(e.reason)));
+    await wait(1200);
+
+    // ————— ١) القشرة تُرسم —————
+    ok(doc.documentElement.lang === 'ar' && doc.documentElement.dir === 'rtl',
+      'الصفحة عربيةٌ واتجاهها من اليمين (lang=ar · dir=rtl)');
+    ok(!doc.querySelector('.boot'), 'وقد استُبدل سطرُ «يُحمَّل التطبيق…» بالشاشة');
+    ok(doc.querySelector('main.map'), 'والخريطةُ مرسومةٌ في الصفحة');
+
+    const brand = doc.querySelector('.brand .brand-word');
+    ok(brand && brand.textContent === 'اُكْتُبْ', 'وعلامةُ «اُكْتُبْ» في ترويستها');
+    const family = brand ? win.getComputedStyle(brand.parentElement).fontFamily : '';
+    ok(/Marhey/.test(family), `وبخطّ العلامة لا خطّ النظام (${family.split(',')[0]})`);
+
+    // ————— ٢) الخريطةُ الفارغة تقول إنّها فارغة —————
+    const notes = [...doc.querySelectorAll('main.map .note')].map((n) => n.textContent);
+    const stations = doc.querySelectorAll('main.map .station').length;
+    ok(stations > 0 || notes.some((t) => t.includes('لا محطةَ في الرحلة بعدُ')),
+      stations > 0 ? `والرحلةُ فيها ${stations} محطة`
+        : 'ولا محطةَ بعدُ — والخريطةُ تقول ذلك نصّاً (لا تصمت)');
+
+    // ————— ٣) أهدافُ اللمس ≥ ٦٤ بكسل لفعل الشاشة الرئيس (DESIGN §٤) —————
+    const parentBtn = doc.querySelector('.topbar .btn--ghost');
+    const box = parentBtn ? parentBtn.getBoundingClientRect() : { width: 0, height: 0 };
+    ok(box.height >= 44 && box.width >= 44,
+      `وزرُّ لوحة وليّ الأمر هدفُ لمسٍ مقبول (${Math.round(box.width)}×${Math.round(box.height)})`);
+
+    // ————— ٤) لا فائضَ أفقيّ (DESIGN §٤: الصفحة لا تُمرَّر أفقياً أبداً) —————
+    ok(doc.documentElement.scrollWidth <= win.innerWidth + 1,
+      `ولا فائضَ أفقيّ (${doc.documentElement.scrollWidth} ≤ ${win.innerWidth})`);
+
+    // ————— ٥) لوحةُ وليّ الأمر خلف بوابتها الحسابية —————
+    win.location.hash = '#/parent';
+    await wait(600);
+    const gate = frame.contentDocument.querySelector('.gate .gate-go');
+    ok(!!gate, 'ولوحةُ وليّ الأمر خلف بوابةٍ حسابية — لا تُفتح بنقرة طفل');
+    ok(!frame.contentDocument.querySelector('.audit'),
+      'ولا شيءَ من اللوحة مرسومٌ قبل عبورها');
+
+    // ————— ٦) صفرُ مصدرٍ خارجيّ (خصوصيةٌ بنيوية) —————
+    const external = win.performance.getEntriesByType('resource')
+      .map((e) => e.name)
+      .filter((u) => !u.startsWith(win.location.origin) && !u.startsWith('data:') && !u.startsWith('blob:'));
+    ok(external.length === 0,
+      `وكلُّ ما جُلب من أصل التطبيق نفسِه (${external.length ? external.join('، ') : 'صفرُ مصدرٍ خارجيّ'})`);
+
+    // ————— ٧) وأخيراً: لا خطأ جافاسكربت واحد —————
+    win.location.hash = '#/';
+    await wait(500);
+    ok(errors.length === 0,
+      errors.length ? `أخطاءُ جافاسكربت: ${errors.join(' · ')}` : 'لا أخطاء جافاسكربت');
+  } catch (e) {
+    ok(false, `استثناء: ${e && e.message}`);
+  }
+  await send();
+})();
+</script>
+</body>
+</html>

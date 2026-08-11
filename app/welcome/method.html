@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content="أسس «اُكْتُبْ»: لماذا تتبّعُ المسار لا التمييزُ البصريّ، ولماذا النقاطُ بعد الجسم، وما المخالفات المعلَنة، وحدودُ النطاق." />
+    <meta name="theme-color" content="#FAF4E8" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#2A241C" />
+    <title>أسس «اُكْتُبْ» ومسوّغاتها وحدود نطاقه</title>
+    <link rel="icon" href="../icons/icon-192.png" />
+    <!--
+    **بنيةٌ من بذرة اقرأ، ومحتواها للجلسة ١١** (`FAMILY.md §٥`: «بنيةُ `welcome/`
+    الأربع»، و`SESSIONS.md` الجلسة ١١: «الصفحات الأربع بقشرة اقرأ ولغته القريبة»).
+    فما هنا اليومَ **القشرةُ وشريطُ التنقّل والعنوان** — ولا حقيقةَ تُدَّعى عن
+    التطبيق قبل أن تُبنى: صفحةُ عرضٍ تصف ما ليس قائماً كذبٌ على معلّم.
+
+    وقوانينُ `welcome/` كلُّها قائمة من اليوم:
+      · **صفرُ جافاسكربت** — ولا تسجّل عاملَ خدمة ولا تصل بيان التطبيق.
+      · **خارج قشرة عامل الخدمة** (`WELCOME` في `sw.js`، ولا في `SHELL`) —
+        فلا تُخزَّن ولا يبتلعها ردُّ التنقّل، ولولا ذلك لفُتح التطبيقُ مكانَها.
+      · **صفرُ مَوردٍ شبكيّ خارجيّ يُجلَب** — لوحُها من `app/css/app.css` نفسِه
+        (لا لون منسوخ)، وخطوطُها في `welcome/fonts/`.
+      · **أرقامُها يحسبها الحارس** لا تُكتب بيد، ولكل صورةٍ أبعادُها و`loading="lazy"`.
+  -->
+    <link rel="stylesheet" href="../css/app.css" />
+    <link rel="stylesheet" href="welcome.css" />
+  </head>
+  <body>
+    <header class="w-top">
+      <div class="w-top-in">
+        <a class="w-top-brand" href="./"
+          ><img src="../icons/icon-192.png" alt="" width="30" height="30" /><span
+            class="brand"
+            ><span class="brand-word">اُكْتُبْ</span></span
+          ></a
+        >
+        <nav class="w-topnav" aria-label="صفحات المرجع">
+          <a href="./">الرئيسة</a>
+          <a href="curriculum.html">المنهج</a>
+          <a href="method.html" aria-current="page">الأسس</a>
+          <a href="guide.html">الدليل العملي</a>
+          <a class="btn btn--primary" href="../">ابدأ الآن ←</a>
+        </nav>
+      </div>
+    </header>
+
+    <div class="w-wrap">
+      <div class="w-print-head">
+        <img loading="lazy" src="../icons/icon-192.png" alt="" width="44" height="44" />
+        <span class="w-print-brand brand"><span class="brand-word">اُكْتُبْ</span></span>
+        <span class="w-print-url">write.mishkat.qa</span>
+      </div>
+
+      <main>
+        <h1>الأسس</h1>
+        <p class="w-lead">الأسسُ والمسوّغات وحدودُ النطاق — **وفيها المخالفاتُ المعلَنة** (مؤشّر التقدّم الحركيّ داخل التمرين، والنقاطُ بعد الجسم، وأنّ جمال الخطّ ليس مادّةَ التطبيق).</p>
+
+        <p class="note">
+          هذه الصفحة قيد الإنشاء — تُكتب في الجلسة ١١ مع بقية صفحات المرجع
+          التعريفي، بعد أن يكتمل المنهج والشاشات. والبنيةُ هنا من اليوم كي لا
+          يُبنى المحتوى على قشرةٍ لم تُختبَر.
+        </p>
+      </main>
+
+      <footer class="w-foot">
+        <p>
+          <span class="brand"><span class="brand-word">اُكْتُبْ</span></span>
+          — ثالثُ عائلة التأسيس: اِقْرَأْ ← اُكْتُبْ ← أَتْقِنْ ← رَتِّلْ.
+        </p>
+      </footer>
+    </div>
+  </body>
+</html>
