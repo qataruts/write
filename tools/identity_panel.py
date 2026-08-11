@@ -46,6 +46,7 @@ CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 # مقاسُ الجهاز: آيباد ١٠٫٩ طولي — من `DEVICE_SIZES` في `browser_test.py` (لا يُكتب مرّتين)
 DEVICE_W, DEVICE_H = 820, 1180
 GROUNDS = ["warm", "tuned"]
+SHIFT = "shift"               # الأرضيةُ الدافئةُ المزاحة — مشتقّةٌ لا مكتوبة (§٣ب)
 SCENES = [
     ("map", "الخريطة"),
     ("board", "لوحُ الكتابة — محاولةٌ وإرشادُها"),
@@ -141,6 +142,28 @@ def mix(one: str, two: str, part: float) -> str:
     return "#%02X%02X%02X" % tuple(round(x * part + y * (1 - part)) for x, y in zip(a, b))
 
 
+def lab_hex(light: float, a: float, b: float) -> tuple:
+    """عكسُ `lab()` — ويعيد معه **هل قُصَّ اللونُ إلى حدّ المجال**؟
+
+    فالقصُّ ليس تفصيلاً: لونٌ خرج عن sRGB لا يُكتب كما أُريد له، فمن سكت عنه ادّعى
+    إزاحةً لم تقع. ولذلك يُعلَن مع كل قيمةٍ مشتقّة (وتُقاس القيمةُ المكتوبة لا المرادة).
+    """
+    fy = (light + 16) / 116
+    fx, fz = fy + a / 500, fy - b / 200
+    f = lambda v: v ** 3 if v ** 3 > 0.008856 else (v - 16 / 116) / 7.787
+    x, y, z = f(fx) * 0.95047, f(fy), f(fz) * 1.08883
+    channels = (3.2406 * x - 1.5372 * y - 0.4986 * z,
+                -0.9689 * x + 1.8758 * y + 0.0415 * z,
+                0.0557 * x - 0.2040 * y + 1.0570 * z)
+    clipped = any(c < -0.0005 or c > 1.0005 for c in channels)
+
+    def enc(c):
+        c = max(0.0, min(1.0, c))
+        c = 12.92 * c if c <= 0.0031308 else 1.055 * c ** (1 / 2.4) - 0.055
+        return round(c * 255)
+    return "#%02X%02X%02X" % tuple(enc(c) for c in channels), clipped
+
+
 # ————— ٢) قراءةُ الألواح: لوحُ التطبيق ولوحا الأخوين —————
 
 def root_tokens(text: str) -> dict:
@@ -210,12 +233,105 @@ def floors(read_tokens: dict, opacity: float) -> dict:
     }
 
 
-def candidate_palette(app_tokens: dict, cand: dict, ground: str) -> dict:
+# ————— ٣ب) الأرضيةُ الدافئةُ المزاحة — تُشتقّ بقياسٍ معلَن لا بذوق —————
+#
+# حكمُ المالك (١٢ أغسطس ٢٠٢٦): الغالبُ نِيليّ، **والأرضيةُ دافئةٌ مزاحة** — تبقى دافئةً
+# بالعين وتقيس مخالفةً لورق اقرأ (قيدُ ميثاق الهوية `FAMILY §٩`). وهذه ثلاثةُ مطالبَ في
+# عبارة، فتُترجَم ثلاثةَ أرقامٍ لا ثلاثةَ أذواق:
+#
+#   ١) **«مزاحة»** كم؟ — لا عتبةَ تُخترع: أبعدُ ما في العائلة من سابقةٍ أنّ **احسب** اختار
+#      ورقاً لنفسه، فبُعدُ ورقه عن ورق اقرأ هو **خطوةُ أخٍ** — وهي الأرضية. فمن بلغها
+#      فقد خالف بمقدارِ ما خالف به أخٌ فعلاً، لا بمقدارِ ما استحسنّا.
+#   ٢) **«دافئة»** كيف؟ — الإزاحةُ **في الدفء لا منه**: يُضرب إشباعُ لوح اقرأ في معاملٍ
+#      واحد **والإضاءةُ والصبغةُ لا تُمَسّان**. فالورقُ يزداد كِرَميّةً ولا يبرد، وصبغتُه
+#      صبغةُ العائلة بعينها.
+#   ٣) **وكم بالضبط؟** — **أصغرُ معاملٍ يبلغ خطوةَ الأخ**: لا تُنفَق مخالفةٌ أكثرُ مما
+#      يطلبه الميثاق. والمقياسُ على **القيمة الثمانيّة التي تُكتب في اللوح فعلاً** لا على
+#      المتّصل الرياضيّ — فما لا يُكتب لا يُقاس.
+#
+# **وربحٌ يلزم عن (٢) بالبرهان لا بالتجربة**: تباينُ WCAG دالّةُ الإضاءة وحدَها، و`L*`
+# دالّةُ الإضاءة النسبية وحدَها — فما دامت `L*` لم تُمَسّ فكلُّ تباينٍ في لوح اقرأ
+# **محفوظٌ بعينه**. لا يُشترى الدفءُ بحرفٍ يخفت على طفل.
+#
+# **والاتجاهُ نفسُه يُبرهَن بالرقم**: للمعامل جهتان — فوق الواحد (أدفأ) ودونه (أبرد).
+# والجهةُ الباردة تبلغ خطوةَ اقرأ ثم **تجلس في حِجر احسب** (الرقمُ في اللوحة)، فتخالف
+# أخاً وتزاحم أخاً. فسقطت بالقياس لا بالذوق.
+
+SHIFT_GRID = 0.0005          # دقّةُ مسح المعامل
+SHIFT_SPAN = 4000            # ومداه — والمسحُ يقف عند أوّل قيمةٍ تبلغ الخطوة
+
+
+def scale_chroma(value: str, k: float) -> tuple:
+    """اللونُ نفسُه إضاءةً وصبغةً، وإشباعُه مضروبٌ في `k`."""
+    light, a, b = lab(value)
+    return lab_hex(light, a * k, b * k)
+
+
+def shift_search(paper: str, step: float, sign: int) -> tuple:
+    """أصغرُ معاملٍ (في جهةٍ) يبلغ به الورقُ **المكتوبُ** خطوةَ الأخ — ومعه ما دونه.
+
+    وردُّ «ما دونه» ليس زينة: به يُثبَت أنّ المعامل **أصغرُ ما يجوز** لا رقماً مختاراً —
+    فالفحصُ الذاتيّ يشهد أنّ آخرَ قيمةٍ قبله تنزل عن الخطوة.
+    """
+    below = (1.0, paper, 0.0)
+    for i in range(1, SHIFT_SPAN + 1):
+        k = 1 + sign * i * SHIFT_GRID
+        value, _ = scale_chroma(paper, k)
+        gap = de00(value, paper)
+        if gap >= step:
+            return k, value, gap, below
+        if value != below[1]:
+            below = (k, value, gap)
+    return None, None, None, below
+
+
+def derive_shift(read_tokens: dict, calc_tokens: dict, names: list) -> dict:
+    """الأرضيةُ المزاحة كاملةً — قيمُها مشتقّةٌ هنا، ولا تُكتب في `palettes.json` ألبتّة."""
+    paper = read_tokens["paper"]
+    step = de00(paper, calc_tokens["paper"])
+    k, value, gap, below = shift_search(paper, step, +1)
+    if k is None:
+        raise SystemExit("لم يبلغ المسحُ خطوةَ الأخ — راجع مدى المعامل")
+
+    ground, clipped = {}, []
+    for name in names:
+        got, clip = scale_chroma(read_tokens[name], k)
+        ground[name] = got
+        if clip:
+            clipped.append(name)
+
+    cool_k, cool_paper, cool_gap, _ = shift_search(paper, step, -1)
+    return {
+        "k": k, "step": step, "ground": ground, "clipped": clipped, "below": below,
+        "paper": value, "paper_read": gap, "paper_calc": de00(value, calc_tokens["paper"]),
+        "read_calc": step,
+        "cool": None if cool_k is None else {
+            "k": cool_k, "paper": cool_paper, "paper_read": cool_gap,
+            "paper_calc": de00(cool_paper, calc_tokens["paper"]),
+        },
+        "reach": {name: lch(ground[name])[1] / lch(read_tokens[name])[1] if lch(read_tokens[name])[1] else 1.0
+                  for name in names},
+    }
+
+
+def shift_for(data: dict) -> str:
+    """أيُّ مرشَّحٍ يلبس الأرضيةَ المزاحة — من البيان لا من الشيفرة."""
+    return data.get("shift", {}).get("for", "")
+
+
+def grounds_of(data: dict, candidate: str) -> list:
+    """أرضياتُ مرشَّحٍ بعينه: الدافئةُ والمعدَّلة للجميع، والمزاحةُ لمن حُكم له."""
+    return GROUNDS + ([SHIFT] if candidate == shift_for(data) else [])
+
+
+def candidate_palette(app_tokens: dict, cand: dict, ground: str, shift: dict = None) -> dict:
     """لوحُ المرشَّح كاملاً كما سيراه المتصفّح: لوحُ البذرة ثم ما يبدّله المرشَّح."""
     palette = dict(app_tokens)
     palette.update(cand["tokens"])
     if ground == "tuned":
         palette.update(cand["ground"])
+    elif ground == SHIFT:
+        palette.update(shift["ground"])
     return palette
 
 
@@ -260,6 +376,21 @@ def measure(palette: dict, siblings: dict, base: dict, opacity: float) -> dict:
     }
 
 
+def build_report(data: dict, app_tokens: dict, siblings: dict, floor: dict,
+                 opacity: float, shift: dict, cands: list) -> dict:
+    """كلُّ مرشَّحٍ على كل أرضيةٍ يلبسها — حسابٌ خالص بلا متصفّح (تستعمله اللوحةُ وفحصُها)."""
+    report = {}
+    for cand in cands:
+        report[cand["id"]] = {}
+        for ground in grounds_of(data, cand["id"]):
+            palette = candidate_palette(app_tokens, cand, ground, shift)
+            m = measure(palette, siblings, siblings, opacity)
+            m["palette"] = palette
+            m["complaints"] = complaints(m, floor)
+            report[cand["id"]][ground] = m
+    return report
+
+
 def complaints(m: dict, floor: dict) -> list:
     """ما نزل عن أرضيةِ اقرأ أو عن AA — بحرفه، فلا يُقرأ رقمٌ ضعيف مدحاً."""
     out = []
@@ -296,7 +427,19 @@ HOLD_PNG = bytes.fromhex(
     "0557bfabd40000000049454e44ae426082")
 
 
-def make_server(port: int, state: dict):
+def served_palettes(data: dict, shift: dict) -> bytes:
+    """بيانُ المرشّحات كما يُقدَّم للصفحة — **ومعه الأرضيةُ المزاحة مشتقّةً**.
+
+    فالقيمُ لا تُكتب في `palettes.json` (نصُّ البيان نفسِه)، والصفحةُ لا تعرف حساب
+    لونٍ — فيُحقن المشتقُّ في الجواب وحدَه. وهو عينُ عهد «أرقامٌ محسوبة لا مكتوبة»:
+    ما تراه اللقطةُ خارجٌ من الاشتقاق ساعتَها، لا من رقمٍ نام في ملفّ.
+    """
+    served = json.loads(json.dumps(data))
+    served["shift"] = {**data["shift"], "ground": shift["ground"], "k": shift["k"]}
+    return json.dumps(served, ensure_ascii=False).encode("utf-8")
+
+
+def make_server(port: int, state: dict, palettes: bytes):
     """خادمُ `app/` ومعه صفحةُ اللقطات وبيانُ المرشّحات — **وبابُ الحبس**.
 
     و«بابُ الحبس» (`/__hold`) هو ما يجعل لقطةً بمشهدٍ مسوقٍ ممكنة أصلاً: كروم بلا
@@ -322,7 +465,7 @@ def make_server(port: int, state: dict):
             if path == "/__identity.html":
                 return self._send(PAGE.read_bytes(), "text/html; charset=utf-8")
             if path == "/__palettes.json":
-                return self._send(PALETTES.read_bytes(), "application/json; charset=utf-8")
+                return self._send(palettes, "application/json; charset=utf-8")
             if path == "/__ready":
                 if "fail=1" in query:
                     state["failed"] = True
@@ -392,15 +535,15 @@ def capture(base: str, profile: Path, state: dict, candidate: str, ground: str,
     return out, None
 
 
-def capture_all(cands: list, port: int, timeout: int) -> int:
+def capture_all(cands: list, port: int, timeout: int, data: dict, shift: dict) -> int:
     OUT.mkdir(parents=True, exist_ok=True)
     state = {"ready": threading.Event(), "failed": False, "timeout": timeout}
-    server = make_server(port, state)
+    server = make_server(port, state, served_palettes(data, shift))
     threading.Thread(target=server.serve_forever, daemon=True).start()
     base = f"http://127.0.0.1:{port}"
     fails = 0
     try:
-        jobs = [("now", "warm")] + [(c["id"], g) for c in cands for g in GROUNDS]
+        jobs = [("now", "warm")] + [(c["id"], g) for c in cands for g in grounds_of(data, c["id"])]
         for candidate, ground in jobs:
             for scene, title in SCENES:
                 profile = Path(tempfile.mkdtemp(prefix="uktub-identity-"))
@@ -423,12 +566,28 @@ def capture_all(cands: list, port: int, timeout: int) -> int:
 VERDICT_LINE = re.compile(r"^\*\*الحكم\*\*:\s*(.+?)\s*$", re.M)
 WAITING = "(منتظَر)"
 
+# **بابُ المالك يُحفَظ كلُّه لا سطرُه وحدَه.** أوّلُ صياغةٍ حفظت سطرَ الحكم فقط، ثم كتب
+# المديرُ رفعَه للمالك في الباب نفسِه — **فكانت إعادةُ التوليد تمحوه صامتةً**. فصار
+# المحفوظُ ما بين العلامتين: يقرؤه المولّدُ ويعيد كتابتَه كما هو.
+KEPT_OPEN = "<!-- ⇩ يُحفَظ عند إعادة التوليد: بابُ المالك — حكمُه وما يُرفَع إليه ⇩ -->"
+KEPT_SHUT = "<!-- ⇧ ينتهي المحفوظ ⇧ -->"
+KEPT_BLOCK = re.compile(re.escape(KEPT_OPEN) + r"\n(.*?)\n" + re.escape(KEPT_SHUT), re.S)
+# ولوحةٌ سابقةٌ بلا علامتين تُلتقط بمرساتَي بابها، فلا يضيع ما كُتب قبل أن تُوضَع.
+KEPT_FIRST = re.compile(r"^والمعرّفاتُ:[^\n]*\n\n(.*?)\n\n> وما دام", re.M | re.S)
+
+
+def read_kept() -> str:
+    """ما كتبته يدٌ في باب المالك — حكمُه، وما رُفع إليه فيه."""
+    if not PANEL.exists():
+        return f"**الحكم**: {WAITING}"
+    text = PANEL.read_text(encoding="utf-8")
+    found = KEPT_BLOCK.search(text) or KEPT_FIRST.search(text)
+    return found.group(1).strip() if found else f"**الحكم**: {WAITING}"
+
 
 def read_verdict() -> str:
     """حكمُ المالك إن كُتب — ويُحفَظ عند إعادة توليد اللوحة فلا يمحوه مولّدُها."""
-    if not PANEL.exists():
-        return WAITING
-    found = VERDICT_LINE.search(PANEL.read_text(encoding="utf-8"))
+    found = VERDICT_LINE.search(read_kept())
     return found.group(1).strip() if found else WAITING
 
 
@@ -478,29 +637,18 @@ def free_space_scan(siblings: dict, palette: dict, opacity: float) -> list:
 
 def lch_hex(light: float, chroma: float, hue: float) -> str:
     """لونٌ من (إضاءة، إشباع، صبغة) في CIELAB — للمسح وحدَه، لا يدخل لوحاً."""
-    a, b = chroma * math.cos(math.radians(hue)), chroma * math.sin(math.radians(hue))
-    fy = (light + 16) / 116
-    fx, fz = fy + a / 500, fy - b / 200
-    f = lambda v: v ** 3 if v ** 3 > 0.008856 else (v - 16 / 116) / 7.787
-    x, y, z = f(fx) * 0.95047, f(fy), f(fz) * 1.08883
-    r = 3.2406 * x - 1.5372 * y - 0.4986 * z
-    g = -0.9689 * x + 1.8758 * y + 0.0415 * z
-    bl = 0.0557 * x - 0.2040 * y + 1.0570 * z
-    def enc(c):
-        c = max(0.0, min(1.0, c))
-        c = 12.92 * c if c <= 0.0031308 else 1.055 * c ** (1 / 2.4) - 0.055
-        return round(c * 255)
-    return "#%02X%02X%02X" % (enc(r), enc(g), enc(bl))
+    return lab_hex(light, chroma * math.cos(math.radians(hue)),
+                   chroma * math.sin(math.radians(hue)))[0]
 
 
 def swatch(value: str) -> str:
     return f'<code>{value}</code>'
 
 
-def panel_text(data: dict, app_tokens: dict, siblings: dict, floor: dict, report: dict, opacity: float) -> str:
+def panel_text(data: dict, app_tokens: dict, siblings: dict, floor: dict, report: dict,
+               opacity: float, shift: dict) -> str:
     read_tokens = siblings["read"]["tokens"]
     calc_tokens = siblings["calc"]["tokens"]
-    verdict = read_verdict()
     lines = []
     add = lines.append
 
@@ -697,12 +845,150 @@ def panel_text(data: dict, app_tokens: dict, siblings: dict, floor: dict, report
     add("**ولم يُفعل اليوم**: البندُ يقول «لا تُمَسّ ألوانُ الحكم»، والإرشادُ منها.")
     add("")
 
-    add("## ٦. حكمُ المالك")
+    chosen = next((c for c in data["candidates"] if c["id"] == shift_for(data)), None)
+    if chosen:
+        rep = report.get(chosen["id"], {})
+        add(f"## ٦. الأرضيةُ الدافئةُ المزاحة — لوحةٌ مكمّلة لـ«{chosen['name']}»")
+        add("")
+        add(f"> **حكمُ المالك في اللوحة أعلاه**: الغالبُ «{chosen['name']}»، **والأرضيةُ دافئةٌ")
+        add("> مُزاحة** — تبقى دافئةً بالعين وتقيس مخالفةً لورق اقرأ. وهي أرضيةٌ **لم تكن في")
+        add("> اللوحة الأولى**: «الدافئةُ كما هي» بُعدُها عن ورق اقرأ **٠٫٠** فيردّها حارسُ")
+        add("> الميثاق القادم (`FAMILY §٩`)، و«المعدَّلة» ورقٌ بارد. فاشتُقّت ثالثةٌ وصُيِّرت")
+        add("> **لتُرى قبل أن يُكتب الحكم** — فلا يُعتمد لونٌ لم تره عين.")
+        add("")
+        add("**والإزاحةُ تُشتقّ بقياسٍ معلَن لا بذوق** — ثلاثةُ مطالبَ في العبارة، ثلاثةُ أرقامٍ في الاشتقاق:")
+        add("")
+        add(f"1. **كم تُزاح؟** — لا عتبةَ تُخترع. وفي العائلة سابقةٌ واحدة لورقٍ اختار نفسَه:"
+            f" **احسب**. فبُعدُ ورقه عن ورق اقرأ **خطوةُ أخٍ** — وهي الأرضية:"
+            f" ΔE₀₀ = **{shift['read_calc']:.2f}**. فمن بلغها خالف بمقدارِ ما خالف به أخٌ فعلاً،"
+            " لا بمقدارِ ما استُحسن.")
+        add(f"2. **كيف تبقى دافئة؟** — الإزاحةُ **في الدفء لا منه**: يُضرب إشباعُ لوح اقرأ في"
+            " معاملٍ واحد **والإضاءةُ والصبغةُ لا تُمَسّان**. فالورقُ يزداد كِرَميّةً ولا يبرد،"
+            " وصبغتُه صبغةُ العائلة بعينها.")
+        add(f"3. **وكم بالضبط؟** — **أصغرُ معاملٍ يبلغ الخطوة**: `k` = **{shift['k']:.3f}**"
+            f" ⇐ ورقٌ {swatch(shift['paper'])} على **{shift['paper_read']:.2f}** من ورق اقرأ."
+            f" ولا يُنفَق أكثرُ مما يطلبه الميثاق: ما دونه ({shift['below'][0]:.3f} ⇐"
+            f" {swatch(shift['below'][1])}) ينزل عن الخطوة بـ**{shift['below'][2]:.2f}**."
+            " **والمقياسُ على القيمة الثمانيّة التي تُكتب في اللوح** لا على المتّصل الرياضيّ —"
+            " فما لا يُكتب لا يُقاس.")
+        add("")
+        if shift.get("cool"):
+            cool = shift["cool"]
+            add(f"**وللمعامل جهتان، وسقطت إحداهما بالرقم**: دون الواحد يبرد الورقُ"
+                f" (`k` = {cool['k']:.3f} ⇐ {swatch(cool['paper'])})، فيبلغ خطوةَ اقرأ"
+                f" (**{cool['paper_read']:.2f}**) **ثم يجلس في حِجر احسب**: على"
+                f" **{cool['paper_calc']:.2f}** من ورقه وحدَه — أي يخالف أخاً ويزاحم أخاً."
+                f" والجهةُ الدافئة تبعد عن **الاثنين معاً**: {shift['paper_read']:.2f} عن اقرأ"
+                f" و**{shift['paper_calc']:.2f}** عن احسب. فالاتجاهُ حكمُ رقمٍ لا ميلُ عين.")
+            add("")
+        add("| رمزُ الأرضية | لوحُ اقرأ | المزاح | ΔE₀₀ |")
+        add("|---|---|---|---|")
+        for name in data["shift"]["tokens"]:
+            was = read_tokens[name]
+            add(f"| `--{name}` | {swatch(was)} | {swatch(shift['ground'][name])} |"
+                f" {de00(shift['ground'][name], was):.2f} |")
+        add("")
+        pairs = [("الحبرُ على الورق", "ink", "paper"), ("الثانويُّ على الورق", "ink-soft", "paper"),
+                 ("الحبرُ على البطاقة", "ink", "card"), ("المقفلُ على الورق", "locked", "paper")]
+        drift = max(abs(contrast(shift["ground"][a], shift["ground"][b]) - contrast(read_tokens[a], read_tokens[b]))
+                    for _, a, b in pairs)
+        add("**وربحٌ يلزم عن (٢) بالبرهان لا بالتجربة**: تباينُ WCAG دالّةُ الإضاءة النسبية")
+        add("وحدَها، و`L*` دالّتُها هي الأخرى — فما دامت `L*` لم تُمَسّ فكلُّ تباينٍ في لوح اقرأ")
+        add(f"**محفوظٌ بعينه**. والمقيسُ يشهد: أقصى ما تحرّك تباينٌ **{drift:.3f}** (وهو حَفُّ")
+        add("التدوير إلى ثماني بتّات):")
+        add("")
+        add("| التباين | لوحُ اقرأ | المزاح |")
+        add("|---|---|---|")
+        for label, a, b in pairs:
+            add(f"| {label} | {contrast(read_tokens[a], read_tokens[b]):.2f}:١ |"
+                f" {contrast(shift['ground'][a], shift['ground'][b]):.2f}:١ |")
+        add("")
+        if shift["clipped"]:
+            add("**وواحدٌ يُعلَن ولا يُخبَّأ — البطاقةُ على جدار المجال**: "
+                + " و".join(f"`--{n}`" for n in shift["clipped"])
+                + f" يبلغ حدَّ sRGB قبل تمام الإزاحة (وهو عند اقرأ نفسِه على الحدّ: أحمرُه ٢٥٥)،"
+                f" فيأخذ ما يسعه المجالُ: **{shift['reach'][shift['clipped'][0]]:.3f}** من"
+                f" **{shift['k']:.3f}**. **والمقيسُ ما كُتب لا ما أُريد** — والأرقامُ أعلاه من"
+                " القيمة المكتوبة.")
+            add("")
+        best = {g: min(s["ink_sep"] for s in rep[g]["stages"].values()) for g in rep}
+        add(f"**وحصيلةُ الأرضيات الثلاث على «{chosen['name']}»** — وأنفسُها **فصلُ حبر الطفل عن")
+        add("النموذج المرسوم**، أوّلُ ما تراه عينُه على اللوح:")
+        add("")
+        add("| الأرضية | الورق | عن ورق اقرأ | عن ورق احسب | حبرٌ على ورق | أدنى فصلِ حبر | ما نزل عن أرضيةٍ |")
+        add("|---|---|---|---|---|---|---|")
+        for ground in GROUNDS + [SHIFT]:
+            if ground not in rep:
+                continue
+            m = rep[ground]
+            label = {"warm": "الدافئةُ كما هي", "tuned": "المعدَّلة (باردة)", SHIFT: "**المزاحة**"}[ground]
+            mark = " ✓" if best[ground] >= floor["ink_sep"] else ""
+            add(f"| {label} | {swatch(m['palette']['paper'])} | {m['paper_read']:.1f} |"
+                f" {m['paper_calc']:.1f} | {m['ink_paper']:.2f}:١ | {best[ground]:.1f}{mark} |"
+                f" {arnum(len(m['complaints']))} |")
+        add("")
+        add(f"**وأرضيةُ اقرأ في فصل الحبر {floor['ink_sep']:.1f}** — فالمزاحةُ وحدَها تعلوها:")
+        add("ورقٌ أدفأ يدفع النموذجَ المرسوم إلى الدفء، فيزداد فصلُه عن حبرٍ نيليٍّ بارد.")
+        add("**والشكوى التي كانت على الدافئة سقطت** ولم يُشترَ ذلك بحرفٍ خفت.")
+        add("")
+        if rep.get(SHIFT):
+            bad = rep[SHIFT]["complaints"]
+            add("**وما بقي تحت أرضيةٍ في المزاحة**:" + ("" if bad else " لا شيء."))
+            if bad:
+                add("")
+                for line in bad:
+                    add(f"- ⚠ {line}")
+                add("")
+                add("(وهي شكوى بنيويةٌ في كل مرشَّحٍ ذي هويةٍ غالبةٍ واحدة — علّتُها في §٢،")
+                add("ولا تخصّ الأرضية: رقمُها واحدٌ في الأرضيات الثلاث.)")
+            add("")
+        add("**وماذا ترى العينُ؟ — يُقال صريحاً**: الإزاحةُ **صغيرةٌ بالقصد** (لا تُنفَق مخالفةٌ")
+        add(f"أكثرُ مما يطلبه الميثاق): {shift['paper_read']:.2f} ΔE₀₀ فرقٌ يُرى إن صُفَّ الورقان")
+        add("جنباً إلى جنب — كما في المقابلة أدناه — ولا يُرى وحدَه. **وهذا نصُّ المطلوب**:")
+        add("«تبقى دافئةً بالعين وتقيس مخالفة». فمن أراد فرقاً يصرخ فليس هذا بابَه؛ والمزاحةُ")
+        add(f"في المقابلة أدفأُ من الدافئة نفسِها لا أبردُ منها (إشباعُ ورقها {lch(shift['paper'])[1]:.1f}")
+        add(f"وإشباعُ ورق اقرأ {lch(read_tokens['paper'])[1]:.1f}).")
+        add("")
+        add(f"### اللقطات — «{chosen['name']}» على الأرضية المزاحة")
+        add("")
+        add("<table><tr>")
+        for scene, scene_title in SCENES:
+            name = shot_name(chosen["id"], SHIFT, scene)
+            add(f'<td align="center" width="33%"><a href="identity/{name}">'
+                f'<img src="identity/{name}" width="260" alt="{scene_title}"></a>'
+                f'<br><sub>{scene_title}</sub></td>')
+        add("</tr></table>")
+        add("")
+        add("**والمقابلةُ بالأرضيات الثلاث** — الغالبُ واحدٌ في الأعمدة الثلاثة، والمتبدّلُ الورقُ وحدَه:")
+        add("")
+        for scene, scene_title in SCENES:
+            add(f"**{scene_title}**")
+            add("")
+            add("<table><tr>")
+            for ground, label in (("warm", "الدافئةُ كما هي"), ("tuned", "المعدَّلة (باردة)"),
+                                  (SHIFT, "المزاحة")):
+                name = shot_name(chosen["id"], ground, scene)
+                add(f'<td align="center" width="33%"><a href="identity/{name}">'
+                    f'<img src="identity/{name}" width="260" alt="{label} — {scene_title}"></a>'
+                    f'<br><sub>{label}</sub></td>')
+            add("</tr></table>")
+            add("")
+        add(f"**والمطلوبُ من هذه اللوحة سطرٌ واحد**: إن رضيت عينُك الأرضيةَ المزاحة فالحكمُ")
+        add(f"`{chosen['id']} / {SHIFT}` يُكتب في §٧ أدناه؛ وإن آثرتَ سواها فـ`{chosen['id']} / warm`")
+        add(f"أو `{chosen['id']} / tuned`. **ولا يُصبَغ اللوحُ حتى يُكتب** — والحارسُ على الطرفين.")
+        add("")
+
+    add("## ٧. حكمُ المالك")
     add("")
     add("يُكتب هنا بمعرّف المرشَّح والأرضية — مثلاً `mulberry / tuned` أو `indigo / warm`،")
+    add("والأرضياتُ: `warm` (الدافئةُ كما هي) · `tuned` (المعدَّلة) · "
+        f"`{SHIFT}` (**الدافئةُ المزاحة**، §٦ — ولها وحدَها من المرشّحين "
+        + (f"`{shift_for(data)}`" if shift_for(data) else "—") + ")،")
     add("والمعرّفاتُ: " + " · ".join(f"`{c['id']}` ({c['name']})" for c in data["candidates"]) + ".")
     add("")
-    add(f"**الحكم**: {verdict}")
+    add(KEPT_OPEN)
+    add(read_kept())
+    add(KEPT_SHUT)
     add("")
     add("> وما دام الحكمُ منتظَراً فـ`app/css/app.css` يبقى لوحَ البذرة، **يحرسه**")
     add("> `python3 tools/identity_panel.py --self-test`: يحمرّ إن طُبِّق لونٌ بلا حكمٍ")
@@ -771,13 +1057,84 @@ def self_test() -> int:
            f"المردودُ «{out['name']}»: رموزُه معروفةٌ ولا تمسّ لونَ حكم"
            + (f" — {unknown + touched}" if unknown or touched else ""))
 
-    print("\n— لوحُ احسب عند التزامه المسمّى —")
+    print("\n— الأرضيةُ الدافئةُ المزاحة: مشتقّةٌ لا مكتوبة —")
     siblings = sibling_palettes(data)
+    read_tokens = siblings["read"]["tokens"]
+    calc_tokens = siblings["calc"]["tokens"]
+    names = data["shift"]["tokens"]
+    written = [k for k, v in data["shift"].items()
+               if isinstance(v, str) and re.fullmatch(r"#[0-9A-Fa-f]{3,8}", v)]
+    ok(not written, "لا لونَ مكتوبٌ في بيان الإزاحة" + (f" — مكتوب: {written}" if written else ""))
+    shift = derive_shift(read_tokens, calc_tokens, names)
+    again = derive_shift(read_tokens, calc_tokens, names)
+    ok(shift["ground"] == again["ground"], "الاشتقاقُ يعيد نفسَه حرفاً")
+    ok(shift_for(data) in {c["id"] for c in cands},
+       f"الأرضيةُ المزاحة لمرشَّحٍ معروف: «{shift_for(data)}»")
+    ok(set(shift["ground"]) == set(names) and all(t in app_tokens for t in names),
+       "رموزُها رموزُ أرضيةٍ معروفةٌ في لوح التطبيق")
+    ok(not [t for t in names if t in held], "لا تمسّ لونَ حكمٍ وظيفياً")
+    ok(all(re.fullmatch(r"#[0-9A-Fa-f]{6}", v) for v in shift["ground"].values()),
+       "قيمُها ألوانٌ سليمةُ الصيغة")
+
+    # ١) «مخالفةٌ تُقاس» — خطوةُ أخٍ لا عتبةٌ تُخترع، وأصغرُ ما يبلغها
+    ok(abs(shift["step"] - de00(read_tokens["paper"], calc_tokens["paper"])) < 1e-9,
+       f"خطوةُ الإزاحة هي بُعدُ ورق احسب عن ورق اقرأ: {shift['step']:.3f}")
+    ok(shift["paper_read"] >= shift["step"],
+       f"الورقُ المزاح يبلغ الخطوة: {shift['paper_read']:.3f} ≥ {shift['step']:.3f}")
+    ok(shift["below"][2] < shift["step"],
+       f"وهو **أصغرُ ما يبلغها**: ما دونه {shift['below'][1]} على {shift['below'][2]:.3f} فقط")
+    ok(shift["paper_calc"] > shift["step"],
+       f"ويبعد عن ورق احسب كذلك: {shift['paper_calc']:.3f} — فليس مخالفةَ أخٍ ومزاحمةَ أخ")
+
+    # ٢) «تبقى دافئة» — الإزاحةُ في الدفء لا منه: إشباعٌ يعلو، وصبغةٌ وإضاءةٌ لا تُمَسّان
+    was, now = lch(read_tokens["paper"]), lch(shift["paper"])
+    ok(now[1] > was[1] > lch(calc_tokens["paper"])[1],
+       f"إشباعُ الورق يعلو ولا ينزل: احسب {lch(calc_tokens['paper'])[1]:.2f}"
+       f" · اقرأ {was[1]:.2f} · المزاح {now[1]:.2f}")
+    ok(abs(now[2] - was[2]) < 2.5 and abs(now[0] - was[0]) < 0.5,
+       f"الصبغةُ والإضاءةُ في موضعهما: صبغة {was[2]:.1f}° ← {now[2]:.1f}° ·"
+       f" إضاءة {was[0]:.2f} ← {now[0]:.2f}")
+    ok(shift["cool"] and shift["cool"]["paper_calc"] < shift["step"],
+       "والجهةُ الباردة مردودةٌ بالرقم: تجلس في حِجر احسب على "
+       + (f"{shift['cool']['paper_calc']:.2f}" if shift["cool"] else "—"))
+
+    # ٣) «ولا يُشترى الدفءُ بحرفٍ يخفت» — التباينُ محفوظٌ لأن `L*` لم تُمَسّ
+    drift = max((abs(contrast(shift["ground"][a], shift["ground"][b]) - contrast(read_tokens[a], read_tokens[b])), a, b)
+                for a, b in (("ink", "paper"), ("ink-soft", "paper"), ("ink", "card"), ("locked", "paper")))
+    ok(drift[0] < 0.05, f"كلُّ تباينات اقرأ محفوظة — أقصى انحراف {drift[0]:.3f}"
+                        f" (`--{drift[1]}` على `--{drift[2]}`)")
+    ok(contrast(shift["ground"]["ink"], shift["ground"]["paper"]) >= 7
+       and contrast(shift["ground"]["ink-soft"], shift["ground"]["paper"]) >= AA,
+       "حبرُها على ورقها AAA وثانويُّها AA")
+    ok(all(n == "card" for n in shift["clipped"]),
+       "ولا يُقَصّ إلى حدّ المجال إلا ما هو على حدّه أصلاً"
+       + (f" — قُصّ: {shift['clipped']}" if shift["clipped"] else " (ولا شيء)"))
+
+    print("\n— لوحُ احسب عند التزامه المسمّى —")
     calc = siblings["calc"]
     if calc["matches"] is None:
         print("  · مستودعُ احسب غيرُ متاح هنا — القيمُ المقيَّدة هي المعتمدة، ومعلَنٌ ذلك في اللوحة")
     else:
         ok(calc["matches"], f"المقيَّدُ يطابق `calc@{calc['commit']}` حرفاً")
+
+    print("\n— بابُ المالك: ما تكتبه يدٌ لا يمحوه مولّد —")
+    panel_now = PANEL.read_text(encoding="utf-8") if PANEL.exists() else ""
+    kept = read_kept()
+    ok(KEPT_OPEN in panel_now and KEPT_SHUT in panel_now, "علامتا الحفظ في اللوحة")
+    ok(bool(VERDICT_LINE.search(kept)), "وسطرُ الحكم داخلَ المحفوظ")
+    ok(panel_now.count(KEPT_OPEN) == 1 and panel_now.count(KEPT_SHUT) == 1,
+       "ولا علامةَ مكرّرة تشقّ البابَ بابين")
+    # وأصدقُ شهادةٍ: أن يُعاد توليدُ اللوحة نصّاً فيخرج المحفوظُ كما هو
+    opacity = model_opacity(CSS.read_text(encoding="utf-8"))
+    floor = floors(read_tokens, opacity)
+    remade = panel_text(data, app_tokens, siblings, floor,
+                        build_report(data, app_tokens, siblings, floor, opacity, shift, cands),
+                        opacity, shift)
+    ok(kept in remade, "وإعادةُ التوليد تردّه بحرفه")
+    # وشقُّه الآخر: ما عدا البابَ **مولَّدٌ لا يُحرَّر بيد** — فاللوحةُ على القرص يجب أن
+    # تكون عينَ ما يخرج من المولّد اليوم. فمن حرّر فقرةً مولَّدة أو بدّل المولّدَ ولم
+    # يُعِد التوليدَ يحمرّ هنا، ولا تُقرَأ لوحةٌ تصف أرقاماً غيرَ التي تُحسب.
+    ok(panel_now == remade, "وما عدا البابَ: اللوحةُ على القرص عينُ ما يخرج من المولّد")
 
     print("\n— «لا لونَ قبل الحكم، ولا حكمَ بلا تطبيق» —")
     ok(PANEL.exists(), "لوحةُ العرض `docs/REVIEW_IDENTITY.md` موجودة")
@@ -795,10 +1152,14 @@ def self_test() -> int:
     else:
         chosen = next((c for c in cands if c["id"] == verdict[0]), None)
         ok(chosen is not None, f"الحكمُ «{verdict[0]}» مرشَّحٌ معروف")
-        if chosen:
+        ok(chosen is not None and verdict[1] in grounds_of(data, verdict[0]),
+           f"والأرضيةُ «{verdict[1]}» أرضيةٌ يلبسها هذا المرشَّح")
+        if chosen and verdict[1] in grounds_of(data, verdict[0]):
             want = dict(chosen["tokens"])
             if verdict[1] == "tuned":
                 want.update(chosen["ground"])
+            elif verdict[1] == SHIFT:
+                want.update(shift["ground"])
             off = [k for k, v in want.items() if app_tokens.get(k) != v]
             ok(not off, f"لوحُ التطبيق مصبوغٌ بـ«{chosen['name']}» ({verdict[1]}) حرفاً"
                         + (f" — يخالف: {off}" if off else ""))
@@ -806,7 +1167,7 @@ def self_test() -> int:
     print("\n— اللقطاتُ المصيَّرة —")
     wanted = {shot_name("now", "warm", s) for s, _ in SCENES}
     for cand in cands:
-        for ground in GROUNDS:
+        for ground in grounds_of(data, cand["id"]):
             for scene, _ in SCENES:
                 wanted.add(shot_name(cand["id"], ground, scene))
     if not OUT.exists():
@@ -849,20 +1210,22 @@ def main() -> int:
     if not cands:
         sys.exit(f"لا مرشَّحَ بهذا المعرّف: {args.only}")
 
+    shift = derive_shift(siblings["read"]["tokens"], siblings["calc"]["tokens"],
+                         data["shift"]["tokens"])
+
     print("— أرضياتُ اقرأ المحسوبة —")
     print(f"  فصلُ الحبر {floor['ink_sep']:.1f} · تمايزُ المراحل {floor['pairwise']:.1f}"
           f" · مفارقةُ ألوان الحكم {floor['functional']:.1f} · أقصى إشباع {floor['chroma']:.0f}")
+    print(f"\n— الأرضيةُ المزاحة (مشتقّةٌ لـ«{shift_for(data)}») —")
+    print(f"  خطوةُ الأخ {shift['read_calc']:.2f} · المعامل {shift['k']:.3f}"
+          f" · ورقٌ {shift['paper']} على {shift['paper_read']:.2f} من اقرأ"
+          f" و{shift['paper_calc']:.2f} من احسب"
+          + (f" · قُصّ إلى المجال: {shift['clipped']}" if shift["clipped"] else ""))
 
-    report = {}
+    report = build_report(data, app_tokens, siblings, floor, opacity, shift, cands)
     for cand in cands:
-        report[cand["id"]] = {}
         print(f"\n— «{cand['name']}» ({cand['id']}) —")
-        for ground in GROUNDS:
-            palette = candidate_palette(app_tokens, cand, ground)
-            m = measure(palette, siblings, siblings, opacity)
-            m["palette"] = palette
-            m["complaints"] = complaints(m, floor)
-            report[cand["id"]][ground] = m
+        for ground, m in report[cand["id"]].items():
             print(f"  · الأرضية {ground}: حبرٌ على ورق {m['ink_paper']:.2f}:١ ·"
                   f" تمايزُ المراحل {m['pairwise']:.1f} ·"
                   f" ورقٌ عن اقرأ {m['paper_read']:.1f}")
@@ -873,9 +1236,10 @@ def main() -> int:
         return 0
 
     print("\n— اللقطات —")
-    fails = capture_all(cands, args.port, args.timeout)
+    fails = capture_all(cands, args.port, args.timeout, data, shift)
     if not args.only:
-        PANEL.write_text(panel_text(data, app_tokens, siblings, floor, report, opacity), encoding="utf-8")
+        PANEL.write_text(panel_text(data, app_tokens, siblings, floor, report, opacity, shift),
+                         encoding="utf-8")
         print(f"\nاللوحة: {PANEL.relative_to(ROOT)}")
     return 1 if fails else 0
 

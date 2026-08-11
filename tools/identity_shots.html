@@ -35,7 +35,9 @@
 <script type="module">
 const q = new URLSearchParams(location.search);
 const CANDIDATE = q.get('candidate') || 'now';    // `now` = لوحُ البذرة كما هو اليوم
-const GROUND = q.get('ground') || 'warm';         // warm = أرضيةُ العائلة · tuned = المعدَّلة
+// warm = أرضيةُ العائلة · tuned = المعدَّلة · shift = **الدافئةُ المزاحة** (مشتقّةٌ في
+// `identity_panel.py §٣ب`، تصل هذه الصفحةَ في جواب `/__palettes.json` لا من ملفٍّ على القرص)
+const GROUND = q.get('ground') || 'warm';
 const SCENE = q.get('scene') || 'map';
 const frame = document.getElementById('app');
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -120,8 +122,10 @@ function hand(doc, win) {
   const palettes = await (await fetch('/__palettes.json')).json();
   const found = palettes.candidates.find((c) => c.id === CANDIDATE);
   if (CANDIDATE !== 'now' && !found) throw new Error(`مرشَّحٌ لا وجود له: ${CANDIDATE}`);
-  const tokens = CANDIDATE === 'now' ? {}
-    : { ...found.tokens, ...(GROUND === 'tuned' ? found.ground : {}) };
+  const grounds = { warm: {}, tuned: found ? found.ground : {} };
+  if (palettes.shift && palettes.shift.for === CANDIDATE) grounds.shift = palettes.shift.ground;
+  if (!grounds[GROUND]) throw new Error(`أرضيةٌ لا وجود لها لهذا المرشَّح: ${GROUND}`);
+  const tokens = CANDIDATE === 'now' ? {} : { ...found.tokens, ...grounds[GROUND] };
 
   await seed(SCENE === 'map' ? 'g1' : 'warm');
   frame.src = SCENE === 'map' ? '/' : `/#/warmup/${encodeURIComponent(BOARD_PART)}`;
