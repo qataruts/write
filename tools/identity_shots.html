@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>لقطاتُ هوية اللون — «اُكْتُبْ» الجلسة هـ١</title>
+<!--
+  **مصيِّرُ مرشّحات اللون على شاشاتٍ حقيقية** (بند الجلسة هـ١: «لقطاتُ شاشاتٍ حقيقية
+  لا مربّعاتِ لونٍ مجردة»). يسوقها `tools/identity_panel.py`.
+
+  والقاعدةُ التي تحكم هذا الملفَّ كلَّه: **التطبيقُ لا يُمَسّ**. الشاشةُ التي تُصوَّر
+  هي التطبيقُ نفسُه في إطارٍ بمقاس الجهاز، والمرشَّحُ يُحقن **متغيّراتٍ في `:root`**
+  بعد إقلاعه — كما كان سيُكتب في `app.css` لو حكم المالك. فما تراه اللقطةُ ما سيراه
+  الطفلُ يومَ يُطبَّق، لا محاكاةً له.
+
+  و**الحبرُ يُكتب بإصبع**: مشهدُ اللوح يُكتب بأحداث مؤشّرٍ حقيقية على `pen.js`
+  (نظيرُ `browser_warmup.html`)، فالمحاولةُ محاولةٌ حكم عليها المحرّكُ، والإرشادُ
+  إرشادُه هو — لا صنفٌ يُلصق بيد ليبدو في الصورة.
+
+  المشاهدُ الثلاثة (نصُّ البند): `map` الخريطة · `board` لوحُ الكتابة بمحاولةٍ
+  وإرشادها · `celebrate` الاحتفال.
+-->
+<style>
+  html, body { margin: 0; padding: 0; background: #fff; height: 100%; overflow: hidden; }
+  iframe { display: block; width: 100vw; height: 100vh; border: 0; }
+  /* صورةُ الحبس: تُعلّق اكتمالَ التحميل حتى يكتمل المشهد (`identity_panel.py §٤`) */
+  #hold { position: fixed; inset-inline-start: 0; top: 0; width: 1px; height: 1px; opacity: 0; }
+  #fail { position: fixed; inset: 0; font: 16px/1.7 system-ui; padding: 2rem;
+          background: #300; color: #fdd; white-space: pre-wrap; display: none; }
+</style>
+</head>
+<body>
+<iframe id="app" title="التطبيق"></iframe>
+<img id="hold" src="/__hold" alt="">
+<pre id="fail"></pre>
+<script type="module">
+const q = new URLSearchParams(location.search);
+const CANDIDATE = q.get('candidate') || 'now';    // `now` = لوحُ البذرة كما هو اليوم
+const GROUND = q.get('ground') || 'warm';         // warm = أرضيةُ العائلة · tuned = المعدَّلة
+const SCENE = q.get('scene') || 'map';
+const frame = document.getElementById('app');
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
+/** المحطةُ التي يُكتب عليها الحبر: منحنياتٌ ودوائر — أغنى ما بُني من شاشات اليوم. */
+const BOARD_PART = 'curves';
+
+function die(err) {
+  const box = document.getElementById('fail');
+  box.textContent = 'تعذّر المشهد: ' + (err && err.stack ? err.stack : err);
+  box.style.display = 'block';
+  fetch('/__ready?fail=1');
+}
+
+/** المرشَّحُ يُحقن متغيّراتٍ في `:root` — لا سطرَ في `app.css` ولا ملفَّ يُعدَّل. */
+function paint(doc, palette) {
+  const lines = Object.entries(palette).map(([k, v]) => `  --${k}: ${v};`).join('\n');
+  const style = doc.createElement('style');
+  style.id = 'identity-candidate';
+  style.textContent = `:root {\n${lines}\n}\n`;
+  doc.head.append(style);
+}
+
+/**
+ * تقدّمُ الطفل يُكتب **بواجهة `progress.js` نفسِها** التي يكتبها إتمامُ المحطة —
+ * لا مخزنٌ يُركَّب بيد. والمشهدُ يقول أين وقف: الخريطةُ لطفلٍ أتمّ التهيئةَ ومجموعتَه
+ * الأولى، واللوحُ لطفلٍ بلغ محطةَ المنحنيات.
+ */
+async function seed(upto) {
+  const progress = await import('/js/progress.js');
+  const { STAGES } = await import('/js/curriculum.js');
+  progress.reset();
+  const wanted = [];
+  for (const stage of STAGES) {
+    wanted.push(...progress.stageNodes(stage).map((n) => n.id));
+    if (stage.id === upto) break;
+  }
+  for (const id of wanted) progress.setStars(id, 3);
+  return wanted.length;
+}
+
+/** إصبعٌ مصنوع على لوح `pen.js` — أحداثُ مؤشّرٍ حقيقية بإحداثيات الشبكة ١٠٠٠×١٠٠٠. */
+function hand(doc, win) {
+  let pid = 100;
+  const surface = () => doc.querySelector('.pen-surface');
+  const toClient = ([x, y]) => {
+    const rect = surface().getBoundingClientRect();
+    const size = Math.min(rect.width, rect.height);
+    return {
+      clientX: rect.left + (rect.width - size) / 2 + (x / 1000) * size,
+      clientY: rect.top + (rect.height - size) / 2 + (y / 1000) * size,
+    };
+  };
+  const fire = (type, point, id) => surface().dispatchEvent(new win.PointerEvent(type, {
+    bubbles: true, cancelable: true, composed: true,
+    pointerId: id, pointerType: 'touch', isPrimary: true, ...toClient(point),
+  }));
+  return {
+    /** ضربةٌ كاملة: نزولٌ فحركةٌ فرفع. */
+    async stroke(points) {
+      const id = ++pid;
+      fire('pointerdown', points[0], id);
+      for (const p of points.slice(1)) fire('pointermove', p, id);
+      await wait(50);
+      fire('pointerup', points[points.length - 1], id);
+      await wait(80);
+    },
+    /** ضربةٌ **لم تُرفَع بعد**: حبرُ الطفل تحت إصبعه ومؤشّرُ التقدّم يمشي معه. */
+    async holding(points) {
+      const id = ++pid;
+      fire('pointerdown', points[0], id);
+      for (const p of points.slice(1)) {
+        fire('pointermove', p, id);
+        await wait(16);      // إطارٌ لكل نقطة: الرسمُ في `requestAnimationFrame`
+      }
+      await wait(120);
+    },
+  };
+}
+
+(async () => {
+  const palettes = await (await fetch('/__palettes.json')).json();
+  const found = palettes.candidates.find((c) => c.id === CANDIDATE);
+  if (CANDIDATE !== 'now' && !found) throw new Error(`مرشَّحٌ لا وجود له: ${CANDIDATE}`);
+  const tokens = CANDIDATE === 'now' ? {}
+    : { ...found.tokens, ...(GROUND === 'tuned' ? found.ground : {}) };
+
+  await seed(SCENE === 'map' ? 'g1' : 'warm');
+  frame.src = SCENE === 'map' ? '/' : `/#/warmup/${encodeURIComponent(BOARD_PART)}`;
+  await new Promise((r) => frame.addEventListener('load', r, { once: true }));
+  const doc = frame.contentDocument;
+  const win = frame.contentWindow;
+  paint(doc, tokens);
+  await wait(500);
+
+  if (SCENE === 'map') {
+    if (!doc.querySelector('.station')) throw new Error('لا خريطةَ على الشاشة');
+    // **رأسُ الخريطة لا موضعُ الجبهة**: الخريطةُ تنزل من نفسها إلى المحطة التالية،
+    // ولقطةُ الهوية تريد ما يراه الطفلُ أوّلَ ما يفتح — العلامةُ وعدّادُ النجوم
+    // وبطاقةُ «تابع من هنا» ومحطّاتُه الأولى بألوانها.
+    // **ويُنتظَر حتى يستقرّ**: الخريطةُ تنزل إلى المحطة التالية بانزلاقٍ ناعم
+    // (`revealNext` بـ`behavior: 'smooth'`)، فمن صوّرها في وسط انزلاقها خرجت لقطتُه
+    // بموضعٍ يختلف من تشغيلٍ إلى تشغيل — وقد خرج ذلك فعلاً في لقطتين. فيُعاد الصعودُ
+    // بعد استقرارها، **ويُشترَط أن تكون على رأسها** فلا تمرّ لقطةٌ زائغة.
+    win.scrollTo(0, 0);
+    await wait(500);
+    win.scrollTo(0, 0);
+    await wait(200);
+    if (win.scrollY !== 0) throw new Error('الخريطةُ لم تستقرّ على رأسها');
+  } else {
+    const { WARMUPS } = await import('/js/warmups.js');
+    const shapes = WARMUPS[BOARD_PART].shapes;
+    const finger = hand(doc, win);
+    if (!doc.querySelector('.pen-surface')) throw new Error('لا لوحَ على الشاشة');
+
+    if (SCENE === 'board') {
+      // **محاولةٌ ثم إرشادُها**: أوّلاً ضربةٌ معكوسة — يحكم المحرّكُ بردّها فيومض
+      // إرشادُه (نقطةُ البداية والسهم)، ثم يعاود الطفلُ من موضعه الصحيح **وإصبعُه
+      // ما زال على اللوح**: فتجتمع في صورةٍ واحدة أربعةٌ يراها الطفل — النموذجُ
+      // الخافت، وحبرُه هو، ومؤشّرُ تقدّمه الحركيّ، والإرشادُ الذي دلّه.
+      const stroke = shapes[0].ref.strokes[0].points;
+      await finger.stroke([...stroke].reverse());
+      const upto = stroke.slice(0, Math.max(2, Math.round(stroke.length * 0.55)));
+      await finger.holding(upto);
+      if (!doc.querySelector('.pen-box--hint')) throw new Error('لم يظهر الإرشاد');
+      if (!doc.querySelector('.pen-ink path')) throw new Error('لا حبرَ على اللوح');
+    } else if (SCENE === 'celebrate') {
+      // **الاحتفالُ يُبلَغ بالكتابة لا بالقفز إليه**: تُكتب أشكالُ المحطة الثلاثة
+      // على مساراتها المرجعية، فيكون النجومُ نجومَ محاولةٍ حكم عليها المحرّك.
+      for (const shape of shapes) {
+        for (const part of shape.ref.strokes) await finger.stroke(part.points);
+        await wait(560);      // لحظةُ «يرى حبرَه مكتملاً» ثم بناءُ الشكل التالي
+      }
+      await wait(400);
+      if (!doc.querySelector('.celebrate')) throw new Error('لم يبلغ المشهدُ الاحتفال');
+    }
+  }
+
+  await wait(350);
+  await fetch('/__ready');
+})().catch(die);
+</script>
+</body>
+</html>
