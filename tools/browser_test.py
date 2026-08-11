@@ -41,11 +41,13 @@ TOOLS = Path(__file__).resolve().parent
 PAGES = {
     "/__test.html": TOOLS / "browser_test.html",
     "/__pen.html": TOOLS / "browser_pen.html",
+    "/__paths.html": TOOLS / "browser_paths.html",
 }
 # سَوقةُ الصفحات: `--suite <اسم>` يختار أيَّها يُشغَّل، والافتراضُ فحصُ القشرة.
 SUITES = {
     "shell": "/__test.html",       # الجلسة ٠: التطبيق يفتح بلا خطأ جافاسكربت واحد
     "pen": "/__pen.html",          # الجلسة ١: خصوصيةُ القلم — صفرُ طلباتٍ في دورة كتابة
+    "paths": "/__paths.html",      # الجلسة ٢: كلُّ حرفٍ يُعرض من مساره ويُحكم عليه
 }
 # نافذة Chrome بلا واجهة تحجز ٨٧ بكسلاً لإطارٍ وهميّ فوق المنظور — فلولا تعويضها لقِسنا
 # جهازاً أقصر من الجهاز. والصفحة تعيد منظورها الحقيقي، والعدّاء يرفض أي انحرافٍ عن المطلوب.
@@ -219,7 +221,7 @@ def main():
             out = Path(args.shots).resolve()
             out.unlink(missing_ok=True)   # وإلا لعُدَّت لقطةُ تشغيلٍ سابق نجاحاً فوريّاً
             # اللقطةُ تتبع السَّوقة: لقطةُ القلم لوحُه لا خريطتُه
-            where = "/?dev=1#/pen" if args.suite == "pen" else "/?dev=1"
+            where = "/?dev=1#/pen" if args.suite in ("pen", "paths") else "/?dev=1"
             proc = run_chrome(f"{base}{where}", profile,
                               [f"--screenshot={out}", "--window-size=980,1400", "--hide-scrollbars"],
                               args.show)

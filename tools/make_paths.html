@@ -1,0 +1,1276 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>عدّةُ تأليف المسارات المرجعية — «اُكْتُبْ»</title>
+<!--
+  **عدّةُ تأليف المسارات** (`METHOD.md §٣.٨`، بند الجلسة ٢/١):
+  «رسمٌ على شبكة فوق خيال حرفٍ مرجعيّ بالنسخ المدرسي، تصدير JSON — **لا إحداثياتٍ
+  تُكتب بيد**.» وتُشغَّل بسائقها: `python3 tools/make_paths.py --open`.
+
+  **والعهدُ يُستوفى بأشدَّ مما يقتضي حرفُه**: ليس في هذه العدّة إحداثيٌّ يُكتب،
+  ولا إحداثيٌّ **يُنقَر** كذلك. فالمؤلِّفُ لا يرسم الشكل — **الشكلُ يُقرأ من خيال
+  الحرف نفسِه**:
+
+    ١) يُرسَم الخيالُ من خطّ النسخ المرجعيّ (`NotoNaskhArabic`، ق٢) على الشبكة
+       المعيارية ١٠٠٠×١٠٠٠، بخطّ أساسٍ ومقياسٍ **واحدٍ لكل الحروف** (فلا تُقاس
+       ألفٌ بمقياسٍ وميمٌ بآخر، ويصحّ الوصلُ يومَ يأتي).
+    ٢) يُقشَّر الخيالُ إلى **هيكله** (تنحيفُ Zhang-Suen): خطٌّ بعرض بكسلٍ واحد يمرّ
+       في قلب الحرف — وهو **مسارُ القلم** الذي رسم الشكل.
+    ٣) يُقرأ الهيكلُ **بيانياً**: أطرافٌ ومفارقُ وقممٌ — وهي **عُقَدُ الحرف**، لكلٍّ
+       رقمٌ وموضعٌ يقرؤهما المؤلِّف.
+    ٤) و**عملُ المؤلِّف هو المادّةُ المدرَّسة وحدَها**: من أيّ عقدةٍ يبدأ، وفي أيّ
+       اتجاهٍ يمضي، وبأيّ ترتيبٍ تتوالى الأجزاء (`METHOD.md §١`: «الاتجاهُ هو
+       المادةُ المدرَّسة، والشكلُ ثمرتُه»). فإيماءتُه **أرقامُ عُقَدٍ لا إحداثيات**،
+       وتُحفَظ في `tools/path_anchors.json` فتُعاد كما هي.
+    ٥) والنقاطُ (نقطةُ الباء وأخواتها) **تُقرأ من الخيال آلياً**: أجرامٌ منفصلةٌ
+       صغيرة، موضعُها مركزُها وعددُها عددُها — ولا يُنقَر لها شيء.
+
+  فما في `app/js/paths.js` من رقمٍ **مقروءٌ من خيال الحرف** لا مكتوبٌ ولا مقدَّر.
+
+  🔒 وهذه عدّةُ تأليفٍ لا شاشةَ طفل: لا يمرّ بها مسارُ طفلٍ قطّ (حارسُ الخصوصية
+  يحرس `app/js/` وحملةَ مسار الطفل — `tools/test_pen.mjs §١`).
+
+  **والنموذجُ هو المقياس هنا كذلك** (`METHOD.md §٣.٢`): معاينةُ العدّة تُبنى بـ
+  `penSurface` من `app/js/pen.js` نفسِه — فما يراه المؤلِّفُ متحركاً هو ما يحكم به
+  المحرّك على الطفل، ولا شكلَ ثانٍ في هذا المشروع أصلاً.
+
+  الأوضاع: (بلا راية) عدّةٌ لليد · `?nodes=1` جردُ العُقَد · `?build=1` بناءُ
+  المسارات كلِّها · `?sheet=1` لوحةُ مراجعةٍ بالعين. والثلاثةُ الأخيرة تُرسل
+  حصيلتَها إلى سائقها بـ`POST /result` (بروتوكول `browser_test.py`).
+-->
+<style>
+  :root { color-scheme: dark; --line: #2c3340; --ink: #e8ecf2; }
+  body {
+    margin: 0; background: #12161d; color: var(--ink);
+    font: 15px/1.6 -apple-system, system-ui, sans-serif;
+    display: flex; gap: 1rem; align-items: flex-start;
+  }
+  aside { width: 21rem; padding: 1rem; }
+  h1 { font-size: 1.1rem; margin: 0 0 .6rem; }
+  .row { display: flex; flex-wrap: wrap; gap: .35rem; margin-block: .5rem; }
+  button, input, select {
+    font: inherit; background: #1c2330; color: var(--ink);
+    border: 1px solid var(--line); border-radius: .5rem; padding: .35rem .7rem;
+  }
+  button:hover { background: #27314257; }
+  button.on { background: #3a5a86; border-color: #6f9ad0; }
+  #gesture { white-space: pre-wrap; font-family: ui-monospace, monospace; font-size: 13px;
+    background: #0d1117; border: 1px solid var(--line); border-radius: .5rem; padding: .6rem;
+    min-height: 5rem; }
+  .note { color: #9aa7b8; font-size: 13px; }
+  #stage { position: relative; width: 720px; height: 720px; flex: none; }
+  #stage canvas, #stage svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #stage { background: #f7f4ee; border-radius: .8rem; }
+  .grid-line { stroke: #c9c2b4; stroke-width: 1; }
+  .grid-line.base { stroke: #b08a5a; stroke-width: 3; }
+  .skel { stroke: #7fb3e6; stroke-width: 3; fill: none; opacity: .55; }
+  .node { fill: #1d4f86; opacity: .85; }
+  .node.pick { fill: #c85a2a; }
+  .node-tag { fill: #fff; font: 700 15px/1 ui-monospace, monospace; text-anchor: middle;
+    dominant-baseline: central; pointer-events: none; }
+  .made { stroke: #b8342b; stroke-width: 10; fill: none; stroke-linecap: round;
+    stroke-linejoin: round; }
+  .made-start { fill: #1f7a3d; }
+  .made-dot { fill: #b8342b; opacity: .8; }
+  #sheet { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 6px;
+    background: #12161d; }
+  #sheet figure { margin: 0; background: #f7f4ee; border-radius: .5rem; position: relative; }
+  #sheet figcaption { position: absolute; inset-block-start: 4px; inset-inline-start: 8px;
+    color: #6b6357; font-size: 13px; }
+  #sheet svg, #sheet canvas { display: block; width: 100%; aspect-ratio: 1; }
+  #sheet .cell { position: relative; }
+  #sheet .cell svg { position: absolute; inset: 0; }
+  /* معاينةُ اللوح تُبنى بـ`penSurface` من `pen.js` نفسِه — ولوحُ التطبيق (`app.css`)
+     لا يُحمَّل هنا لئلّا يُلبِس العدّةَ ثوبَ الشاشة، فتُكسى بأدنى ما تُقرأ به. */
+  #preview { margin-block-start: .6rem; background: #f7f4ee; border-radius: .8rem; padding: .3rem; }
+  #preview svg { display: block; width: 100%; aspect-ratio: 1; }
+  #preview .pen-stroke { fill: none; stroke: #c9c2b4; stroke-width: 24;
+    stroke-linecap: round; stroke-linejoin: round; }
+  #preview .pen-stroke--trail { stroke: #b8342b; }
+  #preview .pen-dot { fill: #8a8272; }
+  #preview .pen-start { fill: none; stroke: #1f7a3d; stroke-width: 9; }
+  #preview .pen-arrow { fill: #b08a5a; }
+  #preview .pen-head { display: none; fill: #b8342b; }
+  #preview .pen-box--playing .pen-head { display: inline; }
+  #log { padding: 1rem; white-space: pre-wrap; font-size: 13px; }
+  .bad { color: #e08a80; } .ok { color: #7ec97e; }
+</style>
+</head>
+<body>
+<script type="module">
+import { GRID, TOLERANCE, penSurface, judge, prepare } from '/js/pen.js';
+
+// ————— ثوابتُ الخيال والقشرة —————
+
+const FAMILY = 'naskh-ref';
+const ZWJ = '‍';
+/** أشكالُ الموقع تُطلَب من مُشكِّل المتصفّح نفسِه بالواصل الصفريّ — لا جدولَ أشكالٍ يُكتب. */
+const SHAPE = {
+  isolated: (ch) => ch,
+  initial: (ch) => ch + ZWJ,
+  medial: (ch) => ZWJ + ch + ZWJ,
+  final: (ch) => ZWJ + ch,
+};
+const FORMS = Object.keys(SHAPE);
+const FORM_AR = { isolated: 'معزول', initial: 'ابتدائي', medial: 'وسطي', final: 'نهائي' };
+
+/** دقّةُ قناع الخيال: بكسلٌ لكل وحدتَي شبكة — يكفي لتنحيفٍ نظيف ويبقى سريعاً. */
+const MASK = 500;
+const PX = GRID / MASK;
+/** هامشُ الكراسة: لا يلمس الحرفُ حافّةَ الصندوق (وفيه يتنفّس امتدادُ الأطراف). */
+const MARGIN = 90;
+
+/**
+ * **أقصى طولٍ للقطعة الواحدة** — زيادةُ مراجعة الجلسة ١، ويفرضها `check_paths.py`:
+ * نافذةُ الرتابة في `pen.js` **تُرشِّح قطعاً كاملة** (`nearestOn` يقبل القطعةَ إن
+ * تداخل مداها مع النافذة)، فقطعةٌ أطولُ من النافذة تُوسّعها من حيث لا يُحتسَب —
+ * وأخطرُ ذلك عند النزول: `headSpan` يحرس رأسَ المسار، فقطعةٌ تتجاوزه تُعيد ثغرةَ
+ * ذيل الشكل المغلق من بابها. فالخطوةُ هنا **منسوبةٌ إلى سماحة المحرّك نفسِها**
+ * (`TOLERANCE.back`) وإلى عُشر طول القطعة، بهامشِ ثلثٍ تحت الحدّ لا عنده.
+ */
+const HEAD_RATIO = 0.1;
+const stepFor = (len) => Math.max(6, Math.min(TOLERANCE.back, len * HEAD_RATIO) * 0.66);
+
+const qs = new URLSearchParams(location.search);
+const results = [];
+const say = (ok, msg, extra = {}) => results.push({ ok: !!ok, msg, ...extra });
+const send = () => fetch('/result', { method: 'POST', body: JSON.stringify(results) });
+
+// ————— ١) الخيال: خطُّ النسخ المرجعيّ على الشبكة —————
+
+async function loadFont() {
+  // العدّةُ تُخدَم من جذر التطبيق (سائقُها `make_paths.py`)، وتُفتح كذلك من جذر
+  // المستودع بخادمٍ بسيط — فيُجرَّب البابان ولا يُفترض واحد.
+  const tries = ['/fonts/NotoNaskhArabic-arabic.woff2', '/app/fonts/NotoNaskhArabic-arabic.woff2',
+    '../app/fonts/NotoNaskhArabic-arabic.woff2'];
+  for (const url of tries) {
+    try {
+      const face = new FontFace(FAMILY, `url(${url})`);
+      await face.load();
+      document.fonts.add(face);
+      return url;
+    } catch { /* البابُ التالي */ }
+  }
+  throw new Error('لم يُعثر على خطّ النسخ المرجعيّ (NotoNaskhArabic)');
+}
+
+const sheet = document.createElement('canvas');
+sheet.width = sheet.height = GRID;
+const sctx = sheet.getContext('2d', { willReadFrequently: true });
+
+/**
+ * **اتجاهُ الفقرة رأسُ الأمر في التشكيل**: طلبُ الشكل الابتدائيّ بالواصل الصفريّ
+ * (`ب` ثم ZWJ) **لا يعمل في سياقٍ يساريّ** — يخرج الحرفُ معزولاً كأنّ الواصلَ لم
+ * يكن، ويخرج الوسطيُّ نهائياً. أمسكه قياسٌ مباشر (بصماتُ ستّ صيغ في السياقين):
+ * في `ltr` كانت `ب+ZWJ` عينَ المعزول بصمةً، وفي `rtl` صارت الشكلَ الصغير الموصول
+ * كما ينبغي. فالسياقُ **يمينيّ دائماً** هنا، وهو سياقُ العربية أصلاً.
+ */
+function shaper(size) {
+  sctx.direction = 'rtl';
+  sctx.textAlign = 'left';
+  sctx.textBaseline = 'alphabetic';
+  sctx.fillStyle = '#000';
+  sctx.font = `${size}px "${FAMILY}"`;
+}
+
+/**
+ * **كلُّ شكلٍ يملأ صندوقَه** — لا مقياسٌ واحدٌ يجمع الحروف.
+ *
+ * وهي عينُ نصّ `METHOD.md §٣.١`: «لكل شكلٍ مساراتٌ على شبكة معيارية ١٠٠٠×١٠٠٠» —
+ * شبكةُ الشكل لا شبكةُ الكلمة. **والعلّةُ في المحرّك نفسِه**: سماحاتُه أطوالٌ مطلقة
+ * على الشبكة (`start: 120` · `lateral: 90`)، فلو رُسمت الباءُ الوسطية بنسبتها في
+ * الكلمة لخرجت سنّتُها نحوَ سبعين وحدة — **أدقَّ من سماحة الانحراف نفسِها**، فيمرّ
+ * خطٌّ مستقيمٌ على موضع السنّة ويُقبَل. فما لا يبلغ سماحةَ المحرّك لا يُقاس، ولا
+ * يُدرَّس ما لا يُقاس.
+ *
+ * وهو صنيعُ الكرّاسة نفسِه: صندوقُ التدريب يُملأ بالحرف كبيراً، والنسبةُ بين الحروف
+ * شأنُ **الكلمة** — ويومَ تُوصَل الحروفُ (الجلسة ٨) يُؤلَّف خيالُ الكلمة كلِّها على
+ * شبكتها بهذه العدّة نفسِها، فتخرج النسبُ من التشكيل لا من جمعِ حروفٍ مفردة.
+ */
+function fit(ch, form) {
+  const probe = 100;
+  shaper(probe);
+  const m = sctx.measureText(SHAPE[form](ch));
+  const width = m.actualBoundingBoxLeft + m.actualBoundingBoxRight;
+  const height = m.actualBoundingBoxAscent + m.actualBoundingBoxDescent;
+  const span = GRID - 2 * MARGIN;
+  const scale = span / Math.max(width, height);
+  return {
+    size: probe * scale,
+    // موضعُ القلم: يُوسَّط الحبرُ في الصندوق أفقياً ورأسياً
+    x: (GRID - width * scale) / 2 + m.actualBoundingBoxLeft * scale,
+    baseline: (GRID - height * scale) / 2 + m.actualBoundingBoxAscent * scale,
+    ink: [Math.round(width * scale), Math.round(height * scale)],
+  };
+}
+
+/** يرسم خيالَ الشكل على القشرة ويعيد قناعَه (١ داخلَ الحبر، ٠ خارجَه). */
+function ghost(ch, form) {
+  const cal = fit(ch, form);
+  sctx.clearRect(0, 0, GRID, GRID);
+  shaper(cal.size);
+  sctx.fillText(SHAPE[form](ch), cal.x, cal.baseline);
+
+  const data = sctx.getImageData(0, 0, GRID, GRID).data;
+  const mask = new Uint8Array(MASK * MASK);
+  for (let y = 0; y < MASK; y++) {
+    for (let x2 = 0; x2 < MASK; x2++) {
+      let on = 0;
+      for (let dy = 0; dy < PX; dy++) {
+        for (let dx = 0; dx < PX; dx++) {
+          if (data[(((y * PX + dy) * GRID) + (x2 * PX + dx)) * 4 + 3] > 128) on++;
+        }
+      }
+      mask[y * MASK + x2] = on * 2 >= PX * PX ? 1 : 0;
+    }
+  }
+  return { mask, cal, image: sctx.getImageData(0, 0, GRID, GRID) };
+}
+
+/** بصمةُ خيالٍ — بها يُثبَت أنّ شكلين متطابقان (ألفٌ ابتدائيةٌ = معزولة) بلا دعوى. */
+function fingerprint(mask) {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < mask.length; i++) {
+    h ^= mask[i] ? (i & 0xff) + 1 : 0;
+    h = Math.imul(h, 0x01000193) >>> 0;
+  }
+  return h.toString(16).padStart(8, '0');
+}
+
+// ————— ٢) الأجرام: جسمٌ ونقاط —————
+
+/** أجرامُ القناع الموصولة (جوارُ الثمانية) — الأكبرُ جسمُ الحرف وما دونه نقاطُه. */
+function bodies(mask) {
+  const seen = new Int32Array(MASK * MASK).fill(-1);
+  const list = [];
+  for (let i = 0; i < mask.length; i++) {
+    if (!mask[i] || seen[i] >= 0) continue;
+    const id = list.length;
+    const cells = [];
+    const queue = [i];
+    seen[i] = id;
+    while (queue.length) {
+      const at = queue.pop();
+      cells.push(at);
+      const x = at % MASK;
+      const y = (at - x) / MASK;
+      for (let dy = -1; dy <= 1; dy++) {
+        for (let dx = -1; dx <= 1; dx++) {
+          const nx = x + dx;
+          const ny = y + dy;
+          if (nx < 0 || ny < 0 || nx >= MASK || ny >= MASK) continue;
+          const j = ny * MASK + nx;
+          if (mask[j] && seen[j] < 0) { seen[j] = id; queue.push(j); }
+        }
+      }
+    }
+    let sx = 0;
+    let sy = 0;
+    for (const c of cells) { sx += c % MASK; sy += (c - (c % MASK)) / MASK; }
+    list.push({ cells, area: cells.length, at: [sx / cells.length, sy / cells.length] });
+  }
+  list.sort((a, b) => b.area - a.area);
+  return list;
+}
+
+const maskOf = (cells) => {
+  const m = new Uint8Array(MASK * MASK);
+  for (const c of cells) m[c] = 1;
+  return m;
+};
+
+// ————— ٣) الهيكل: تنحيفُ الخيال إلى مسار قلمٍ بعرض بكسل —————
+
+const NB = [[0, -1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1]];
+
+// جيرانُ البكسل يُقرَؤون في مصفوفةٍ واحدةٍ يُعاد استعمالها: التنحيفُ يمرّ على مئات
+// الألوف من البكسلات مرّاتٍ، وتخصيصُ مصفوفةٍ لكل بكسلٍ يُثقل الجرد بلا فائدة.
+const NEAR = new Uint8Array(8);
+function around(img, x, y) {
+  for (let k = 0; k < 8; k++) {
+    const nx = x + NB[k][0];
+    const ny = y + NB[k][1];
+    NEAR[k] = (nx < 0 || ny < 0 || nx >= MASK || ny >= MASK) ? 0 : img[ny * MASK + nx];
+  }
+  return NEAR;
+}
+
+/** حدودُ الحبر في القناع — فلا يُمشَّط الفراغُ حول الحرف في كل مرور. */
+function bounds(mask) {
+  let x0 = MASK;
+  let y0 = MASK;
+  let x1 = 0;
+  let y1 = 0;
+  for (let i = 0; i < mask.length; i++) {
+    if (!mask[i]) continue;
+    const x = i % MASK;
+    const y = (i - x) / MASK;
+    if (x < x0) x0 = x;
+    if (x > x1) x1 = x;
+    if (y < y0) y0 = y;
+    if (y > y1) y1 = y;
+  }
+  return {
+    x0: Math.max(1, x0 - 1), y0: Math.max(1, y0 - 1),
+    x1: Math.min(MASK - 2, x1 + 1), y1: Math.min(MASK - 2, y1 + 1),
+  };
+}
+
+const crossings = (p) => {
+  let a = 0;
+  for (let i = 0; i < 8; i++) if (!p[i] && p[(i + 1) % 8]) a++;
+  return a;
+};
+
+/**
+ * تنحيفُ Zhang-Suen: يُقشَّر الحبرُ من طرفيه بالتساوي حتى يبقى خطٌّ واحد **في قلب
+ * الحرف** لا ينقطع ولا يزيح — وهو أثرُ سنّ القلم الذي رسمه. (والقاعدةُ الحارسة في
+ * كل حذف: ألّا يتغيّر عددُ العبورات، فلا تنفصل موصولة.)
+ */
+function thin(src) {
+  const img = Uint8Array.from(src);
+  const box = bounds(src);
+  for (let pass = 0; pass < 200; pass++) {
+    let removed = 0;
+    for (const step of [0, 1]) {
+      const drop = [];
+      for (let y = box.y0; y <= box.y1; y++) {
+        for (let x = box.x0; x <= box.x1; x++) {
+          if (!img[y * MASK + x]) continue;
+          const p = around(img, x, y);
+          const on = p.reduce((a, b) => a + b, 0);
+          if (on < 2 || on > 6 || crossings(p) !== 1) continue;
+          const [p2, p3, p4, p5, p6, p7, p8, p9] = p;   // شمالاً ثم مع عقارب الساعة
+          if (step === 0) { if (p2 * p4 * p6 || p4 * p6 * p8) continue; } else if (p2 * p4 * p8 || p2 * p6 * p8) continue;
+          drop.push(y * MASK + x);
+          void p3; void p5; void p7; void p9;
+        }
+      }
+      for (const i of drop) img[i] = 0;
+      removed += drop.length;
+    }
+    if (!removed) break;
+  }
+  // **تنظيفُ السلالم**: التنحيفُ يخلّف بكسلاتٍ فائضةً في المنعطفات تصنع مفارقَ
+  // كاذبة. فيُحذف كلُّ بكسلٍ يبقى جيرانُه موصولين بعده — الشكلُ واحدٌ والعُقَدُ تصدق.
+  for (let pass = 0; pass < 4; pass++) {
+    let removed = 0;
+    for (let y = box.y0; y <= box.y1; y++) {
+      for (let x = box.x0; x <= box.x1; x++) {
+        if (!img[y * MASK + x]) continue;
+        const p = around(img, x, y);
+        if (p.reduce((a, b) => a + b, 0) < 3 || crossings(p) !== 1) continue;
+        img[y * MASK + x] = 0;
+        removed++;
+      }
+    }
+    if (!removed) break;
+  }
+  return img;
+}
+
+/** مسافةُ كل بكسلٍ عن حافّة الحبر (مربّعاتٌ متعاقبة) — بها يُعرَف نصفُ عرض القلم. */
+function distance(mask) {
+  const INF = 1e6;
+  const d = new Float32Array(MASK * MASK).fill(INF);
+  for (let i = 0; i < mask.length; i++) if (!mask[i]) d[i] = 0;
+  const relax = (i, j, w) => { if (d[j] + w < d[i]) d[i] = d[j] + w; };
+  for (let y = 0; y < MASK; y++) {
+    for (let x = 0; x < MASK; x++) {
+      const i = y * MASK + x;
+      if (!d[i]) continue;
+      if (x > 0) relax(i, i - 1, 1);
+      if (y > 0) relax(i, i - MASK, 1);
+      if (x > 0 && y > 0) relax(i, i - MASK - 1, 1.4142);
+      if (x < MASK - 1 && y > 0) relax(i, i - MASK + 1, 1.4142);
+    }
+  }
+  for (let y = MASK - 1; y >= 0; y--) {
+    for (let x = MASK - 1; x >= 0; x--) {
+      const i = y * MASK + x;
+      if (!d[i]) continue;
+      if (x < MASK - 1) relax(i, i + 1, 1);
+      if (y < MASK - 1) relax(i, i + MASK, 1);
+      if (x < MASK - 1 && y < MASK - 1) relax(i, i + MASK + 1, 1.4142);
+      if (x > 0 && y < MASK - 1) relax(i, i + MASK - 1, 1.4142);
+    }
+  }
+  return d;
+}
+
+// ————— ٤) العُقَد: قراءةُ الهيكل بياناً —————
+
+const degreeOf = (img, i) => around(img, i % MASK, (i - (i % MASK)) / MASK)
+  .reduce((a, b) => a + b, 0);
+
+const px2grid = (i) => [((i % MASK) + 0.5) * PX, (((i - (i % MASK)) / MASK) + 0.5) * PX];
+
+/**
+ * **حدودُ الجراحة على الرسم البيانيّ** — بالبكسل، ومنسوبةٌ إلى مقاس القناع لا
+ * أرقاماً حرّة (فالدقّةُ إن تبدّلت تبدّلت معها):
+ *   · `MERGE` — عناقيدُ التنحيف: يخلّف التنحيفُ في المنعطفات مربّعاتِ ٢×٢ يصير كلُّ
+ *     بكسلٍ فيها «مفرقاً»، فيُقرأ الحرفُ عشراتِ العُقَد الكاذبة. فما بين عقدتين
+ *     أقصرُ من هذا **عقدةٌ واحدة** لا عقدتان.
+ *   · `SPUR` — شوكةٌ قصيرة تنتهي بطرفٍ: زائدةُ تنحيفٍ عند عرض السنّ لا جزءٌ من الحرف.
+ *   · `SPLIT`/`BEND` — حافّةٌ طويلةٌ منحنية تُشقّ عند **قمّتها** (أبعدِ نقطةٍ عن وترها)
+ *     فتصير للمؤلِّف عقدةُ مرورٍ في القوس يوجّه بها القلمَ — والحلقةُ تُشقّ مرّتين
+ *     فيصير لها بابان، وبهما يُملى **اتجاهُ الدوران** وهو عينُ المادّة المدرَّسة.
+ */
+const MERGE = 4;
+const SPUR = Math.round(0.05 * MASK);
+const SPLIT = Math.round(0.12 * MASK);
+const BEND = Math.round(0.02 * MASK);
+
+const pxAt = (i) => [i % MASK, (i - (i % MASK)) / MASK];
+const chainPx = (chain) => {
+  let len = 0;
+  for (let i = 1; i < chain.length; i++) {
+    const a = pxAt(chain[i - 1]);
+    const b = pxAt(chain[i]);
+    len += Math.hypot(a[0] - b[0], a[1] - b[1]);
+  }
+  return len;
+};
+
+/** الرسمُ الخام: عُقَدُه بكسلاتٌ بجارٍ واحد أو بثلاثةٍ فأكثر، وحوافُّه ما بينها. */
+function rawGraph(img) {
+  const nodeAt = new Map();
+  const nodes = [];
+  for (let i = 0; i < img.length; i++) {
+    if (!img[i]) continue;
+    const deg = degreeOf(img, i);
+    if (deg !== 2) { nodeAt.set(i, nodes.length); nodes.push({ px: i }); }
+  }
+  const edges = [];
+  const walked = new Set();
+  const seen = new Uint8Array(img.length);
+
+  const next = (prev, cur) => {
+    const [x, y] = pxAt(cur);
+    for (const [dx, dy] of NB) {
+      const nx = x + dx;
+      const ny = y + dy;
+      if (nx < 0 || ny < 0 || nx >= MASK || ny >= MASK) continue;
+      const j = ny * MASK + nx;
+      if (j !== prev && img[j]) return j;
+    }
+    return -1;
+  };
+
+  for (const [px, id] of nodeAt) {
+    const [x, y] = pxAt(px);
+    for (const [dx, dy] of NB) {
+      const nx = x + dx;
+      const ny = y + dy;
+      if (nx < 0 || ny < 0 || nx >= MASK || ny >= MASK) continue;
+      const first = ny * MASK + nx;
+      if (!img[first] || walked.has(`${px}>${first}`)) continue;
+      const chain = [px, first];
+      seen[px] = 1;
+      seen[first] = 1;
+      walked.add(`${px}>${first}`);
+      let prev = px;
+      let cur = first;
+      while (!nodeAt.has(cur)) {
+        const step = next(prev, cur);
+        if (step < 0) break;
+        seen[step] = 1;
+        chain.push(step);
+        prev = cur;
+        cur = step;
+      }
+      if (!nodeAt.has(cur)) continue;
+      walked.add(`${cur}>${chain[chain.length - 2]}`);
+      edges.push({ a: id, b: nodeAt.get(cur), chain });
+    }
+  }
+
+  // حلقةٌ تامّة بلا طرفٍ ولا مفرق (شكلٌ مغلق): تُفتح عند أعلى بكسلٍ فيها فيصير لها باب
+  for (let i = 0; i < img.length; i++) {
+    if (!img[i] || seen[i]) continue;
+    const start = i;
+    const ring = [start];
+    seen[start] = 1;
+    let prev = -1;
+    let cur = next(-1, start);
+    while (cur >= 0 && cur !== start) {
+      ring.push(cur);
+      seen[cur] = 1;
+      const step = next(prev, cur);
+      prev = cur;
+      cur = step >= 0 && !seen[step] ? step : (step === start ? start : -1);
+    }
+    ring.push(start);
+    const id = nodes.length;
+    nodes.push({ px: start });
+    edges.push({ a: id, b: id, chain: ring });
+  }
+  return { nodes, edges };
+}
+
+/** يعيد بناء الرسم بعد جراحةٍ: يُسقِط العُقَدَ التي لا حافّةَ لها ويعيد الترقيم. */
+function compact(graph) {
+  const used = new Set();
+  for (const e of graph.edges) { used.add(e.a); used.add(e.b); }
+  const keep = [...used].sort((a, b) => a - b);
+  const map = new Map(keep.map((old, i) => [old, i]));
+  return {
+    nodes: keep.map((old) => graph.nodes[old]),
+    edges: graph.edges.map((e) => ({ a: map.get(e.a), b: map.get(e.b), chain: e.chain })),
+  };
+}
+
+/** عناقيدُ التنحيف عقدةٌ واحدة: كلُّ حافّةٍ أقصرَ من `MERGE` تُطوى ويُضَمّ طرفاها. */
+function mergeClusters(graph) {
+  const parent = graph.nodes.map((_, i) => i);
+  const find = (i) => (parent[i] === i ? i : (parent[i] = find(parent[i])));
+  for (const edge of graph.edges) {
+    if (edge.a === edge.b || chainPx(edge.chain) > MERGE) continue;
+    parent[find(edge.a)] = find(edge.b);
+  }
+  const edges = graph.edges
+    .map((e) => ({ a: find(e.a), b: find(e.b), chain: e.chain }))
+    .filter((e) => !(e.a === e.b && chainPx(e.chain) <= MERGE));
+  return compact({ nodes: graph.nodes, edges });
+}
+
+const degOf = (graph, id) => graph.edges
+  .reduce((n, e) => n + (e.a === id ? 1 : 0) + (e.b === id ? 1 : 0), 0);
+
+/** شذبُ الأشواك: حافّةٌ تنتهي بطرفٍ حرٍّ وطولُها دون `SPUR` زائدةُ تنحيفٍ فتُقصّ. */
+function pruneSpurs(graph) {
+  let work = graph;
+  for (let round = 0; round < 8; round++) {
+    const deg = work.nodes.map((_, i) => degOf(work, i));
+    const cut = work.edges.findIndex((e) => e.a !== e.b
+      && (deg[e.a] === 1 || deg[e.b] === 1) && chainPx(e.chain) < SPUR
+      && work.edges.length > 1);
+    if (cut < 0) break;
+    work = compact({ nodes: work.nodes, edges: work.edges.filter((_, i) => i !== cut) });
+  }
+  return work;
+}
+
+/** عقدةٌ بحافّتين ليست عقدة: تُذاب وتُوصَل حافّتاها سلسلةً واحدة. */
+function dissolve(graph) {
+  let work = graph;
+  for (let round = 0; round < 400; round++) {
+    const deg = work.nodes.map((_, i) => degOf(work, i));
+    const id = deg.findIndex((d, i) => d === 2
+      && work.edges.filter((e) => e.a === i || e.b === i).length === 2);
+    if (id < 0) break;
+    const [one, two] = work.edges.filter((e) => e.a === id || e.b === id);
+    const rest = work.edges.filter((e) => e !== one && e !== two);
+    const head = one.a === id ? { end: one.b, chain: [...one.chain].reverse() } : { end: one.a, chain: one.chain };
+    const tail = two.a === id ? { end: two.b, chain: two.chain } : { end: two.a, chain: [...two.chain].reverse() };
+    rest.push({ a: head.end, b: tail.end, chain: [...head.chain, ...tail.chain.slice(1)] });
+    work = compact({ nodes: work.nodes, edges: rest });
+  }
+  return work;
+}
+
+/** أبعدُ نقطةٍ في سلسلةٍ عن وترها (أو عن مبدئها إن كانت حلقة) — قمّةُ القوس. */
+function apexOf(chain, closed) {
+  const a = pxAt(chain[0]);
+  const b = pxAt(chain[chain.length - 1]);
+  const vx = b[0] - a[0];
+  const vy = b[1] - a[1];
+  const norm = Math.hypot(vx, vy) || 1;
+  let best = -1;
+  let far = 0;
+  for (let k = 3; k < chain.length - 3; k++) {
+    const p = pxAt(chain[k]);
+    const gap = closed
+      ? Math.hypot(p[0] - a[0], p[1] - a[1])
+      : Math.abs(((p[0] - a[0]) * vy - (p[1] - a[1]) * vx) / norm);
+    if (gap > far) { far = gap; best = k; }
+  }
+  return { at: best, gap: far };
+}
+
+/** شقُّ الحوافّ الطويلة عند قممها — عُقَدُ مرورٍ يوجّه بها المؤلِّفُ القلمَ في الأقواس. */
+function splitApex(graph) {
+  let work = graph;
+  for (let round = 0; round < 6; round++) {
+    let did = false;
+    for (let i = 0; i < work.edges.length; i++) {
+      const edge = work.edges[i];
+      const closed = edge.a === edge.b;
+      if (chainPx(edge.chain) < SPLIT) continue;
+      const apex = apexOf(edge.chain, closed);
+      if (apex.at < 0 || (!closed && apex.gap < BEND)) continue;
+      const id = work.nodes.length;
+      const nodes = [...work.nodes, { px: edge.chain[apex.at] }];
+      const edges = work.edges.filter((_, k) => k !== i);
+      edges.push({ a: edge.a, b: id, chain: edge.chain.slice(0, apex.at + 1) });
+      edges.push({ a: id, b: edge.b, chain: edge.chain.slice(apex.at) });
+      work = compact({ nodes, edges });
+      did = true;
+      break;
+    }
+    if (!did) break;
+  }
+  return work;
+}
+
+/**
+ * يقرأ الهيكلَ رسماً بيانياً ثم يُجريه على جراحةٍ أربع: ضمُّ عناقيد التنحيف، وشذبُ
+ * الأشواك، وإذابةُ ما ليس عقدةً، وشقُّ الأقواس عند قممها. فتخرج **عُقَدُ الحرف**
+ * قليلةً معدودةً: أطرافٌ ومفارقُ وقمم — كلُّها مقروءةٌ من صورة الحرف لا مقدَّرة،
+ * ولكلٍّ رقمٌ حتميّ يقرؤه المؤلِّف فيبني بها إيماءتَه.
+ */
+function skeletonGraph(img) {
+  let graph = rawGraph(img);
+  if (!graph.nodes.length) return { nodes: [], edges: [] };
+  graph = mergeClusters(graph);
+  graph = dissolve(graph);
+  graph = pruneSpurs(graph);
+  graph = dissolve(graph);
+  graph = splitApex(graph);
+  return orderNodes(graph);
+}
+
+/** ترتيبٌ حتميّ للعُقَد (من أعلى فأيمن — ترتيبُ القراءة) فرقمُ العقدة نفسُه في كل تشغيل. */
+function orderNodes(graph) {
+  const order = graph.nodes
+    .map((n, i) => ({ i, px: n.px, x: n.px % MASK, y: (n.px - (n.px % MASK)) / MASK }))
+    .sort((a, b) => (a.y - b.y) || (b.x - a.x));
+  const map = new Map(order.map((o, k) => [o.i, k]));
+  const edges = graph.edges.map((e) => ({ a: map.get(e.a) + 1, b: map.get(e.b) + 1, chain: e.chain }));
+  return {
+    nodes: order.map((o, k) => ({
+      id: k + 1, px: o.px, at: px2grid(o.px),
+      deg: edges.reduce((n, e) => n + (e.a === k + 1 ? 1 : 0) + (e.b === k + 1 ? 1 : 0), 0),
+    })),
+    edges,
+  };
+}
+
+// ————— ٥) التوجيه: من عقدةٍ إلى عقدةٍ على الهيكل نفسِه —————
+
+const chainLen = (chain) => chain.length * PX;
+
+/**
+ * أقصرُ طريقٍ بين عقدتين **على الهيكل** لا في الفراغ — فما بين عقدتين هو الحرفُ
+ * نفسُه. وإن كان الطريقان سواءً فالمؤلِّفُ يفصل بعقدةِ مرورٍ ثالثة.
+ */
+function route(graph, from, to) {
+  const best = new Map([[from, { cost: 0, via: null }]]);
+  const queue = [from];
+  while (queue.length) {
+    queue.sort((a, b) => best.get(a).cost - best.get(b).cost);
+    const at = queue.shift();
+    if (at === to && at !== from) break;
+    for (const [k, edge] of graph.edges.entries()) {
+      if (edge.a !== at && edge.b !== at) continue;
+      const next = edge.a === at ? edge.b : edge.a;
+      const cost = best.get(at).cost + chainLen(edge.chain);
+      if (best.has(next) && best.get(next).cost <= cost) continue;
+      best.set(next, { cost, via: { edge: k, from: at } });
+      queue.push(next);
+    }
+  }
+  if (!best.has(to) || (to === from && !best.get(to).via)) return null;
+  const legs = [];
+  let at = to;
+  while (best.get(at)?.via) {
+    const { edge, from: prev } = best.get(at).via;
+    legs.unshift({ edge, from: prev, to: at });
+    at = prev;
+    if (at === from) break;
+  }
+  return legs;
+}
+
+/** نقاطُ حافّةٍ بالاتجاه المطلوب (السلسلةُ مخزونةٌ من `a` إلى `b`). */
+function edgePoints(graph, leg) {
+  const edge = graph.edges[leg.edge];
+  const forward = edge.a === leg.from;
+  const chain = forward ? edge.chain : [...edge.chain].reverse();
+  return chain.map(px2grid);
+}
+
+/**
+ * **فَكُّ الطيّة** — وهي ثمرةُ التنحيف لا عيبٌ فيه.
+ *
+ * كثيرٌ من حروف العربية يكتبها القلمُ **ذَهاباً وإياباً في حركةٍ واحدة**: سنّةُ
+ * الباء الوسطية (ـبـ)، وعمودُ اللام الوسطية (ـلـ) يصعد ثم يعود ليمضي يساراً،
+ * وتُوَيْجُ الباء النهائية. فيقع الحبرُ ضلعين متلاصقين، ويطويهما التنحيفُ على
+ * بعضهما فيخرج الهيكلُ **شوكةً واحدة تُمشى مرّتين**.
+ *
+ * **ولو تُرك المسارُ مطويّاً لانكسر المحرّك بحقّ**: التقدّمُ يُقاس بطول المسار،
+ * فالنزولُ على عين الصعود يُسقِط الإسقاطَ على الضلع الأول ويقف التقدّمُ عند نصفه
+ * — فيُرفَض طفلٌ كتب السنّةَ صحيحة.
+ *
+ * **فتُفَكّ الطيّةُ بعرض الحبر نفسِه**: يُزاح الضلعُ الصاعد إلى جهة الذراع الداخلة
+ * والنازلُ إلى جهة الخارجة، بمقدار **ربع عرض الحبر** لكلٍّ (يقرؤه مقياسُ المسافة من
+ * الخيال عند المفرق)، ويضيق الإزاحُ حتى ينعدم عند القمّة. فيعود المثلّثُ الذي في
+ * الحبر أصلاً — ضلعان متمايزان داخلَ الحرف لا خارجه — ويبقى الطولُ رتيباً.
+ *
+ * ⚠ **وهذه أوّلُ مسألةٍ في المحرّك تكشفها المسارات الحقيقية**: التتبّعُ يستقيم لأن
+ * الطفل يتتبّع النموذجَ المعروض («النموذجُ هو المقياس»)، أما **الكتابةُ الحرّة**
+ * على صندوقٍ فارغ (`METHOD.md §٥.٤`) فطفلٌ يكتب السنّةَ على خطٍّ واحد صعوداً
+ * ونزولاً — كما تُكتب حقّاً — يقع إسقاطُه بين الضلعين فيُقرأ ارتداداً. وعلاجُه في
+ * المحرّك لا في المسار (قطعةٌ مُعلَنةٌ أنها طيّة يُسمح فيها بالعود إلى القمّة)،
+ * وهو **قرارُ مديرٍ لا جلسةِ مسارات** — فيُرفَع بلاغاً.
+ */
+function foldSpan(legs, i) {
+  let k = 0;
+  while (i - k >= 0 && i + 1 + k < legs.length && legs[i - k].edge === legs[i + 1 + k].edge) k++;
+  return k;
+}
+
+/**
+ * **ضلعا الطيّة**: نسختان من الشوكة، تُزاح الصاعدةُ إلى **الذراع الداخلة** والنازلةُ
+ * إلى **الخارجة**، ويضيق الإزاحُ حتى ينعدم عند القمّة فتكون قمّةً واحدة.
+ *
+ * **ولا يعود المسارُ إلى المفرق قطّ** — وهذا لبُّ العلاج: عند المفرق تلتقي ثلاثةُ
+ * فروع (الذراعُ الداخلة والضلعان)، فطفلٌ يمشي على الذراع يقع إسقاطُه على الضلع
+ * النازل **وهو أمامَه بمئتَي وحدة**، فيقفز تقدّمُه ثم يُقرأ رجوعُه ارتداداً. أمسك
+ * ذلك تُوَيْجُ الباء النهائية بعينها (قفزةٌ من ١٨٣ إلى ٤٤٣ ثم `reverse`). فتُقتطع
+ * من الذراعين مسافةُ الإزاح، ويُوصَل الضلعان بطرفَيهما — فلا يجتمع فرعان في موضع.
+ */
+const CLOSE = 0.25;
+function shifted(spike, target, room) {
+  const n = spike.length;
+  const fork = spike[0];
+  const dx = target[0] - fork[0];
+  const dy = target[1] - fork[1];
+  const full = Math.hypot(dx, dy) || 1;
+  return spike.map((p, i) => {
+    const hold = Math.min(1, (n > 1 ? 1 - i / (n - 1) : 0) / CLOSE);
+    // **ولا يخرج الضلعُ من حبر حرفه**: الإزاحُ محدودٌ بعرض الحبر **عند تلك النقطة**
+    // لا عند المفرق — فالسنّةُ تضيق كلما ارتفعت، ولو أُزيح الضلعُ بعرض قاعدتها
+    // لخرج من الخيال في أعلاها. (ويحرس ذلك `browser_paths.html` نقطةً نقطة.)
+    const cap = Math.min(full, (room[i] || full) * 0.9);
+    const amount = (cap / full) * hold;
+    return [p[0] + dx * amount, p[1] + dy * amount];
+  });
+}
+
+/** نصفُ عرض الحبر عند نقطةٍ على الشبكة — يقرؤه مقياسُ المسافة من الخيال. */
+const inkHalf = (work, p) => {
+  const mx = Math.round(p[0] / PX - 0.5);
+  const my = Math.round(p[1] / PX - 0.5);
+  if (mx < 0 || my < 0 || mx >= MASK || my >= MASK) return 0;
+  return (work.dt[my * MASK + mx] || 0) * PX;
+};
+
+/** يمشي إيماءةَ جزءٍ (أرقامُ عُقَد) على الهيكل فيخرج مسارُ القلم خاماً. */
+function walkGesture(work, ids) {
+  const graph = work.graph;
+  const byId = new Map(graph.nodes.map((n) => [n.id, n]));
+  for (const id of ids) if (!byId.has(id)) throw new Error(`لا عقدةَ برقم ${id}`);
+  if (ids.length === 1) return [byId.get(ids[0]).at];
+
+  const legs = [];
+  for (let i = 0; i < ids.length - 1; i++) {
+    const hop = route(graph, ids[i], ids[i + 1]);
+    if (!hop || !hop.length) throw new Error(`لا طريقَ على الهيكل بين ${ids[i]} و${ids[i + 1]}`);
+    legs.push(...hop);
+  }
+
+  // مواضعُ الطيّات: كتلةٌ من الأرجل تُمشى ثم تُعاد مرآةً
+  const folds = new Map();
+  for (let i = 0; i < legs.length - 1; i++) {
+    const k = foldSpan(legs, i);
+    if (k > 0) { folds.set(i - k + 1, { apex: i, end: i + k }); i += k; }
+  }
+
+  const join = (points, add) => (points.length ? points.concat(add.slice(1)) : add.slice());
+  let points = [];
+  for (let i = 0; i < legs.length; i++) {
+    const fold = folds.get(i);
+    if (!fold) { points = join(points, edgePoints(graph, legs[i])); continue; }
+    let spike = [];
+    for (let k = i; k <= fold.apex; k++) spike = join(spike, edgePoints(graph, legs[k]));
+    const fork = spike[0];
+    const forkPx = byId.get(legs[i].from)?.px;
+    // مقدارُ الإزاح: **نصفُ عرض الحبر عند المفرق** يقرؤه مقياسُ المسافة من الخيال،
+    // **ومحدودٌ بطول الشوكة نفسِها** — شوكةٌ قصيرة (تُوَيْجُ الباء) لو فُتحت بعرض
+    // الحبر لصارت بطحاءَ لا سنّة، فيضيع شكلُها ويلتبس على الحَكَم أمرُها.
+    const grip = Math.max(Math.min((work.dt[forkPx] || 0) * PX, prepare(spike).len * 0.35), 10);
+    while (points.length > 2 && dist(points[points.length - 1], fork) < grip) points.pop();
+    const armIn = points[points.length - 1] || fork;
+    const nextPts = legs[fold.end + 1] ? edgePoints(graph, legs[fold.end + 1]) : [];
+    let cut = 0;
+    while (cut < nextPts.length - 2 && dist(nextPts[cut], fork) < grip) cut++;
+    const armOut = nextPts[cut] || fork;
+    const room = spike.map((p) => inkHalf(work, p));
+    points = join(points, shifted(spike, armIn, room));
+    points = join(points, shifted(spike, armOut, room).reverse());
+    if (nextPts.length) { points = points.concat(nextPts.slice(cut + 1)); i = fold.end + 1; } else i = fold.end;
+  }
+  return points;
+}
+
+// ————— ٦) الصقل: تنعيمٌ وامتدادٌ إلى الطرف وإعادةُ توزيع —————
+
+const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
+const round1 = (n) => Math.round(n * 10) / 10;
+
+/**
+ * تنعيمٌ خفيف يزيل سلالمَ البكسل ولا يزيح المسار عن قلب الحرف.
+ *
+ * **ولا يخرج عن الحبر**: التنعيمُ يقصّ الزوايا، والزاويةُ الحادّة (ملتقى ذيل الميم
+ * برأسها) يقصّها فيقع القصُّ خارج الحرف. أمسك ذلك حارسُ «المسار داخلَ خيال حرفه»
+ * يومَ كُتب (نقطةٌ واحدة في م/نهائي)، فصار كلُّ نقطةٍ نُعِّمت تُردّ إلى موضعها إن
+ * خرجت — فالحدُّ **حبرُ الحرف** لا رقمٌ يُختار.
+ */
+function smooth(points, passes = 3, work = null) {
+  const inside = (p) => {
+    if (!work) return true;
+    const mx = Math.round(p[0] / PX - 0.5);
+    const my = Math.round(p[1] / PX - 0.5);
+    return mx >= 0 && my >= 0 && mx < MASK && my < MASK && work.bodyMask[my * MASK + mx];
+  };
+  let out = points.map((p) => [p[0], p[1]]);
+  for (let k = 0; k < passes; k++) {
+    out = out.map((p, i) => {
+      if (i === 0 || i === out.length - 1) return p;
+      const soft = [(out[i - 1][0] + 2 * p[0] + out[i + 1][0]) / 4,
+        (out[i - 1][1] + 2 * p[1] + out[i + 1][1]) / 4];
+      return inside(soft) ? soft : p;
+    });
+  }
+  return out;
+}
+
+/**
+ * **امتدادُ الطرف إلى حافّة الخيال**: التنحيفُ يقصّر المسارَ عند طرفيه بنصف عرض
+ * القلم (فالهيكلُ يقف حيث يلتقي الطرفان)، فيمتدّ الطرفُ على اتجاهه ما دام داخلَ
+ * الحبر — فيبدأ الحرفُ من حيث يبدأ حقّاً وينتهي حيث ينتهي.
+ */
+function extendEnd(points, mask, atStart) {
+  const take = atStart ? points.slice(0, 6) : points.slice(-6).reverse();
+  if (take.length < 2) return points;
+  const tip = take[0];
+  const dir = [tip[0] - take[take.length - 1][0], tip[1] - take[take.length - 1][1]];
+  const norm = Math.hypot(dir[0], dir[1]) || 1;
+  const unit = [dir[0] / norm, dir[1] / norm];
+  // **ويقف على مسافةٍ من الحافّة لا عليها**: طرفٌ يقف على آخر بكسلٍ من الحبر يخرج
+  // منه بتدوير الإحداثيّ إلى العُشر — أمسك ذلك حارسُ «المسار داخلَ خيال حرفه» يومَ
+  // كُتب (ذيلُ م/نهائي، نصفُ بكسل). فيُشترط أن يبقى داخلَه بعد خطوتين أُخريين.
+  const inside = (p) => {
+    const mx = Math.round(p[0] / PX - 0.5);
+    const my = Math.round(p[1] / PX - 0.5);
+    return mx >= 0 && my >= 0 && mx < MASK && my < MASK && mask[my * MASK + mx];
+  };
+  let grown = tip;
+  for (let step = 1; step <= 40; step++) {
+    const p = [tip[0] + unit[0] * step, tip[1] + unit[1] * step];
+    if (!inside(p) || !inside([tip[0] + unit[0] * (step + 2), tip[1] + unit[1] * (step + 2)])) break;
+    grown = p;
+  }
+  return atStart ? [grown, ...points] : [...points, grown];
+}
+
+/** إعادةُ توزيعٍ بخطوةٍ منتظمة تحترم أقصى طول قطعة (`stepFor`). */
+function resample(points) {
+  const poly = prepare(points);
+  if (!poly.len) return [points[0], points[points.length - 1] || points[0]];
+  const step = stepFor(poly.len);
+  const count = Math.max(2, Math.ceil(poly.len / step));
+  const out = [];
+  for (let i = 0; i <= count; i++) {
+    const target = (poly.len * i) / count;
+    let k = 1;
+    while (k < poly.cum.length - 1 && poly.cum[k] < target) k++;
+    const span = poly.cum[k] - poly.cum[k - 1] || 1;
+    const t = (target - poly.cum[k - 1]) / span;
+    const a = poly.pts[k - 1];
+    const b = poly.pts[k];
+    out.push([round1(a[0] + (b[0] - a[0]) * t), round1(a[1] + (b[1] - a[1]) * t)]);
+  }
+  return out;
+}
+
+// ————— ٧) تركيبُ الشكل: أجسامٌ من الإيماءة ونقاطٌ من الخيال —————
+
+/**
+ * النقاطُ **تُقرأ من الخيال آلياً**: الأجرامُ الصغيرة المنفصلة عن الجسم. وتُجمَع
+ * المتجاورةُ منها في جزءٍ واحد بعدد نقراته (ثاءٌ ثلاثُ نقراتٍ في موضعٍ واحد)،
+ * والحدُّ **من سماحة المحرّك نفسِها** (`TOLERANCE.dot`) لا رقماً حرّاً: ما يقبله
+ * `pen.js` نقرتين في جزءٍ واحد يُكتب جزءاً واحداً. **وكلُّها `after: true`** —
+ * النقاطُ بعد الجسم، قاعدةُ الخطّ المدرسيّ (`METHOD.md §٣.١`).
+ */
+function dotsFrom(marks) {
+  const spread = TOLERANCE.dot * 0.7;
+  const groups = [];
+  for (const mark of marks) {
+    const at = [mark.at[0] * PX, mark.at[1] * PX];
+    const near = groups.find((g) => dist(g.at, at) <= spread);
+    if (near) {
+      near.at = [(near.at[0] * near.count + at[0]) / (near.count + 1),
+        (near.at[1] * near.count + at[1]) / (near.count + 1)];
+      near.count++;
+    } else groups.push({ at, count: 1 });
+  }
+  return groups
+    .sort((a, b) => a.at[1] - b.at[1] || b.at[0] - a.at[0])
+    .map((g) => ({ at: [round1(g.at[0]), round1(g.at[1])], count: g.count, after: true }));
+}
+
+/** أصغرُ جرمٍ يُعدّ نقطةً — ما دونه غبارُ تنعيمٍ لا نقطة. */
+const DUST = 8;
+
+/** يُهيّئ شكلاً واحداً: خيالُه وقناعُه وأجرامُه وهيكلُه وعُقَدُه. */
+function studio(ch, form) {
+  const { mask, cal, image } = ghost(ch, form);
+  const parts = bodies(mask);
+  if (!parts.length) throw new Error(`خيالٌ فارغ: ${ch} ${form}`);
+  const body = parts[0];
+  const marks = parts.slice(1).filter((p) => p.area >= DUST);
+  const bodyMask = maskOf(body.cells);
+  const skeleton = thin(bodyMask);
+  const graph = skeletonGraph(skeleton);
+  return {
+    ch, form, mask, image, bodyMask, skeleton, graph, cal,
+    dots: dotsFrom(marks),
+    sig: fingerprint(mask),
+    dt: distance(bodyMask),
+  };
+}
+
+/**
+ * **المسارُ داخلَ خيال حرفه** — شرطُ «النموذجُ هو المقياس» على الحرف الحقيقيّ:
+ * ما يُعرَض على الطفل ويُحكَم به هو خطُّ الحرف الذي في الخيال، فنقطةٌ خارجَ الحبر
+ * دعوى على الحرف لا وصفٌ له. ويُقاس **غَوصُ** كل نقطةٍ في الحبر (مقياسُ المسافة
+ * نفسُه)، فيُعرَف كم بقي للمسار من هامشٍ قبل الحافّة — لا «داخلٌ أو خارج» وحدَه.
+ */
+function depthIn(work, points) {
+  let least = Infinity;
+  let out = 0;
+  const stray = [];
+  for (const p of points) {
+    const mx = Math.round(p[0] / PX - 0.5);
+    const my = Math.round(p[1] / PX - 0.5);
+    const inside = mx >= 0 && my >= 0 && mx < MASK && my < MASK && work.bodyMask[my * MASK + mx];
+    if (!inside) { out++; stray.push(p.map(round1)); }
+    least = Math.min(least, inside ? work.dt[my * MASK + mx] * PX : 0);
+  }
+  return { out, stray, least: least === Infinity ? 0 : least };
+}
+
+/** يبني مسارَ الشكل من إيماءته (أرقامُ عُقَدٍ لكل جزء). */
+function compose(work, gesture) {
+  const strokes = [];
+  for (const ids of gesture.strokes) {
+    let points = walkGesture(work, ids);
+    points = smooth(points, 2, work);
+    points = extendEnd(points, work.bodyMask, true);
+    points = extendEnd(points, work.bodyMask, false);
+    points = smooth(points, 2, work);
+    points = resample(points);
+    strokes.push({ points, start: points[0] });
+  }
+  return { strokes, dots: work.dots };
+}
+
+// ————— ٨) العرضُ: الشبكةُ والخيالُ والهيكلُ والمسارُ المؤلَّف —————
+
+const SVG = 'http://www.w3.org/2000/svg';
+const sv = (tag, attrs = {}) => {
+  const el = document.createElementNS(SVG, tag);
+  for (const [k, v] of Object.entries(attrs)) if (v != null) el.setAttribute(k, String(v));
+  return el;
+};
+const pathD = (pts) => pts.map((p, i) => `${i ? 'L' : 'M'}${p[0]} ${p[1]}`).join(' ');
+
+function ghostCanvas(work) {
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = GRID;
+  const ctx = canvas.getContext('2d');
+  ctx.putImageData(work.image, 0, 0);
+  ctx.globalCompositeOperation = 'destination-over';
+  ctx.fillStyle = '#f7f4ee';
+  ctx.fillRect(0, 0, GRID, GRID);
+  canvas.style.opacity = '.28';
+  return canvas;
+}
+
+function overlay(work, made, { nodes = true, skeleton = true, grid = true } = {}) {
+  const svg = sv('svg', { viewBox: `0 0 ${GRID} ${GRID}` });
+  if (grid) {
+    for (let i = 1; i < 10; i++) {
+      svg.append(sv('line', { class: 'grid-line', x1: i * 100, y1: 0, x2: i * 100, y2: GRID }));
+      svg.append(sv('line', { class: 'grid-line', x1: 0, y1: i * 100, x2: GRID, y2: i * 100 }));
+    }
+  }
+  if (skeleton) {
+    for (const edge of work.graph.edges) {
+      svg.append(sv('path', { class: 'skel', d: pathD(edge.chain.map(px2grid).map((p) => [round1(p[0]), round1(p[1])])) }));
+    }
+  }
+  if (made) {
+    for (const stroke of made.strokes) {
+      svg.append(sv('path', { class: 'made', d: pathD(stroke.points) }));
+      svg.append(sv('circle', { class: 'made-start', cx: stroke.start[0], cy: stroke.start[1], r: 22 }));
+    }
+    for (const dot of made.dots) {
+      svg.append(sv('circle', { class: 'made-dot', cx: dot.at[0], cy: dot.at[1], r: 20 }));
+    }
+  }
+  if (nodes) {
+    for (const node of work.graph.nodes) {
+      svg.append(sv('circle', { class: 'node', cx: node.at[0], cy: node.at[1], r: 26, 'data-id': node.id }));
+      const tag = sv('text', { class: 'node-tag', x: node.at[0], y: node.at[1] });
+      tag.textContent = String(node.id);
+      svg.append(tag);
+    }
+  }
+  return svg;
+}
+
+// ————— ٩) الأوضاع —————
+
+async function anchors() {
+  // ملفُّ الإيماءات يُخدَم للعدّة باسمٍ داخليّ (سائقُها يخدم `app/` جذراً)
+  const res = await fetch('/__anchors.json');
+  return res.json();
+}
+
+/** الحروفُ × أشكالُها الأربعة — قائمةُ العمل التامّة، تُقرأ في كل وضع. */
+const allForms = (spec) => Object.keys(spec.letters)
+  .flatMap((ch) => FORMS.map((form) => ({ ch, form })));
+const workList = (spec) => Object.entries(spec.letters)
+  .flatMap(([ch, forms]) => FORMS.filter((f) => forms[f]).map((form) => ({ ch, form })));
+
+/** يبني كلَّ ما في ملفّ الإيماءات، ويتحقّق من دعوى «الشكلان واحد» بالخيال لا بالقول. */
+function buildAll(spec) {
+  const paths = {};
+  const report = [];
+  for (const [ch, forms] of Object.entries(spec.letters)) {
+    const done = {};
+    const works = {};
+    for (const form of FORMS) {
+      const entry = forms[form];
+      if (!entry) throw new Error(`${ch}: لا إيماءةَ لشكل ${FORM_AR[form]}`);
+      works[form] = works[form] || studio(ch, form);
+      const work = works[form];
+      if (entry.sameAs) {
+        // **الدعوى تُفحَص بالخيال**: بصمتا القناعين تتطابقان أو تسقط الدعوى.
+        const source = works[entry.sameAs] || (works[entry.sameAs] = studio(ch, entry.sameAs));
+        if (work.sig !== source.sig) {
+          throw new Error(`${ch}/${FORM_AR[form]}: ادُّعي أنه عينُ ${FORM_AR[entry.sameAs]}`
+            + ` وخيالاهما مختلفان (${work.sig} ≠ ${source.sig})`);
+        }
+        done[form] = done[entry.sameAs] || compose(source, forms[entry.sameAs]);
+        report.push({ ch, form, sameAs: entry.sameAs, sig: work.sig, nodes: work.graph.nodes.length });
+        continue;
+      }
+      if (entry.nodes != null && entry.nodes !== work.graph.nodes.length) {
+        throw new Error(`${ch}/${FORM_AR[form]}: عُقَدُ الخيال ${work.graph.nodes.length}`
+          + ` والإيماءةُ كُتبت على ${entry.nodes} — أُعيدت قراءةُ الخيال فلْتُراجَع الإيماءة`);
+      }
+      if (entry.sig && entry.sig !== work.sig) {
+        throw new Error(`${ch}/${FORM_AR[form]}: بصمةُ الخيال ${work.sig} والإيماءةُ على ${entry.sig}`);
+      }
+      done[form] = compose(work, entry);
+      const ink = depthIn(work, done[form].strokes.flatMap((st) => st.points));
+      if (ink.out) {
+        throw new Error(`${ch}/${FORM_AR[form]}: ${ink.out} نقطةً خارج خيال الحرف`
+          + ` (${ink.stray.slice(0, 3).map((p) => p.join('،')).join(' · ')})`
+
+          + ' — المسارُ يدّعي على الحرف ما ليس فيه');
+      }
+      report.push({
+        ch, form, sig: work.sig, nodes: work.graph.nodes.length, depth: round1(ink.least),
+        strokes: done[form].strokes.length, dots: done[form].dots.length,
+      });
+    }
+    paths[ch] = done;
+  }
+  return { paths, report };
+}
+
+async function runBuild() {
+  const spec = await anchors();
+  try {
+    const { paths, report } = buildAll(spec);
+    for (const line of report) {
+      say(true, `${line.ch} ${FORM_AR[line.form]}: `
+        + (line.sameAs ? `عينُ ${FORM_AR[line.sameAs]} — خيالاهما ببصمةٍ واحدة (${line.sig})`
+          : `${line.strokes} جزءاً و${line.dots} نقطةً · عُقَدُ الخيال ${line.nodes}`
+            + ` · داخلَ الحبر كلُّه (أدنى غوص ${line.depth}) · بصمة ${line.sig}`));
+    }
+    say(true, 'تمّ البناء', { paths, meta: { report, grid: GRID } });
+  } catch (e) {
+    say(false, `تعذّر البناء: ${e.message}`);
+  }
+  await send();
+}
+
+async function runNodes() {
+  const spec = await anchors();
+  const list = allForms(spec);
+  const table = {};
+  for (const { ch, form } of list) {
+    try {
+      const work = studio(ch, form);
+      table[`${ch}/${form}`] = {
+        sig: work.sig,
+        ink: work.cal.ink,
+        dots: work.dots,
+        nodes: work.graph.nodes.map((n) => ({
+          id: n.id, at: n.at.map(round1), deg: n.deg,
+          width: round1(work.dt[n.px] * PX * 2),
+        })),
+        edges: work.graph.edges.map((e) => ({ a: e.a, b: e.b, len: round1(chainLen(e.chain)) })),
+      };
+      say(true, `${ch} ${FORM_AR[form]}: ${work.graph.nodes.length} عقدةً و${work.graph.edges.length} حافّة`);
+    } catch (e) {
+      say(false, `${ch} ${FORM_AR[form]}: ${e.message}`);
+    }
+  }
+  say(true, 'جردُ العُقَد', { table });
+  await send();
+}
+
+/** لوحةُ مراجعةٍ بالعين: خيالٌ وهيكلٌ ومسارٌ مؤلَّف لكل شكل — تُلتقط صورةً. */
+async function runSheet() {
+  const spec = await anchors();
+  // اللوحةُ تعرض الأشكالَ الأربعة لكل حرفٍ دائماً — وما لم تُؤلَّف إيماءتُه بعدُ
+  // يُعرَض خيالُه وهيكلُه وعُقَدُه وحدَها، فهي لوحةُ التأليف كما هي لوحةُ المراجعة.
+  const list = allForms(spec);
+  const board = document.createElement('div');
+  board.id = 'sheet';
+  document.body.replaceChildren(board);
+  const showNodes = qs.get('tags') !== '0';
+  for (const { ch, form } of list) {
+    const cell = document.createElement('figure');
+    cell.className = 'cell';
+    try {
+      const work = studio(ch, form);
+      const entry = spec.letters[ch][form];
+      const gesture = entry?.sameAs ? spec.letters[ch][entry.sameAs] : entry;
+      const src = entry?.sameAs ? studio(ch, entry.sameAs) : work;
+      const made = gesture?.strokes ? compose(src, gesture) : null;
+      cell.append(ghostCanvas(work), overlay(work, made, { nodes: showNodes }));
+      const cap = document.createElement('figcaption');
+      cap.textContent = `${ch} · ${FORM_AR[form]}`;
+      cell.append(cap);
+    } catch (e) {
+      cell.textContent = `${ch} ${form}: ${e.message}`;
+    }
+    board.append(cell);
+  }
+  say(true, `لوحةُ المراجعة: ${list.length} شكلاً`);
+  await send();
+}
+
+// ————— ١٠) العدّةُ لليد: نقرُ العُقَد ترتيباً واتجاهاً —————
+
+async function runStudio() {
+  const spec = await anchors().catch(() => ({ letters: {} }));
+  const letters = Object.keys(spec.letters);
+  document.body.innerHTML = `
+    <aside>
+      <h1>عدّةُ تأليف المسارات</h1>
+      <p class="note">انقر عُقَدَ الحرف بترتيب كتابته — من أين يبدأ القلم، وإلى أين
+        يمضي. الشكلُ يخرج من خيال الحرف نفسِه، وإيماءتُك ترتيبٌ واتجاهٌ لا إحداثيات.</p>
+      <div class="row">
+        <input id="ch" size="2" value="${letters[0] || 'ب'}">
+        <select id="form">${FORMS.map((f) => `<option value="${f}">${FORM_AR[f]}</option>`).join('')}</select>
+        <button id="reload">اقرأ الخيال</button>
+      </div>
+      <div class="row">
+        <button id="newStroke">جزءٌ جديد</button>
+        <button id="undo">تراجع</button>
+        <button id="clear">امسح</button>
+        <button id="play">شاهِد</button>
+      </div>
+      <div id="gesture"></div>
+      <p class="note" id="verdict"></p>
+      <div class="row"><button id="copy">انسخ الإيماءة</button><button id="copyJson">انسخ JSON</button></div>
+      <div id="preview"></div>
+    </aside>
+    <div id="stage"></div>`;
+
+  const stage = document.getElementById('stage');
+  const out = document.getElementById('gesture');
+  const verdict = document.getElementById('verdict');
+  let work = null;
+  let strokes = [[]];
+  let surface = null;
+
+
+  function draw() {
+    const gesture = { strokes: strokes.filter((s) => s.length) };
+    let made = null;
+    try { made = gesture.strokes.length ? compose(work, gesture) : null; } catch (e) { verdict.textContent = e.message; }
+    stage.replaceChildren(ghostCanvas(work), overlay(work, made));
+    for (const circle of stage.querySelectorAll('.node')) {
+      const id = Number(circle.dataset.id);
+      if (strokes.some((s) => s.includes(id))) circle.classList.add('pick');
+      circle.addEventListener('click', () => {
+        strokes[strokes.length - 1].push(id);
+        draw();
+      });
+    }
+    out.textContent = JSON.stringify({ strokes: gesture.strokes, nodes: work.graph.nodes.length, sig: work.sig });
+    if (made) {
+      const clean = made.strokes.map((s) => s.points);
+      const wrong = made.strokes.map((s) => [...s.points].reverse());
+      const dots = made.dots.map((d) => [d.at, d.at, d.at]);
+      const good = judge(made, [...clean, ...dots]);
+      const bad = judge(made, [...wrong, ...dots]);
+      verdict.textContent = `الحكم: الصحيحُ ${good.accepted ? 'يُقبل ✓' : `يُرفَض (${good.primary}) ✗`}`
+        + ` · المعكوسُ ${bad.accepted ? 'يُقبَل ✗' : `يُرفَض (${bad.primary}) ✓`}`;
+      const box = document.getElementById('preview');
+      surface?.destroy();
+      surface = penSurface({ ref: made, label: 'معاينةُ المسار' });
+      box.replaceChildren(surface.el);
+    }
+  }
+
+  async function reload() {
+    const ch = document.getElementById('ch').value.trim();
+    const form = document.getElementById('form').value;
+    work = studio(ch, form);
+    const saved = spec.letters[ch]?.[form];
+    strokes = saved && !saved.sameAs ? saved.strokes.map((s) => [...s]) : [[]];
+    if (!strokes.length) strokes = [[]];
+    draw();
+  }
+
+  document.getElementById('reload').onclick = reload;
+  document.getElementById('form').onchange = reload;
+  document.getElementById('newStroke').onclick = () => { strokes.push([]); draw(); };
+  document.getElementById('undo').onclick = () => {
+    const last = strokes[strokes.length - 1];
+    if (last.length) last.pop(); else if (strokes.length > 1) strokes.pop();
+    draw();
+  };
+  document.getElementById('clear').onclick = () => { strokes = [[]]; draw(); };
+  document.getElementById('play').onclick = () => surface?.play();
+  document.getElementById('copy').onclick = () => navigator.clipboard.writeText(
+    JSON.stringify({ strokes: strokes.filter((s) => s.length), nodes: work.graph.nodes.length, sig: work.sig }));
+  document.getElementById('copyJson').onclick = () => navigator.clipboard.writeText(
+    JSON.stringify(compose(work, { strokes: strokes.filter((s) => s.length) }), null, 1));
+  await reload();
+}
+
+// ————— الإقلاع —————
+
+(async () => {
+  try {
+    await loadFont();
+    if (qs.has('build')) await runBuild();
+    else if (qs.has('nodes')) await runNodes();
+    else if (qs.has('sheet')) await runSheet();
+    else await runStudio();
+  } catch (e) {
+    const box = document.createElement('div');
+    box.id = 'log';
+    box.className = 'bad';
+    box.textContent = `استثناء: ${e && e.message}`;
+    document.body.append(box);
+    if (!qs.has('open')) { say(false, `استثناء: ${e && e.message}`); await send(); }
+  }
+})();
+</script>
+</body>
+</html>

@@ -85,6 +85,18 @@ const resources = (win) => win.performance.getEntriesByType('resource').map((e) 
     watchNetwork(win);
     await wait(900);
 
+    // **المسارُ حرفٌ حقيقيّ** (الجلسة ٢): صارت صفحةُ التجربة تعرض حروفَ المنهج،
+    // فيُختار منها **منقوطٌ** لتكتمل الدورةُ جسماً ثم نقطة (وهي عينُ الشرط الرابع).
+    // **والاختيارُ قبل التقاط اللوح**: النقرُ على حرفٍ يعيد بناءَ اللوح، فلوحٌ التُقط
+    // قبله يبقى في يد الفاحص وقد نُزع من الشاشة — فتذهب ضرباتُه إلى لوحٍ لا يراه أحد.
+    const { PATHS } = await import('/js/paths.js');
+    const dotted = Object.keys(PATHS).find((ch) => PATHS[ch].isolated.dots.length);
+    [...doc.querySelectorAll('.dev-row .btn')].find((b) => b.textContent.trim() === dotted)?.click();
+    await wait(150);
+    const ref = PATHS[dotted].isolated;
+    const body = ref.strokes.map((s) => s.points);
+    const dot = ref.dots[0].at;
+
     const surface = doc.querySelector('.pen-surface');
     ok(!!surface, 'صفحةُ تجربة المحرّك مفتوحةٌ وفيها لوحُ الكتابة');
     if (!surface) throw new Error('لا لوحَ على الشاشة');
@@ -94,6 +106,16 @@ const resources = (win) => win.performance.getEntriesByType('resource').map((e) 
       `واللوحُ مربّعٌ بمقاسٍ يكفي يدَ طفل (${Math.round(box.width)}×${Math.round(box.height)})`);
     ok(win.getComputedStyle(surface).touchAction === 'none',
       'ولمسُه كتابةٌ لا تمريرٌ للصفحة (touch-action: none)');
+
+    // **وما يُكتَب هو ما يُعرَض**: طولُ خطّ النموذج على الشاشة عينُ طول المسار الذي
+    // تُكتب به الدورةُ — فلا يفترق المفحوصُ عن المعروض («النموذجُ هو المقياس»).
+    const span = (pts) => pts.reduce((sum, p, i) => (i
+      ? sum + Math.hypot(p[0] - pts[i - 1][0], p[1] - pts[i - 1][1]) : 0), 0);
+    const drawn = [...surface.querySelectorAll('.pen-stroke--trail')];
+    ok(drawn.length === body.length
+      && drawn.every((t, i) => Math.abs(Number(t.getAttribute('stroke-dasharray')) - span(body[i])) < 1)
+      && surface.querySelectorAll('.pen-dot').length === ref.dots.length,
+      `والحرفُ المعروض «${dotted}» بنقطته — والنموذجُ المرسوم عينُ مساره`);
 
     // ————— محاكاةُ يدٍ تكتب: من الشبكة المعيارية إلى إحداثيات الشاشة —————
     let pointerId = 1;
@@ -120,10 +142,6 @@ const resources = (win) => win.performance.getEntriesByType('resource').map((e) 
       await wait(60);
     }
 
-    // مسارُ التجربة نفسُه (شكلٌ هندسيّ محسوب في `pendev.js`) — يُقرأ من الوحدة لا يُكتب هنا
-    const { SAMPLE } = await import('/js/pendev.js');
-    const body = SAMPLE.strokes.map((s) => s.points);
-    const dot = SAMPLE.dots[0].at;
 
     // ————— نافذةُ القياس تُفتح هنا: دورةُ كتابةٍ كاملة —————
     const netMark = netCalls.length;
