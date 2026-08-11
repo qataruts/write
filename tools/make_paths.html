@@ -709,12 +709,17 @@ function edgePoints(graph, leg) {
  * الخيال عند المفرق)، ويضيق الإزاحُ حتى ينعدم عند القمّة. فيعود المثلّثُ الذي في
  * الحبر أصلاً — ضلعان متمايزان داخلَ الحرف لا خارجه — ويبقى الطولُ رتيباً.
  *
- * ⚠ **وهذه أوّلُ مسألةٍ في المحرّك تكشفها المسارات الحقيقية**: التتبّعُ يستقيم لأن
- * الطفل يتتبّع النموذجَ المعروض («النموذجُ هو المقياس»)، أما **الكتابةُ الحرّة**
- * على صندوقٍ فارغ (`METHOD.md §٥.٤`) فطفلٌ يكتب السنّةَ على خطٍّ واحد صعوداً
- * ونزولاً — كما تُكتب حقّاً — يقع إسقاطُه بين الضلعين فيُقرأ ارتداداً. وعلاجُه في
- * المحرّك لا في المسار (قطعةٌ مُعلَنةٌ أنها طيّة يُسمح فيها بالعود إلى القمّة)،
- * وهو **قرارُ مديرٍ لا جلسةِ مسارات** — فيُرفَع بلاغاً.
+ * ⚠ **والفَكُّ وحدَه لا يكفي** — كشفته المساراتُ الحقيقية ورُفع بلاغاً، **وحسمه
+ * المدير في مراجعة الجلسة ٢**: التتبّعُ يستقيم لأن الطفل يتتبّع النموذجَ المعروض
+ * («النموذجُ هو المقياس»)، أما **الكتابةُ الحرّة** على صندوقٍ فارغ (`METHOD.md §٥.٤`)
+ * فطفلٌ يكتب السنّةَ على خطٍّ واحد صعوداً ونزولاً — كما تُكتب حقّاً — يقع إسقاطُه
+ * بين الضلعين فيُقرأ ارتداداً.
+ *
+ * **فالطيّةُ تُعلَن صفةً في بيانات المسار** (`METHOD.md §٣.١`، الجلسة ٢ب): موضعُها
+ * من الشوكة معلومٌ هنا بعينه — أوّلُ ضلعها وقمّتُها وآخرُ ضلعها — فتُصدَّر مع النقاط
+ * (`walkGesture` أدناه يعيد `folds`)، ويقيس بها الشرطُ الثاني التقدّمَ **ذهاباً
+ * وإياباً**. **ولا تُعلَن طيّةٌ بيد**: هي مفرقُ الهيكل الذي تكشفه هذه الدالّة وحدَها،
+ * فما لم يطوِه التنحيفُ لا يُدَّعى فيه طيّة.
  */
 function foldSpan(legs, i) {
   let k = 0;
@@ -758,12 +763,18 @@ const inkHalf = (work, p) => {
   return (work.dt[my * MASK + mx] || 0) * PX;
 };
 
-/** يمشي إيماءةَ جزءٍ (أرقامُ عُقَد) على الهيكل فيخرج مسارُ القلم خاماً. */
+/**
+ * يمشي إيماءةَ جزءٍ (أرقامُ عُقَد) على الهيكل فيخرج مسارُ القلم خاماً.
+ *
+ * ويعيد معه **إعلانَ الطيّات** (`{ from, apex, to }` أرقامَ نقاطٍ في المسار الخام):
+ * مواضعُها معلومةٌ هنا بعينها لأنّ الطيّةَ **مفرقٌ في الهيكل** يُمشى ضلعاه — فتُقيَّد
+ * ساعةَ تُفَكّ، ولا تُستنبَط بعدُ من شكل المسار ولا تُكتب بيد.
+ */
 function walkGesture(work, ids) {
   const graph = work.graph;
   const byId = new Map(graph.nodes.map((n) => [n.id, n]));
   for (const id of ids) if (!byId.has(id)) throw new Error(`لا عقدةَ برقم ${id}`);
-  if (ids.length === 1) return [byId.get(ids[0]).at];
+  if (ids.length === 1) return { points: [byId.get(ids[0]).at], folds: [] };
 
   const legs = [];
   for (let i = 0; i < ids.length - 1; i++) {
@@ -780,6 +791,7 @@ function walkGesture(work, ids) {
   }
 
   const join = (points, add) => (points.length ? points.concat(add.slice(1)) : add.slice());
+  const marks = [];
   let points = [];
   for (let i = 0; i < legs.length; i++) {
     const fold = folds.get(i);
@@ -799,11 +811,17 @@ function walkGesture(work, ids) {
     while (cut < nextPts.length - 2 && dist(nextPts[cut], fork) < grip) cut++;
     const armOut = nextPts[cut] || fork;
     const room = spike.map((p) => inkHalf(work, p));
+    // **إعلانُ الطيّة يُقيَّد ساعةَ تُفَكّ**: مبدؤها آخرُ نقطةٍ من الذراع الداخلة،
+    // وقمّتُها رأسُ الضلع الصاعد، وآخرُها آخرُ نقطةٍ من النازل — ثلاثةُ أرقامٍ تخرج
+    // من الجراحة نفسِها لا من قراءةٍ لاحقة لشكل المسار.
+    const from = Math.max(0, points.length - 1);
     points = join(points, shifted(spike, armIn, room));
+    const apex = points.length - 1;
     points = join(points, shifted(spike, armOut, room).reverse());
+    marks.push({ from, apex, to: points.length - 1 });
     if (nextPts.length) { points = points.concat(nextPts.slice(cut + 1)); i = fold.end + 1; } else i = fold.end;
   }
-  return points;
+  return { points, folds: marks };
 }
 
 // ————— ٦) الصقل: تنعيمٌ وامتدادٌ إلى الطرف وإعادةُ توزيع —————
@@ -954,17 +972,39 @@ function depthIn(work, points) {
   return { out, stray, least: least === Infinity ? 0 : least };
 }
 
-/** يبني مسارَ الشكل من إيماءته (أرقامُ عُقَدٍ لكل جزء). */
+/**
+ * يبني مسارَ الشكل من إيماءته (أرقامُ عُقَدٍ لكل جزء).
+ *
+ * **وإعلانُ الطيّة يُحمَل عبر الصقل كلِّه**: التنعيمُ يبدّل المواضعَ ولا يبدّل عددَ
+ * النقاط، وامتدادُ الرأس يزيد نقطةً واحدة فتزيح الأرقامُ واحداً، **وإعادةُ التوزيع
+ * تبدّل العدّةَ كلَّها** — فتُترجَم الأرقامُ عندها إلى **أطوالٍ على المسار** ثم تُقرأ
+ * أرقاماً في المسار الموزَّع. فتبقى الطيّةُ على حبرها لا على رقمٍ شاخ.
+ */
 function compose(work, gesture) {
   const strokes = [];
   for (const ids of gesture.strokes) {
-    let points = walkGesture(work, ids);
-    points = smooth(points, 2, work);
+    const walked = walkGesture(work, ids);
+    let points = smooth(walked.points, 2, work);
     points = extendEnd(points, work.bodyMask, true);
+    let marks = walked.folds.map((f) => ({ from: f.from + 1, apex: f.apex + 1, to: f.to + 1 }));
     points = extendEnd(points, work.bodyMask, false);
     points = smooth(points, 2, work);
+    const before = prepare(points);
+    const spans = marks.map((f) => [before.cum[f.from], before.cum[f.apex], before.cum[f.to]]);
     points = resample(points);
-    strokes.push({ points, start: points[0] });
+    const at = (len) => Math.min(points.length - 1,
+      Math.max(0, Math.round((len / (before.len || 1)) * (points.length - 1))));
+    marks = spans.map(([a, b, c]) => ({ from: at(a), apex: at(b), to: at(c) }));
+    // **وطيّةٌ تنطوي تحت إعادة التوزيع تُسقِط البناءَ ولا تُطرَح صامتة**: طيّةٌ أقصرُ
+    // من خطوة التوزيع لا يقيسها المحرّكُ كذلك — فالسكوتُ عنها يعيد العطبَ من بابه.
+    for (const f of marks) {
+      if (!(f.from < f.apex && f.apex < f.to)) {
+        throw new Error(`طيّةٌ انطوت تحت إعادة التوزيع (${f.from}،${f.apex}،${f.to})`
+          + ' — أقصرُ من خطوة المسار فلا يقيسها المحرّك');
+      }
+    }
+    strokes.push(marks.length ? { points, start: points[0], folds: marks }
+      : { points, start: points[0] });
   }
   return { strokes, dots: work.dots };
 }
@@ -1079,6 +1119,7 @@ function buildAll(spec) {
       report.push({
         ch, form, sig: work.sig, nodes: work.graph.nodes.length, depth: round1(ink.least),
         strokes: done[form].strokes.length, dots: done[form].dots.length,
+        folds: done[form].strokes.reduce((n, st) => n + (st.folds?.length || 0), 0),
       });
     }
     paths[ch] = done;
@@ -1094,6 +1135,7 @@ async function runBuild() {
       say(true, `${line.ch} ${FORM_AR[line.form]}: `
         + (line.sameAs ? `عينُ ${FORM_AR[line.sameAs]} — خيالاهما ببصمةٍ واحدة (${line.sig})`
           : `${line.strokes} جزءاً و${line.dots} نقطةً · عُقَدُ الخيال ${line.nodes}`
+            + (line.folds ? ` · طيّاتٌ معلنة ${line.folds}` : '')
             + ` · داخلَ الحبر كلُّه (أدنى غوص ${line.depth}) · بصمة ${line.sig}`));
     }
     say(true, 'تمّ البناء', { paths, meta: { report, grid: GRID } });

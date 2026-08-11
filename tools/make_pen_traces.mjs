@@ -18,6 +18,7 @@
 
 import { readFileSync, writeFileSync } from 'node:fs';
 import { prepare, pointAt, TOLERANCE } from '../app/js/pen.js';
+import { PATHS } from '../app/js/paths.js';
 
 const OUT = new URL('./pen_traces.json', import.meta.url);
 
@@ -137,6 +138,64 @@ const RING = {
 const RING_POLY = prepare(RING.strokes[0].points);
 
 /**
+ * **السنّةُ المطويّة** — شكلٌ هندسيّ محسوب لا حرف (كسائر أشكال العدّة)، وفيه
+ * **طيّةٌ معلنة**: ذراعٌ داخلةٌ من اليمين، فضلعٌ صاعد، فقمّة، فضلعٌ نازلٌ يعود
+ * بجواره، فذراعٌ خارجةٌ يساراً. وهي سنّةُ ـبـ وعمودُ ـلـ مجرَّدَين من حرفهما.
+ *
+ * **وبها تُحرَس طيّةُ الجلسة ٢ب من وجهيها**: يُقبَل مَن كتبها **على خطٍّ واحد** كما
+ * تُكتب حقّاً (وهو ما كان يُرفَض `reverse` قبل الإعلان)، ويُرَدّ مَن عكسها ومَن
+ * **قفز عنها** من المفرق إلى الذراع الخارجة — فالطيّةُ رخصةٌ في قراءة الموضع لا
+ * إعفاءٌ من كتابة السنّة.
+ */
+// **وضلعاها متباعدان بعرض حبرٍ لا أكثر** (٨٠ وحدةً عند القاعدة، كما تفتحهما عدّةُ
+// المسارات في الحروف الحقيقية): فالخطُّ الواحد بينهما يقع في سماحة الانحراف، والعطبُ
+// المحروسُ هنا **قراءةُ الطول** لا بُعدُ الطفل عن الحبر.
+const TOOTH_ARM_IN = line([820, 620], [640, 620], 9);
+const TOOTH_APEX = [600, 200];
+const TOOTH_UP = line(TOOTH_ARM_IN[TOOTH_ARM_IN.length - 1], TOOTH_APEX, 20);
+const TOOTH_DOWN = line(TOOTH_APEX, [560, 620], 20);
+const TOOTH_ARM_OUT = line(TOOTH_DOWN[TOOTH_DOWN.length - 1], [200, 640], 18);
+const TOOTH_PTS = [...TOOTH_ARM_IN, ...TOOTH_UP.slice(1),
+  ...TOOTH_DOWN.slice(1), ...TOOTH_ARM_OUT.slice(1)];
+const TOOTH = {
+  strokes: [{
+    points: TOOTH_PTS,
+    start: TOOTH_PTS[0],
+    folds: [{
+      from: TOOTH_ARM_IN.length - 1,
+      apex: TOOTH_ARM_IN.length + TOOTH_UP.length - 2,
+      to: TOOTH_ARM_IN.length + TOOTH_UP.length + TOOTH_DOWN.length - 3,
+    }],
+  }],
+  dots: [],
+};
+const TOOTH_POLY = prepare(TOOTH_PTS);
+
+/**
+ * **السنّةُ كما تُكتب حقّاً**: خطٌّ واحدٌ يصعد ثم يعود عليه — بين ضلعَي النموذج، لا
+ * على أحدهما. وهو ما يفعله الطفل في «اكتبه وحدك» (`METHOD.md §٥.٤`)، وهو الذي كان
+ * يُقرأ ارتداداً قبل إعلان الطيّة.
+ */
+const TOOTH_SPINE = line([(TOOTH_ARM_IN[TOOTH_ARM_IN.length - 1][0]
+  + TOOTH_DOWN[TOOTH_DOWN.length - 1][0]) / 2, 620], TOOTH_APEX, 20);
+const TOOTH_LINE = prepare([...TOOTH_ARM_IN, ...TOOTH_SPINE.slice(1),
+  ...[...TOOTH_SPINE].reverse().slice(1), ...TOOTH_ARM_OUT.slice(1)]);
+
+/**
+ * **ل/وسطي من المنهج بعينه** — وهو الشكلُ الذي أثبتت عليه مراجعةُ المدير نقضَ عهد
+ * `child-drift` (سقط برجفة ٤٠ من سماحة ٩٠ قبل الإعلان). فيدخل العدّةَ شاهداً مجمَّداً
+ * على أنّ رجفةَ نصف السماحة تُقبَل عليه.
+ *
+ * ⚠ **وهو المسارُ الوحيد في العدّة الذي لا يُولَد هنا** بل يُنسَخ من `app/js/paths.js`
+ * (تؤلّفه عدّةُ المسارات) — **وذلك رباطٌ مقصود**: يومَ يتبدّل مسارُ ل/وسطي يحمرّ
+ * الفحصُ الذاتي حتى تُعاد العدّةُ عليه، فلا يبقى شاهدٌ على شكلٍ زال. وحكمُ المحرّك
+ * على المسارات الستّة عشرة كلِّها (والأرضيةُ الحيّة لاحتمال الرجفة) في
+ * `tools/test_paths.mjs` لا هنا.
+ */
+const LAM_MEDIAL = PATHS['ل'].medial;
+const LAM_POLY = prepare(LAM_MEDIAL.strokes[0].points);
+
+/**
  * الحالاتُ العشر — لكل شرطٍ من الشروط الأربعة وجهُه الموجب ووجهُه السالب.
  * والأرقامُ منسوبةٌ إلى السماحة نفسِها (`TOLERANCE`) لا مكتوبةً حرّة: فالحالةُ
  * «داخل السماحة» تبقى داخلَها إن عُدِّلت، والحالةُ «خارجها» تبقى خارجَها.
@@ -230,14 +289,56 @@ function build() {
       from: 1 - 60 / RING_POLY.len, to: 1 - 130 / RING_POLY.len, step: 14, jitter: 3, rand,
     })], 'ring');
 
+  // ————— الطيّةُ المعلَنة: حالاتُ الجلسة ٢ب (قرارُ المدير في مراجعة الجلسة ٢) —————
+
+  rand = rng(1414);
+  add('fold-traced', { accept: true },
+    `**سنّةٌ مطويّة تُتتبَّع** على ضلعَي النموذج برجفةٍ داخل السماحة (± ${
+      Math.round(TOLERANCE.lateral * 0.5)}) — الشرط ٢ عبر الطيّة`,
+    [walk(TOOTH_POLY, {
+      jitter: 4, sway: (r) => Math.sin(r * Math.PI * 2) * TOLERANCE.lateral * 0.5, rand,
+    })], 'tooth');
+
+  rand = rng(1515);
+  add('fold-single-line', { accept: true },
+    '**سنّةٌ على خطٍّ واحد** — كما تُكتب حقّاً في «اكتبه وحدك»: يصعد ثم يعود على أثره '
+    + 'بين ضلعَي النموذج. كانت تُرفَض `reverse` قبل إعلان الطيّة',
+    [walk(TOOTH_LINE, { jitter: 5, rand })], 'tooth');
+
+  rand = rng(1616);
+  add('fold-reversed', { accept: false, fault: 'start-end' },
+    '**سنّةٌ معكوسة** — يبدأ من الذراع الخارجة ويمشي رجوعاً: الطيّةُ لا تُبيح عكسَ الحركة',
+    [walk(TOOTH_POLY, { from: 1, to: 0, jitter: 4, rand })], 'tooth');
+
+  rand = rng(1717);
+  // **الحالةُ الحارسة للطيّة** (نظيرُ `closed-tail` للشكل المغلق): الطيّةُ رخصةٌ في
+  // قراءة الموضع لا إعفاءٌ من كتابة السنّة — فمن دخل من المفرق ومضى إلى الذراع
+  // الخارجة بلا صعودٍ ولا نزول لا يرث تغطيةَ ضلعين لم يمشِهما.
+  add('fold-skipped', { accept: false, fault: 'wander' },
+    '**قفزٌ فوق السنّة**: من الذراع الداخلة إلى الخارجة مباشرةً بلا صعودٍ ولا نزول '
+    + '— الطيّةُ لا تُمنَح بلا مشي',
+    [[...walk(prepare(TOOTH_ARM_IN), { jitter: 3, rand }),
+      ...walk(prepare(TOOTH_ARM_OUT), { jitter: 3, rand })]], 'tooth');
+
+  rand = rng(1818);
+  add('lam-medial-drift', { accept: true },
+    `**ل/وسطي برجفة ${Math.round(TOLERANCE.lateral * 0.5)}** — الشكلُ الذي نقض عهدَ `
+    + '`child-drift` في مراجعة المدير (سقط برجفة ٤٠)، وقد عاد فوقه بإعلان الطيّة',
+    [walk(LAM_POLY, {
+      jitter: 4, sway: (r) => Math.sin(r * Math.PI * 2) * TOLERANCE.lateral * 0.5, rand,
+    })], 'lam-medial');
+
   return {
     what: 'عدّةُ معايرة محرّك القلم — مساراتٌ مسجّلة تُدخَل على المحرّك آلياً (METHOD.md §٣.٩)',
-    refs_note: 'شكلان هندسيّان محسوبان للعدّة وحدها لا حرفان: `sample` مركّبٌ يجمع أصنافَ '
-      + 'الشروط الأربعة، و`ring` شكلٌ مغلق تُحرَس به ثغرةُ ذيل الحلقة. وحكمُ المحرّك على '
-      + 'مسارات الحروف بعينها في tools/test_paths.mjs.',
+    refs_note: 'ثلاثةُ أشكالٍ هندسيةٍ محسوبة للعدّة وحدها لا حروف: `sample` مركّبٌ يجمع أصنافَ '
+      + 'الشروط الأربعة، و`ring` شكلٌ مغلق تُحرَس به ثغرةُ ذيل الحلقة، و`tooth` سنّةٌ '
+      + '**بطيّةٍ معلنة** تُحرَس بها طيّةُ الجلسة ٢ب. ومعها `lam-medial` وحدَه منقولاً من '
+      + 'app/js/paths.js — شاهدٌ على الشكل الذي نقض عهدَ child-drift في مراجعة المدير، '
+      + 'ويحمرّ الفحصُ الذاتيّ إن تبدّل مسارُه. وحكمُ المحرّك على مسارات الحروف كلِّها '
+      + 'في tools/test_paths.mjs.',
     generator: 'tools/make_pen_traces.mjs',
     warning: 'مساراتٌ مصنوعة لا مساراتُ أطفال — ميدانُ الطفل ومساراتُه الحقيقية في الجلسة ١٢',
-    refs: { sample: SAMPLE, ring: RING },
+    refs: { sample: SAMPLE, ring: RING, tooth: TOOTH, 'lam-medial': LAM_MEDIAL },
     cases,
   };
 }

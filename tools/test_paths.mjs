@@ -100,6 +100,7 @@ const loose = shapes.filter(({ ref }) => !pen.judge(ref, trace(ref, { from: 1, t
 ok(loose.length === shapes.length,
   `والمعكوسُ يُرفَض في الأشكال كلِّها ولو ضوعفت السماحةُ ثلاثاً (${loose.length}/${shapes.length})`);
 
+
 // **والنقاطُ بعد الجسم**: مَن نقَط قبل أن يكتب الجسمَ رُدّ بخطئه بعينه.
 const dotted = shapes.filter(({ ref }) => ref.dots.length);
 ok(dotted.length > 0, `والمنقوطُ من الأشكال ${dotted.length} — تُجرَّب فيها قاعدةُ «النقاطُ بعد الجسم»`);
@@ -111,19 +112,20 @@ for (const { ch, form, ref } of dotted) {
 
 // ————— ٤) الطيّة: كم يحتمل المسارُ من ارتجاف يدِ طفل؟ —————
 //
-// **حصيلةُ هذه الجلسة، وتُطبع رقماً لتُقارَن**: حروفُ العربية فيها ما يكتبه القلمُ
-// **ذهاباً وإياباً** (سنّةُ ـبـ، وعمودُ ـلـ، وتُوَيْجُ ـب). وطيّةٌ كهذه أضيقُ على
-// الحَكَم من غيرها: الضلعان متجاوران، فيدٌ ترتجف يقع إسقاطُها على الضلع الخطأ.
-// فيُقاس لكلِّ مسارٍ **أقصى انحرافٍ يحتمله وهو يُكتب صحيحاً**، ويُشترط ألّا ينزل
-// عن كسرٍ من سماحة المحرّك — فلو ضاق مسارٌ يوماً بتعديلٍ في العدّة حمِرَ هذا السطر.
+// حروفُ العربية فيها ما يكتبه القلمُ **ذهاباً وإياباً** (سنّةُ ـبـ، وعمودُ ـلـ،
+// وتُوَيْجُ ـب). وطيّةٌ كهذه أضيقُ على الحَكَم من غيرها: الضلعان متجاوران، فيدٌ ترتجف
+// يقع إسقاطُها على الضلع الخطأ. فيُقاس لكلِّ مسارٍ **أقصى انحرافٍ يحتمله وهو يُكتب
+// صحيحاً**، ويُشترط ألّا ينزل عن **نصف سماحة المحرّك** — وهي أرضيةٌ ليست رقماً
+// مختاراً: عهدُ `child-drift` في عدّة المعايرة (`tools/pen_traces.json`) أنّ رجفةَ
+// نصف السماحة **تُقبَل**، فما نزل عنها مسارٌ ينقض عهدَ المحرّك على نفسه.
 //
-// ⚠ **والعلاجُ التامّ في المحرّك لا في المسار** (يُرفَع بلاغاً إلى المدير): قطعةٌ
-// مُعلَنةٌ أنها طيّة يُسمح فيها بالعود إلى القمّة. وما هنا اليومَ **تخفيفٌ بنيويّ**:
-// يُفتَح الضلعان بعرض الحبر نفسِه فيتمايزان.
+// **وكانت الأرضيةُ ٠٫٤ حتى الجلسة ٢ب**: ل/وسطي كان يحتمل ٤٢ (والمديرُ قاس ٤٠) —
+// أيْ أنّ العهدَ كان منقوضاً على شكلٍ مؤلَّف، وقد شُدّت اليومَ إلى العهد نفسِه بعد
+// أن أُعلنت الطيّةُ في بيانات المسار وصار الشرطُ الثاني يقيس بها ذهاباً وإياباً.
 
-const FLOOR = 0.4;
+const FLOOR = 0.5;
 console.log(`\n— ٤) احتمالُ الارتجاف: أدنى المقبول ${Math.round(pen.TOLERANCE.lateral * FLOOR)}`
-  + ` من سماحة ${pen.TOLERANCE.lateral} —`);
+  + ` من سماحة ${pen.TOLERANCE.lateral} — وهو عهدُ \`child-drift\` بعينه —`);
 const room = [];
 for (const { ch, form, ref } of shapes) {
   let max = 0;
@@ -136,12 +138,81 @@ for (const { ch, form, ref } of shapes) {
 for (const { ch, form, max } of room) {
   ok(max >= pen.TOLERANCE.lateral * FLOOR,
     `${ch} ${curriculum.FORM_NAMES[form]}: يحتمل انحراف ${max}`
-    + `${max < pen.TOLERANCE.lateral * 0.5 ? ' — طيّةٌ ضيّقة، والبلاغُ عند المدير' : ''}`);
+    + `${max >= pen.TOLERANCE.lateral * FLOOR ? '' : ' — دون عهد `child-drift`'}`);
 }
 
-// ————— ٥) الوصل: الوحدةُ مولَّدةٌ وفي مخزون العمل دون إنترنت —————
+// ————— ٥) الطيّةُ المعلَنة: أتُقبَل السنّةُ على خطٍّ واحد؟ —————
+//
+// **وهذا سؤالُ «اكتبه وحدك»** (`METHOD.md §٥.٤`): في التتبّع يمشي الطفلُ على النموذج
+// المعروض بضلعَيه المفكوكين، أما في الصندوق الفارغ فيكتب السنّةَ **على خطٍّ واحد
+// صعوداً ونزولاً كما تُكتب حقّاً** — فيقع خطُّه بين الضلعين. وهي الحالةُ التي أثبتت
+// مراجعةُ المدير أنها كانت تُرفَض `[reverse, wander, short]`.
+//
+// فيُبنى خطُّ الطفل من المسار نفسِه: **منتصفُ الضلعين** (يُقرَن الصاعدُ بالنازل
+// بنسبة الطول)، ثم يُحكَم عليه مرّتين — بالإعلان وبلا الإعلان. **فالفارقُ يُرى**:
+// لا إحداثيَّ يتبدّل، وإنما صفةُ الطيّة تُنزَع فيعود الحكمُ إلى ما كان.
 
-console.log('\n— ٥) الوصل —');
+/** خطُّ الطفل على طيّةٍ: يصعد بين الضلعين ثم يعود عليه. */
+function spine(points, fold, steps = 24) {
+  const up = pen.prepare(points.slice(fold.from, fold.apex + 1));
+  const down = pen.prepare(points.slice(fold.apex, fold.to + 1));
+  const mid = [];
+  for (let i = 0; i <= steps; i++) {
+    const a = pen.pointAt(up, (i / steps) * up.len).at;
+    const b = pen.pointAt(down, (1 - i / steps) * down.len).at;
+    mid.push([(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]);
+  }
+  return [...points.slice(0, fold.from + 1), ...mid,
+    ...[...mid].reverse().slice(1), ...points.slice(fold.to + 1)];
+}
+const unfold = (ref) => ({
+  ...ref,
+  strokes: ref.strokes.map((s) => ({ start: s.start, points: s.points })),
+});
+const freeHand = (ref) => [
+  ...ref.strokes.map((s) => walk(s.folds?.length ? spine(s.points, s.folds[0]) : s.points)),
+  ...taps(ref),
+];
+
+console.log('\n— ٥) الطيّةُ المعلَنة: السنّةُ على خطٍّ واحد —');
+const folded = shapes.filter(({ ref }) => ref.strokes.some((s) => s.folds?.length));
+ok(folded.length > 0,
+  `المطويُّ من الأشكال ${folded.length}: ${folded.map((f) => f.ch + '/' + f.form).join('، ')}`
+  + ' — وإعلانُه من مفرق الهيكل آلياً لا بيد');
+for (const { ch, form, ref } of folded) {
+  const free = pen.judge(ref, freeHand(ref));
+  const bare = pen.judge(unfold(ref), freeHand(ref));
+  ok(free.accepted && !bare.accepted && bare.primary === pen.FAULTS.REVERSE,
+    `${ch} ${curriculum.FORM_NAMES[form]}: على خطٍّ واحد ${free.accepted ? 'تُقبَل' : `تُرفَض «${free.primary}»`}`
+    + ` — وبنزع الإعلان ${bare.accepted ? 'تُقبَل أيضاً، فالإعلانُ حلية!' : `تُرفَض «${bare.primary}»`}`);
+}
+// **وأضيقُ المطويّات مدىً هو موضعُ الامتحان**: عند مضاعفة السماحة تتّسع دائرةُ البداية
+// حتى تبتلع طرفَي الشكل القصير، **فيسقط الشرطُ الأول من نفسه** ويبقى الحكمُ كلُّه على
+// الشرط الثاني. وهو موضعُ الخطر بعد الطيّة: الطيّةُ مكانٌ واحد بطولين، فالصعودُ فيها
+// والنزولُ سواءٌ من أيّ ضلعٍ كانا — فلو مُنحت رخصتُها لمن **نزل داخلها** لَقُرئ
+// المعكوسُ كلُّه طيّةً مكتوبةً على وجهها. فرخصتُها لمن دخل من مدخلها (`pen.js`).
+const tightest = folded
+  .map((s) => ({ ...s, span: Math.min(...s.ref.strokes.map((st) => Math.hypot(
+    st.points[0][0] - st.points[st.points.length - 1][0],
+    st.points[0][1] - st.points[st.points.length - 1][1]))) }))
+  .sort((a, b) => a.span - b.span)[0];
+if (tightest) {
+  const swallowed = pen.judge(tightest.ref, trace(tightest.ref, { from: 1, to: 0 }), { tolerance: 3 });
+  ok(!swallowed.accepted && swallowed.primary === pen.FAULTS.REVERSE,
+    `وأضيقُ المطويّات مدىً (${tightest.ch} ${curriculum.FORM_NAMES[tightest.form]}: ${Math.round(tightest.span)}`
+    + ` < دائرةُ بدايةٍ مضاعفةٍ ثلاثاً ${pen.TOLERANCE.start * 3}) يردّه **الشرطُ الثاني**`
+    + ` «${swallowed.primary}» لا الأول — فرخصةُ الطيّة لمن دخلها من مدخلها`);
+}
+
+// وما لا طيّةَ فيه لا يتبدّل حكمُه بنزعٍ ولا إثبات — فالصفةُ لا تسري على غير أهلها
+ok(shapes.filter(({ ref }) => !ref.strokes.some((s) => s.folds?.length))
+  .every(({ ref }) => pen.judge(ref, trace(ref)).accepted
+    && !pen.judge(ref, trace(ref, { from: 1, to: 0 })).accepted),
+  `والأشكالُ التي لا طيّةَ فيها (${shapes.length - folded.length}) على حكمها كما كانت`);
+
+// ————— ٦) الوصل: الوحدةُ مولَّدةٌ وفي مخزون العمل دون إنترنت —————
+
+console.log('\n— ٦) الوصل —');
 const module = read('js/paths.js');
 ok(/ملفٌّ مولَّد — لا يُحرَّر بيد/.test(module) && /make_paths\.py --build/.test(module),
   'ووحدةُ المسارات تُعلن أنها مولَّدةٌ وتُسمّي مولِّدَها في رأسها');
@@ -150,7 +221,9 @@ ok(/export const PATHS_SOURCE/.test(module),
 const sw = read('sw.js');
 ok(sw.includes("'js/paths.js'"), 'وهي في مخزون العمل دون إنترنت (`SHELL`)');
 const version = Number((sw.match(/VERSION = 'v(\d+)'/) || [])[1]);
-ok(version >= 3, `ونسخةُ عامل الخدمة مرفوعةٌ لتصل الوحدةُ الجديدة إلى الأجهزة (v${version} ≥ v3)`);
+// **وتُرفَع مع كل تبديلٍ في المسارات**: v3 يومَ وُلدت الوحدة، وv4 يومَ حملت إعلانَ
+// الطيّة (الجلسة ٢ب) — فلا يبقى على جهازٍ مسارٌ بلا الصفة التي يقرؤها محرّكُه.
+ok(version >= 4, `ونسخةُ عامل الخدمة مرفوعةٌ لتصل الوحدةُ الجديدة إلى الأجهزة (v${version} ≥ v4)`);
 // **والعدّةُ لا تسكن التطبيق**: أداةُ التأليف في `tools/` وحدها، فلا يُخدَم للطفل
 // خيالُ حرفٍ ولا مُنحِّفٌ ولا شيءٌ من عُدّة الصنعة.
 ok(!readdirSync(new URL('js/', APP)).some((f) => /make_paths|thin|ghost/i.test(f)),

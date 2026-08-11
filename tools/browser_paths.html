@@ -93,6 +93,30 @@ function walk(points, back) {
 
     const { PATHS } = await import('/js/paths.js');
     const { FORM_NAMES } = await import('/js/curriculum.js');
+    const { prepare, pointAt } = await import('/js/pen.js');
+
+    /**
+     * **خطُّ الطفل على الطيّة**: منتصفُ الضلعين — يصعد ثم يعود عليه، كما تُكتب
+     * السنّةُ حقّاً في «اكتبه وحدك» (`METHOD.md §٥.٤`). ويُبنى من المسار نفسِه:
+     * يُقرَن الضلعُ الصاعد بالنازل بنسبة الطول.
+     */
+    function spine(points, fold, steps = 24) {
+      const up = prepare(points.slice(fold.from, fold.apex + 1));
+      const down = prepare(points.slice(fold.apex, fold.to + 1));
+      const mid = [];
+      for (let i = 0; i <= steps; i++) {
+        const a = pointAt(up, (i / steps) * up.len).at;
+        const b = pointAt(down, (1 - i / steps) * down.len).at;
+        mid.push([(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]);
+      }
+      return [...points.slice(0, fold.from + 1), ...mid,
+        ...[...mid].reverse().slice(1), ...points.slice(fold.to + 1)];
+    }
+    const freeHand = (ref) => ({
+      dots: ref.dots,
+      strokes: ref.strokes.map((s) => (s.folds?.length
+        ? { points: spine(s.points, s.folds[0]) } : s)),
+    });
     const letters = Object.keys(PATHS);
     ok(letters.length > 0, `المساراتُ في التطبيق: ${letters.length} حرفاً (${letters.join('، ')})`);
 
@@ -186,6 +210,20 @@ function walk(points, back) {
         if (accepted && rejected) judged++;
         press('أعِد');
         await wait(40);
+
+        // **والسنّةُ على خطٍّ واحد** (الطيّةُ المعلَنة، الجلسة ٢ب): في التتبّع يمشي
+        // الطفلُ على ضلعَي النموذج، وفي الصندوق الفارغ يكتب السنّةَ **خطّاً واحداً
+        // صعوداً ونزولاً** كما تُكتب حقّاً. وهنا تُكتب **بإصبعٍ حقيقيّ** على اللوح —
+        // فيمرّ خطُّها بتبسيط النقاط وإطارِ الرسم، لا بـ`judge` وحدها.
+        if (ref.strokes.some((s) => s.folds?.length)) {
+          await writeAll(freeHand(ref), false);
+          const free = readout();
+          ok(/✓ مقبول/.test(free),
+            `${ch} ${FORM_NAMES[form]}: **السنّةُ على خطٍّ واحد** تُقبَل بإصبعٍ حقيقيّ`
+            + `${/✓ مقبول/.test(free) ? '' : ' — ' + free.split('\n')[0]}`);
+          press('أعِد');
+          await wait(40);
+        }
       }
     }
     const shapes = letters.reduce((n, ch) => n + Object.keys(PATHS[ch]).length, 0);

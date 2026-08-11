@@ -168,7 +168,14 @@ def write_module(paths: dict, meta: dict) -> str:
                 rows = chunk(stroke["points"])
                 for ri, row in enumerate(rows):
                     lines.append(f'      {row}' + ("," if ri < len(rows) - 1 else ""))
-                lines.append("     ] }" + ("," if si < len(ref["strokes"]) - 1 else ""))
+                # **الطيّةُ صفةٌ في القطعة** (`METHOD.md §٣.١`): أرقامُ نقاطٍ في `points`
+                # تُصدِرها العدّةُ من مفرق الهيكل — ولا تُكتب بيد ولا تُستنبَط لاحقاً.
+                tail = "     ]"
+                if stroke.get("folds"):
+                    tail += ', "folds": [' + ", ".join(
+                        f'{{ "from": {int(f["from"])}, "apex": {int(f["apex"])},'
+                        f' "to": {int(f["to"])} }}' for f in stroke["folds"]) + "]"
+                lines.append(tail + " }" + ("," if si < len(ref["strokes"]) - 1 else ""))
             lines.append("    ],")
             dots = ", ".join(
                 f'{{ "at": [{num(d["at"][0])}, {num(d["at"][1])}], "count": {int(d["count"])},'

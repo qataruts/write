@@ -163,6 +163,34 @@ const ring = traces.cases.find((c) => c.id === 'ring-clean');
 ok(pen.judge(refOf(ring), ring.strokes).accepted,
   'ودائرةٌ تامّةٌ صحيحة تُقبَل كما هي — الإصلاحُ سدَّ الثغرة ولم يمنع الشكلَ المغلق');
 
+// ————— الطيّةُ المعلَنة: **الإعلانُ هو الفارق** (الجلسة ٢ب) —————
+//
+// الجدولُ أعلاه يقول «قُبلت السنّةُ على خطٍّ واحد»، وهذا يقول **بمَ قُبلت**: تُنزَع
+// صفةُ الطيّة من المسار نفسِه — لا يتبدّل إحداثيٌّ واحد — فتُرفَض `reverse` كما كانت
+// قبل الجلسة ٢ب. فالحكمُ معلَّقٌ بالإعلان لا بتخفيفٍ في العتبات، **ولو أُلغي الإعلانُ
+// يوماً لَقُرئ الإخفاقُ هنا بعلّته**.
+const spine = traces.cases.find((c) => c.id === 'fold-single-line');
+const strip = (ref) => ({
+  ...ref,
+  strokes: ref.strokes.map(({ folds, ...rest }) => rest),   // eslint-disable-line no-unused-vars
+});
+const bare = pen.judge(strip(refOf(spine)), spine.strokes);
+ok(pen.judge(refOf(spine), spine.strokes).accepted && !bare.accepted
+  && bare.primary === pen.FAULTS.REVERSE,
+  'وسنّةٌ على خطٍّ واحد تُقبَل **بالطيّة المعلنة وحدَها**: تُنزَع الصفةُ من المسار'
+  + ` نفسِه فتُرفَض «${bare.primary}» — والعودُ غيرُ المعلَن ارتدادٌ كما كان`);
+
+// **ولا تُمنَح الطيّةُ بلا مشي** — نظيرُ ثغرة ذيل الشكل المغلق: مَن قفز من المفرق
+// إلى الذراع الخارجة لا يرث تغطيةَ ضلعين لم يمشِهما.
+const skipped = traces.cases.find((c) => c.id === 'fold-skipped');
+const skipVerdict = pen.judge(refOf(skipped), skipped.strokes);
+ok(!skipVerdict.accepted && skipVerdict.metrics.coverage < 0.5,
+  `وقفزٌ فوق السنّة لا يرث تغطيتَها (${skipVerdict.metrics.coverage.toFixed(2)})`
+  + ' — الطيّةُ رخصةٌ في قراءة الموضع لا إعفاءٌ من الكتابة');
+ok(traces.cases.filter((c) => c.ref === 'tooth' || c.ref === 'lam-medial')
+  .every((c) => seen.get(c.id).accepted === c.expect.accept),
+  'وحالاتُ الطيّة الخمسُ كلُّها على حكمها — تتبّعاً وحُرّاً ومعكوسةً وقفزاً وعلى حرفٍ حقيقيّ');
+
 // ————— ٣. الشروطُ الأربعة أربعة: لكلٍّ وجهاه —————
 
 console.log('\n— ٣) الشروطُ الأربعة: لكلِّ شرطٍ حالةٌ تُسقِطه —');

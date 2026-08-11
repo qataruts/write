@@ -21,6 +21,12 @@
 **وأخطرُ ذلك عند النزول**: `headSpan` يحرس رأسَ المسار بعُشره، فقطعةٌ تتجاوزه تُعيد
 **ثغرةَ ذيل الشكل المغلق** من بابها (وهي التي أسقطت المحرّك في مراجعة الجلسة ١).
 فالحدُّ هنا `min(back, len × HEAD_RATIO)` لكل قطعة — من جنس ما يحرسه لا رقماً حرّاً.
+
+**والطيّةُ المعلَنة** (الجلسة ٢ب): صفةٌ في بيانات المسار يقيس بها الشرطُ الثاني
+التقدّمَ ذهاباً وإياباً — أيْ **رخصةٌ في الحكم**، فتُفحَص بنيتُها هنا: ضلعان
+متقابلان يعودان من حيث بدآ، وطولُ كلٍّ فوق سماحة الارتداد، ولا طيّةَ مزعومةٌ على
+قطعةٍ سويّة. (والحكمُ نفسُه — أتُقبَل السنّةُ على خطٍّ واحد؟ — في `test_paths.mjs`
+و`pen_traces.json`.)
 """
 
 import argparse
@@ -95,6 +101,76 @@ def poly_len(points) -> float:
     return sum(dist(points[i - 1], points[i]) for i in range(1, len(points)))
 
 
+def heading(points) -> tuple:
+    """اتجاهُ ضلعٍ جملةً: متّجهُ الوحدة من أوّله إلى آخره."""
+    vx = points[-1][0] - points[0][0]
+    vy = points[-1][1] - points[0][1]
+    norm = math.hypot(vx, vy) or 1.0
+    return vx / norm, vy / norm
+
+
+def check_folds(stroke: dict, where: str, tol: dict) -> list:
+    """**الطيّةُ المعلَنة**: ضلعان متقابلان، ولا طيّةَ مزعومة على قطعةٍ سويّة.
+
+    الطيّةُ صفةٌ في بيانات المسار (`METHOD.md §٣.١`) يقيس بها الشرطُ الثاني تقدّمَ
+    الطفل ذهاباً وإياباً — فهي **رخصةٌ في الحكم**: داخلَها يقسم المحرّكُ المسارَ على
+    القمّة فلا يُقرأ العودُ ارتداداً. فدعوى الطيّة على قطعةٍ لا طيّةَ فيها تفتح على
+    الحرف باباً لا يُغلَق، ولذلك تُفحَص البنيةُ هنا لا يُوثَق بالمولّد وحدَه.
+
+    والمفحوصُ ثلاثةٌ، **كلُّها من جنس ما تحرسه لا أرقاماً حرّة**:
+      · **أرقامٌ سليمة**: `from < apex < to` داخلَ نقاط القطعة، والطيّاتُ لا تتداخل.
+      · **ضلعان متقابلان**: اتجاهُ النازل يعاكس الصاعد (جداءٌ قياسيّ سالب)، **وتعود
+        الطيّةُ من حيث بدأت** — طرفاها أقربُ من أقصر ضلعيها. وقطعةٌ سويّةٌ (أو زاويةٌ)
+        تسقط في الاثنين: جداؤها موجبٌ وطرفاها أبعدُ ما فيها.
+      · **وضلعٌ يقيسه المحرّك**: أقصرُ من سماحة الارتداد (`back`) يبتلعه سماحُ بلوغِ
+        القمّة نفسُه، فلا تُقاس فيه ذهابٌ ولا إياب.
+    """
+    bad = []
+    folds = stroke.get("folds")
+    if folds is None:
+        return bad
+    points = stroke.get("points") or []
+    last = len(points) - 1
+    if not isinstance(folds, list) or not folds:
+        return [f"{where}: `folds` معلنةٌ فارغةً أو ليست قائمة — والطيّةُ تُعلَن أو تُترك"]
+
+    spans = []
+    for n, fold in enumerate(folds, 1):
+        tag = f"{where} طيّة {n}"
+        keys = ("from", "apex", "to")
+        if not isinstance(fold, dict) or any(not isinstance(fold.get(k), int) for k in keys):
+            bad.append(f"{tag}: أرقامُ نقاطٍ صحيحةٌ لازمة (from وapex وto)")
+            continue
+        a, mid, b = (fold[k] for k in keys)
+        if not (0 <= a < mid < b <= last):
+            bad.append(f"{tag}: أرقامُها {a}،{mid}،{b} خارجَ نقاط القطعة أو غيرُ مرتّبة (٠..{last})")
+            continue
+        spans.append((a, b, tag))
+
+        up = points[a:mid + 1]
+        down = points[mid:b + 1]
+        rise, fall = poly_len(up), poly_len(down)
+        ux, uy = heading(up)
+        dx, dy = heading(down)
+        facing = ux * dx + uy * dy
+        if facing >= 0:
+            bad.append(f"{tag}: ضلعاها لا يتقابلان (جداءُ اتجاهيهما {facing:+.2f}) "
+                       "— لا تُدَّعى طيّةٌ على قطعةٍ سويّة")
+        gap = dist(points[a], points[b])
+        if gap >= min(rise, fall):
+            bad.append(f"{tag}: لا تعود من حيث بدأت — طرفاها على بُعد {gap:.0f} "
+                       f"وأقصرُ ضلعيها {min(rise, fall):.0f}")
+        if min(rise, fall) < tol["back"]:
+            bad.append(f"{tag}: ضلعٌ طولُه {min(rise, fall):.0f} دون سماحة الارتداد "
+                       f"({tol['back']:.0f}) — لا يقيس فيه المحرّكُ ذهاباً ولا إياباً")
+
+    spans.sort()
+    for i in range(1, len(spans)):
+        if spans[i][0] < spans[i - 1][1]:
+            bad.append(f"{spans[i][2]}: تتداخل مع طيّةٍ قبلها — ولا يقع مكانان في مكان")
+    return bad
+
+
 def check(paths: dict, tol: dict, forms: list, letters=None) -> list:
     """كلُّ ما يُخالف — قائمةُ شكاوى، فيصلح الفاحصُ نفسَه للفحص الذاتي."""
     bad = []
@@ -161,6 +237,8 @@ def check(paths: dict, tol: dict, forms: list, letters=None) -> list:
                         bad.append(f"{where}: نقطتان متطابقتان عند {points[k]}")
                         break
 
+                bad += check_folds(stroke, where, tol)
+
             for j, dot in enumerate(dots, 1):
                 where = f"{tag} نقطة {j}"
                 at = dot.get("at")
@@ -204,10 +282,12 @@ def run(quiet: bool) -> int:
                 spans = [poly_len(s["points"]) for s in ref["strokes"]]
                 steps = [max(dist(s["points"][k - 1], s["points"][k])
                              for k in range(1, len(s["points"]))) for s in ref["strokes"]]
+                folds = sum(len(s.get("folds") or []) for s in ref["strokes"])
                 print(f"  · {ch} {form}: {len(ref['strokes'])} جزءاً"
                       f" · طول {'، '.join(f'{v:.0f}' for v in spans)}"
                       f" · أقصى قطعة {max(steps):.0f}"
-                      f" · نقاط {sum(int(d['count']) for d in ref['dots'])}")
+                      f" · نقاط {sum(int(d['count']) for d in ref['dots'])}"
+                      + (f" · **طيّة {folds}**" if folds else ""))
 
     if letters is None:
         if not quiet:
@@ -222,7 +302,8 @@ def run(quiet: bool) -> int:
     for line in bad:
         print("  ✗ " + line)
     print(f"\n{len(bad)} مخالفة" if bad else "\nكلُّ مسارٍ سليمُ البنية: بداياتٌ معلنة،"
-          " وأجزاءٌ معقولة، والنقاطُ بعد الجسم، ولا قطعةَ تخدع نافذةَ الرتابة")
+          " وأجزاءٌ معقولة، والنقاطُ بعد الجسم، ولا قطعةَ تخدع نافذةَ الرتابة،"
+          " ولا طيّةَ مزعومةٌ على قطعةٍ سويّة")
     return 1 if bad else 0
 
 
@@ -248,10 +329,32 @@ def self_test() -> int:
             "dots": [{"at": [500.0, 950.0], "count": 1, "after": True}],
         }
 
+    def seg(a, b, count):
+        return [[a[0] + (b[0] - a[0]) * i / count, a[1] + (b[1] - a[1]) * i / count]
+                for i in range(count + 1)]
+
+    def folded():
+        """مسارٌ سليمٌ **فيه طيّة**: ذراعٌ داخلة، فضلعٌ صاعد، فقمّة، فضلعٌ نازلٌ
+
+        يعود بجواره، فذراعٌ خارجة — وهي سنّةُ ـبـ مجرّدةً من حرفها."""
+        arm_in = seg([760.0, 620.0], [620.0, 620.0], 5)
+        apex = [590.0, 220.0]
+        up = seg(arm_in[-1], apex, 12)
+        down = seg(apex, [540.0, 620.0], 12)
+        arm_out = seg(down[-1], [300.0, 640.0], 8)
+        pts = arm_in + up[1:] + down[1:] + arm_out[1:]
+        fold = {"from": len(arm_in) - 1, "apex": len(arm_in) + len(up) - 2,
+                "to": len(arm_in) + len(up) + len(down) - 3}
+        return {
+            "strokes": [{"start": pts[0], "points": pts, "folds": [fold]}],
+            "dots": [{"at": [520.0, 900.0], "count": 1, "after": True}],
+        }
+
     def one(ref):
         return {"ب": {f: ref for f in forms}}
 
     ok(not check(one(sound()), tol, forms), "المسارُ السليم يمرّ بلا شكوى")
+    ok(not check(one(folded()), tol, forms), "والمسارُ المطويُّ بطيّةٍ معلنةٍ سليمة كذلك")
 
     # ١) البدايةُ المعلنة
     ref = sound()
@@ -312,7 +415,45 @@ def self_test() -> int:
     ok(any("ولا حرفَ عربيّ كذلك" in b for b in check(one(ref), tol, forms)),
        f"ويُمسِك نقطاً جاوز {MAX_DOTS}")
 
-    # ٨) وأرقامُه من المحرّك لا من هنا
+    # ٨) الطيّة المعلَنة — رخصةٌ في الحكم فتُفحَص بنيتُها (الجلسة ٢ب)
+    ref = sound()
+    span = len(ref["strokes"][0]["points"]) - 1
+    ref["strokes"][0]["folds"] = [{"from": 0, "apex": span // 2, "to": span}]
+    plain = check(one(ref), tol, forms)
+    ok(any("لا تُدَّعى طيّةٌ على قطعةٍ سويّة" in b for b in plain),
+       "ويُمسِك **طيّةً مزعومة على قطعةٍ سويّة** — ضلعاها لا يتقابلان")
+    ok(any("لا تعود من حيث بدأت" in b for b in plain),
+       "وأنها لا تعود من حيث بدأت — طرفاها أبعدُ ما فيها")
+
+    ref = folded()
+    ref["strokes"][0]["folds"] = [{"from": 5, "apex": 3, "to": 9}]
+    ok(any("غيرُ مرتّبة" in b for b in check(one(ref), tol, forms)),
+       "ويُمسِك طيّةً أرقامُها غيرُ مرتّبة أو خارجَ نقاط القطعة")
+    ref = folded()
+    ref["strokes"][0]["folds"] = [{"from": 0, "apex": 9999, "to": 10}]
+    ok(any("خارجَ نقاط القطعة" in b for b in check(one(ref), tol, forms)),
+       "ويُمسِك رقمَ نقطةٍ لا وجودَ لها في القطعة")
+
+    ref = folded()
+    fold = dict(ref["strokes"][0]["folds"][0])
+    ref["strokes"][0]["folds"] = [fold, {"from": fold["apex"], "apex": fold["to"],
+                                         "to": fold["to"] + 4}]
+    ok(any("تتداخل مع طيّةٍ قبلها" in b for b in check(one(ref), tol, forms)),
+       "ويُمسِك طيّتين متداخلتين — ولا يقع مكانان في مكان")
+
+    ref = folded()
+    fold = ref["strokes"][0]["folds"][0]
+    ref["strokes"][0]["folds"] = [{"from": fold["apex"] - 1, "apex": fold["apex"],
+                                   "to": fold["apex"] + 1}]
+    ok(any("دون سماحة الارتداد" in b for b in check(one(ref), tol, forms)),
+       f"ويُمسِك ضلعاً أقصرَ من سماحة الارتداد ({tol['back']:.0f}) — لا يقيسه المحرّك")
+
+    ref = folded()
+    ref["strokes"][0]["folds"] = []
+    ok(any("تُعلَن أو تُترك" in b for b in check(one(ref), tol, forms)),
+       "ويُمسِك `folds` معلنةً فارغة — الطيّةُ تُعلَن أو تُترك")
+
+    # ٩) وأرقامُه من المحرّك لا من هنا
     src = PEN_JS.read_text(encoding="utf-8")
     ok(f"back: {int(tol['back'])}" in src and f"start: {int(tol['start'])}" in src,
        f"وسماحاتُه مقروءةٌ من `pen.js` نفسِه (بداية {tol['start']:.0f} · ارتداد {tol['back']:.0f})")
