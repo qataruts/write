@@ -144,6 +144,12 @@
 html {
   -webkit-text-size-adjust: 100%;
   overflow-x: hidden;   /* لا تمرير أفقي أبداً (DESIGN §٤) */
+
+  /* **لا تكبيرَ بالنقر المزدوج — والنقرةُ تستجيب بلا مهلة انتظاره** (منقولٌ من اقرأ،
+     `read@9220ab1`). **ولا يمسّ لوحَ القلم**: `.pen-surface` تعلن `touch-action: none`،
+     وسلوكُ اللمس **تقاطعُ** قيم العنصر وأسلافه — و`none ∩ manipulation = none`. فيبقى
+     اللوحُ مانعاً كلَّ إيماءةِ متصفّحٍ كما كان، ويكسب هذا السطرُ ما دونه من الشاشة. */
+  touch-action: manipulation;
 }
 
 body {
@@ -1342,4 +1348,36 @@ button {
   font-size: .9rem;
   line-height: 1.7;
   text-align: start;
+}
+
+/* ————— شريطُ التثبيت (`install.js`) — منقولُ اقرأ الميدانيّ، `read@260bf48` —————
+   رسالةٌ لكل جهازٍ بلسانه، وزرٌّ حقيقيّ حيث يتيحه النظام — ويغيب كلياً في المثبَّت.
+
+   **وزيادةٌ معلَنة على لوح اقرأ**: زرُّ الإغلاق عنده ٢٫٧٥rem (٤٤ بكسلاً) و`DESIGN §٤`
+   يشترط ≥٤٨ للثانويّ — فرُفع إلى ٣rem، نظيرُ زيادة `.btn--ghost` في الجلسة ٠.
+   **والعيبُ قائمٌ في اقرأ نفسِه فيُعاد إليه** (مقيَّدٌ في `docs/SEED.md`). */
+.install-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .5rem .85rem;
+  padding: .6rem 1rem;
+  background: var(--paper-deep);
+  border-bottom: 1px solid var(--line);
+  font-size: .95rem;
+  line-height: 1.6;
+}
+
+.install-bar .install-text { flex: 1 1 16rem; }
+
+.install-bar .install-go { min-height: 3rem; padding: .35rem 1.15rem; font-size: 1rem; }
+
+.install-x {
+  min-width: 3rem;
+  min-height: 3rem;
+  background: none;
+  border: 0;
+  color: var(--ink-soft);
+  font-size: 1rem;
+  cursor: pointer;
 }

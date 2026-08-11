@@ -104,8 +104,18 @@ const resources = (win) => win.performance.getEntriesByType('resource').map((e) 
     const box = surface.getBoundingClientRect();
     ok(Math.abs(box.width - box.height) <= 2 && box.width >= 240,
       `واللوحُ مربّعٌ بمقاسٍ يكفي يدَ طفل (${Math.round(box.width)}×${Math.round(box.height)})`);
+    // ————— قفلُ المقياس حيٌّ، واللوحُ لم يبتلعه (الجلسة ٤ب) —————
+    //
+    // القفلُ يُعلَن على `html`، واللوحُ يُعلن `touch-action: none`. **والمقيسُ هنا
+    // المحسوبُ في متصفّحٍ حقيقيّ لا المكتوبُ في اللوح** — فلو غلب العامُّ الخاصَّ يوماً
+    // لصار الإصبعُ يمرّر الصفحةَ بدل أن يكتب، ولَما أمسكه فحصٌ نصيّ.
+    const liveViewport = doc.querySelector('meta[name="viewport"]')?.getAttribute('content') || '';
+    ok(/maximum-scale=1\b/.test(liveViewport) && /user-scalable=no/.test(liveViewport),
+      'وقفلُ المقياس حيٌّ في الصفحة نفسِها (لا زومَ يفسد رسمَ الحرف)');
+    ok(win.getComputedStyle(doc.documentElement).touchAction === 'manipulation',
+      'ولا تكبيرَ بالنقر المزدوج في التطبيق (html: manipulation) — محسوباً لا مكتوباً');
     ok(win.getComputedStyle(surface).touchAction === 'none',
-      'ولمسُه كتابةٌ لا تمريرٌ للصفحة (touch-action: none)');
+      'ومع ذلك يبقى لمسُ اللوح كتابةً لا تمريراً (touch-action: none أخصُّ فيغلب)');
 
     // **وما يُكتَب هو ما يُعرَض**: طولُ خطّ النموذج على الشاشة عينُ طول المسار الذي
     // تُكتب به الدورةُ — فلا يفترق المفحوصُ عن المعروض («النموذجُ هو المقياس»).
@@ -178,16 +188,30 @@ const resources = (win) => win.performance.getEntriesByType('resource').map((e) 
       'ولمسُ الكفّ أثناء القلم لا يكتب شيئاً (ق٤: تُهمَل اللمسةُ ما دام القلمُ يكتب)');
 
     // ٣) دورةٌ صحيحة كاملة على لوحٍ نظيف: جسمان ثم نقطة
+    //
+    // **وتُكتب بعد عودةٍ من الخلفية** (الجلسة ٤ب): الجزءُ الثالث من القفل يعيد إعلانَ
+    // الميتا عند `pageshow`/`visibilitychange` — فهنا يُطلَق الحدثان قبل الكتابة، ثم
+    // تُكتب الدورةُ كاملةً. **والمدَّعى ما يُقاس**: أنّ الإعادةَ لا ترمي شيئاً، وأنّ
+    // القفلَ يبقى على حاله بعدها، وأنّ **الطفلَ يكتب بعدها كما كان يكتب**.
     const buttons = [...doc.querySelectorAll('.dev-row .btn')];
     buttons.find((b) => b.textContent.includes('أعِد'))?.click();
     await wait(120);
+
+    win.dispatchEvent(new win.Event('pageshow'));
+    doc.dispatchEvent(new win.Event('visibilitychange'));
+    await wait(60);
+    ok((doc.querySelector('meta[name="viewport"]')?.getAttribute('content') || '') === liveViewport
+      && win.getComputedStyle(doc.documentElement).touchAction === 'manipulation'
+      && win.getComputedStyle(doc.querySelector('.pen-surface')).touchAction === 'none',
+      'والعودةُ من الخلفية تُعيد إعلانَ الميتا فلا تنقصه ولا تُسقط إعلانَ اللوح');
+
     for (const stroke of body) await writeStroke(stroke, 'pen');
     await writeStroke([dot, dot], 'pen');
     await wait(150);
 
     const done = doc.querySelector('.dev-readout')?.textContent || '';
     ok(/مقبول/.test(done) && !/غير مقبول/.test(done),
-      `والكتابةُ الصحيحة تُقبَل على الشاشة (${done.split('\n')[0].slice(0, 40)})`);
+      `ودورةُ الكتابة الكاملة **بعد القفل والعودة** تُقبَل على الشاشة (${done.split('\n')[0].slice(0, 40)})`);
     const trail = doc.querySelector('.pen-stroke--trail');
     ok(trail && Number(trail.getAttribute('stroke-dashoffset')) < 1,
       'والمسارُ تلوّن تحت القلم حتى آخره (مؤشّرُ التقدّم الحركيّ — METHOD §٥)');

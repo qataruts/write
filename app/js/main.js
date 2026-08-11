@@ -11,6 +11,7 @@
 
 import * as progress from './progress.js';
 import * as audio from './audio.js';
+import * as install from './install.js';
 import { renderReview } from './review.js';
 import { renderGate } from './gate.js';
 import { renderParent, skillsText } from './parent.js';
@@ -465,6 +466,25 @@ if (progress.PREVIEW) {
     h('span', {}, ' — كلُّ المحطات مفتوحةٌ للاطّلاع، ولا يُحفَظ أيُّ تقدّم على هذا الجهاز.'),
     h('a', { class: 'btn btn--ghost', href: './' }, 'اخرج إلى تجربة الطفل')));
 }
+
+// وشريطُ التثبيت لكل زائرٍ من متصفّح (منقولُ اقرأ الميدانيّ، `read@260bf48`): يعرف
+// جهازَه فيعطي رسالتَه — زرٌّ حقيقيّ حيث يسمح النظام، وخطوتا سفاري حيث لا يسمح —
+// **ويصمت في التطبيق المثبَّت وفي المعاينة** (شريطان فوق الشاشة ضجيجٌ على المقيّم).
+if (!progress.PREVIEW) install.mount();
+
+// **والعودةُ من الخلفية بمقياس ١** (منقولٌ من اقرأ، `read@9220ab1`): iPadOS يسترجع
+// التطبيقَ المثبَّت بعد زيارة تطبيقٍ آخر **مكبَّراً** أحياناً — عيبُ استرجاعٍ معروف في
+// المنصّة لا في شيفرتنا. الميتا تمنع التكبير أصلاً (`maximum-scale=1`)، وإعادةُ إعلانها
+// نفسِها عند العودة تُلزم WebKit بإعادة تطبيقها حيث يتلكّأ. **وهنا ألزمُ منه في اقرأ**:
+// الطفلُ يعود إلى **لوحٍ** يكتب عليه، ومقياسٌ منحرفٌ يزيح ما تحت إصبعه عمّا تحت قلمه.
+const viewportMeta = document.querySelector('meta[name="viewport"]');
+const reassertViewport = () => {
+  if (viewportMeta) viewportMeta.setAttribute('content', viewportMeta.getAttribute('content'));
+};
+window.addEventListener('pageshow', reassertViewport);
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') reassertViewport();
+});
 
 window.addEventListener('hashchange', render);
 audio.ready();
