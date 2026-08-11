@@ -13,10 +13,10 @@
 **وصفحاتُ اقرأ الاثنتان والعشرون لم تُنقَل**: كلٌّ منها تسوق شاشةً من شاشاته. وتُكتب
 صفحاتُ «اُكْتُبْ» في جلساتها: **فحصُ خصوصية القلم بصفر طلباتٍ شبكية في الجلسة ١**
 (وهو أوّلُ ما يحتاج هذه الحظيرة، ولذلك بقي عدّادُ الطلبات كما هو)، ومحطاتُ التهيئة
-في الجلسة ٤، وعدّةُ الأجهزة (`--device`) في الجلسة ١٢.
+في الجلسة ٤ (`--suite warmup`)، وعدّةُ الأجهزة (`--device`) في الجلسة ١٢.
 
-**وصفحةُ اليوم واحدة**: `browser_test.html` — فحصُ القشرة على تطبيقٍ فارغ: يفتح بلا
-خطأ جافاسكربت واحد، وتُرسَم الخريطةُ وعلامتُها، وأهدافُ اللمس ≥ ٦٤ بكسل (`DESIGN §٤`).
+**والافتراضُ فحصُ القشرة**: `browser_test.html` — يفتح بلا خطأ جافاسكربت واحد،
+وتُرسَم الخريطةُ وعلامتُها، وأهدافُ اللمس ≥ ٦٤ بكسل (`DESIGN §٤`).
 
 ملاحظة: --dump-dom و--virtual-time-budget غير موثوقين مع fetch والصوت،
 لذلك تُرسَل النتائج من الصفحة نفسها ثم يُقتل المتصفّح.
@@ -42,12 +42,14 @@ PAGES = {
     "/__test.html": TOOLS / "browser_test.html",
     "/__pen.html": TOOLS / "browser_pen.html",
     "/__paths.html": TOOLS / "browser_paths.html",
+    "/__warmup.html": TOOLS / "browser_warmup.html",
 }
 # سَوقةُ الصفحات: `--suite <اسم>` يختار أيَّها يُشغَّل، والافتراضُ فحصُ القشرة.
 SUITES = {
     "shell": "/__test.html",       # الجلسة ٠: التطبيق يفتح بلا خطأ جافاسكربت واحد
     "pen": "/__pen.html",          # الجلسة ١: خصوصيةُ القلم — صفرُ طلباتٍ في دورة كتابة
     "paths": "/__paths.html",      # الجلسة ٢: كلُّ حرفٍ يُعرض من مساره ويُحكم عليه
+    "warmup": "/__warmup.html",    # الجلسة ٤: إصبعٌ يعبر محطات التهيئة الستّ بقفلها
 }
 # نافذة Chrome بلا واجهة تحجز ٨٧ بكسلاً لإطارٍ وهميّ فوق المنظور — فلولا تعويضها لقِسنا
 # جهازاً أقصر من الجهاز. والصفحة تعيد منظورها الحقيقي، والعدّاء يرفض أي انحرافٍ عن المطلوب.
@@ -80,6 +82,15 @@ def pending_texts() -> list:
         return []
     return [e["text"] for e in data
             if isinstance(e, dict) and e.get("text") and e.get("status", "pending") != "done"]
+
+
+def warmup_parts() -> list:
+    """محطاتُ التهيئة كما تعلنها وحدتُها المولَّدة — لقطتُها تُفتح على أوّلها،
+    ولا تُكتب هنا قائمةٌ ثانية تشيخ (`app/js/warmups.js` يكتبها مولّدُ المسارات)."""
+    module = APP / "js" / "warmups.js"
+    if not module.exists():
+        return []
+    return re.findall(r'^  "([^"]+)": \{', module.read_text(encoding="utf-8"), re.M)
 
 
 def make_server(port: int, results: list):
@@ -221,7 +232,8 @@ def main():
             out = Path(args.shots).resolve()
             out.unlink(missing_ok=True)   # وإلا لعُدَّت لقطةُ تشغيلٍ سابق نجاحاً فوريّاً
             # اللقطةُ تتبع السَّوقة: لقطةُ القلم لوحُه لا خريطتُه
-            where = "/?dev=1#/pen" if args.suite in ("pen", "paths") else "/?dev=1"
+            where = ("/#/warmup/" + (warmup_parts() or ["lines-h"])[0] if args.suite == "warmup"
+                     else "/?dev=1#/pen" if args.suite in ("pen", "paths") else "/?dev=1")
             proc = run_chrome(f"{base}{where}", profile,
                               [f"--screenshot={out}", "--window-size=980,1400", "--hide-scrollbars"],
                               args.show)

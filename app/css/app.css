@@ -1236,6 +1236,17 @@ button {
   opacity: .18;
 }
 
+/* **ممرُّ السماحة** (محطةُ «تحكّمٌ داخل حدود»، METHOD §٤): يُرسم بعرض السماحة التي
+   يحكم بها المحرّكُ نفسُه (`pen.js` يكتب `stroke-width` من `trial.tolerance`)، فما
+   يراه الطفلُ حدّاً هو الحدُّ المقيس — ولا لونَ إنذارٍ فيه: أرضٌ أفتحُ يمشي فيها. */
+.pen-fence {
+  fill: none;
+  stroke: var(--pen-accent);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: .1;
+}
+
 .pen-dot { fill: var(--ink); opacity: .18; }
 .pen-dot--on { opacity: .42; }
 
@@ -1305,6 +1316,19 @@ button {
   .pen-box--hint .pen-arrow { animation: none; opacity: .95; }
   .pen-stroke--trail { transition: none; }
 }
+
+/* ————— شاشةُ التهيئة الحركية (`app/js/warmup.js` · METHOD §٤ المرحلة ١) —————
+   شاشةٌ بفعلٍ رئيسٍ واحد: **اللوح**. فما حوله يتنحّى — عنوانٌ صغير، ونقاطُ الأشكال،
+   وسطرٌ لوليّ الأمر، وزرّان بارتفاع فعل الشاشة الرئيس (≥ ٦٤ بكسل، DESIGN §٤). */
+
+.warmup { --accent: var(--accent-skills); }
+.warmup-title { margin: 0 0 .6rem; font-size: 1.35rem; text-align: center; }
+.warmup .dots { margin-bottom: .4rem; }
+.warmup-board { min-height: 12rem; }
+.warmup .hint { margin: .2rem auto .8rem; max-width: 26rem; text-align: center; }
+.warmup .foot { justify-content: center; gap: .6rem; }
+/* الزرّان فعلا شاشةٍ لا زينة: ارتفاعُهما ارتفاعُ «تابع من هنا» نفسُه (`.next`) */
+.warmup .foot .btn { min-width: 8rem; }
 
 /* لوحُ قراءةِ المطوّر تحت اللوح (?dev=1) — أرقامُ حكمٍ لا شاشةُ طفل */
 .dev-readout {

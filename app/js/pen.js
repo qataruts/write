@@ -243,6 +243,23 @@ export function partsOf(ref) {
 const startDist = (part, p) => dist(part.start, p);
 
 /**
+ * **الشكلُ المغلق**: مسارٌ يعود طرفُه إلى **دائرة بدايته** — دائرةُ التهيئة، وحلقاتُ
+ * م/ه/و. والمقياسُ من جنس الشرط الأول لا رقماً حرّاً: ما دام الطرفُ داخل الدائرة التي
+ * يُقبَل فيها النزول فالموضعُ الواحد يحمل طولين (رأسَ المسار وذيلَه) — وهو بعينه ما
+ * يجعل الطولَ في الشكل المغلق **دائرياً**: الرجوعُ خطوةً من البداية يقع في الطول
+ * قفزةً إلى آخر المسار.
+ */
+const isClosed = (part, tol) => part.kind === 'stroke'
+  && dist(part.poly.pts[0], part.end) <= tol.start;
+
+/** فرقُ طولين على مسارٍ دائريّ: أقصرُ الطريقين بينهما، موجباً تقدّماً وسالباً رجوعاً. */
+function cyclicGap(len, total) {
+  if (!(total > 0)) return len;
+  const wrapped = ((len % total) + total) % total;
+  return wrapped > total / 2 ? wrapped - total : wrapped;
+}
+
+/**
  * **رأسُ المسار** — المدى الذي يُرسى فيه نزولُ الإصبع، لا المسارُ كلُّه.
  *
  * 🔴 **ثغرةُ ذيل الشكل المغلق** (كشفتها مراجعةُ المدير للجلسة ١، وأُصلحت قبل
@@ -278,6 +295,9 @@ const headSpan = (poly, startTol = TOLERANCE.start) =>
 export function createTrial(ref, options = {}) {
   const tol = resolveTolerance(options.tolerance);
   const parts = partsOf(ref);
+  // **الانغلاقُ يُعرَف مرّةً عند بناء المحاولة** وبسماحة المحطة نفسِها (لا بسماحةٍ
+  // عامّة): محطةٌ تشدّ سماحتَها تشدّ معها ما تعدّه شكلاً مغلقاً — فلا مقياسان.
+  for (const part of parts) part.closed = isClosed(part, tol);
   const onFault = options.onFault || (() => {});
   const onProgress = options.onProgress || (() => {});
 
@@ -454,10 +474,39 @@ export function createTrial(ref, options = {}) {
     }
     metrics.maxLateral = Math.max(metrics.maxLateral, hit.d);
 
+    /**
+     * **صدقُ الاسم على الشكل المغلق** (حمولةُ مراجعة الجلسة ١، تُنفَّذ هنا عند صاحبة
+     * الدوائر): طفلٌ يدور دورانَه معكوساً على دائرةٍ كان يُقال له **«يخرج عن المسار»**
+     * — والحقُّ **«يعكس اتجاه الحركة»**. وعلّةُ اللبس أنّ الرجوعَ من البداية على شكلٍ
+     * مغلق يقع في الطول **قفزةً إلى الأمام** (إلى ذيل المسار) لا ارتداداً، فلا يمسّه
+     * الشرطُ الثاني؛ ونافذةُ الإسقاط لا تبلغ الذيلَ فيُقاس بُعدُه عن رأس المسار
+     * ويُسمَّى `wander`.
+     *
+     * **والحكمُ لا يتبدّل — الاسمُ وحدَه**: لا عتبةَ تُمَسّ ولا مقبولَ يصير مردوداً ولا
+     * عكسُه. فحين يقع الانحرافُ على شكلٍ **مغلق**، يُسأل سؤالٌ واحد: أهو على الحبر
+     * فعلاً (إسقاطٌ على المسار كلِّه داخلَ سماحة الانحراف) **وخلفَ موضعه دائرياً**
+     * (أقصرُ الطريقين بينه وبين مؤشّره رجوعٌ يتجاوز سماحة الارتداد)؟ فإن كان فهو راجعٌ
+     * على حبره لا خارجٌ عنه — **وذلك ذهبُ لوحة وليّ الأمر** (`METHOD.md §٦`).
+     *
+     * ولِمَ الشكلُ المغلق وحدَه؟ لأنّ الطولَ فيه وحدَه دائريّ: على مسارٍ مفتوح يبقى
+     * الرجوعُ رجوعاً في الطول فيمسكه الشرطُ الثاني باسمه.
+     */
+    const backwardsOnRing = () => {
+      if (!parts[stroke.aim].closed) return false;
+      const anywhere = nearestOn(poly, p, 0, poly.len);
+      return anywhere.d <= tol.lateral
+        && cyclicGap(anywhere.len - stroke.cursor, poly.len) < -tol.back;
+    };
+
     let fault = null;
     if (hit.d > tol.lateral && !stroke.wandered) {
       stroke.wandered = true;
-      fault = note(FAULTS.WANDER, p, stroke.aim);
+      if (backwardsOnRing()) {
+        stroke.reversed = true;      // شكوى واحدة لا صدىً: الاسمُ قيل مرّة
+        fault = note(FAULTS.REVERSE, p, stroke.aim);
+      } else {
+        fault = note(FAULTS.WANDER, p, stroke.aim);
+      }
     }
     // **الارتدادُ يُقاس عن أبعد ما بلغ** لا عن آخر نقطة: الرجوعُ خطوةً خطوة عن آخر
     // نقطةٍ لا يتجاوز عتبةً أبداً، فينسلّ عكسُ الاتجاه كلَّه من تحت الشرط.
@@ -588,23 +637,28 @@ export const MODES = { GUIDED: 'guided', FAINT: 'faint', FREE: 'free' };
  * @param {object} config.ref المسارُ المرجعيّ (`METHOD.md §٣.١`)
  * @param {string} [config.mode] `guided` (المسار ظاهر) · `faint` (خافت) · `free` (صندوقٌ فارغ)
  * @param {number|object} [config.tolerance] سماحةُ المحطة
+ * @param {boolean} [config.bounds] يرسم **ممرَّ السماحة** حول المسار (محطةُ التحكّم)
  * @param {Function} [config.onFault] خطأٌ وقع — للقياس ولإرشاد الشاشة
  * @param {Function} [config.onPart] جزءٌ استُوفي
  * @param {Function} [config.onDone] اكتملت الأجزاء — ومعها حصيلةُ المحاولة
  */
 export function penSurface(config) {
-  const { ref, mode = MODES.GUIDED, tolerance, onFault, onPart, onDone, label = 'لوحُ الكتابة' } = config;
+  const {
+    ref, mode = MODES.GUIDED, tolerance, bounds = false,
+    onFault, onPart, onDone, label = 'لوحُ الكتابة',
+  } = config;
 
   const box = document.createElement('div');
   box.className = `pen-box pen-box--${mode}`;
   const svg = sv('svg', {
     class: 'pen-surface', viewBox: `0 0 ${GRID} ${GRID}`, role: 'img', 'aria-label': label,
   });
+  const fence = sv('g', { class: 'pen-bounds' });      // ممرُّ السماحة (اختياريّ)
   const model = sv('g', { class: 'pen-model' });
   const trailed = sv('g', { class: 'pen-trail' });     // ما تلوّن تحت القلم
   const guide = sv('g', { class: 'pen-guide' });
   const inkLayer = sv('g', { class: 'pen-ink' });
-  svg.append(model, trailed, guide, inkLayer);
+  svg.append(fence, model, trailed, guide, inkLayer);
   box.append(svg);
 
   const trial = createTrial(ref, {
@@ -621,6 +675,13 @@ export function penSurface(config) {
   for (const part of parts) {
     if (part.kind === 'stroke') {
       const d = pathD(part.poly.pts);
+      /**
+       * **ممرُّ السماحة — مرسومٌ بالسماحة نفسِها** (محطةُ «تحكّمٌ داخل حدود»،
+       * `METHOD.md §٤`): عرضُه `٢ × سماحةِ الانحراف` التي يحكم بها `createTrial`
+       * الآن، لا رقمَ زينةٍ يُختار. فالحدُّ الذي يراه الطفلُ هو الحدُّ الذي يُقاس به
+       * — امتدادُ «النموذجُ هو المقياس» (`METHOD.md §٣.٢`) إلى السماحة.
+       */
+      if (bounds) fence.append(sv('path', { class: 'pen-fence', d, 'stroke-width': trial.tolerance.lateral * 2 }));
       const shape = sv('path', { class: 'pen-stroke', d });
       const trail = sv('path', {
         class: 'pen-stroke pen-stroke--trail',

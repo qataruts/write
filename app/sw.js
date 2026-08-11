@@ -38,7 +38,7 @@
 // **نسخةُ «اُكْتُبْ» تبدأ من ١** وسلوكُها سلوكُ `v20` في اقرأ (مخزنٌ ثابت للصوت،
 // وشفاءٌ عند أول اتصال، وشفافيةُ تحميل) — فالبذرةُ تُنسخ ولا تُستورَد، وتاريخُ
 // نسخِ اقرأ تاريخُه هو. عند تغيير أي ملف من ملفات الهيكل: ارفع `VERSION`.
-const VERSION = 'v5';
+const VERSION = 'v6';
 const SHELL_CACHE = `uktub-shell-${VERSION}`;
 const AUDIO_CACHE = 'uktub-audio';          // ثابتٌ عمداً — لا يحمل VERSION
 const KEEP = [SHELL_CACHE, AUDIO_CACHE];
@@ -64,6 +64,8 @@ const SHELL = [
   'js/progress.js',
   'js/review.js',
   'js/ui.js',
+  'js/warmup.js',
+  'js/warmups.js',
   'icons/icon-192.png',
   'icons/icon-512.png',
   'icons/maskable-512.png',

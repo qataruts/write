@@ -15,6 +15,7 @@ import { renderReview } from './review.js';
 import { renderGate } from './gate.js';
 import { renderParent, skillsText } from './parent.js';
 import { renderPenDev, releasePen } from './pendev.js';
+import { renderWarmup, releaseWarmup } from './warmup.js';
 import {
   h, icon, faceEl, toast, go, arNum, starsRow, topbar, brandMark,
   nodeTitle, nodeFace, nodeWhere, accentForKind, landmark, DEV,
@@ -345,7 +346,6 @@ function fillAll(stars) {
 // يقع الطفلُ على طريقٍ مسدود. والسطرُ يُحذف يومَ تُكتب شاشتُه لا قبلها.
 
 const SCREENS = {
-  warmup: 'محطات التهيئة الحركية — الجلسة ٤',
   letter: 'درس الحرف المعزول — الجلسة ٥',
   form: 'أشكال المواقع — الجلسة ٧',
   join: 'الوصل والنسخ — الجلسة ٨',
@@ -358,8 +358,9 @@ let renderToken = 0;
 async function render() {
   audio.stop();
   // إطلاقُ لوح الكتابة مع كل رسمة — نظيرُ `recorder.release()` في اقرأ: لا يبقى
-  // للوحٍ غادره الطفلُ أثرٌ معلَّقٌ على النافذة.
+  // للوحٍ غادره الطفلُ أثرٌ معلَّقٌ على النافذة. (ولكلِّ شاشةٍ تبني لوحاً إطلاقُها.)
   releasePen();
+  releaseWarmup();
   const token = ++renderToken;
   const [name, arg1] = location.hash.replace(/^#\/?/, '').split('/');
 
@@ -385,6 +386,15 @@ async function render() {
     }
   } else if (name === 'parent') {
     screen = renderParent(render);
+  } else if (name === 'warmup' && arg1) {
+    // محطةُ تهيئةٍ حركية (الجلسة ٤): القفلُ يُحرس هنا كما يُحرس في أزرار الخريطة،
+    // ومحطةٌ لا أشكالَ لها تردّ `null` فيعود الطفلُ إلى خريطته بلا شاشةٍ بيضاء.
+    // **ومعرّفُ العقدة يُقرأ من الرحلة لا يُركَّب هنا**: الموجّهُ يفتح بالنوع والجزء،
+    // ومعرّفُها من صنع `progress.nodeId` وحدَه — فلا سابقةُ محطةٍ تُكتب في موضعين.
+    const part = decodeURIComponent(arg1);
+    const node = progress.allNodes().find((n) => n.type === 'warmup' && n.part === part);
+    if (node && !guard(node.id)) return;
+    screen = (node && renderWarmup(part)) || renderMap();
   } else if (name === 'pen') {
     // صفحةُ تجربة محرّك القلم (الجلسة ١) — خلف `?dev=1` وحدها، و`renderPenDev`
     // تردّ `null` بدونها فيعود الطفلُ إلى خريطته.

@@ -49,7 +49,13 @@ ROOT = TOOLS.parent
 ANCHORS = TOOLS / "path_anchors.json"
 TOOL_PAGE = TOOLS / "make_paths.html"
 OUT = ROOT / "app" / "js" / "paths.js"
+WARM_OUT = ROOT / "app" / "js" / "warmups.js"
+CURRICULUM = ROOT / "app" / "js" / "curriculum.js"
 FORMS = ["isolated", "initial", "medial", "final"]
+
+# **قسمُ أشكال التهيئة في العدّة** — تُبصَم حدودُه فيُعرَف أنّ الوحدةَ بُنيت منه
+# بعينه: تعديلُ تعريفٍ هندسيّ بلا إعادة بناءٍ يحمرّ من نفسه (نظيرُ بصمة الإيماءات).
+WARM_SECTION = ("// ————— ٧ب) أشكالُ التهيئة الحركية", "// ————— ٨) العرضُ")
 
 sys.path.insert(0, str(TOOLS))
 import browser_test  # noqa: E402  (حظيرةُ الخادم ومُشغِّلُ Chrome — تبعيةٌ معلَنة)
@@ -62,6 +68,44 @@ def sha() -> str:
 
 def anchors() -> dict:
     return json.loads(ANCHORS.read_text(encoding="utf-8"))
+
+
+def warm_spec() -> str:
+    """نصُّ قسم أشكال التهيئة من العدّة — تعريفاتُها الهندسية وبناؤها."""
+    src = TOOL_PAGE.read_text(encoding="utf-8")
+    head = src.find(WARM_SECTION[0])
+    tail = src.find(WARM_SECTION[1], head + 1)
+    if head < 0 or tail < 0:
+        return ""
+    return src[head:tail]
+
+
+def warm_sha() -> str:
+    return hashlib.sha1(warm_spec().encode("utf-8")).hexdigest()[:12]
+
+
+def warm_parts() -> list:
+    """محطاتُ التهيئة كما يعلنها المنهج — `part` بعينه لا قائمةٌ ثانية تشيخ."""
+    if not CURRICULUM.exists():
+        return []
+    src = CURRICULUM.read_text(encoding="utf-8")
+    body = re.search(r"export const STAGES = (\[.*?\n\]);", src, re.S)
+    if not body:
+        return []
+    stages = json.loads(body.group(1))
+    return [node["part"] for stage in stages if stage.get("kind") == "warmup"
+            for node in stage.get("nodes", [])]
+
+
+def warmups_module() -> tuple:
+    """يقرأ `WARMUPS` و`WARMUPS_SOURCE` من الوحدة المولَّدة (قراءةٌ نصّية)."""
+    if not WARM_OUT.exists():
+        return None, None
+    src = WARM_OUT.read_text(encoding="utf-8")
+    body = re.search(r"export const WARMUPS = (\{.*?\n\});", src, re.S)
+    source = re.search(r"export const WARMUPS_SOURCE = (\{.*?\});", src, re.S)
+    return (json.loads(body.group(1)) if body else None,
+            json.loads(source.group(1)) if source else None)
 
 
 def paths_module() -> tuple:
@@ -191,6 +235,88 @@ def write_module(paths: dict, meta: dict) -> str:
     return "\n".join(lines)
 
 
+WARM_HEADER = """\
+// **مساراتُ التهيئة الحركية** — المرحلةُ الأولى في `METHOD.md §٤`: خطوطٌ ومنحنياتٌ
+// ودوائرُ وموجاتٌ وتحكّمٌ داخل حدود، **قبل أوّل حرف**. وصيغتُها صيغةُ `METHOD.md §٣.١`
+// نفسُها (`{ strokes: [{ points, start }], dots }`) فيقرؤها `pen.js` كما يقرأ الحروف.
+//
+// ⚠ **ملفٌّ مولَّد — لا يُحرَّر بيد** (`METHOD.md §٣.٨`):
+//   python3 tools/make_paths.py --build
+//
+// **وليس فيه إحداثيٌّ كُتب**: كلُّ نقطةٍ محسوبةٌ من **تعريفٍ هندسيّ** معلَنٍ في عدّة
+// التأليف (`tools/make_paths.html §٧ب`) — «خطٌّ من حافّة الصندوق إلى حافّته»، «قوسٌ
+// نصفُ قطره كذا». وشكلُ التهيئة ليس حقيقةً من حقائق الخطّ تُقرأ من مُشكِّل العربية
+// (كالحروف)، بل هو تعريفُه نفسُه — فالمكتوبُ التعريفُ والمحسوبُ الإحداثيّ.
+//
+// **واتجاهُ الدوران مقروءٌ من المادّة**: دوائرُ التهيئة وحلقاتُها تدور دورانَ **حلقة
+// م المعزولة** — أوّلِ حلقةٍ يكتبها الطفلُ في المنهج — يُقاس من مسارها ساعةَ البناء
+// لا يُختار رأياً (`METHOD.md §٤`: «دوائرُ باتجاهٍ صحيح»).
+//
+// **ولا شكلَ هنا لا يقبله محرّكُه**: كلُّ شكلٍ أُدخل على `judge` ساعةَ البناء صحيحاً
+// فقُبل ومعكوساً فرُدّ — وإلا سقط البناء. ويحرسه بعدها `tools/test_warmup.mjs`.
+
+"""
+
+
+def warm_body(text: str = None) -> str:
+    """نصُّ كتلة `WARMUPS` من الوحدة — تُبصَم فيُعرف أنّ أحداً لم يمسّها بيد."""
+    src = text if text is not None else (
+        WARM_OUT.read_text(encoding="utf-8") if WARM_OUT.exists() else "")
+    found = re.search(r"export const WARMUPS = \{.*?\n\};", src, re.S)
+    return found.group(0) if found else ""
+
+
+def body_sha(text: str) -> str:
+    return hashlib.sha1(text.encode("utf-8")).hexdigest()[:12]
+
+
+def warmup_block(warmups: dict) -> str:
+    lines = ["export const WARMUPS = {"]
+    parts = list(warmups.items())
+    for pi, (part, entry) in enumerate(parts):
+        lines.append(f'  "{part}": {{')
+        lines.append('   "shapes": [')
+        shapes = entry["shapes"]
+        for si, shape in enumerate(shapes):
+            lines.append("    {")
+            lines.append(f'     "id": "{shape["id"]}",')
+            lines.append(f'     "note": "{shape["note"]}",')
+            if shape.get("tolerance") is not None:
+                lines.append(f'     "tolerance": {shape["tolerance"]},')
+            if shape.get("bounds"):
+                lines.append('     "bounds": true,')
+            lines.append('     "ref": { "strokes": [')
+            strokes = shape["ref"]["strokes"]
+            for ki, stroke in enumerate(strokes):
+                start = stroke["start"]
+                lines.append(f'      {{ "start": [{num(start[0])}, {num(start[1])}], "points": [')
+                rows = chunk(stroke["points"])
+                for ri, row in enumerate(rows):
+                    lines.append(f'       {row}' + ("," if ri < len(rows) - 1 else ""))
+                lines.append("      ] }" + ("," if ki < len(strokes) - 1 else ""))
+            lines.append('     ], "dots": [] }')
+            lines.append("    }" + ("," if si < len(shapes) - 1 else ""))
+        lines.append("   ]")
+        lines.append("  }" + ("," if pi < len(parts) - 1 else ""))
+    lines.append("};")
+    return "\n".join(lines)
+
+
+def write_warmups(warmups: dict, meta: dict) -> str:
+    """الوحدةُ كاملةً: ترويستُها وكتلتُها ونسبُها — **وبصمةُ الكتلة في نسبها**،
+    فتحريرُ إحداثيٍّ بيد يُسقِط الفحصَ الذاتيّ حتى يُعاد البناء."""
+    block = warmup_block(warmups)
+    return "\n".join([
+        WARM_HEADER,
+        block,
+        "",
+        "/** نسبُ الوحدة: من أيّ قسمٍ في العدّة بُنيت، وبأيّ اتجاهِ دوران، وبصمةُ كتلتها. */",
+        "export const WARMUPS_SOURCE = "
+        + json.dumps({**meta, "body": body_sha(block)}, ensure_ascii=False) + ";",
+        "",
+    ])
+
+
 def build(port: int, timeout: int) -> int:
     results = drive("?build=1", port, timeout)
     if not results:
@@ -211,6 +337,20 @@ def build(port: int, timeout: int) -> int:
     OUT.write_text(write_module(paths, meta), encoding="utf-8")
     forms = sum(len(v) for v in paths.values())
     print(f"\nكُتب {OUT.relative_to(ROOT)}: {len(paths)} حرفاً في {forms} شكلاً")
+
+    warmups = payload.get("warmups")
+    if warmups:
+        spin = payload["meta"].get("spin")
+        WARM_OUT.write_text(write_warmups(warmups, {
+            "tool": "tools/make_paths.html §٧ب",
+            "sha": warm_sha(),
+            "grid": payload["meta"]["grid"],
+            "spin": spin,
+            "spinFrom": "م/isolated",
+            "spinText": "مع عقارب الساعة" if spin and spin > 0 else "عكسَ عقارب الساعة",
+        }), encoding="utf-8")
+        shapes = sum(len(v["shapes"]) for v in warmups.values())
+        print(f"وكُتب {WARM_OUT.relative_to(ROOT)}: {len(warmups)} محطةَ تهيئةٍ في {shapes} شكلاً")
     return 0
 
 
@@ -291,6 +431,37 @@ def self_test() -> int:
                 continue
             ok(len(ref["strokes"]) == len(entry["strokes"]),
                f"{ch}/{form}: أجزاءُ المسار {len(ref['strokes'])} = أجزاءُ الإيماءة {len(entry['strokes'])}")
+
+    # ————— عهدُ التهيئة: الوحدةُ بُنيت من قسم العدّة، ومحطاتُها محطاتُ المنهج —————
+    #
+    # **ولا قائمةَ محطاتٍ تُكتب هنا**: تُقرأ من `curriculum.js` نفسِه (الجلسة ٣)، فمحطةٌ
+    # تدخل المنهجَ أو تخرج منه تُطالِب هذا الفحصَ من نفسها بلا سطرٍ يُعدَّل.
+    warmups, wmeta = warmups_module()
+    parts = warm_parts()
+    ok(bool(warm_spec()), "وقسمُ أشكال التهيئة قائمٌ في العدّة (§٧ب)")
+    ok(warmups is not None, f"ووحدةُ التهيئة المولَّدة موجودةٌ ({WARM_OUT.relative_to(ROOT)})")
+    if warmups is not None:
+        missing = [p for p in parts if p not in warmups]
+        extra = [p for p in warmups if p not in parts]
+        ok(not missing and not extra,
+           f"ومحطاتُ التهيئة في الوحدة عينُ محطات المنهج ({len(parts)} محطة)"
+           + (f" — ناقصٌ: {'، '.join(missing)}" if missing else "")
+           + (f" — دخيلٌ: {'، '.join(extra)}" if extra else ""))
+        ok(wmeta and wmeta.get("sha") == warm_sha(),
+           f"وبصمةُ قسم العدّة في الوحدة عينُ ما في الملفّ ({wmeta.get('sha') if wmeta else '—'}"
+           f" = {warm_sha()})"
+           + ("" if wmeta and wmeta.get("sha") == warm_sha()
+              else " — عُدِّل تعريفُ الأشكال ولم يُعَد البناء"))
+        # **ولا يُدَسّ شكلٌ بيد ولا يُحرَّر إحداثيّ**: بصمةُ كتلة الوحدة في نسبها،
+        # فتحريرُها بلا إعادة بناءٍ يحمرّ (نظيرُ «لا مسارَ بلا إيماءةٍ ولّدته»).
+        ok(bool(wmeta and wmeta.get("body") == body_sha(warm_body())),
+           f"ولم تُمَسّ الوحدةُ بيد بعد بنائها ({wmeta.get('body') if wmeta else '—'}"
+           f" = {body_sha(warm_body())})"
+           + ("" if wmeta and wmeta.get("body") == body_sha(warm_body())
+              else " — حُرِّرت بيد أو لم يُعَد البناء"))
+        ok(bool(wmeta and wmeta.get("spin") in (1, -1) and wmeta.get("spinFrom")),
+           f"ودورانُ دوائرها مقروءٌ من المادّة لا مختاراً ({wmeta.get('spinFrom') if wmeta else '—'}"
+           f" ⇐ {wmeta.get('spinText') if wmeta else '—'})")
 
     print(f"\n{fails} فشل" if fails else "\nعهدُ الإيماءة والمسار قائم")
     return 1 if fails else 0

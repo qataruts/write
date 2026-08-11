@@ -100,7 +100,7 @@
 </head>
 <body>
 <script type="module">
-import { GRID, TOLERANCE, penSurface, judge, prepare } from '/js/pen.js';
+import { GRID, TOLERANCE, penSurface, judge, prepare, pointAt } from '/js/pen.js';
 
 // ————— ثوابتُ الخيال والقشرة —————
 
@@ -1009,6 +1009,203 @@ function compose(work, gesture) {
   return { strokes, dots: work.dots };
 }
 
+// ————— ٧ب) أشكالُ التهيئة الحركية: هندسةٌ **محسوبة** لا خيالُ حرف —————
+//
+// المرحلةُ الأولى في `METHOD.md §٤` — «خطوطٌ أفقية/رأسية/مائلة · منحنيات ودوائر
+// باتجاهٍ صحيح · موجاتٌ وحلقات · تحكّمٌ داخل حدود» — **قبل أيّ حرف**. ومحطاتُها
+// الستُّ في `curriculum.js` (الجلسة ٣)، ومساراتُها هنا (بند الجلسة ٤: «بمساراتٍ من
+// `make_paths.html`»).
+//
+// **ولِمَ تُبنى في العدّة وليس فيها خيالُ حرفٍ يُقرأ؟** لأنّ عهدَ `METHOD.md §٣.٨`
+// **ألّا تُكتب إحداثياتٌ بيد**، وشكلُ التهيئة **ليس حقيقةً من حقائق الخطّ** تُقرأ من
+// المُشكِّل — بل هو **تعريفُه الهندسيّ نفسُه**: «خطٌّ من حافّة الصندوق إلى حافّته»،
+// «دائرةٌ نصفُ قطرها ثلثُ الصندوق». فالمكتوبُ هنا **التعريف**، والإحداثياتُ تُحسب
+// منه — كما تُحسب أشكالُ عدّة المعايرة (`tools/make_pen_traces.mjs`). وموضعُها هذه
+// العدّةُ لا وحدةٌ في `app/`، لثلاثة تجتمع فيها:
+//   ١) **إعادةُ التوزيع نفسُها** (`resample`): أقصى طولِ قطعةٍ مقروءٌ من سماحة
+//      المحرّك، فلا يُبنى شكلُ تهيئةٍ بقطعةٍ تخدع نافذةَ الرتابة.
+//   ٢) **الحكمُ يُجرَّب ساعةَ البناء**: كلُّ شكلٍ يُدخَل على `judge` صحيحاً ومعكوساً
+//      قبل أن يخرج من هنا — فلا يدخل التطبيقَ شكلٌ لا يقبله محرّكُه أو يقبل عكسَه.
+//   ٣) **الصندوقُ صندوقُ الحروف** (`MARGIN` نفسُه): فما تمرّنت عليه اليدُ في التهيئة
+//      هو المدى الذي ستملؤه الحروفُ بعدها، لا صندوقٌ آخر.
+//
+// **واتجاهُ الدوران يُقرأ من المادّة لا يُختار**: `METHOD.md §٤` يشترط «دوائر
+// **باتجاهٍ صحيح**»، والصحيحُ هو دورانُ أوّل حلقةٍ سيكتبها الطفلُ — **حلقةُ م
+// المعزولة** (المجموعةُ الأولى)، وإيماءتُها تقول «مع عقارب الساعة». فلا يُكتب
+// الاتجاهُ هنا رأياً: يُقاس من مسار م المؤلَّف في هذا البناء نفسِه (إشارةُ مساحته
+// المُوجَّهة)، فإن تبدّل مسارُها تبدّلت معه دوائرُ التهيئة.
+
+/** الصندوقُ: حافّتا الكراسة نفسُهما (`MARGIN`) — مدى الحرف هو مدى التهيئة. */
+const W_LOW = MARGIN;
+const W_HIGH = GRID - MARGIN;
+const W_MID = GRID / 2;
+
+/** منحنىً محسوب: يُعاين كثيفاً ثم يُعاد توزيعُه بخطوة المحرّك (`stepFor`). */
+const curve = (fn, dense = 260) => resample(
+  Array.from({ length: dense + 1 }, (_, i) => fn(i / dense)).map((p) => [round1(p[0]), round1(p[1])]));
+
+const wLine = (a, b) => curve((t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t], 24);
+
+/** قوسٌ حول مركز: من زاويةٍ إلى زاوية (إحداثياتُ شاشة، y نازلة). */
+const wArc = (c, r, from, to) => curve((t) => {
+  const a = from + (to - from) * t;
+  return [c[0] + r * Math.cos(a), c[1] + r * Math.sin(a)];
+});
+
+/** موجةٌ من اليمين إلى اليسار — أوّلُ بطنها **نازل** كبطون ب وس. */
+const wWave = (y, amp, waves) => curve((t) => [
+  W_HIGH - (W_HIGH - W_LOW) * t,
+  y + amp * Math.sin(2 * Math.PI * waves * t),
+]);
+
+/**
+ * خطٌّ مكسورٌ **بزوايا مدوَّرة** يمرّ بمواضعَ بأعيانها (زجزاجٌ ودرج).
+ *
+ * **ولِمَ تُدوَّر؟** لأن الزاوية الحادّة موضعٌ **لا يُقاس**: ضلعاها يقتربان فيقع
+ * إسقاطُ يدٍ ترتجف على الضلع الخطأ، فيُردّ طفلٌ يدور الزاويةَ كما تُدار حقّاً. وقد
+ * قِسناه: زجزاجٌ بزوايا حادّة يحتمل ١٨ من سماحة ٦٣ — **دون عهد `child-drift`** —
+ * ويحتمل ٥٤ إذا دُوِّرت زواياه. وهي عينُ قاعدة الجلسة ٢: **ما لا يبلغ سماحةَ
+ * المحرّك لا يُقاس، ولا يُدرَّس ما لا يُقاس**. واليدُ تدور الزاويةَ كذلك لا تكسرها.
+ */
+function wPolyline(points, round = 140) {
+  const out = [points[0]];
+  for (let i = 1; i < points.length - 1; i++) {
+    const [a, b, c] = [points[i - 1], points[i], points[i + 1]];
+    const v1 = [a[0] - b[0], a[1] - b[1]];
+    const v2 = [c[0] - b[0], c[1] - b[1]];
+    const n1 = Math.hypot(...v1) || 1;
+    const n2 = Math.hypot(...v2) || 1;
+    const cut = Math.min(round, n1 / 2, n2 / 2);
+    const p1 = [b[0] + (v1[0] / n1) * cut, b[1] + (v1[1] / n1) * cut];
+    const p2 = [b[0] + (v2[0] / n2) * cut, b[1] + (v2[1] / n2) * cut];
+    out.push(p1);
+    for (let k = 1; k < 12; k++) {       // قوسٌ تربيعيّ بين الضلعين على رأس الزاوية
+      const t = k / 12;
+      out.push([(1 - t) ** 2 * p1[0] + 2 * (1 - t) * t * b[0] + t * t * p2[0],
+        (1 - t) ** 2 * p1[1] + 2 * (1 - t) * t * b[1] + t * t * p2[1]]);
+    }
+    out.push(p2);
+  }
+  out.push(points[points.length - 1]);
+  const poly = prepare(out);
+  return curve((t) => pointAt(poly, t * poly.len).at, 200);
+}
+
+/**
+ * **إشارةُ الدوران**: مساحةٌ مُوجَّهة موجبة = **مع عقارب الساعة** على الشاشة (لأن y
+ * نازلة). ومقياسُها مُعايَرٌ بشكلٍ معلومٍ سلفاً في هذا المشروع: دائرةُ عدّة المعايرة
+ * (`ring`) تمضي من قمّتها **يساراً** فتخرج سالبة.
+ */
+const spinOf = (points) => {
+  let twice = 0;
+  for (let i = 0; i < points.length; i++) {
+    const q = points[(i + 1) % points.length];
+    twice += points[i][0] * q[1] - q[0] * points[i][1];
+  }
+  return Math.sign(twice);
+};
+
+/**
+ * **إعلانُ المحطات الست** — لكلٍّ ثلاثةُ أشكال، ومفتاحُها **عينُ `part` في
+ * `curriculum.js`** (يحرسه `tools/test_warmup.mjs`: لا محطةَ بلا أشكال ولا شكلَ بلا
+ * محطة). و`spin` يُمرَّر إلى ما يدور، فالدوائرُ والحلقاتُ تتبع حلقةَ الميم.
+ */
+const WARMUP_SPEC = (spin) => [
+  ['lines-h', [
+    ['خطٌّ أفقيٌّ طويل من اليمين إلى اليسار — اتجاهُ الكتابة',
+      [wLine([W_HIGH, W_MID], [W_LOW, W_MID])]],
+    ['خطّان أفقيان: الأعلى ثم الأدنى — يدٌ تعيد الحركةَ نفسَها',
+      [wLine([W_HIGH, 350], [W_LOW, 350]), wLine([W_HIGH, 650], [W_LOW, 650])]],
+    ['ثلاثةُ خطوطٍ قصيرة بترتيبها من أعلى — ضبطُ الابتداء ثلاثاً',
+      [250, 500, 750].map((y) => wLine([W_HIGH, y], [W_LOW, y]))],
+  ]],
+  ['lines-v', [
+    ['خطٌّ رأسيٌّ من أعلى إلى أسفل — نزولُ الألف',
+      [wLine([W_MID, W_LOW], [W_MID, W_HIGH])]],
+    ['خطّان رأسيان: الأيمنُ ثم الأيسر — ترتيبُ العربية',
+      [wLine([650, W_LOW], [650, W_HIGH]), wLine([350, W_LOW], [350, W_HIGH])]],
+    ['ثلاثةُ خطوطٍ رأسية من اليمين — ثباتُ النزول',
+      [750, 500, 250].map((x) => wLine([x, W_LOW], [x, W_HIGH]))],
+  ]],
+  ['lines-d', [
+    ['مائلٌ من أعلى اليمين إلى أسفل اليسار', [wLine([W_HIGH, W_LOW], [W_LOW, W_HIGH])]],
+    ['مائلٌ من أعلى اليسار إلى أسفل اليمين', [wLine([W_LOW, W_LOW], [W_HIGH, W_HIGH])]],
+    ['خيمةٌ بجزأين: صعودٌ من اليمين ثم نزولٌ إلى اليسار',
+      [wLine([W_HIGH, W_HIGH], [W_MID, W_LOW]), wLine([W_MID, W_LOW], [W_LOW, W_HIGH])]],
+  ]],
+  ['curves', [
+    ['كأسٌ: من اليمين ينزل إلى القاع ثم يصعد يساراً — بطنُ الباء',
+      [wArc([W_MID, 420], 320, 0, Math.PI)]],
+    ['قبّةٌ: من اليمين يصعد إلى القمّة ثم ينزل يساراً', [wArc([W_MID, 580], 320, 0, -Math.PI)]],
+    ['دائرةٌ تامّة من قمّتها — **بدوران حلقة الميم**',
+      [wArc([W_MID, W_MID], 320, -Math.PI / 2, -Math.PI / 2 + spin * 2 * Math.PI)]],
+  ]],
+  ['waves', [
+    ['موجتان واسعتان من اليمين — بطنٌ فظهرٌ بلا رفعِ قلم', [wWave(W_MID, 140, 2)]],
+    ['ثلاثُ موجاتٍ أضيق — يدٌ تضبط حركةً أصغر', [wWave(W_MID, 110, 3)]],
+    ['حلقتان تدوران دورانَ الميم: اليمنى ثم اليسرى',
+      [700, 300].map((x) => wArc([x, W_MID], 170, -Math.PI / 2, -Math.PI / 2 + spin * 2 * Math.PI))],
+  ]],
+  ['inside', [
+    ['طريقٌ متموّج بين حدّين — لا يخرج القلمُ عن الممرّ', [wWave(W_MID, 150, 2)], true],
+    ['طريقٌ منكسر: انعطافتان داخل الحدود',
+      [wPolyline([[W_HIGH, 280], [640, 720], [360, 280], [W_LOW, 720]])], true],
+    ['درجٌ ينزل يساراً — أفقيٌّ ورأسيٌّ في حركةٍ واحدة',
+      [wPolyline([[W_HIGH, 200], [610, 200], [610, 450], [310, 450], [310, 700], [W_LOW, 700]], 100)], true],
+  ]],
+];
+
+/**
+ * **سماحةُ محطة «التحكّم داخل حدود»** — وهي عينُ ما تدرّسه: `METHOD.md §٣.٥`
+ * «السماحةُ تملكها المحطة وتتشدّد مع التقدّم». فممرُّها أضيقُ من سماحة سائر المحطات،
+ * **ويراه الطفلُ**: الشاشةُ ترسم الممرَّ بعرض السماحة نفسِها (`bounds` في `pen.js`)،
+ * فلا حدَّ مرسومٌ يخالف الحدَّ المقيس.
+ *
+ * ⚠ ورقمُه **مبدئيٌّ كسائر أرقام السماحة** (`METHOD.md §٣.٥`: تُعايَر بمسارات ميدانٍ
+ * حقيقية) — وموضعُ معايرته الجلسةُ ١٢ مع أصله.
+ */
+const WARMUP_STRICT = 0.7;
+
+/** يبني أشكالَ التهيئة كلَّها، ويردّ ما لا يقبله المحرّكُ صحيحاً ويردّ عكسَه. */
+function buildWarmups(paths) {
+  const loop = paths['م']?.isolated?.strokes?.[0]?.points;
+  if (!loop) {
+    throw new Error('لا مسارَ لحلقة م المعزولة — ومنها يُقرأ اتجاهُ دوران دوائر التهيئة');
+  }
+  const spin = spinOf(loop);
+  if (!spin) throw new Error('مساحةُ حلقة م صفرٌ — لا يُقرأ منها اتجاهُ دوران');
+
+  const out = {};
+  const report = [];
+  for (const [part, shapes] of WARMUP_SPEC(spin)) {
+    out[part] = { shapes: [] };
+    for (const [note, strokes, strict] of shapes) {
+      const id = `${part}/${out[part].shapes.length + 1}`;
+      const ref = { strokes: strokes.map((points) => ({ points, start: points[0] })), dots: [] };
+      const entry = { id, note, ref };
+      if (strict) { entry.tolerance = WARMUP_STRICT; entry.bounds = true; }
+      const tolerance = entry.tolerance;
+
+      // **لا يخرج من هنا شكلٌ لا يقبله محرّكُه**: يُكتب صحيحاً فيُقبَل، ومعكوساً
+      // فيُرَدّ — نظيرُ «المسارُ داخلَ خيال حرفه» في الحروف، مقيساً لا مدَّعىً.
+      const walk = (back) => ref.strokes.map((s) => (back ? [...s.points].reverse() : s.points));
+      const good = judge(ref, walk(false), { tolerance });
+      const bad = judge(ref, walk(true), { tolerance });
+      if (!good.accepted) throw new Error(`${id}: المحرّكُ يردّ كتابتَه الصحيحة (${good.primary})`);
+      if (bad.accepted) throw new Error(`${id}: المحرّكُ يقبله معكوساً — شكلٌ لا يدرّس اتجاهاً`);
+
+      // وأطرافُ الأشكال داخلَ الصندوق: ما خرج عن اللوح لا يبلغه إصبعُ الطفل
+      const stray = ref.strokes.flatMap((s) => s.points)
+        .filter((p) => p[0] < 0 || p[1] < 0 || p[0] > GRID || p[1] > GRID);
+      if (stray.length) throw new Error(`${id}: ${stray.length} نقطةً خارج الشبكة`);
+
+      out[part].shapes.push(entry);
+      report.push({ id, strokes: ref.strokes.length, reversed: bad.primary, tolerance });
+    }
+  }
+  return { warmups: out, report, spin };
+}
+
 // ————— ٨) العرضُ: الشبكةُ والخيالُ والهيكلُ والمسارُ المؤلَّف —————
 
 const SVG = 'http://www.w3.org/2000/svg';
@@ -1138,7 +1335,20 @@ async function runBuild() {
             + (line.folds ? ` · طيّاتٌ معلنة ${line.folds}` : '')
             + ` · داخلَ الحبر كلُّه (أدنى غوص ${line.depth}) · بصمة ${line.sig}`));
     }
-    say(true, 'تمّ البناء', { paths, meta: { report, grid: GRID } });
+    // **وأشكالُ التهيئة تُبنى مع الحروف في التشغيلة نفسِها** (§٧ب): اتجاهُ دورانها
+    // مقروءٌ من حلقة الميم المؤلَّفة الآن — فلا تُبنى على مسارٍ قديمٍ لها على القرص.
+    const warm = buildWarmups(paths);
+    for (const line of warm.report) {
+      say(true, `تهيئة ${line.id}: ${line.strokes} جزءاً · معكوسُه يُرَدّ «${line.reversed}»`
+        + (line.tolerance ? ` · سماحةُ محطتها ×${line.tolerance}` : ''));
+    }
+    say(true, `دورانُ دوائر التهيئة من حلقة م المعزولة: ${
+      warm.spin > 0 ? 'مع عقارب الساعة' : 'عكسَ عقارب الساعة'}`);
+    say(true, 'تمّ البناء', {
+      paths,
+      warmups: warm.warmups,
+      meta: { report, grid: GRID, spin: warm.spin, warmups: warm.report },
+    });
   } catch (e) {
     say(false, `تعذّر البناء: ${e.message}`);
   }

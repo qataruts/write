@@ -69,6 +69,7 @@ function blank() {
     v: VERSION,
     stars: {},        // معرّف عقدة ← نجوم
     skills: {},       // «وحدة|شكل موقع|تمرين» ← {right, wrong, box, due, seen}
+    faults: {},       // «وحدة|رمزُ الخطأ الحركيّ» ← {n, seen} — انظر `recordFault`
     days: {},         // «YYYY-MM-DD» ← ثوانٍ من الاستعمال الفعلي
     reviews: {},      // «YYYY-MM-DD» ← {items, right, at}
     // **عدّادُ الخفوت** (`METHOD.md §٤` مرحلة ١٣): «كلمة» ← {n, day} — ثلاثُ
@@ -478,6 +479,57 @@ export function recordAttempt(unit, form, kind, correct, today = dayNumber()) {
   save();
   return s;
 }
+
+// ————— عدّادُ أخطاء الاتجاه المميَّز (`METHOD.md §٦`) —————
+//
+// **الذهبُ القياسيّ لهذا التطبيق**: موضعُ الخطأ الحركيّ يُسجَّل **بعينه** — «يبدأ
+// الميمَ من أسفل» لا «أخطأ في الميم». ورموزُه رموزُ `pen.js` نفسِها (`FAULTS`)،
+// **ولا تُكتب هنا قائمةٌ ثانية** تشيخ: ما يُمرَّر يُخزَّن كما جاء من المحرّك، وتقرؤه
+// لوحةُ وليّ الأمر (الجلسة ١٠) فتبني منه جملتَها.
+//
+// **وهو غيرُ ليتنر ولا يُغني عنه**: ليتنر يقيس **الإتقان** بمفتاحه الثلاثيّ
+// (وحدة × شكل موقع × تمرين) ويجدول المراجعة؛ وهذا يقيس **العادةَ الحركية**. فمحطةُ
+// التهيئة — المعفاةُ من ليتنر بعلّتها (قرارُ الجلسة ٣، لأن وحداتِها خطوطٌ لا حروف
+// ولا شكلَ موقعٍ لها في المفتاح) — **تكتب هنا من أوّل محطة**، فلا تمرّ حركةٌ خاطئة
+// بلا قياس ولو لم تدخل صناديقَ التثبيت.
+//
+// 🔒 **والمخزونُ عددٌ لا أثرُ يد**: لا إحداثيَّ نقطةٍ ولا انزياحَ يُكتب على القرص —
+// مسارُ الطفل يعيش في الذاكرة ويموت فيها (`METHOD.md §٣.٧`)، والنسخةُ الاحتياطية
+// ملفٌّ يُرسَل ويُخزَّن حيث شاء وليُّه فلا يدخلها أثرُ يده من بابٍ خلفيّ. وموضعُ
+// الخطأ محفوظٌ في **اسمه** (`start-end` = «يبدأ من الطرف الآخر») لا في إحداثيّ.
+
+/** مفتاح عدّاد الاتجاه: **(وحدة × رمزُ الخطأ)** — والوحدةُ حرفٌ أو شكلُ تهيئة. */
+export const faultKey = (unit, code) => `${unit}|${code}`;
+
+/**
+ * تسجيلُ خطأٍ حركيّ واحد بعينه.
+ * @param {string} unit الوحدة المكتوبة (حرفٌ، أو محطةُ تهيئةٍ مثل `lines-h`)
+ * @param {string} code رمزُ الخطأ من `pen.js` (`FAULTS`)
+ * @returns {object|null} حالةُ العدّاد بعد التسجيل
+ */
+export function recordFault(unit, code, today = dayNumber()) {
+  if (!unit || !code) return null;
+  const key = faultKey(unit, code);
+  const entry = state.faults[key] || { n: 0, seen: today };
+  entry.n++;
+  entry.seen = today;
+  state.faults[key] = entry;
+  save();
+  return entry;
+}
+
+/** كلُّ ما سُجِّل من أخطاء الاتجاه: [{key, unit, code, n, seen}] — الأكثرُ أولاً. */
+export function faults() {
+  return Object.entries(state.faults || {})
+    .map(([key, entry]) => {
+      const [unit, code] = key.split('|');
+      return { key, unit, code, ...entry };
+    })
+    .sort((a, b) => b.n - a.n || a.key.localeCompare(b.key));
+}
+
+/** أخطاءُ وحدةٍ بعينها (حرفٌ أو محطةُ تهيئة). */
+export const faultsOf = (unit) => faults().filter((f) => f.unit === unit);
 
 /** ترتيب الضعف: أدنى صندوق، ثم أكثر أخطاءً، ثم أقدم استحقاقاً (وأخيراً المفتاح لثبات الترتيب). */
 const byWeakness = (a, b) =>
