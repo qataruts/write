@@ -16,7 +16,8 @@
 
 import * as progress from './progress.js';
 import * as audio from './audio.js';
-import { pathOf } from './curriculum.js';
+import { pathOf, WORDS, SPOKEN_WORDS } from './curriculum.js';
+import { WORD_PATHS } from './word_paths.js';
 import { penSurface, MODES } from './pen.js';
 import {
   h, icon, toast, go, arNum, arCount, starsRow, topbar, mascot, cheer, letterName, DEV,
@@ -25,8 +26,10 @@ import {
 export const SESSION_SIZE = 6;    // جلسة قصيرة تُنجَز في دقائق (لا تُرهق طفل الخامسة)
 const ACCENT = 'var(--accent-skills)';   // المراجعة تثبيت مهارات — لونها لون المهارات
 
-/** نجوم الجلسة: ٣ بلا خطأ، ٢ ما دامت الأخطاء ≤ عدد التمارين، وإلا ١ (عتبة متناسبة). */
-export const starsForReview = (errors, items) => (errors === 0 ? 3 : errors <= items ? 2 : 1);
+/** نجومُ الجلسة — **قاعدتُها في `progress.js`** مع سائر النجوم (الجلسة ٨)، وتُصدَّر
+ *  من هنا لمن اعتادها: مصدرٌ واحد لا نسختان. */
+export { starsForReview } from './progress.js';
+import { starsForReview } from './progress.js';
 
 // ————— سجلُّ التمارين: مُصيِّرٌ لكل نوع قياس —————
 //
@@ -44,12 +47,14 @@ export const starsForReview = (errors, items) => (errors === 0 ? 3 : errors <= i
 
 /**
  * **ما تنطقه المراجعةُ — مُعلَنٌ لا مضمَر** (بابُ الإعلان في `tools/check_speech.mjs`):
- * أسماءُ الحروف وحدَها، **وهي عينُ ما يُعلنه درسُ الحرف** — فتُستورَد منه ولا
- * تُشتقّ هنا ثانيةً: نصٌّ واحد لا مصدران يفترقان.
+ * أسماءُ الحروف من درس الحرف، **وكلماتُ النسخ من المنهج نفسِه** (`SPOKEN_WORDS`) —
+ * تُستورَد من مصدرها ولا تُشتقّ هنا ثانيةً: نصٌّ واحد لا مصدران يفترقان.
  *
  * **ولا نصَّ يُؤلَّف للمراجعة** (قيدُها الأول): تمارينُها من مادّة الدرس بأعيانها.
  */
-export { LETTER_NAMES as SPOKEN } from './lesson.js';
+import { LETTER_NAMES } from './lesson.js';
+
+export const SPOKEN = [...LETTER_NAMES, ...SPOKEN_WORDS];
 
 /** لوحُ الطفل المعلَّق في تمرين المراجعة — يُطلَق مع كل رسمةٍ ومع مغادرة الشاشة. */
 let live = null;
@@ -97,12 +102,49 @@ function penExercise(item, api, mode) {
   return box;
 }
 
+/**
+ * **تمرينُ نسخِ كلمة** (الجلسة ٨): الكلمةُ تُعرَض من مسارها المرجعيّ وتُنسَخ عليه —
+ * وهو عينُ ما تفعله محطةُ النسخ، **بسماحة الكلمة التي في مسارها ومسطرتِها**.
+ *
+ * **ولا محتوى جديد**: مادّتُه كلمةٌ في سجلّ الطفل، ونصُّه المنطوق **صوتُها من بنك
+ * اقرأ** — فلا نصَّ يُؤلَّف للمراجعة (قيدُ `review.js` الأول).
+ */
+function wordExercise(item, api, mode) {
+  const ref = WORD_PATHS[item.unit];
+  if (!ref) return h('p', { class: 'hint' }, `لا مسارَ لـ«${item.unit}» بعدُ.`);
+
+  const box = h('div', { class: 'exercise' });
+  let faults = 0;
+  releaseReview();
+  const surface = penSurface({
+    ref,
+    mode,
+    tolerance: ref.tolerance,
+    baseline: ref.line,
+    label: `لوحُ نسخ: ${item.unit}`,
+    onFault: (fault) => { faults++; progress.recordFault(item.unit, fault.code); },
+    onDone: () => {
+      api.score(item, item.unit, progress.WORD_FORM, faults === 0);
+      if (faults === 0) api.right(surface.el);
+      else api.wrong(surface.el, () => api.next());
+    },
+  });
+  live = surface;
+  box.append(h('p', { class: 'ask' }, 'اُنْسُخِ الكلمة'), surface.el);
+  surface.play();
+  surface.el.addEventListener('pointerdown', () => surface.stop(), { capture: true });
+  if (WORDS[item.unit]?.say) api.say(WORDS[item.unit].say);
+  return box;
+}
+
 export const VIEWS = {
   [progress.KINDS.TRACE]: (item, api) => penExercise(item, api, MODES.GUIDED),
   [progress.KINDS.FREE]: (item, api) => penExercise(item, api, MODES.FREE),
-  // **`نسخ` و`إملاء` معلَّقان بعلّتهما**: مادّتُهما كلماتٌ (`METHOD.md §٤` المرحلتان
-  // ١٢ و١٣)، وشاشتاهما للجلستين ٨ و٩ — ويومَ تُكتبان يمتلئ هذا الموضع، ويُطالِب
-  // `tools/test_measure.mjs` بهما من نفسه (لكل قياسٍ تمرينٌ يراجعه).
+  // **والنسخُ امتلأ في الجلسة ٨**: مادّتُه كلماتٌ دُرِّست كتابةً في محطة الوصل،
+  // فصار للقياس تمرينٌ يراجعه — وبه تسأل **بوابةُ النسخ** عن أضعف كلماته.
+  [progress.KINDS.COPY]: (item, api) => wordExercise(item, api, MODES.GUIDED),
+  // **و`إملاء` معلَّقٌ بعلّته**: نموذجُه يخفت حتى يغيب (`METHOD.md §٤` المرحلة ١٣)،
+  // وشاشتُه للجلسة ٩ — ويومَ تُكتب يمتلئ هذا الموضع ويُطالِب `test_measure` من نفسه.
 };
 
 /**
@@ -120,9 +162,12 @@ export function buildSession({ due = [], size = SESSION_SIZE } = {}) {
   for (const skill of due) {
     if (out.length >= size) break;
     if (!VIEWS[skill.kind]) continue;      // نوعٌ لا مُصيِّر له بعدُ: لا يُقحَم
-    // ونصُّ التمرين المنطوق للتحميل المسبق: **اسمُ الحرف من بنك اقرأ** — ولا نصَّ
-    // يُؤلَّف للمراجعة (قيدُها الأول). ومهارةُ الكلمة نصُّها للجلستين ٨ و٩.
-    out.push({ ...skill, texts: progress.isWordSkill(skill) ? [] : [letterName(skill.unit)] });
+    // ونصُّ التمرين المنطوق للتحميل المسبق: **اسمُ الحرف** للحرف، **وصوتُ الكلمة من
+    // بنك اقرأ** للكلمة — ولا نصَّ يُؤلَّف للمراجعة (قيدُها الأول).
+    const texts = progress.isWordSkill(skill)
+      ? [WORDS[skill.unit]?.say].filter(Boolean)
+      : [letterName(skill.unit)];
+    out.push({ ...skill, texts });
   }
   return out;
 }

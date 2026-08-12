@@ -38,6 +38,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 PATHS_JS = ROOT / "app" / "js" / "paths.js"
+WORD_PATHS_JS = ROOT / "app" / "js" / "word_paths.js"
 PEN_JS = ROOT / "app" / "js" / "pen.js"
 CURRICULUM = ROOT / "app" / "js" / "curriculum.js"
 
@@ -56,9 +57,14 @@ def load_tolerance() -> dict:
     if not block:
         sys.exit("لم يُقرأ TOLERANCE من app/js/pen.js")
     tol = {k: float(v) for k, v in re.findall(r"(\w+):\s*([0-9.]+)", block.group(1))}
+    # **وأدنى خطوةٍ يفرّقها المحرّك** (`MIN_STEP`): ما دونها يطرحه تبسيطُ نقاط الطفل
+    # أصلاً، فلا معنى لأن يُطالَب مسارٌ مرجعيّ بقطعةٍ أدقَّ منها — وهي أرضيةُ الكثافة
+    # في عدّة التأليف نفسِها (`stepFor`).
+    step = re.search(r"export const MIN_STEP = ([0-9.]+)", src)
     head = re.search(r"const HEAD_RATIO = ([0-9.]+)", src)
     grid = re.search(r"export const GRID = (\d+)", src)
     tol["head_ratio"] = float(head.group(1)) if head else 0.1
+    tol["min_step"] = float(step.group(1)) if step else 6.0
     tol["grid"] = float(grid.group(1)) if grid else 1000.0
     return tol
 
@@ -234,7 +240,7 @@ def check(paths: dict, tol: dict, forms: list, letters=None) -> list:
                 cap = min(tol["back"], length * tol["head_ratio"])
                 for k in range(1, len(points)):
                     step = dist(points[k - 1], points[k])
-                    if step > cap:
+                    if step > cap + 0.5:
                         bad.append(f"{where}: قطعةٌ طولُها {step:.0f} وأقصى المسموح "
                                    f"{cap:.0f} (نافذةُ الرتابة تُرشِّح قطعاً كاملة)")
                         break
@@ -271,6 +277,146 @@ def check(paths: dict, tol: dict, forms: list, letters=None) -> list:
     return bad
 
 
+# ————— بابُ الكلمات (الجلسة ٨): مسارُ النسخ بنيةٌ كبنية الحرف بفارقين —————
+#
+# مسارُ الكلمة يقرؤه `pen.js` كما يقرأ الحرف، فيسري عليه أكثرُ ما يسري على الحرف:
+# بداياتٌ معلنة، ونقاطٌ بعد الجسم، ولا نقطتين متطابقتين، ولا نقطةَ خارج الشبكة،
+# **وطيّاتٌ مفحوصةُ البنية**. وفارقاه اثنان، وكلاهما من طبيعة الكلمة لا استثناءٌ لها:
+#
+#   ١) **سقفُ الأجزاء والنقاط يتبع حروفَها**: `MAX_STROKES` ثلاثةٌ لأنّ أكثرَ حرفٍ
+#      ثلاثةُ أجزاء — والكلمةُ حروفٌ، فسقفُها ذلك السقفُ **مضروباً في عدد حروفها**
+#      (محسوبٌ من رسمها لا مكتوب). وكذلك النقاط.
+#   ٢) **سماحتُها سماحتُها هي** (`tolerance` في مسارها): سماحاتُ المحرّك مُعايَرةٌ على
+#      حرفٍ يملأ صندوقَه، وحرفُ الكلمة جزءٌ منه — فتُشَدّ بمقياسه. وكلُّ حدٍّ يقرؤه
+#      هذا الفاحصُ من المحرّك (طولُ القطعة، ضلعُ الطيّة، تمايزُ المبادئ) **يُشَدّ
+#      معها**، وإلا لَحكم على كلمةٍ بسماحةٍ لا تُحكَم بها.
+
+
+def load_words() -> dict:
+    """`WORD_PATHS` من الوحدة المولَّدة — `None` إن لم تُبنَ بعد."""
+    if not WORD_PATHS_JS.exists():
+        return None
+    src = WORD_PATHS_JS.read_text(encoding="utf-8")
+    body = re.search(r"export const WORD_PATHS = (\{.*?\n\});", src, re.S)
+    return json.loads(body.group(1)) if body else None
+
+
+def copy_material() -> set:
+    """مادّةُ النسخ التي يطلبها المنهج — وصلاتُ محطة الوصل وكلماتُ جدولها."""
+    if not CURRICULUM.exists():
+        return None
+    src = CURRICULUM.read_text(encoding="utf-8")
+    stages = re.search(r"export const STAGES = (\[.*?\n\]);", src, re.S)
+    words = re.search(r"export const WORDS = (\{.*?\n\});", src, re.S)
+    if not stages or not words:
+        return None
+    out = set(json.loads(words.group(1)))
+    for stage in json.loads(stages.group(1)):
+        if stage.get("kind") != "join":
+            continue
+        for node in stage.get("nodes", []):
+            out.update(node.get("joins", []))
+            out.update(node.get("words", []))
+    return out
+
+
+def check_words(words: dict, tol: dict, material: set) -> list:
+    """بنيةُ مسارات النسخ — بسماحة كلِّ كلمةٍ التي تحملها."""
+    bad = []
+    stacks = []
+    grid = tol["grid"]
+
+    if material:
+        for text in sorted(material):
+            if text not in words:
+                bad.append(f"«{text}» تُطلب نسخاً ولا مسارَ لها — لا كلمةَ بلا مسار")
+
+    for text, ref in words.items():
+        tag = f"كلمة «{text}»"
+        scale = ref.get("tolerance")
+        if not isinstance(scale, (int, float)) or not 0 < scale <= 1:
+            bad.append(f"{tag}: بلا سماحةٍ في مسارها (`tolerance`) — والسماحةُ تُحمَل لا تُفترَض")
+            continue
+        line = ref.get("line")
+        if not isinstance(line, (int, float)) or not 0 < line < grid:
+            bad.append(f"{tag}: بلا سطرِ جلوسٍ على الشبكة (`line`)")
+        # حدودُ المحرّك مشدودةً بمقياس الكلمة — فما يحكم به يُفحَص به
+        wtol = {**tol, "start": tol["start"] * scale, "back": tol["back"] * scale}
+        letters = [c for c in text if c not in " " and not (0x64B <= ord(c) <= 0x652)]
+        strokes = ref.get("strokes") or []
+        dots = ref.get("dots") or []
+        if not strokes:
+            bad.append(f"{tag}: لا جسمَ لها — مسارٌ بلا أجزاء")
+        if len(strokes) > MAX_STROKES * max(1, len(letters)):
+            bad.append(f"{tag}: أجزاؤها {len(strokes)} وحروفُها {len(letters)}"
+                       f" وأكثرُ حرفٍ {MAX_STROKES} أجزاء")
+        if sum(int(d.get("count", 1)) for d in dots) > MAX_DOTS * max(1, len(letters)):
+            bad.append(f"{tag}: نقطُها أكثرُ ممّا تحتمل حروفُها")
+
+        starts = []
+        for i, stroke in enumerate(strokes, 1):
+            where = f"{tag} جزء {i}"
+            points = stroke.get("points") or []
+            if len(points) < 2:
+                bad.append(f"{where}: نقطتان فأكثر لازمتان ({len(points)})")
+                continue
+            start = stroke.get("start")
+            if start is None:
+                bad.append(f"{where}: بلا `start` — والبدايةُ تُعلَن لا تُستنبَط")
+            elif dist(start, points[0]) > 0.05:
+                bad.append(f"{where}: `start` ليس أوّلَ نقاطه")
+            starts.append((where, start or points[0]))
+            out = [p for p in points if not (0 <= p[0] <= grid and 0 <= p[1] <= grid)]
+            if out:
+                bad.append(f"{where}: {len(out)} نقطةً خارج الشبكة ({out[0]})")
+            length = poly_len(points)
+            cap = max(tol["min_step"], min(wtol["back"], length * tol["head_ratio"]))
+            for k in range(1, len(points)):
+                step = dist(points[k - 1], points[k])
+                if step > cap + 0.5:
+                    bad.append(f"{where}: قطعةٌ طولُها {step:.0f} وأقصى المسموح بسماحتها {cap:.0f}")
+                    break
+                if step < 0.05:
+                    bad.append(f"{where}: نقطتان متطابقتان عند {points[k]}")
+                    break
+            bad += check_folds(stroke, where, wtol)
+
+        for j, dot in enumerate(dots, 1):
+            where = f"{tag} نقطة {j}"
+            at = dot.get("at")
+            if not at or len(at) != 2:
+                bad.append(f"{where}: بلا موضع")
+                continue
+            if not (0 <= at[0] <= grid and 0 <= at[1] <= grid):
+                bad.append(f"{where}: خارج الشبكة ({at})")
+            if dot.get("after") is not True:
+                bad.append(f"{where}: لا تُعلن `after: true` — والنقاطُ بعد جسم الكلمة كلِّه")
+            starts.append((where, at))
+
+        # **تمايزُ المبادئ — وإعفاءٌ واحدٌ مكتوبٌ بسببه**: القاعدةُ كما في الحرف
+        # (بدايتان أقربُ من دائرة البداية لا يفرّق بينهما المحرّك). **ويُستثنى
+        # المتراكبان على حرفٍ واحد** (شدّةٌ وحركتُها): العربيةُ تركّبهما فوق بعضهما
+        # بحكم الرسم لا بحكم تأليفنا — لا موضعَ آخرَ لهما — والمسافةُ بينهما **رأسيةٌ
+        # لا أفقية** فيفرّقهما نزولُ الطفل بأقرب الجزأين إليه (وهو ما يقيسه `down`).
+        # **ويُعلَن العددُ ولا يُسكَت عنه**، فما استُثني معلومٌ لا مستور.
+        for a in range(len(starts)):
+            for b in range(a + 1, len(starts)):
+                pa, pb = starts[a][1], starts[b][1]
+                gap = dist(pa, pb)
+                if gap >= wtol["start"]:
+                    continue
+                stacked = abs(pa[1] - pb[1]) > abs(pa[0] - pb[0])
+                if stacked and "جزء" in starts[a][0] and "جزء" in starts[b][0]:
+                    stacks.append(f"{text}: {gap:.0f}")
+                    continue
+                bad.append(f"{tag}: بدايتا «{starts[a][0]}» و«{starts[b][0]}» "
+                           f"على بُعد {gap:.0f} < {wtol['start']:.0f} — لا يفرّق بينهما المحرّك")
+    if stacks:
+        print("  ○ مُستثنىً بسببه (علامتان متراكبتان على حرفٍ واحد — رأسيتان يفرّقهما "
+              "أقربُ الجزأين إلى نزول الطفل): " + " · ".join(stacks))
+    return bad
+
+
 def run(quiet: bool) -> int:
     tol = load_tolerance()
     forms = load_forms()
@@ -304,11 +450,32 @@ def run(quiet: bool) -> int:
         print(f"الحروفُ المقرَّرة كتابةً في المنهج: {len(letters)}")
 
     bad = check(paths, tol, forms, letters)
+
+    # **وبابُ الكلمات يُطالِب يومَ تُبنى وحدتُه** (نمطُ «التعليقُ يُطالِب من نفسه»):
+    # ما دامت `word_paths.js` غيرَ مبنيّةٍ فلا مطالبة، ويومَ تُبنى يصير كلُّ ما في
+    # محطة الوصل مطالَباً بمساره بلا سطرٍ يُعدَّل هنا.
+    words = load_words()
+    material = copy_material()
+    if words is None:
+        if not quiet:
+            print("مساراتُ النسخ لم تُبنَ بعد (الجلسة ٨) — والمطالبةُ تنطلق يومَ تُبنى")
+    else:
+        if not quiet:
+            print(f"مساراتُ النسخ: {len(words)} مساراً"
+                  + (f"، ومادّةُ النسخ في المنهج {len(material)}" if material else ""))
+            for text, ref in list(words.items())[:4]:
+                spans = [poly_len(s["points"]) for s in ref["strokes"]]
+                print(f"  · «{text}»: {len(ref['strokes'])} قطعةً"
+                      f" · سماحتُها ×{ref.get('tolerance')} · سطرُها {ref.get('line')}"
+                      f" · أطول قطعةٍ {max(spans):.0f}")
+            print(f"  … و{max(0, len(words) - 4)} غيرُها")
+        bad += check_words(words, tol, material)
+
     for line in bad:
         print("  ✗ " + line)
     print(f"\n{len(bad)} مخالفة" if bad else "\nكلُّ مسارٍ سليمُ البنية: بداياتٌ معلنة،"
           " وأجزاءٌ معقولة، والنقاطُ بعد الجسم، ولا قطعةَ تخدع نافذةَ الرتابة،"
-          " ولا طيّةَ مزعومةٌ على قطعةٍ سويّة")
+          " ولا طيّةَ مزعومةٌ على قطعةٍ سويّة — في الحروف والكلمات جميعاً")
     return 1 if bad else 0
 
 

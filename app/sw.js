@@ -61,7 +61,11 @@
 // **و`v15` (الجلسة ٧)**: محطاتُ أشكال المواقع وتمييزُ المتشابهات — منهجٌ جديد
 // (`js/curriculum.js`) وشاشةٌ بوحداتها (`js/lesson.js`) وشارةُ الشكل في `js/pen.js`،
 // فجهازٌ مثبَّتٌ على القشرة القديمة يقرأ رحلةً بلا محطات الأشكال.
-const VERSION = 'v15';
+// **و`v16` (الجلسة ٨)**: الوصلُ والنسخ — شاشتُه (`js/copy.js`) ومساراتُ كلماته
+// (`js/word_paths.js`، وحدةٌ ثالثةٌ مولَّدة) وأصواتُ الكلمات من بنك اقرأ ببصماتها.
+// **والرفعةُ شرطُ وصول الوحدة الجديدة**: `main.js` يستوردها، فجهازٌ مثبَّتٌ على قشرته
+// القديمة يقف عند أوّل كلمةٍ يُطلب نسخُها.
+const VERSION = 'v16';
 const SHELL_CACHE = `uktub-shell-${VERSION}`;
 const AUDIO_CACHE = 'uktub-audio';          // ثابتٌ عمداً — لا يحمل VERSION
 const KEEP = [SHELL_CACHE, AUDIO_CACHE];
@@ -80,6 +84,7 @@ const SHELL = [
   'audio/manifest.json',
   'audio/versions.json',
   'js/audio.js',
+  'js/copy.js',
   'js/curriculum.js',
   'js/gate.js',
   'js/install.js',
@@ -95,6 +100,7 @@ const SHELL = [
   'js/ui.js',
   'js/warmup.js',
   'js/warmups.js',
+  'js/word_paths.js',
   'icons/icon-192.png',
   'icons/icon-512.png',
   'icons/maskable-512.png',

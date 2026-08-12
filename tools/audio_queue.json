@@ -38,5 +38,45 @@
   "priority": 100,
   "status": "pending",
   "doneAt": null
+ },
+ {
+  "text": "شَاهِدْ كَيْفَ تُكْتَبْ",
+  "category": "ui",
+  "requestedBy": "session-8",
+  "priority": 100,
+  "status": "pending",
+  "doneAt": null
+ },
+ {
+  "text": "اُنْسُخْهَا عَلَى الْمَسَارْ",
+  "category": "ui",
+  "requestedBy": "session-8",
+  "priority": 100,
+  "status": "pending",
+  "doneAt": null
+ },
+ {
+  "text": "اُنْسُخْهَا وَهْيَ خَافِتَةْ",
+  "category": "ui",
+  "requestedBy": "session-8",
+  "priority": 100,
+  "status": "pending",
+  "doneAt": null
+ },
+ {
+  "text": "كَلِمَتَانِ بَيْنَهُمَا فَرَاغْ",
+  "category": "ui",
+  "requestedBy": "session-8",
+  "priority": 100,
+  "status": "pending",
+  "doneAt": null
+ },
+ {
+  "text": "اِنْظُرِ الْعَلَامَةَ ثُمَّ اُكْتُبْ",
+  "category": "ui",
+  "requestedBy": "session-8",
+  "priority": 100,
+  "status": "pending",
+  "doneAt": null
  }
 ]

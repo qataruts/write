@@ -130,8 +130,16 @@ const MARGIN = 90;
  * ذيل الشكل المغلق من بابها. فالخطوةُ هنا **منسوبةٌ إلى سماحة المحرّك نفسِها**
  * (`TOLERANCE.back`) وإلى عُشر طول القطعة، بهامشِ ثلثٍ تحت الحدّ لا عنده.
  */
+// **والخطوةُ تتبع سماحةَ من يحكم** (زيادةُ الجلسة ٨): سماحاتُ المحرّك أطوالٌ مطلقة،
+// ومحطةُ النسخ تشدّها بمقياس حروف الكلمة (`METHOD.md §٣.٥`) — فلو بقيت الخطوةُ على
+// السماحة الكاملة لَصارت **القطعةُ الواحدة أطولَ من ضلع الطيّة نفسِه** فتُسرِّب
+// الطولَ عبر حدّ النافذة، فيتشبّث تقدّمُ الطفل بالحدّ وتُردّ كتابتُه الصحيحة (قِيس:
+// «عِنَبْ» تقف عند مبدأ طيّتها والقلمُ على قمّتها، ثم يُقرأ مضيُّها `wander`).
+// **والقاعدةُ واحدةٌ في الحرف والكلمة**: عيّنةُ المسار تُكثَّف حتى تكون القطعةُ دون
+// سماحة الارتداد **التي سيُحكَم بها**.
 const HEAD_RATIO = 0.1;
-const stepFor = (len) => Math.max(6, Math.min(TOLERANCE.back, len * HEAD_RATIO) * 0.66);
+const stepFor = (len, scale = 1) =>
+  Math.max(6, Math.min(TOLERANCE.back * scale, len * HEAD_RATIO) * 0.66);
 
 const qs = new URLSearchParams(location.search);
 const results = [];
@@ -933,11 +941,11 @@ function extendEnd(points, mask, atStart) {
   return atStart ? [grown, ...points] : [...points, grown];
 }
 
-/** إعادةُ توزيعٍ بخطوةٍ منتظمة تحترم أقصى طول قطعة (`stepFor`). */
-function resample(points) {
+/** إعادةُ توزيعٍ بخطوةٍ منتظمة تحترم أقصى طول قطعة (`stepFor`) بسماحة من يحكم. */
+function resample(points, scale = 1) {
   const poly = prepare(points);
   if (!poly.len) return [points[0], points[points.length - 1] || points[0]];
-  const step = stepFor(poly.len);
+  const step = stepFor(poly.len, scale);
   const count = Math.max(2, Math.ceil(poly.len / step));
   const out = [];
   for (let i = 0; i <= count; i++) {
@@ -1142,6 +1150,780 @@ function compose(work, gesture) {
   if (gesture.marks) return { strokes: [...strokes, ...markGesture(work, gesture.marks)], dots: [] };
   if (gesture.markStrokes) return { strokes: [...strokes, ...markStrokes(work)], dots: [] };
   return { strokes, dots: work.dots };
+}
+
+// ————— ٧ج) خيالُ الكلمة: النسخُ يُؤلَّف من التشكيل لا من جمع حروفٍ مفردة —————
+//
+// لازمُ قرار الجلسة ٢ الثاني، مكتوبٌ يومَها: «الوصلُ يُؤلَّف **خيالَ الكلمة كلِّها**
+// بهذه العدّة نفسِها فتخرج النسبُ من التشكيل، لا بجمع حروفٍ مفردة». فالكلمةُ تُصيَّر
+// نصاً واحداً بمُشكِّل المتصفّح (كما صُيّرت أشكالُ المواقع بالواصل الصفريّ)، ويُقرأ
+// منها ثلاث: **أين يقع كلُّ حرف** (فتخرج النسبُ والمقاعدُ من التشكيل لا من تقدير)،
+// **وأين تقع علاماتُه** (نقاطاً وحركات)، **وأين السطر** (خطُّ القاعدة نفسُه).
+//
+// **ومداخلُ الحروف على منظومة الأحكام الخمسة** (`REVIEW_HANDWRITING.md`): مسارُ كلِّ
+// حرفٍ في الكلمة هو **مسارُه القانونيُّ بعينه** (المؤلَّفُ بإيماءته المحكومة) مُنزَّلاً
+// على جسده في الكلمة — فما تعلّمه الطفلُ في محطة الشكل هو ما يكتبه في الكلمة، عادةً
+// حركيةً واحدةً للشكل الواحد أينما وقع. **والوصلةُ يرسمها خروجُ الحرف قبلها** (حكم
+// ٤): خروجُ القانونيّ يبلغ مقعدَ التالي فتُدمَج القطعتان قطعةً واحدة لا يُرفَع فيها
+// القلم، **والعمودُ الموصول يقطع الوصل** (حكم ١): بدايتُه قمّتُه لا مقعدُه، فيُرفَع
+// القلمُ قبله كما تقضي الكرّاسة.
+//
+// **ولماذا التنزيلُ لا إعادةُ مشي هيكل الكلمة؟** لأنّ هيكلَ الكلمة الموصولة رسمٌ
+// واحدٌ متشابك تتوالد عُقَدُه بتوالد التقاطعات، وإيماءتُه على أرقام عُقَده تشيخ بكلّ
+// كلمة — بينما **حرفُ الكلمة هو حرفُ المحطة نفسُه** (المُشكِّل يضع الرمزَ نفسَه
+// مُصغَّراً في موضعه)، أثبته المسبار: نسبةُ أبعاد حبر الحرف في الكلمة تطابق نسبتَه
+// القانونية (ا ١٫٠٠ · ي ١٫٠١ · و ١٫٠٠). فالإيماءةُ تبقى واحدةً محكومةً في موضعها،
+// والكلمةُ تُقرأ منها المواضعُ والمقاييس — **ويحرسه الغَوصُ**: المسارُ المنزَّل يُقاس
+// في حبر الكلمة نقطةً نقطة كما يُقاس مسارُ الحرف في حبره.
+//
+// **وعزوُ الحبر بطبقتين** (قاسه مسبارُ الجلسة ٨): المتصفّح يرسم الحركةَ بلون عنقود
+// حرفها لا بلون محرفها، فتُصيَّر الكلمةُ مرتين — **كاملةً** (وهي الخيالُ المعروض
+// والمقيس) **ومجرّدةً من الحركات** (تُعزى فيها الحروفُ ونقاطُها محرفاً محرفاً بإخفاء
+// ما سواه) — **والفرقُ بين الطبقتين حبرُ الحركات وحدَه**، يُعزى كلُّ جرمٍ منه إلى
+// علامته بحامله وشكله. وتفريقُ المحارف لا يبدّل التشكيل (قِيس: فرقُ الأقنعة ٠–٠٫١٪
+// في خمس عشرة كلمةً فيها لام-ألف والشدّةُ المركّبة).
+
+/** الحركاتُ وما جرى مجراها — كلُّ محرفٍ متّصلٍ يُرسَم فوق الحرف أو تحته. */
+const HARAKA = /[ً-ْٰ]/;
+
+/** خطُّ النسخ المرجعيّ ذاتُه لتصيير SVG — يُضمَّن بياناتِه (صورةُ SVG لا تبلغ الشبكة). */
+let fontInline = null;
+async function inlineFont(url) {
+  if (fontInline) return fontInline;
+  const buf = await (await fetch(url)).arrayBuffer();
+  const bytes = new Uint8Array(buf);
+  let s = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) {
+    s += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  }
+  fontInline = btoa(s);
+  return fontInline;
+}
+
+const wordSheet = document.createElement('canvas');
+wordSheet.width = wordSheet.height = GRID;
+const wordCtx = wordSheet.getContext('2d', { willReadFrequently: true });
+
+/**
+ * تصييرُ نصٍّ SVG على الشبكة — محارفُه في `tspans` فيُخفى ما شئنا ويبقى التشكيلُ
+ * تشكيلَ النصّ كاملاً (المُشكِّلُ يصل المحارفَ عبر الحدود). `visible` مِصفاةُ
+ * المحارف الظاهرة (بفهرسها في النصّ)، و`null` تعني كلَّها.
+ */
+async function svgPaint(text, size, x, baseline, visible = null) {
+  const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+  const body = [...text].map((ch, i) =>
+    `<tspan fill="${!visible || visible.has(i) ? '#000' : 'transparent'}">${esc(ch)}</tspan>`).join('');
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${GRID}" height="${GRID}">`
+    + `<style>@font-face{font-family:'${FAMILY}';src:url(data:font/woff2;base64,${fontInline}) format('woff2')}</style>`
+    + `<text x="${x}" y="${baseline}" direction="rtl" text-anchor="middle"`
+    + ` style="font:${size}px '${FAMILY}'">${body}</text></svg>`;
+  const img = new Image();
+  await new Promise((res, rej) => {
+    img.onload = res;
+    img.onerror = () => rej(new Error('تعذّر تصيير SVG'));
+    img.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+  });
+  wordCtx.clearRect(0, 0, GRID, GRID);
+  wordCtx.drawImage(img, 0, 0);
+  return wordCtx.getImageData(0, 0, GRID, GRID);
+}
+
+/** قناعُ صورةٍ على دقّة القناع (كقناع `ghost` سواءً). */
+function imageMask(image) {
+  const data = image.data;
+  const mask = new Uint8Array(MASK * MASK);
+  for (let y = 0; y < MASK; y++) {
+    for (let x2 = 0; x2 < MASK; x2++) {
+      let on = 0;
+      for (let dy = 0; dy < PX; dy++) {
+        for (let dx = 0; dx < PX; dx++) {
+          if (data[(((y * PX + dy) * GRID) + (x2 * PX + dx)) * 4 + 3] > 128) on++;
+        }
+      }
+      mask[y * MASK + x2] = on * 2 >= PX * PX ? 1 : 0;
+    }
+  }
+  return mask;
+}
+
+/** حدودُ قناعٍ بوحدات الشبكة — `null` إن لم يكن فيه حبر. */
+function maskBox(mask) {
+  let x0 = MASK;
+  let y0 = MASK;
+  let x1 = -1;
+  let y1 = -1;
+  for (let i = 0; i < mask.length; i++) {
+    if (!mask[i]) continue;
+    const x = i % MASK;
+    const y = (i - x) / MASK;
+    if (x < x0) x0 = x;
+    if (x > x1) x1 = x;
+    if (y < y0) y0 = y;
+    if (y > y1) y1 = y;
+  }
+  if (x1 < 0) return null;
+  return {
+    x0: x0 * PX, y0: y0 * PX, x1: (x1 + 1) * PX, y1: (y1 + 1) * PX,
+    w: (x1 - x0 + 1) * PX, h: (y1 - y0 + 1) * PX,
+    cx: (x0 + x1 + 1) / 2 * PX, cy: (y0 + y1 + 1) / 2 * PX,
+  };
+}
+
+/**
+ * **معايرةُ الكلمة ذاتيةٌ بالبكسل**: تُصيَّر تجريبياً ويُقاس حبرُها فيُحسَب مقاسُها
+ * وموضعُها — فلا تُستعار مقاييسُ لوحٍ آخر (أمسك المسبارُ فرقَ مرساتَي canvas وSVG:
+ * النصُّ كان يخرج عن اللوح كلِّه). والكلمةُ تملأ صندوقَها كما يملؤه الحرف —
+ // والنسبُ **بين** حروفها من التشكيل (قرارُ الجلسة ٢ بلازمه).
+ */
+async function wordFit(text) {
+  const probe = imageMask(await svgPaint(text, 100, GRID / 2, GRID / 2));
+  const box = maskBox(probe);
+  if (!box) throw new Error(`لا حبرَ في مسبار «${text}»`);
+  const span = GRID - 2 * MARGIN;
+  const scale = span / Math.max(box.w, box.h);
+  return {
+    size: 100 * scale,
+    x: GRID / 2 + (GRID / 2 - box.cx) * scale,
+    baseline: GRID / 2 + (GRID / 2 - box.cy) * scale,
+  };
+}
+
+/** أجرامُ قناعٍ (كأجرام الحرف) بحدودها ومركز كتلتها. */
+function maskBodies(mask) {
+  return bodies(mask).map((b) => ({
+    ...b,
+    box: maskBox(maskOf(b.cells)),
+    at: [b.at[0] * PX, b.at[1] * PX],
+  }));
+}
+
+/**
+ * **رسمُ الكلمة وحداتٍ**: كلُّ حرفٍ بشكل موقعه (قاعدةُ العربية التي يحسبها المولّدُ
+ * والفاحصُ سواء)، **ولام-ألف وحدةٌ واحدة**: المُشكِّلُ يصهرهما رمزاً واحداً لا يشبه
+ * جمعَهما، فلها خيالُها وإيماءتُها في `ligatures` — وحدةٌ حركيةٌ كما هي وحدةُ رسم.
+ * والمسافةُ تفصل الكلماتِ فلا يتّصل رسمٌ عبرها.
+ */
+function wordUnits(text) {
+  const chars = [...text];
+  const units = [];
+  const wordsIdx = [];
+  let current = [];
+  for (let i = 0; i < chars.length; i++) {
+    if (chars[i] === ' ') {
+      if (current.length) wordsIdx.push(current);
+      current = [];
+    } else if (!HARAKA.test(chars[i])) current.push(i);
+  }
+  if (current.length) wordsIdx.push(current);
+
+  for (const word of wordsIdx) {
+    for (let k = 0; k < word.length; k++) {
+      const i = word[k];
+      const ch = chars[i];
+      const prev = k > 0 ? chars[word[k - 1]] : null;
+      const tied = prev != null && JOINS_AFTER[prev];
+      // لام-ألف: وحدةٌ تُلتَهم ألفُها
+      if (ch === 'ل' && k + 1 < word.length && chars[word[k + 1]] === 'ا') {
+        units.push({ kind: 'liga', text: 'لا', idx: [i, word[k + 1]], form: tied ? 'final' : 'isolated' });
+        k++;
+        continue;
+      }
+      const open = JOINS_AFTER[ch] && k + 1 < word.length;
+      const form = tied && open ? 'medial' : tied ? 'final' : open ? 'initial' : 'isolated';
+      units.push({ kind: 'letter', text: ch, idx: [i], form });
+    }
+    units[units.length - 1].wordEnd = true;
+  }
+  // حركاتُ كلِّ وحدة: ما وليها من محارفَ متّصلة، بترتيبها في النصّ
+  for (const unit of units) {
+    unit.marks = [];
+    const last = unit.idx[unit.idx.length - 1];
+    for (let i = last + 1; i < chars.length && HARAKA.test(chars[i]); i++) unit.marks.push(i);
+    // وحركةُ ما قبل الألف في لام-ألف تركب لامَها (لَا): ما ولي اللامَ قبل الألف
+    if (unit.kind === 'liga') {
+      for (let i = unit.idx[0] + 1; i < unit.idx[1] && HARAKA.test(chars[i]); i++) unit.marks.push(i);
+    }
+  }
+  return { chars, units };
+}
+
+/** وصلُ الحروف — من بيانات المنهج ساعةَ البناء (تُملأ في `runBuild`)، لا جدولٌ ثانٍ هنا. */
+let JOINS_AFTER = {};
+
+/** نصٌّ تُنزَع منه محارفُ بأعيانها، ومعه خريطةُ الباقين إلى مواضعهم الجديدة. */
+function dropChars(chars, drop) {
+  const map = new Map();
+  const kept = [];
+  for (let i = 0; i < chars.length; i++) {
+    if (drop.has(i)) continue;
+    map.set(i, kept.length);
+    kept.push(chars[i]);
+  }
+  return { text: kept.join(''), map };
+}
+
+const inkArea = (mask) => mask.reduce((a, b) => a + b, 0);
+
+/** صندوقُ مجموعةِ أجرامٍ ومساحتُها — وحدةُ القياس في مطابقة الحركات وتنزيلها. */
+function groupBox(blobs) {
+  const boxes = blobs.map((b) => b.box);
+  const x0 = Math.min(...boxes.map((b) => b.x0));
+  const x1 = Math.max(...boxes.map((b) => b.x1));
+  const y0 = Math.min(...boxes.map((b) => b.y0));
+  const y1 = Math.max(...boxes.map((b) => b.y1));
+  return {
+    x0, x1, y0, y1, w: x1 - x0, h: y1 - y0, cx: (x0 + x1) / 2, cy: (y0 + y1) / 2,
+    area: blobs.reduce((a, b) => a + b.area, 0),
+  };
+}
+
+/** كلُّ ترتيبات قائمةٍ صغيرة — حركاتُ الحرف الواحد اثنتان أو ثلاث. */
+function permutations(items) {
+  if (items.length <= 1) return [items];
+  const out = [];
+  for (let i = 0; i < items.length; i++) {
+    const rest = [...items.slice(0, i), ...items.slice(i + 1)];
+    for (const tail of permutations(rest)) out.push([items[i], ...tail]);
+  }
+  return out;
+}
+
+/** فرقُ قناعين: ما في الأول وليس في الثاني. */
+function maskMinus(a, b) {
+  const out = new Uint8Array(a.length);
+  for (let i = 0; i < a.length; i++) if (a[i] && !b[i]) out[i] = 1;
+  return out;
+}
+
+/**
+ * **مِرسمُ الكلمة**: خيالُها الكامل (المعروضُ والمقيس)، وعزوُ كلِّ وحدةٍ حبرَها
+ * (جسداً وزوائد)، وأجرامُ كلِّ حركةٍ بعينها.
+ *
+ * **والعزوُ بالحذف لا بالإخفاء — قاسه أوّلُ بناء**: المتصفّح يرسم الحركةَ بلون
+ * **عنقود حرفها** لا بلون محرفها، فتُصبَغ الحركةُ بلون حاملها ولو أُخفيت وحدَها
+ * (فرقُ الطبقتين خرج **صفراً** في «بَابَا»). فالتجريدُ يقع **بنزع الحركات من النصّ**
+ * لا بإخفائها: المحرفُ المنزوعُ لا مقدارَ له في التقدّم فتبقى الحروفُ في مواضعها،
+ * ويُقاس ذلك ولا يُفترَض (جسدُ الوحدة المجرّد ⊆ حبرُها الكامل، وإلا سقط البناء).
+ * **والمركّبةُ تُقشَّر من طرفها**: حركتان على حرفٍ (شدّةٌ وحركة) تتراكمان **بترتيب
+ * النصّ من الحرف خارجاً**، فنزعُ الأخيرة لا يزيح ما تحتها — فيُقرأ حبرُ كلِّ واحدةٍ
+ * فرقاً بين نزعين متتاليين. (والقسمةُ بالتخمين تُغني عنها هذه القشرةُ المقيسة.)
+ */
+async function wordStudio(text) {
+  const { chars, units } = wordUnits(text);
+  const cal = await wordFit(text);
+  const paint = async (chs, visible) =>
+    imageMask(await svgPaint(chs.join(''), cal.size, cal.x, cal.baseline, visible));
+
+  const image = await svgPaint(text, cal.size, cal.x, cal.baseline);
+  const mask = imageMask(image);
+  const allMarks = new Set(chars.map((ch, i) => (HARAKA.test(ch) ? i : -1)).filter((i) => i >= 0));
+  const bare = dropChars(chars, allMarks);
+  const bareChars = [...bare.text];
+
+  for (const unit of units) {
+    // ١) جسدُ الوحدة: من النصّ المجرَّد بمحارفها وحدَها ظاهرة — فلا حركةَ تلتبس به
+    const one = await paint(bareChars, new Set(unit.idx.map((i) => bare.map.get(i))));
+    const parts = maskBodies(one).filter((b) => b.area >= DUST);
+    if (!parts.length) throw new Error(`«${text}»: لا حبرَ لوحدة «${unit.text}»`);
+    unit.body = parts[0];
+    unit.extras = parts.slice(1);
+    unit.bodyMask = one;
+    if (!unit.marks.length) continue;
+
+    // ٢) حركاتُها: تُقشَّر من طرفها، وحبرُ كلٍّ فرقُ نزعين — والقشرةُ تُقاس لا تُظنّ
+    let outer = await paint(chars, new Set(unit.idx));   // الحرفُ وحركاتُه كلُّها
+    const shed = maskMinus(one, outer);
+    if (inkArea(shed) > inkArea(one) * 0.02) {
+      throw new Error(`«${text}»/«${unit.text}»: جسدُه المجرَّد يخرج عن حبره الكامل`
+        + ` (${inkArea(shed)} بكسلاً) — نزعُ الحركات بدّل موضعَ الحرف`);
+    }
+    const blobs = maskBodies(maskMinus(outer, one)).filter((b) => b.area >= DUST);
+    if (!blobs.length) throw new Error(`«${text}»/«${unit.text}»: لا حبرَ لحركاته`);
+    if (unit.marks.length === 1) { unit.markInk = [blobs]; continue; }
+
+    // **والمركّبةُ تُعرَف بشكلها المقيس لا بترتيبها في النصّ** (أمسكه «سُكَّرْ»):
+    // الشدّةُ تُرسم **تحت** الحركة وإن تلتها في الترتيب — فالمحرفُ لا يقول أين يقع.
+    // فتُرسَم كلُّ حركةٍ **وحدَها على حرفها** (تُنزَع أخواتُها من النصّ) فيُعرف شكلُها
+    // بعينه، ثم تُنسَب أجرامُ الكلمة إليها بأشبهها مساحةً ونسبةَ أبعاد. والشكلُ
+    // يفرّقهنّ قطعاً (رأسُ الشدّة من ضربة الفتحة في مساحتها ونسبتها).
+    const solo = [];
+    for (const at of unit.marks) {
+      const keep = dropChars(chars, new Set(unit.marks.filter((i) => i !== at)));
+      const alone = await paint([...keep.text], new Set(unit.idx.map((i) => keep.map.get(i))));
+      const parts2 = maskBodies(maskMinus(alone, one)).filter((b) => b.area >= DUST);
+      if (!parts2.length) throw new Error(`«${text}»/«${unit.text}»: لا حبرَ للحركة «${chars[at]}» وحدَها`);
+      solo.push(groupBox(parts2));
+    }
+    if (blobs.length !== unit.marks.length) {
+      throw new Error(`«${text}»/«${unit.text}»: ${blobs.length} جرماً لـ${unit.marks.length} حركات`
+        + ' — التصقت الحركاتُ فلا تُقسَم بالشكل');
+    }
+    const price = (blob, ref) => Math.abs(Math.log(blob.area / ref.area))
+      + Math.abs(Math.log((blob.w / blob.h) / (ref.w / ref.h)));
+    let best = null;
+    for (const order of permutations(blobs.map((_, i) => i))) {
+      const cost = order.reduce((sum, bi, k) => sum + price(groupBox([blobs[bi]]), solo[k]), 0);
+      if (!best || cost < best.cost) best = { cost, order };
+    }
+    unit.markInk = best.order.map((bi) => [blobs[bi]]);
+  }
+  return { text, chars, units, cal, mask, image, dt: distance(mask), line: cal.baseline };
+}
+
+/** علاماتُ الوحدة بحبر كلٍّ — كما قشرها `wordStudio` من النصّ نزعاً بعد نزع. */
+const unitMarks = (unit, chars) => unit.marks.map((at, k) => ({
+  mark: chars[at], at, blobs: unit.markInk[k],
+}));
+
+/** تحويلُ نقاطٍ قانونيةٍ إلى جسد الكلمة: مقياسٌ واحد ومركزٌ على مركز. */
+function fitTransform(canonBox, wordBox, text, label) {
+  const sx = wordBox.w / canonBox.w;
+  const sy = wordBox.h / canonBox.h;
+  const s = (sx + sy) / 2;
+  const skew = Math.abs(sx - sy) / s;
+  return {
+    s,
+    skew,
+    map: (p) => [
+      round1(wordBox.cx + (p[0] - canonBox.cx) * s),
+      round1(wordBox.cy + (p[1] - canonBox.cy) * s),
+    ],
+  };
+}
+
+/**
+ * **الطيّةُ المنزَّلة تُقاس بمقياس المحرّك**: لا تُعلَن طيّةٌ **ضلعُها دون سماحة
+ * الارتداد** — فنصُّ المحرّك نفسُه «ما دون سماحة الارتداد موضعٌ واحد على المسار»،
+ * وضلعٌ دونها لا يقرؤه منطقُ الانعطاف ذهاباً وإياباً (قِيس على «سل»: ضلعٌ نازل ٤٥
+ * يقف الإسقاطُ عنده على القمّة أبداً فتُرَدّ الكتابةُ الصحيحة قِصَراً). فتسقط
+ * صفتُها ويبقى رسمُها، **والصغيرةُ غيرُ المعلنة آمنة**: ضلعاها المفكوكان يُقرآن
+ * تقدّماً متصلاً — عينُ حكم ع وغ: ما لا يقيسه الحَكَمُ لا يُدَّعى. والساقطةُ تُطبَع
+ * في بلاغ البناء بضلعيها.
+ */
+function carryFolds(folds, points, offset, scale, dropped, label) {
+  const poly = prepare(points);
+  const back = TOLERANCE.back * scale;
+  const out = [];
+  for (const f of folds || []) {
+    const rise = poly.cum[f.apex] - poly.cum[f.from];
+    const drop = poly.cum[f.to] - poly.cum[f.apex];
+    if (rise < back || drop < back) {
+      dropped.push(`${label}: طيّةٌ ضلعاها ${Math.round(rise)}/${Math.round(drop)}`
+        + ` دون سماحة الارتداد بمقياس الكلمة (${Math.round(back)}) فسقطت صفتُها`);
+      continue;
+    }
+    out.push({ from: f.from + offset, apex: f.apex + offset, to: f.to + offset });
+  }
+  return out;
+}
+
+/**
+ * **ردُّ الشوارد إلى الحبر** — سابقةُ التنعيم في الحروف («كلُّ نقطةٍ نُعِّمت تُردّ
+ * إلى موضعها إن خرجت»): التنزيلُ يُصغِّر القانونيَّ إلى ربع مقاسه ونحوِه، فطرفٌ
+ * ممدودٌ إلى حافّة حبره القانونيّ قد يقع بعد التقريب خارجَ حبر الكلمة **ببكسل** —
+ * فيُرَدّ إلى أقرب حبرٍ ما دام على مرمى وحداتٍ، وما بَعُد فشكوى الغَوص تمسكه.
+ */
+function snapIntoInk(points, mask) {
+  const RANGE = 4;                       // خلايا قناع — نحو ثماني وحداتِ شبكة
+  return points.map((p) => {
+    const mx = Math.round(p[0] / PX - 0.5);
+    const my = Math.round(p[1] / PX - 0.5);
+    if (mx >= 0 && my >= 0 && mx < MASK && my < MASK && mask[my * MASK + mx]) return p;
+    let best = null;
+    let gap = Infinity;
+    for (let dy = -RANGE; dy <= RANGE; dy++) {
+      for (let dx = -RANGE; dx <= RANGE; dx++) {
+        const nx = mx + dx;
+        const ny = my + dy;
+        if (nx < 0 || ny < 0 || nx >= MASK || ny >= MASK || !mask[ny * MASK + nx]) continue;
+        const d = dx * dx + dy * dy;
+        if (d < gap) { gap = d; best = [(nx + 0.5) * PX, (ny + 0.5) * PX]; }
+      }
+    }
+    return best ? [round1(best[0]), round1(best[1])] : p;
+  });
+}
+
+/**
+ * إعادةُ توزيع قطعةِ كلمةٍ مع حمل طيّاتها أطوالاً — والقاعدةُ («لا ضلعَ دون سماحة
+ * الارتداد») تُعاد **بعد** التوزيع: التقريبُ إلى أقرب نقطةٍ موزَّعة يقصّ الضلعَ حتى
+ * نصفِ خطوةٍ، فطيّةٌ عبرت القاعدةَ قبله قد تسقط عنها بعده — وتسقط بإعلانٍ لا صمتاً.
+ */
+function resampleStroke(stroke, dropped, label, scale) {
+  const before = prepare(stroke.points);
+  const spans = (stroke.folds || []).map((f) => [before.cum[f.from], before.cum[f.apex], before.cum[f.to]]);
+  const points = resample(stroke.points, scale);
+  const poly = prepare(points);
+  const back = TOLERANCE.back * scale;
+  const at = (len) => Math.min(points.length - 1,
+    Math.max(0, Math.round((len / (before.len || 1)) * (points.length - 1))));
+  const folds = [];
+  for (const [a, b, c] of spans) {
+    const f = { from: at(a), apex: at(b), to: at(c) };
+    const rise = f.from < f.apex ? poly.cum[f.apex] - poly.cum[f.from] : 0;
+    const drop = f.apex < f.to ? poly.cum[f.to] - poly.cum[f.apex] : 0;
+    // **وتعود الطيّةُ من حيث بدأت أو فلا طيّة** (عينُ ما يفحصه `check_paths`): تصغيرُ
+    // القانونيّ يفتح زاويةَ الشوكة، فتخرج شوكةٌ ضحلةٌ طرفاها أبعدُ من أقصر ضلعيها —
+    // وتلك قطعةٌ منكسرة لا مكانٌ واحد بطولين، فلا تُدَّعى فيها طيّة.
+    const spread = dist(points[f.from], points[f.to]);
+    if (rise >= back && drop >= back && spread < Math.min(rise, drop)) folds.push(f);
+    else if (rise < back || drop < back) {
+      dropped.push(`${label}: طيّةٌ ضلعاها بعد التوزيع ${Math.round(rise)}/${Math.round(drop)}`
+        + ` دون سماحة الارتداد بمقياس الكلمة (${Math.round(back)}) فسقطت صفتُها`);
+    } else {
+      dropped.push(`${label}: طيّةٌ طرفاها على بُعد ${Math.round(spread)}`
+        + ` وأقصرُ ضلعيها ${Math.round(Math.min(rise, drop))} — شوكةٌ ضحلةٌ لا تعود من مبدئها`);
+    }
+  }
+  return folds.length ? { points, start: points[0], folds } : { points, start: points[0] };
+}
+
+/**
+ * **وصلُ القطع**: خروجُ الحرف يبلغ مقعدَ التالي فيُدمَجان قطعةً واحدة (حكم ٤ —
+ * الوصلةُ يرسمها خروجُ ما قبلها). والدمجُ **هندسيٌّ مقيس**: يقع إن دنا المدخلُ من
+ * الخروج دون سماحة الانحراف — فالعمودُ النازل من قمّته (حكم ١) يفترق عنه بعلوّه
+ * فينقطع الوصلُ عنده من نفسه، بلا جدول حروفٍ يُكتب.
+ */
+const JOIN_GAP = TOLERANCE.lateral;
+
+/**
+ * تأليفُ مسار الكلمة: وحداتُها تُنزَّل قانونيّاتُها على أجسادها، والقطعُ تُدمَج على
+ * الوصل، والعلاماتُ ضرباتٌ بإيماءاتها (حكم ٥ وتوطئتُه) والنقاطُ آخرَ الكلّ — ثم
+ * يُقاس كلُّ شيء: الغَوصُ في حبر الكلمة، والحكمُ صحيحاً ومعكوساً.
+ */
+function composeWord(studioWord, canon, canonMarks, log) {
+  const { text, chars, units } = studioWord;
+  const dropped = [];
+  // **سماحةُ الكلمة سماحةُ حروفها فيها — مقيسةٌ لا مختارة** (`METHOD.md §٣.٥`:
+  // «السماحةُ تملكها المحطة»). سماحاتُ المحرّك أطوالٌ مطلقةٌ مُعايَرةٌ على **حرفٍ
+  // يملأ صندوقَه** (قرارُ الجلسة ٢)، وحرفُ الكلمة جزءٌ من صندوقها — فتُشَدّ سماحاتُه
+  // بنسبة تصغيره. **وأمسك ذلك أوّلُ قياس**: بالسماحة الكاملة سقطت تسعون كلمةً من
+  // سبعٍ وتسعين دون عهد `child-drift`، **وسببُها `reverse` في أربعٍ وخمسين** — لا
+  // ضيقُ سماحةٍ بل اتساعُها: سنّةٌ مداها أربعون وحدةً لا تُعلَن طيّةً تحت مقياسٍ
+  // مطلقٍ سبعين، فتُقرأ عودةُ القلم عليها ارتداداً. فالمقياسُ يتبع الحبر: طيّةً
+  // تُعلَن، وحُكماً يُقاس، وسماحةً تحملها الكلمةُ إلى لوحها.
+  const runs = [];                 // قطعُ الأجساد
+  const markStrokes = [];          // ضرباتُ العلامات (همزةُ المتغيّر ثم حركاتُه) بترتيب الحروف
+  const dots = [];                 // النقاطُ آخرَ الكلّ (قاعدةُ الخطّ المدرسيّ على الكلمة كلِّها)
+  let open = null;                 // القطعةُ المفتوحة للوصل
+  const meta = { units: [], joins: [], skew: 0 };
+  // مقياسُ الكلمة يُقرأ من أجسادها قبل التأليف — به تُقاس الطيّاتُ وبه تُحكَم
+  const scales = units.map((unit) => {
+    const source = canon[unit.text]?.[unit.form];
+    if (!source) throw new Error(`«${text}»: لا قانونيَّ لوحدة «${unit.text}/${unit.form}»`);
+    return fitTransform(source.body, unit.body.box, text, unit.text).s;
+  });
+  const scale = Math.round((scales.reduce((a, b) => a + b, 0) / scales.length) * 100) / 100;
+
+  const close = () => { if (open) { runs.push(open); open = null; } };
+
+  for (const unit of units) {
+    const source = canon[unit.text]?.[unit.form];
+    if (!source) throw new Error(`«${text}»: لا قانونيَّ لوحدة «${unit.text}/${unit.form}»`);
+    const tr = fitTransform(source.body, unit.body.box, text, unit.text);
+    meta.skew = Math.max(meta.skew, tr.skew);
+    if (tr.skew > 0.16) {
+      throw new Error(`«${text}»/«${unit.text}»: جسدُه في الكلمة لا يناسب قانونيَّه`
+        + ` (فرقُ المقياسين ${(tr.skew * 100).toFixed(0)}٪) — أهو رمزٌ سياقيّ آخر؟`);
+    }
+
+    // أجزاءُ الجسد أولاً (ومنها عمودُ ط الثاني في موضعه)، ثم ضرباتُ علامات القانونيّ
+    const bodyCount = source.bodyStrokes;
+    unit.ref = { strokes: [], marks: [] };
+    source.ref.strokes.forEach((stroke, k) => {
+      const points = stroke.points.map(tr.map);
+      // الطيّاتُ تُقاس على النقاط **المنزَّلة** — فمقياسُ المحرّك مطلقٌ على الشبكة
+      const folds = carryFolds(stroke.folds, points, 0, scale, dropped, `${text}/${unit.text}`);
+      const placed = { points, folds };
+      if (k >= bodyCount) { unit.ref.marks.push(placed); return; }
+      if (k === 0 && open) {
+        // **والوصلُ يُقَصّ عند مُلتقاه لا يُلصَق طرفاً بطرف** (كشفه قياسُ «تمر»):
+        // حبرُ الوصلة **مشتركٌ بين الحرفين** — يخرج به الأولُ ويدخل به الثاني — فلو
+        // وُصل طرفُ الأول برأس الثاني لَمشى القلمُ ذلك الحبرَ مرّتين، فينطبق شقّان من
+        // المسار أحدُهما على الآخر ويصير للموضع الواحد طولان **بلا إعلان طيّة**: قِيس
+        // أنّ مؤشّر التقدّم يسبق قلمَ الطفل بخمسمئة وحدة ثم يُقرأ مضيُّه `wander`.
+        // **وحكمُ المالك يقول أيُّهما يُقَصّ** (§٤: «الوصلةُ يرسمها خروجُ الحرف قبلها»
+        // و«مدخلُ الموصول مقعدُه»): فيُقَصّ **ذيلُ الأول عند أقرب موضعٍ من مقعد الثاني**
+        // ويبقى الثاني تامّاً من مقعده — فالحبرُ يُمشى مرّةً واحدة كما يكتبه القلم.
+        // **والقصُّ عند حدّ حبر الثاني**: آخِرُ موضعٍ من ذيل الأول لم يدخل بعدُ في جسد
+        // الثاني — فما بعده حبرٌ سيمشيه الثاني من مقعده. وإن لم يدخله ذيلُه فأقربُ
+        // موضعٍ من مقعده (وصلةٌ تُجسَر لا تُقَصّ).
+        const from = Math.max(1, Math.floor(open.points.length * 0.5));
+        const inNext = (q) => {
+          const mx = Math.round(q[0] / PX - 0.5);
+          const my = Math.round(q[1] / PX - 0.5);
+          return mx >= 0 && my >= 0 && mx < MASK && my < MASK && unit.bodyMask[my * MASK + mx];
+        };
+        let cut = -1;
+        for (let j = open.points.length - 1; j >= from; j--) {
+          if (!inNext(open.points[j])) { cut = j; break; }
+        }
+        if (cut < 0) {
+          let near2 = Infinity;
+          for (let j = from; j < open.points.length; j++) {
+            const d = dist(open.points[j], points[0]);
+            if (d < near2) { near2 = d; cut = j; }
+          }
+        }
+        const near = dist(open.points[cut], points[0]);
+        const trimmed = open.points.length - 1 - cut;
+        if (near <= JOIN_GAP) {
+          meta.joins.push({ at: unit.text, gap: round1(near), trimmed });
+          // وطيّةٌ تقع فيما قُصّ تسقط صفتُها بإعلان — لا تبقى بأرقامٍ شاخت
+          open.folds = open.folds.filter((f) => {
+            if (f.to <= cut) return true;
+            dropped.push(`${text}/${unit.text}: طيّةٌ وقعت في ذيلٍ قُصّ عند الوصل فسقطت صفتُها`);
+            return false;
+          });
+          open.points = open.points.slice(0, cut + 1).concat(points);
+          const offset = cut + 1;
+          open.folds.push(...folds.map((f) => ({ from: f.from + offset, apex: f.apex + offset, to: f.to + offset })));
+          return;
+        }
+        meta.joins.push({ at: unit.text, gap: round1(near), cut: true });
+      }
+      close();
+      open = { points: [...points], folds: [...folds] };
+    });
+    if (source.ref.strokes.length > bodyCount || unit.kind === 'liga') close();
+
+    // زوائدُ الوحدة في الكلمة: نقاطٌ (بعدّة القانونيّ) أو همزةُ متغيّرٍ (ضربةً)
+    const canonDots = source.ref.dots;
+    if (canonDots.length) {
+      if (!unit.extras.length) throw new Error(`«${text}»/«${unit.text}»: نقاطُه لم تُعزَ من الخيال`);
+      const area = unit.extras.reduce((a, b) => a + b.area, 0);
+      const at = unit.extras.reduce((p, b) => [p[0] + b.at[0] * b.area / area, p[1] + b.at[1] * b.area / area], [0, 0]);
+      dots.push({ at: [round1(at[0]), round1(at[1])], count: canonDots.reduce((n, d) => n + d.count, 0), after: true });
+    } else if (unit.ref.marks.length) {
+      // همزةُ أ وإ من القانونيّ (أُلّفت بإيماءتها — حكم ٥ توطئةً لهمزات ق٣)
+      for (const placed of unit.ref.marks) markStrokes.push({ ...placed, why: unit.text });
+    } else if (unit.extras.length) {
+      throw new Error(`«${text}»/«${unit.text}»: زوائدُ في الخيال (${unit.extras.length}) لا يعرفها قانونيُّه`);
+    }
+    if (!JOINS_AFTER[unit.text.at(-1)] || unit.wordEnd) close();
+
+    // حركاتُ الوحدة ضرباتٌ بإيماءات علاماتها القانونية — بترتيبها في الرسم
+    if (unit.marks.length) {
+      for (const { mark, blobs } of unitMarks(unit, chars)) {
+        const canonMark = canonMarks[mark];
+        if (!canonMark) throw new Error(`«${text}»: لا إيماءةَ قانونيةً للعلامة «${mark}»`);
+        const tm = fitTransform(canonMark.box, groupBox(blobs), text, mark);
+        for (const stroke of canonMark.strokes) {
+          markStrokes.push({
+            points: stroke.points.map(tm.map),
+            folds: carryFolds(stroke.folds, stroke.points.map(tm.map), 0, scale, dropped, `${text}/${mark}`),
+            why: mark,
+          });
+        }
+      }
+    }
+    // **وحبرُ الحرف حدُّ مساره في الكلمة**: نظيرُ «المسارُ داخلَ خيال حرفه» مرفوعاً إلى
+    // الكلمة — فمسارٌ يتعدّى جسدَه إلى جسد جاره يمشي حبراً يمشيه غيرُه، فينطبق شقّان
+    // من المسار بلا إعلان طيّة ويصير للموضع الواحد طولان. ويُقاس ولا يُفترَض.
+    const own = depthIn(studioWord, [...unit.ref.strokes, ...unit.ref.marks].flatMap((st) => st.points),
+      unit.bodyMask);
+    meta.units.push({
+      text: unit.text, form: unit.form, scale: round1(tr.s * 100) / 100, stray: own.out,
+    });
+  }
+  close();
+
+  // القطعُ ثم ضرباتُ العلامات ثم النقاط — والطيّاتُ تُحمَل عبر إعادة التوزيع أطوالاً،
+  // والشوارد تُرَدّ إلى الحبر قبل التوزيع (فلا يبقى بعده طرفٌ على حافّة تقريب)
+  const strokes = [
+    ...runs.map((r, i) => resampleStroke({ ...r, points: snapIntoInk(r.points, studioWord.mask) }, dropped, `${text}#${i + 1}`, scale)),
+    ...markStrokes.map((m) => resampleStroke({ ...m, points: snapIntoInk(m.points, studioWord.mask) }, dropped, `${text}/${m.why}`, scale)),
+  ];
+  const ref = { strokes, dots, line: round1(studioWord.line), tolerance: scale };
+
+  // **المسارُ داخل خيال الكلمة** — الغَوصُ يُقاس نقطةً نقطة كما في الحرف، **وشكواه
+  // تسمّي قطعتَها** (سنّةُ الجلسة ٧: العطبُ يسمّي موضعَه، فلا يُبحَث في كلمةٍ كلِّها)
+  const labels = [...runs.map((_, i) => `قطعة ${i + 1}`), ...markStrokes.map((m) => `علامة «${m.why}»`)];
+  const ink = depthIn(studioWord, strokes.flatMap((s) => s.points), studioWord.mask);
+  if (ink.out) {
+    const guilty = strokes.map((s, i) => {
+      const one = depthIn(studioWord, s.points, studioWord.mask);
+      return one.out ? `${labels[i]}: ${one.out} من ${s.points.length}` : null;
+    }).filter(Boolean);
+    throw new Error(`«${text}»: ${ink.out} نقطةً خارج خيال الكلمة — ${guilty.join(' · ')}`
+      + ` (${ink.stray.slice(0, 3).map((p) => p.join('،')).join(' · ')})`);
+  }
+
+  // **ولا يخرج من هنا ما لا يقبله محرّكُه**: صحيحُه يُقبَل ومعكوسُ أوّلِه يُرَدّ
+  const walk = strokes.map((s) => s.points);
+  const taps = dots.flatMap((d) => Array.from({ length: d.count }, () => [d.at]));
+  const good = judge(ref, [...walk, ...taps], { tolerance: scale });
+  if (!good.accepted) {
+    const detail = good.faults.slice(0, 4)
+      .map((f) => `${f.code}@${f.part}(${f.at.map(Math.round).join('،')})`).join(' · ');
+    const err = new Error(`«${text}»: المحرّكُ يردّ كتابتَها الصحيحة — ${detail}`
+      + ` — تغطية ${good.metrics.coverage.toFixed(2)} · أجزاء ${ref.strokes.length}+${dots.length}`
+      + ` · طيّات [${strokes.map((s) => (s.folds || []).length).join('،')}]`);
+    err.ref = ref;
+    throw err;
+  }
+  const bad = judge(ref, [[...walk[0]].reverse(), ...walk.slice(1), ...taps], { tolerance: scale });
+  if (bad.accepted) throw new Error(`«${text}»: المحرّكُ يقبل أولَها معكوساً`);
+
+  log?.({
+    text, strokes: strokes.length, dots: dots.length, joins: meta.joins,
+    skew: meta.skew, depth: round1(ink.least), scale, dropped,
+    stray: meta.units.filter((u) => u.stray).map((u) => `${u.text}:${u.stray}`),
+  });
+  return { ref, meta, dropped };
+}
+
+/**
+ * **قانونيُّ العلامة**: خيالُ العلامة وحدَها يملأ صندوقَه (تُصيَّر على حاملٍ صفريّ
+ * «ـ» ليعرف المُشكِّلُ أنها علامةُ حرف، ثم يُقاس جرمُها ويُكبَّر وحدَه)، وتُنحَّف
+ * ويُقرأ هيكلُها بياناً، **وتُمشى بإيماءتها المؤلَّفة** — عينُ منظومة حكم ٥ (شولةُ
+ * الكاف): البدايةُ والاتجاهُ مادّةٌ مدرَّسة في العلامة كما في الجسم، توطئةً لهمزات
+ * ق٣. ثم تُنزَّل على نظائرها في الكلمات بجرمها هناك.
+ */
+async function markCanonical(mark, entry) {
+  // **حبرُ العلامة فرقُ نزعٍ لا تصفيةَ موضع** (أمسكه أوّلُ بناء): الضمّةُ والتنوينُ
+  // خرجا **شريطَ الحامل نفسَه** (عقدتان أفقيتان متطابقتان لعلامتين مختلفتين) لأنّ
+  // التصفيةَ بالمركز تُبقي الشريطَ الممدود. فالحاملُ يُرسَم مرّتين — به وبلا العلامة —
+  // والفرقُ حبرُها وحدَه، وهو مبدأُ عزو حركات الكلمة بعينه.
+  const carrier = 'ـ';
+  const inkOf = async (size, x, y) => maskMinus(
+    imageMask(await svgPaint(carrier + mark, size, x, y)),
+    imageMask(await svgPaint(carrier, size, x, y)));
+
+  const probe = await inkOf(100, GRID / 2, GRID / 2);
+  const box = maskBox(probe);
+  if (!box) throw new Error(`علامة «${mark}»: لا جرمَ لها على الحامل`);
+  const w = box.w;
+  const h = box.h;
+  const span = GRID - 2 * MARGIN;
+  const scale = span / Math.max(w, h);
+  const size = 100 * scale;
+  const markMask = await inkOf(size, GRID / 2 + (GRID / 2 - box.cx) * scale,
+    GRID / 2 + (GRID / 2 - box.cy) * scale);
+  const parts = maskBodies(markMask).filter((b) => b.area >= DUST);
+  if (!parts.length) throw new Error(`علامة «${mark}»: ضاع جرمُها في التكبير`);
+  for (let i = 0; i < markMask.length; i++) markMask[i] = 0;
+  for (const part of parts) for (const c of part.cells) markMask[c] = 1;
+  const image = await svgPaint(carrier + mark, size, GRID / 2 + (GRID / 2 - box.cx) * scale,
+    GRID / 2 + (GRID / 2 - box.cy) * scale);
+  const work = { bodyMask: markMask, graph: skeletonGraph(thin(markMask)), dt: distance(markMask) };
+  if (!entry?.strokes?.length) {
+    return { mark, work, box: maskBox(markMask), aspect: w / h, strokes: null, image };
+  }
+  const strokes = [];
+  for (const ids of entry.strokes) {
+    // كما في `compose` سواءً: الطيّةُ المعلَنة من مفرق الهيكل (سنّةُ الشدّة الوسطى)
+    // تُحمَل عبر الصقل أطوالاً ثم تُقرأ أرقاماً في المسار الموزَّع.
+    const walked = walkGesture(work, ids);
+    let points = smooth(walked.points, 2, work);
+    points = extendEnd(points, markMask, true);
+    let folds = walked.folds.map((f) => ({
+      from: f.from ? f.from + 1 : 0, apex: f.apex + 1, to: f.to + 1,
+    }));
+    points = extendEnd(points, markMask, false);
+    points = smooth(points, 2, work);
+    const before = prepare(points);
+    const spans = folds.map((f) => [before.cum[f.from], before.cum[f.apex], before.cum[f.to]]);
+    points = resample(points);
+    const at = (len) => Math.min(points.length - 1,
+      Math.max(0, Math.round((len / (before.len || 1)) * (points.length - 1))));
+    folds = spans.map(([a, b, c]) => ({ from: at(a), apex: at(b), to: at(c) }))
+      .filter((f) => f.from < f.apex && f.apex < f.to);
+    strokes.push(folds.length ? { points, start: points[0], folds } : { points, start: points[0] });
+  }
+  const ink = depthIn(work, strokes.flatMap((s) => s.points), markMask);
+  if (ink.out) throw new Error(`علامة «${mark}»: ${ink.out} نقطةً خارج جرمها`);
+  return {
+    mark, work, image,
+    box: maskBox(markMask),
+    aspect: w / h,
+    strokes,
+    /** شارةُ العرض لبطاقة التعريف: العلامةُ في صندوقها المعياريّ — من المسار نفسِه */
+    glyph: { strokes: strokes.map((s) => ({ points: s.points, start: s.start })), dots: [] },
+  };
+}
+
+/**
+ * **قانونيّاتُ التنزيل**: لكلِّ وحدةٍ (حرفاً أو متغيّراً أو لام-ألف) بشكل موقعها —
+ * مسارُها المركَّب، وجسدُها (حدودُ قناعه)، وعددُ أجزاء جسدها (فما بعدها ضرباتُ
+ * علاماتٍ مؤلَّفة تُفرَد في الكلمة إفرادَها).
+ */
+function canonOf(works, done, forms) {
+  const out = {};
+  for (const form of FORMS) {
+    const entry = forms[form];
+    const gesture = entry.sameAs ? forms[entry.sameAs] : entry;
+    out[form] = {
+      ref: done[form],
+      body: maskBox(works[form].bodyMask),
+      bodyStrokes: gesture.strokes.length,
+    };
+  }
+  return out;
+}
+
+/**
+ * **بناءُ مسارات الكلمات كلِّها من المنهج** — قائمةُ العمل تُقرأ من `curriculum.js`
+ * (وصلاتُ مرحلة الوصل ثم كلماتُ الجداول كلُّها) **ولا كلمةَ تُكتب هنا**. وأسطرُ
+ * المسافة (كلمتان تتجاوران بمسافةٍ من المُشكِّل — مادّةُ «المسافة بين الكلمات»)
+ * تُشتقّ بقاعدةٍ معلنة: أولا كلمتَي كلِّ عقدة نسخٍ غير عقد العلامات.
+ */
+async function buildWords(spec, canon) {
+  const cur = await import('/js/curriculum.js');
+  JOINS_AFTER = {};
+  for (const [ch, info] of Object.entries(cur.LETTERS)) JOINS_AFTER[ch] = !!info.joins;
+  for (const [ch, info] of Object.entries(cur.VARIANTS)) JOINS_AFTER[ch] = !!info.joins;
+
+  const stage = cur.STAGES.find((s) => s.kind === 'join');
+  const joins = (stage?.nodes || []).flatMap((n) => n.joins || []);
+  const words = Object.keys(cur.WORDS);
+  const pairs = (stage?.nodes || [])
+    .filter((n) => (n.words || []).length >= 2 && !String(n.part).startsWith('sign-'))
+    .map((n) => `${n.words[0]} ${n.words[1]}`);
+
+  // العلاماتُ المطلوبة قانونيّاتُها: كلُّ حركةٍ وردت في المادّة — فعلامةٌ بلا إيماءةٍ
+  // مؤلَّفةٍ تُسقط البناءَ باسمها، ولا تدخل كلمةٌ حركتُها نقرةٌ عمياء.
+  const needed = [...new Set([...joins, ...words].flatMap((t) => [...t].filter((c) => HARAKA.test(c))))];
+  const canonMarks = {};
+  for (const mark of needed) {
+    if (!spec.marks?.[mark]?.strokes?.length) {
+      throw new Error(`العلامة «${mark}» تلزم الكلماتِ ولا إيماءةَ لها في \`marks\``);
+    }
+    canonMarks[mark] = await markCanonical(mark, spec.marks[mark]);
+  }
+
+  const out = {};
+  const report = [];
+  const failedPairs = [];
+  const failed = [];
+  const failRefs = {};
+  // **وشكوى الكلمة لا توقف جردَ أخواتها**: البناءُ يجمع الشكاوى كلَّها ثم يسقط بها
+  // مجتمعةً — فيُرى العطبُ صنفاً لا واحدةً بعد واحدة (وقد كشف ذلك أنّ ما يبدو ثلاثةَ
+  // أعطاب في ثلاث تشغيلاتٍ عطبٌ واحدٌ في المحرّك).
+  for (const text of [...joins, ...words]) {
+    try {
+      const st = await wordStudio(text);
+      out[text] = composeWord(st, canon, canonMarks, (line) => report.push(line)).ref;
+    } catch (e) {
+      failed.push(`«${text}»: ${e.message}`);
+      if (e.ref) failRefs[text] = e.ref;
+    }
+  }
+  // أسطرُ المسافة تُقاس ككل شيء — وما ضاق عن مقياس المحرّك سقط بإعلانٍ لا صمتاً
+  for (const text of pairs) {
+    try {
+      const st = await wordStudio(text);
+      out[text] = composeWord(st, canon, canonMarks, (line) => report.push(line)).ref;
+    } catch (e) {
+      failedPairs.push(`${text}: ${e.message}`);
+    }
+  }
+  const glyphs = {};
+  for (const [mark, cm] of Object.entries(canonMarks)) glyphs[mark] = cm.glyph;
+  return {
+    words: out, report, glyphs, failedPairs, failed, failRefs,
+    counts: { joins: joins.length, words: words.length, pairs: pairs.length },
+  };
 }
 
 // ————— ٧ب) أشكالُ التهيئة الحركية: هندسةٌ **محسوبة** لا خيالُ حرف —————
@@ -1411,7 +2193,7 @@ const workList = (spec) => Object.entries(spec.letters)
   .flatMap(([ch, forms]) => FORMS.filter((f) => forms[f]).map((form) => ({ ch, form })));
 
 /** يبني كلَّ ما في ملفّ الإيماءات، ويتحقّق من دعوى «الشكلان واحد» بالخيال لا بالقول. */
-function buildAll(spec) {
+function buildAll(spec, canon = null) {
   const paths = {};
   const report = [];
   for (const [ch, forms] of Object.entries(spec.letters)) {
@@ -1464,6 +2246,7 @@ function buildAll(spec) {
       });
     }
     paths[ch] = done;
+    if (canon) canon[ch] = canonOf(works, done, forms);
   }
   return { paths, report };
 }
@@ -1473,14 +2256,15 @@ async function runBuild() {
   // **بناءٌ محدودٌ بحروفٍ بعينها** (`only`، الجلسة ٧): تُقاس به **مرشّحاتُ الكرّاسة**
   // — جوابان لحالةٍ حركية يُبنيان ويُدخَلان على المحرّك قبل أن يحكم المالك. وهو
   // **قياسٌ لا يُكتب منه ملفّ**: السائقُ يرفض الكتابة إذا صُفّيت الحروف (وإلّا خرجت
-  // وحدةٌ ناقصة)، وأشكالُ التهيئة لا تُبنى معه لأنّ دورانَها يُقرأ من حلقة الميم.
+  // وحدةٌ ناقصة)، وأشكالُ التهيئة والكلماتُ لا تُبنى معه.
   const only = qs.get('only');
   if (only) {
     spec.letters = Object.fromEntries(
       Object.entries(spec.letters).filter(([ch]) => only.includes(ch)));
   }
   try {
-    const { paths, report } = buildAll(spec);
+    const canon = {};
+    const { paths, report } = buildAll(spec, canon);
     if (only) {
       say(true, `بناءٌ محدود بـ«${only}» — قياسٌ لا تُكتب منه وحدة`, {
         paths, partial: only, meta: { report, grid: GRID },
@@ -1504,10 +2288,52 @@ async function runBuild() {
     }
     say(true, `دورانُ دوائر التهيئة من حلقة م المعزولة: ${
       warm.spin > 0 ? 'مع عقارب الساعة' : 'عكسَ عقارب الساعة'}`);
+
+    // ————— الكلماتُ (الجلسة ٨): المتغيّراتُ ولام-ألف قانونيّاتٌ، ثم النسخُ كلُّه —————
+    //
+    // المتغيّراتُ (ء ة أ إ) **تُؤلَّف عند أول كلمةٍ تحملها** — وكلماتُها في المنهج
+    // اليوم، فتُبنى هنا قانونيّاتٍ ولا تُكتب في `paths.js` (ليست من حروف اقرأ الثمانية
+    // والعشرين): موضعُها الكلماتُ التي تحملها في `word_paths.js`.
+    await inlineFont(FONT_SRC);
+    for (const [group, name] of [['variants', 'متغيّر'], ['ligatures', 'لام-ألف']]) {
+      if (!spec[group]) continue;
+      const groupReport = buildAll({ letters: spec[group] }, canon).report;
+      for (const line of groupReport) {
+        say(true, `${name} ${line.ch} ${FORM_AR[line.form]}: `
+          + (line.sameAs ? `عينُ ${FORM_AR[line.sameAs]} (${line.sig})`
+            : `${line.strokes} جزءاً و${line.dots} نقطةً · عُقَد ${line.nodes} · غوص ${line.depth}`));
+      }
+    }
+    const built = await buildWords(spec, canon);
+    for (const line of built.report) {
+      const joins = line.joins.map((j) => (j.cut ? `${j.at}✂${j.gap}` : `${j.at}~${j.gap}`)).join(' ');
+      say(true, `كلمة «${line.text}»: ${line.strokes} قطعةً و${line.dots} نقطةً`
+        + ` · وصلُها [${joins}] · مقياسُ حروفها ×${line.scale}`
+        + ` · فرقُ المقياسين ≤${(line.skew * 100).toFixed(0)}٪`
+        + ` · غوص ${line.depth}`
+        + (line.stray.length ? ` · ⚠ خارجَ حبر حرفه: ${line.stray.join(' ')}` : '')
+        + (line.dropped.length ? ` · ⚠ ${line.dropped.join(' · ')}` : ''));
+    }
+    for (const fail of built.failedPairs) say(true, `⚠ سطرُ مسافةٍ سقط بإعلان: ${fail}`);
+    for (const fail of built.failed) say(false, `كلمةٌ لم تُبنَ — ${fail}`);
+    say(true, `الكلماتُ المؤلَّفة: ${Object.keys(built.words).length}`
+      + ` (وصلات ${built.counts.joins} · كلمات ${built.counts.words}`
+      + ` · أسطرُ مسافة ${built.counts.pairs - built.failedPairs.length}/${built.counts.pairs})`);
+    if (built.failed.length) {
+      say(false, `${built.failed.length} كلمةً لم تُبنَ — لا تُكتب وحدةٌ ناقصة`, { failRefs: built.failRefs });
+      await send();
+      return;
+    }
+
     say(true, 'تمّ البناء', {
       paths,
       warmups: warm.warmups,
-      meta: { report, grid: GRID, spin: warm.spin, warmups: warm.report },
+      words: built.words,
+      markGlyphs: built.glyphs,
+      meta: {
+        report, grid: GRID, spin: warm.spin, warmups: warm.report,
+        words: built.report, failedPairs: built.failedPairs, wordCounts: built.counts,
+      },
     });
   } catch (e) {
     say(false, `تعذّر البناء: ${e.message}`);
@@ -1517,8 +2343,27 @@ async function runBuild() {
 
 async function runNodes() {
   const spec = await anchors();
-  const list = allForms(spec);
+  // جردُ المتغيّرات ولام-ألف مع الحروف (قانونيّاتُ الكلمة تُؤلَّف بالأداة نفسِها)،
+  // وجردُ عُقَد العلامات في ذيله — منها تُؤلَّف إيماءاتُ الحركات (منظومة حكم ٥).
+  const everything = { letters: { ...spec.letters, ...(spec.variants || {}), ...(spec.ligatures || {}) } };
+  const list = allForms(everything);
   const table = {};
+  if (spec.marks) {
+    await inlineFont(FONT_SRC);
+    for (const mark of Object.keys(spec.marks)) {
+      try {
+        const cm = await markCanonical(mark, null);
+        table[`mark/${mark}`] = {
+          aspect: round1(cm.aspect * 100) / 100,
+          nodes: cm.work.graph.nodes.map((n) => ({ id: n.id, at: n.at.map(round1), deg: n.deg })),
+          edges: cm.work.graph.edges.map((e) => ({ a: e.a, b: e.b, len: round1(chainLen(e.chain)) })),
+        };
+        say(true, `علامة «${mark}»: ${cm.work.graph.nodes.length} عقدةً و${cm.work.graph.edges.length} حافّة`);
+      } catch (e) {
+        say(false, `علامة «${mark}»: ${e.message}`);
+      }
+    }
+  }
   for (const { ch, form } of list) {
     try {
       const work = studio(ch, form);
@@ -1699,9 +2544,11 @@ async function runStudio() {
 
 // ————— الإقلاع —————
 
+let FONT_SRC = null;
+
 (async () => {
   try {
-    await loadFont();
+    FONT_SRC = await loadFont();
     if (qs.has('build')) await runBuild();
     else if (qs.has('nodes')) await runNodes();
     else if (qs.has('sheet')) await runSheet();

@@ -1496,6 +1496,57 @@ button {
   color: var(--ink);
 }
 
+/* **سطرُ الكرّاسة** (محطةُ النسخ، METHOD §٤: «الجلوسُ على السطر»): موضعُه من الكلمة
+   نفسِها (`ref.line` من خيالها المُشكَّل)، فالخطُّ الذي يراه الطفل هو الذي تجلس عليه
+   حقاً — لا خطُّ زينةٍ يُختار. وهو **خافتٌ متقطّع كسطر الكرّاسة** لا يزاحم الحبر. */
+.pen-baseline {
+  stroke: var(--ink-soft);
+  stroke-width: 3;
+  stroke-dasharray: 14 12;
+  opacity: .3;
+}
+
+/* شريطُ وحدات النسخ: كلماتٌ بنصّها لا شاراتٍ — فالمادّةُ كلمةٌ تُقرأ */
+.unit--word {
+  width: auto;
+  min-width: 2.9rem;
+  height: auto;
+  min-height: 2.4rem;
+  padding: .3rem .6rem;
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-ar);
+  font-size: 1rem;
+}
+
+/* **بطاقةُ تعريف العلامة** (ق٣): العلامةُ مرسومةً من مسارها، واسمُها، وكلمتُها —
+   بطاقةٌ قصيرة تُقرأ ثم تُغلَق بيد الطفل، ولا تتكرّر في المحطة الواحدة. */
+.mark-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .7rem;
+  max-width: 22rem;
+  margin: 0 auto;
+  padding: 1rem;
+  border: 2px solid var(--accent);
+  border-radius: var(--radius-card);
+  background: var(--card);
+  text-align: center;
+}
+
+.mark-face {
+  width: 6.5rem;
+  padding: .4rem;
+  border: 2px solid var(--line);
+  border-radius: var(--radius-btn);
+  color: var(--ink);
+}
+
+.mark-glyph { color: var(--accent); }
+.mark-text h2 { margin: 0 0 .2rem; }
+.mark-text .hint { margin: 0; }
+
 /* تمرينُ المراجعة بالقلم (`review.js`): سطرُ الطلب ثم اللوح */
 .exercise .ask { margin: .2rem auto .4rem; text-align: center; color: var(--ink-soft); }
 

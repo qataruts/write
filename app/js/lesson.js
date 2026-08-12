@@ -33,10 +33,10 @@
 // خارجيّ، وما يُخزَّن **عددٌ باسم خطئه** لا إحداثيُّ نقطة.
 
 import * as progress from './progress.js';
+import { starsForReview } from './progress.js';
 import * as audio from './audio.js';
 import { pathOf, PATHS, LETTERS, FORMS } from './curriculum.js';
 import { penSurface, refGlyph, MODES } from './pen.js';
-import { starsForReview } from './review.js';
 import {
   h, icon, go, arNum, starsRow, topbar, brandMark, mascot, cheer, faceEl,
   nodeTitle, traceFace, letterName, formTitle,

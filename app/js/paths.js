@@ -1488,4 +1488,4 @@ export const PATHS = {
 };
 
 /** نسبُ الوحدة: من أيّ إيماءةٍ بُنيت وبأيّ عدّة — يفحصه `make_paths.py --self-test`. */
-export const PATHS_SOURCE = {"tool": "tools/make_paths.html", "gesture": "tools/path_anchors.json", "sha": "735757f5f354", "grid": 1000, "font": "NotoNaskhArabic — نسخٌ مدرسيّ (ق٢)"};
+export const PATHS_SOURCE = {"tool": "tools/make_paths.html", "gesture": "tools/path_anchors.json", "sha": "963a88a1fad3", "grid": 1000, "font": "NotoNaskhArabic — نسخٌ مدرسيّ (ق٢)"};

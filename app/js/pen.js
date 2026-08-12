@@ -329,9 +329,17 @@ export function createTrial(ref, options = {}) {
 
     // أقربُ جزءٍ إلى موضع النزول — به يُعرَف **قلبُ الترتيب**: مَن نزل على نقطةٍ
     // وأمامَه جسمٌ لم يُكتب فقد قدّم النقطةَ على الجسم، وهي العادةُ الخاطئة بعينها.
+    //
+    // **ومن الأجزاء المنتظَرة وحدَها لا المستوفاة** (كشفته أولُ كلمةٍ مركَّبة، الجلسة
+    // ٨): الجزءُ المستوفى لا يُكتب ثانيةً فليس وجهاً يُفسَّر به النزول — ولو بقي في
+    // العدّ لَلَصِقت نقرةُ النقطة الصحيحةُ بمقعدِ جسمٍ فُرغ منه إلى جوارها (نقطةُ باء
+    // «بَابَا» على بُعد ٦٠ من مقعده) فقُرئت **قلبَ ترتيبٍ وهي على ترتيبها**. لم يظهر
+    // في الحروف لتباعد أجزائها القليلة، وأجزاءُ الكلمة تتجاور بعشراتها — والشرطُ
+    // الرابع كما هو: مَن نزل على جزءٍ **قادمٍ** قبل أوانه تُقرأ له شكواه.
     let best = index;
     let bestGap = Infinity;
     for (const [i, part] of parts.entries()) {
+      if (i < index) continue;
       const gap = startDist(part, p);
       if (gap < bestGap) { bestGap = gap; best = i; }
     }
@@ -377,7 +385,21 @@ export function createTrial(ref, options = {}) {
     if (stroke.kind !== 'stroke' || stroke.aim < 0) return null;
 
     const poly = parts[stroke.aim].poly;
-    const ahead = Math.max(poly.len * 0.35, 300);
+    // **والنافذةُ الأمامية بمقدار ما مشى القلمُ لا بطول المسار** (كشفه قياسُ الكلمات،
+    // الجلسة ٨): علّةُ النافذة أصلاً أنّ **الخطَّ يقترب من نفسه** فيقفز الإسقاطُ إلى
+    // شقٍّ بعيدٍ يصادف قربَه — وكانت سعتُها نسبةً من **طول المسار**، فكلَّما طال الخطُّ
+    // واقترب من نفسه أكثرَ اتّسعت نافذتُه أكثر، وهو عكسُ ما يلزم. والكلمةُ أطولُ من
+    // الحرف وحروفُها متجاورة، **فقِيس أنّ المؤشّر يسبق قلمَ الطفل بخمسمئة وحدةٍ من
+    // أوّل ضربة** ثم يُقرأ مضيُّه `wander` برجفة وحدةٍ واحدة («تمر»: القلمُ عند ٦٦٠
+    // والمؤشّرُ عند ١١٧٠).
+    //
+    // **والحدُّ من الحركة نفسِها**: القلمُ يمشي ولا يقفز — فما تقدّم بين نقطتين لا
+    // يجاوز ما مشاه بينهما، وله من السماحة ما يحتمل دخولَه وخروجَه عرضياً وارتداده
+    // (`lateral × ٢ + back`)، ومن الطيّة ضِعفا سماحة الارتداد ليبلغ مخرجَها. **ولا
+    // عتبةَ جديدة**: كلُّها سماحاتُ المحطة نفسُها.
+    const step = stroke.points.length > 1
+      ? dist(p, stroke.points[stroke.points.length - 2]) : 0;
+    const ahead = Math.max(tol.back * 2, step * 3) + tol.lateral * 2;
     const lo = stroke.cursor - tol.back * 2;
     const hi = stroke.cursor + ahead;
 
@@ -451,8 +473,11 @@ export function createTrial(ref, options = {}) {
     const inFold = (climbing) => {
       const rise = fold.apex - fold.from || 1;
       const drop = fold.to - fold.apex || 1;
-      const up = nearestOn(poly, p, fold.from, fold.apex);
-      const down = nearestOn(poly, p, fold.apex, fold.to);
+      // **وضلعُ الطيّة يُحبَس بحدَّيه** (`within`، الجلسة ٨): نافذةُ `nearestOn` تُرشِّح
+      // القطعَ ولا تحبس الطول، **وقطعةٌ تعبر القمّة تُسرِّب الطولَ إلى الضلع الآخر**
+      // فيخرج كسرُ الارتفاع مشبَّعاً. والحبسُ هنا من جنس ما تفعله `before` و`after`.
+      const up = within(nearestOn(poly, p, fold.from, fold.apex), fold.from, fold.apex);
+      const down = within(nearestOn(poly, p, fold.apex, fold.to), fold.apex, fold.to);
       const clamp = (s) => (s < 0 ? 0 : s > 1 ? 1 : s);
       const seen = [(up.len - fold.from) / rise, (fold.to - down.len) / drop]
         .map((s) => (climbing ? fold.from + clamp(s) * rise : fold.to - clamp(s) * drop))
@@ -479,7 +504,16 @@ export function createTrial(ref, options = {}) {
       hit = fall();
     } else {
       hit = climb();
-      if (hit.len < stroke.reach && stroke.reach >= fold.apex - tol.back) {
+      // **وبلوغُ القمّة نفسِها انعطافة** (كشفه قياسُ الكلمات، الجلسة ٨): القراءةُ
+      // الصاعدة **تتشبّع عند القمّة** ولا تتجاوزها، فمن بلغها بالضبط لا يجد
+      // `hit.len < reach` أبداً فيبقى معلَّقاً عندها ولو مضى قلمُه نازلاً، فتُردّ
+      // كتابتُه الصحيحة قِصَراً. **ويقع ذلك في يد طفلٍ حقيقية** لا في الاختبار وحدَه:
+      // تبسيطُ النقاط (`simplify`) يطرح ما دون ست وحدات، وضلعا الطيّة في الكلمة
+      // أقربُ من ذلك — فتسقط عيّنةُ القمّة من مسار الطفل وهو يمرّ عليها. **ولا عتبةَ
+      // جديدة**: من بلغ القمّة فليس أمامه إلا النزول فيُسلَّم إليه، ومن قصّر عنها
+      // فحكمُه كما كان.
+      const atApex = stroke.reach >= fold.apex;
+      if ((atApex || hit.len < stroke.reach) && stroke.reach >= fold.apex - tol.back) {
         stroke.turned = fold;
         stroke.reach = fold.apex;
         hit = fall();
@@ -674,13 +708,14 @@ export function refGlyph(ref, className = 'ref-glyph') {
  * @param {string} [config.mode] `guided` (المسار ظاهر) · `faint` (خافت) · `free` (صندوقٌ فارغ)
  * @param {number|object} [config.tolerance] سماحةُ المحطة
  * @param {boolean} [config.bounds] يرسم **ممرَّ السماحة** حول المسار (محطةُ التحكّم)
+ * @param {number} [config.baseline] **سطرُ الكرّاسة** يُرسم تحت المادّة (محطةُ النسخ)
  * @param {Function} [config.onFault] خطأٌ وقع — للقياس ولإرشاد الشاشة
  * @param {Function} [config.onPart] جزءٌ استُوفي
  * @param {Function} [config.onDone] اكتملت الأجزاء — ومعها حصيلةُ المحاولة
  */
 export function penSurface(config) {
   const {
-    ref, mode = MODES.GUIDED, tolerance, bounds = false,
+    ref, mode = MODES.GUIDED, tolerance, bounds = false, baseline = null,
     onFault, onPart, onDone, label = 'لوحُ الكتابة',
   } = config;
 
@@ -689,12 +724,23 @@ export function penSurface(config) {
   const svg = sv('svg', {
     class: 'pen-surface', viewBox: `0 0 ${GRID} ${GRID}`, role: 'img', 'aria-label': label,
   });
+  /**
+   * **سطرُ الكرّاسة — من المادّة لا من زينة** (محطةُ النسخ، `METHOD.md §٤`: «الجلوسُ
+   * على السطر»): موضعُه `ref.line` الذي خرج من **خيال الكلمة المُشكَّل** ساعةَ
+   * التأليف، فالخطُّ الذي يراه الطفلُ تحت الكلمة هو الخطُّ الذي تجلس عليه حقّاً —
+   * امتدادُ «النموذجُ هو المقياس» إلى السطر كما امتدّ إلى ممرّ السماحة.
+   */
+  const rule = sv('g', { class: 'pen-rule', 'aria-hidden': 'true' });
+  const seat = baseline ?? ref?.line ?? null;
+  if (seat != null) {
+    rule.append(sv('line', { class: 'pen-baseline', x1: 0, y1: seat, x2: GRID, y2: seat }));
+  }
   const fence = sv('g', { class: 'pen-bounds' });      // ممرُّ السماحة (اختياريّ)
   const model = sv('g', { class: 'pen-model' });
   const trailed = sv('g', { class: 'pen-trail' });     // ما تلوّن تحت القلم
   const guide = sv('g', { class: 'pen-guide' });
   const inkLayer = sv('g', { class: 'pen-ink' });
-  svg.append(fence, model, trailed, guide, inkLayer);
+  svg.append(rule, fence, model, trailed, guide, inkLayer);
   box.append(svg);
 
   const trial = createTrial(ref, {

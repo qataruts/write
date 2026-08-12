@@ -50,6 +50,7 @@ ANCHORS = TOOLS / "path_anchors.json"
 TOOL_PAGE = TOOLS / "make_paths.html"
 OUT = ROOT / "app" / "js" / "paths.js"
 WARM_OUT = ROOT / "app" / "js" / "warmups.js"
+WORD_OUT = ROOT / "app" / "js" / "word_paths.js"
 CURRICULUM = ROOT / "app" / "js" / "curriculum.js"
 FORMS = ["isolated", "initial", "medial", "final"]
 
@@ -106,6 +107,23 @@ def warmups_module() -> tuple:
     source = re.search(r"export const WARMUPS_SOURCE = (\{.*?\});", src, re.S)
     return (json.loads(body.group(1)) if body else None,
             json.loads(source.group(1)) if source else None)
+
+
+def word_material() -> list:
+    """مادّةُ النسخ التي يطلبها المنهج — وصلاتُ محطة الوصل وكلماتُ جدولها."""
+    if not CURRICULUM.exists():
+        return []
+    src = CURRICULUM.read_text(encoding="utf-8")
+    stages = re.search(r"export const STAGES = (\[.*?\n\]);", src, re.S)
+    words = re.search(r"export const WORDS = (\{.*?\n\});", src, re.S)
+    out = list(json.loads(words.group(1))) if words else []
+    if stages:
+        for stage in json.loads(stages.group(1)):
+            if stage.get("kind") != "join":
+                continue
+            for node in stage.get("nodes", []):
+                out += node.get("joins", []) + node.get("words", [])
+    return sorted(set(out))
 
 
 def paths_module() -> tuple:
@@ -364,6 +382,101 @@ def write_warmups(warmups: dict, meta: dict) -> str:
     ])
 
 
+WORD_HEADER = """\
+// **مساراتُ النسخ**: الوصلاتُ والكلماتُ وأسطرُ المسافة — **خيالُ الكلمة كلِّها**
+// (لازمُ قرار الجلسة ٢: النسبُ من التشكيل لا من جمع حروفٍ مفردة)، وصيغةُ كلِّ مدخلٍ
+// صيغةُ `METHOD.md §٣.١` نفسُها فيقرؤها `pen.js` كما يقرأ الحرف — ومعها `line`:
+// سطرُ القاعدة الذي تجلس عليه الكلمة (يرسمه لوحُ النسخ مسطرةً).
+//
+// ⚠ **ملفٌّ مولَّد — لا يُحرَّر بيد** (`METHOD.md §٣.٨`):
+//   python3 tools/make_paths.py --build
+//
+// **وليس فيه كلمةٌ من تأليفنا ولا إحداثيٌّ من تقدير**: قائمةُ الكلمات تُقرأ من
+// `curriculum.js` (وهي بنكُ اقرأ)، ومسارُ كلِّ حرفٍ فيها **مسارُه القانونيُّ بعينه**
+// — المؤلَّفُ بإيماءته المحكومة بأحكام المالك الخمسة — مُنزَّلاً على جسده في خيال
+// الكلمة المُشكَّل، والوصلُ يُدمَج حيث يبلغ خروجُ الحرف مقعدَ ما بعده (حكم ٤)،
+// والعلاماتُ ضرباتٌ بإيماءات قانونيّاتها (منظومة حكم ٥)، والنقاطُ بعد جسم الكلمة
+// كلِّه. و`MARK_PATHS` شاراتُ العلامات لبطاقات تعريفها — من المسار المؤلَّف نفسِه.
+
+"""
+
+
+def word_body(text: str = None) -> str:
+    """نصُّ كتلة `WORD_PATHS` من الوحدة — تُبصَم فيُعرف أنّ أحداً لم يمسّها بيد."""
+    src = text if text is not None else (
+        WORD_OUT.read_text(encoding="utf-8") if WORD_OUT.exists() else "")
+    found = re.search(r"export const WORD_PATHS = \{.*?\n\};", src, re.S)
+    return found.group(0) if found else ""
+
+
+def write_words(words: dict, glyphs: dict, meta: dict) -> str:
+    lines = [WORD_HEADER, "export const WORD_PATHS = {"]
+    texts = list(words.items())
+    for wi, (text, ref) in enumerate(texts):
+        lines.append(f'  "{text}": {{')
+        if ref.get("line") is not None:
+            lines.append(f'   "line": {num(ref["line"])},')
+        # **سماحةُ الكلمة تسافر معها**: مقياسُ حروفها فيها — تقرؤه شاشةُ النسخ
+        # فتحكم به، ويقرؤه الحارسُ فيقيس عليه هامشَ الرجفة (`METHOD.md §٣.٥`).
+        if ref.get("tolerance") is not None:
+            lines.append(f'   "tolerance": {ref["tolerance"]},')
+        lines.append('   "strokes": [')
+        for si, stroke in enumerate(ref["strokes"]):
+            start = stroke["start"]
+            lines.append(f'    {{ "start": [{num(start[0])}, {num(start[1])}], "points": [')
+            rows = chunk(stroke["points"])
+            for ri, row in enumerate(rows):
+                lines.append(f'     {row}' + ("," if ri < len(rows) - 1 else ""))
+            tail = "    ]"
+            if stroke.get("folds"):
+                tail += ', "folds": [' + ", ".join(
+                    f'{{ "from": {int(f["from"])}, "apex": {int(f["apex"])},'
+                    f' "to": {int(f["to"])} }}' for f in stroke["folds"]) + "]"
+            lines.append(tail + " }" + ("," if si < len(ref["strokes"]) - 1 else ""))
+        lines.append("   ],")
+        dots = ", ".join(
+            f'{{ "at": [{num(d["at"][0])}, {num(d["at"][1])}], "count": {int(d["count"])},'
+            f' "after": true }}' for d in ref["dots"])
+        lines.append(f'   "dots": [{dots}]')
+        lines.append("  }" + ("," if wi < len(texts) - 1 else ""))
+    lines.append("};")
+    lines.append("")
+    lines.append("/** شاراتُ العلامات لبطاقات تعريفها — العلامةُ في صندوقها من مسارها المؤلَّف. */")
+    lines.append("export const MARK_PATHS = {")
+    marks = list(glyphs.items())
+    for mi, (mark, ref) in enumerate(marks):
+        lines.append(f'  "{mark}": {{')
+        lines.append('   "strokes": [')
+        for si, stroke in enumerate(ref["strokes"]):
+            start = stroke["start"]
+            lines.append(f'    {{ "start": [{num(start[0])}, {num(start[1])}], "points": [')
+            rows = chunk(stroke["points"])
+            for ri, row in enumerate(rows):
+                lines.append(f'     {row}' + ("," if ri < len(rows) - 1 else ""))
+            lines.append("    ] }" + ("," if si < len(ref["strokes"]) - 1 else ""))
+        lines.append('   ], "dots": []')
+        lines.append("  }" + ("," if mi < len(marks) - 1 else ""))
+    lines.append("};")
+    lines.append("")
+    lines.append("/** نسبُ الوحدة وبصمةُ كتلتها — يفحصهما `make_paths.py --self-test`. */")
+    block = "\n".join(lines[1:lines.index("};") + 1])
+    lines.append("export const WORD_PATHS_SOURCE = "
+                 + json.dumps({**meta, "body": body_sha(block)}, ensure_ascii=False) + ";")
+    lines.append("")
+    return "\n".join(lines)
+
+
+def words_module() -> tuple:
+    """يقرأ `WORD_PATHS` و`WORD_PATHS_SOURCE` من الوحدة المولَّدة (قراءةً نصّية)."""
+    if not WORD_OUT.exists():
+        return None, None
+    src = WORD_OUT.read_text(encoding="utf-8")
+    body = re.search(r"export const WORD_PATHS = (\{.*?\n\});", src, re.S)
+    source = re.search(r"export const WORD_PATHS_SOURCE = (\{.*?\});", src, re.S)
+    return (json.loads(body.group(1)) if body else None,
+            json.loads(source.group(1)) if source else None)
+
+
 def build(port: int, timeout: int) -> int:
     results = drive("?build=1", port, timeout)
     if not results:
@@ -403,6 +516,23 @@ def build(port: int, timeout: int) -> int:
         }), encoding="utf-8")
         shapes = sum(len(v["shapes"]) for v in warmups.values())
         print(f"وكُتب {WARM_OUT.relative_to(ROOT)}: {len(warmups)} محطةَ تهيئةٍ في {shapes} شكلاً")
+
+    words = payload.get("words")
+    if words:
+        # بصمةُ المنهج تدخل النسب: قائمةُ الكلمات قُرئت منه، فتبديلُه بلا إعادة بناءٍ
+        # يحمرّ في الفحص الذاتي (نظيرُ بصمة الإيماءات).
+        cur_sha = hashlib.sha1(CURRICULUM.read_bytes()).hexdigest()[:12]
+        WORD_OUT.write_text(write_words(words, payload.get("markGlyphs") or {}, {
+            "tool": "tools/make_paths.html §٧ج",
+            "gesture": "tools/path_anchors.json",
+            "sha": sha(),
+            "curriculum": cur_sha,
+            "grid": payload["meta"]["grid"],
+            "font": "NotoNaskhArabic — نسخٌ مدرسيّ (ق٢)",
+        }), encoding="utf-8")
+        dropped = payload["meta"].get("failedPairs") or []
+        print(f"وكُتب {WORD_OUT.relative_to(ROOT)}: {len(words)} مساراً للنسخ"
+              + (f" — وأسطرُ مسافةٍ سقطت بإعلان: {len(dropped)}" if dropped else ""))
     return 0
 
 
@@ -512,6 +642,32 @@ def self_test() -> int:
                f"{ch}/{form}: يفترق عن «{root}» في علامته"
                f" ({len(here['dots'])} علامةً مقابل {len(there['dots'])})")
     ok(kin_count > 0, f"ونسبُ الرسم مُعلَنٌ في {kin_count} شكلاً — منها تُبنى محطةُ التمييز")
+
+    # ————— عهدُ النسخ (الجلسة ٨): وحدةُ الكلمات بُنيت ولم تُمَسّ بيد —————
+    #
+    # **وبابُه يُطالِب يومَ تُبنى وحدتُه**: ما دامت `word_paths.js` غيرَ موجودةٍ فلا
+    # مطالبة، ويومَ تُبنى يصير كلُّ ما في محطة الوصل مطالَباً بمساره **ولا تُحرَّر
+    # الوحدةُ بيد** — وهو نظيرُ عهد التهيئة بحرفه.
+    words, wmeta2 = words_module()
+    if words is None:
+        ok(True, "○ مساراتُ النسخ لم تُبنَ بعد — والمطالبةُ تنطلق يومَ تُبنى")
+    else:
+        material = word_material()
+        missing = [t for t in material if t not in words]
+        ok(not missing,
+           f"ولكلِّ ما يُنسَخ في المنهج مسارُه ({len(material)} مادّة، والمبنيُّ {len(words)})"
+           + (f" — ناقص: {'، '.join(missing[:5])}" if missing else ""))
+        ok(bool(wmeta2 and wmeta2.get("sha") == sha()),
+           f"وبصمةُ الإيماءة في وحدة النسخ عينُ الملفّ ({wmeta2.get('sha') if wmeta2 else '—'}"
+           f" = {sha()})")
+        cur_sha = hashlib.sha1(CURRICULUM.read_bytes()).hexdigest()[:12]
+        ok(bool(wmeta2 and wmeta2.get("curriculum") == cur_sha),
+           f"وبصمةُ المنهج فيها عينُ الملفّ ({wmeta2.get('curriculum') if wmeta2 else '—'}"
+           f" = {cur_sha}) — فتبديلُ مادّة النسخ بلا إعادة بناءٍ يحمرّ")
+        # **ولا يُحرَّر إحداثيٌّ بيد**: بصمةُ الكتلة في نسبها (نظيرُ وحدة التهيئة)
+        ok(bool(wmeta2 and wmeta2.get("body") == body_sha(word_body())),
+           f"ولم تُمَسّ وحدةُ النسخ بيد بعد بنائها ({wmeta2.get('body') if wmeta2 else '—'}"
+           f" = {body_sha(word_body())})")
 
     # ————— عهدُ التهيئة: الوحدةُ بُنيت من قسم العدّة، ومحطاتُها محطاتُ المنهج —————
     #

@@ -1207,6 +1207,26 @@ export const VARIANTS = {
   "ى": { "base": "ي", "mark": "ألفٌ مقصورة", "joins": false }
 };
 
+/**
+ * **حكمُ كلِّ علامةٍ من علامات ق٣ — محسوباً لا مكتوباً** (حكمُ المدير في مراجعة
+ * الجلسة ٣، بندٌ في الجلسة ٨): لكلِّ علامةٍ يبحث المولّدُ **سطوحَ اقرأ كلَّها** عن
+ * كلمةٍ حاملة؛ فما وُجد حاملُه ضُمّ بقاعدةٍ معلنة، وما لم يوجد في السطوح كلِّها
+ * **سقط من مقرَّر اكتب** (`surface: null`) — لا كلمةَ تُخترع — وبقي لـ«أَتْقِنْ».
+ *
+ * **وتُعلَن الساقطاتُ في صفحة الأسس**: «اكتبُ يعلّم كتابةَ ما علّمه اقرأ قراءةً».
+ */
+export const Q3_RULING = [
+  { "mark": "ّ", "name": "الشَّدّة", "surface": "مقرَّرةٌ سلفاً", "word": null },
+  { "mark": "ً", "name": "التَّنوين", "surface": null, "word": null },
+  { "mark": "ٌ", "name": "التَّنوين", "surface": "مقرَّرةٌ سلفاً", "word": null },
+  { "mark": "ٍ", "name": "التَّنوين", "surface": null, "word": null },
+  { "mark": "أ", "name": "همزةٌ فوق الألف", "surface": "بنكُ الكلمات", "word": "أُمِّي" },
+  { "mark": "إ", "name": "همزةٌ تحت الألف", "surface": "بنكُ الكلمات", "word": "إِبْرِيقْ" },
+  { "mark": "ؤ", "name": "همزةٌ فوق الواو", "surface": null, "word": null },
+  { "mark": "ئ", "name": "همزةٌ فوق الياء", "surface": null, "word": null },
+  { "mark": "ء", "name": "همزةٌ مفردة", "surface": "بنكُ الكلمات", "word": "قِرَاءَةْ" }
+];
+
 /** نسبُ الوحدة: من أيّ بياناتِ اقرأ بُنيت وببصماتها — يفحصه `make_curriculum.mjs --self-test`. */
 export const CURRICULUM_SOURCE = {
   "tool": "tools/make_curriculum.mjs",
@@ -1258,6 +1278,14 @@ export const FORM_NAMES = {
 
 /** مسارُ حرفٍ بشكلِ موضعٍ بعينه — `null` إن لم يُؤلَّف بعد. */
 export const pathOf = (letter, form = FORMS.ISOLATED) => PATHS[letter]?.[form] || null;
+
+/**
+ * **مفاتيحُ أصوات كلمات المنهج في بنك اقرأ** — مصدرٌ واحد لكلِّ وحدةٍ تنطقها
+ * (شاشةُ النسخ والمراجعة)، فلا تشتقّ كلٌّ قائمتَها فتفترقا يوماً. **وهي حقلُ
+ * `say` لا نصُّ الكلمة**: مفتاحُ الملفّ عند اقرأ هو ما يُشغَّل وهو ما يُعلَن،
+ * وفراغُه يعني «تُنسَخ ولا تُملى» (`METHOD.md §٧`).
+ */
+export const SPOKEN_WORDS = [...new Set(Object.values(WORDS).map((w) => w.say).filter(Boolean))];
 
 /** بيانُ كلمةٍ من البنك — `null` إن لم تكن في المنهج. */
 export const wordInfo = (text) => WORDS[text] || null;

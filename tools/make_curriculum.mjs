@@ -285,14 +285,55 @@ const covered = new Set([
   ...skillSigns.flatMap((s) => s.words),
 ].flatMap(marksOf));
 
+// ————— ٥ب. قاعدةُ الحامل: البحثُ يتّسع قبل أن يُحكَم بالغياب —————
+//
+// **حكمُ المدير** (مراجعة الجلسة ٣، وبندٌ في الجلسة ٨): «لا كلمةَ تُخترع — والبحثُ
+// يتّسع قبل أن يُحكَم بالغياب: يبحث المولّدُ **سطوحَ اقرأ كلَّها** (بنكَ الكلمات
+// وسلّمَ الجمل وجملَ أمثلة المعجم وكلماتِ المهارات) عن حاملٍ لكل علامةٍ معلنة؛ فإن
+// وُجد ضُمّ **آلياً بقاعدةٍ معلنة**، وإن لم يوجد في السطوح كلِّها **سقطت العلامةُ من
+// مقرَّر اكتب بإعلانٍ في صفحة الأسس** وبقيت لأتقن. والمولّدُ يطبع حكمَ كل علامة».
+//
+// **والقاعدةُ المعلَنة للضمّ**: يُؤخَذ **أوّلُ حاملٍ في ترتيب السطوح** (بنكُ الكلمات
+// أوّلاً لأنّه مادّةُ الكتابة، ثم كلماتُ الجمل، ثم كلماتُ جمل المعجم) — **وما يُضَمّ
+// كلمةٌ لا جملة**: مادّةُ هذه المرحلة كلماتٌ تُنسَخ (`METHOD.md §٤` المرحلة ١٢)،
+// فالجملةُ إن كانت هي الحاملَ أُخذت منها **كلمتُها الحاملة** بمفتاح البنك.
+const SURFACES = [
+  { id: 'bank', title: 'بنكُ الكلمات', words: () => [...bank.keys()] },
+  {
+    id: 'ladder',
+    title: 'سلّمُ الجمل',
+    words: () => rs.SENTENCES.flatMap((s) => s.words.map((surface) => bankKey(surface) || surface)),
+  },
+  {
+    id: 'lexicon',
+    title: 'جملُ أمثلة المعجم',
+    words: () => lexicon.words.flatMap((w) => (w.sentence ? [...w.sentence.split(' ')] : []))
+      .map((surface) => bankKey(surface) || surface),
+  },
+  { id: 'skills', title: 'كلماتُ المهارات', words: () => skillSigns.flatMap((s) => s.words) },
+];
+
 const hamzaWords = [];
+const markRuling = [];        // حكمُ كل علامةٍ من ق٣ — يُطبع في الجرد ويُحفظ في الوحدة
 const missingQ3 = [];
 for (const mark of Q3) {
-  if (covered.has(mark)) continue;
-  const bearer = [...bank.values()].find((w) => w.text.includes(mark));
-  if (!bearer) { missingQ3.push(mark); continue; }
-  for (const m of marksOf(bearer.text)) covered.add(m);
-  if (!hamzaWords.includes(bearer.text)) hamzaWords.push(bearer.text);
+  if (covered.has(mark)) {
+    markRuling.push({ mark, where: 'مقرَّرةٌ سلفاً', word: null });
+    continue;
+  }
+  let found = null;
+  for (const surface of SURFACES) {
+    const bearer = surface.words().find((text) => text && text.includes(mark) && bank.has(text));
+    if (bearer) { found = { surface, bearer }; break; }
+  }
+  if (!found) {
+    missingQ3.push(mark);
+    markRuling.push({ mark, where: null, word: null });
+    continue;
+  }
+  for (const m of marksOf(found.bearer)) covered.add(m);
+  if (!hamzaWords.includes(found.bearer)) hamzaWords.push(found.bearer);
+  markRuling.push({ mark, where: found.surface.title, word: found.bearer });
 }
 
 // ————— ٦. المحطات: جدولُ `METHOD.md §٤` مرحلةً مرحلة —————
@@ -540,6 +581,18 @@ const SOURCE = {
   files: Object.fromEntries(Object.values(SOURCES).map((url) => [rel(url), sha12(readFileSync(url))])),
 };
 
+/**
+ * **حكمُ كلِّ علامةٍ من ق٣** — يُصدَّر ليُعلَن في صفحة الأسس (شرطُ حكم المدير):
+ * `{ mark, name, surface, word }` — و`surface: null` تعني **سقطت من مقرَّر اكتب**
+ * لأنّ سطوحَ اقرأ كلَّها لا تحمل لها كلمة، فبقيت لأتقن.
+ */
+const Q3_RULING = markRuling.map((entry) => ({
+  mark: entry.mark,
+  name: MARK_NAMES[entry.mark] ?? VARIANTS[entry.mark]?.mark ?? entry.mark,
+  surface: entry.where,
+  word: entry.word,
+}));
+
 // ————— ١٠. تصيير الوحدة —————
 //
 // **صيغةُ JSON خالصة** لكل جدولٍ في الوحدة (لا فواصلَ ذيلية ولا مفاتيحَ عارية):
@@ -656,6 +709,18 @@ export const VARIANTS = {
 ${table(VARIANTS)}
 };
 
+/**
+ * **حكمُ كلِّ علامةٍ من علامات ق٣ — محسوباً لا مكتوباً** (حكمُ المدير في مراجعة
+ * الجلسة ٣، بندٌ في الجلسة ٨): لكلِّ علامةٍ يبحث المولّدُ **سطوحَ اقرأ كلَّها** عن
+ * كلمةٍ حاملة؛ فما وُجد حاملُه ضُمّ بقاعدةٍ معلنة، وما لم يوجد في السطوح كلِّها
+ * **سقط من مقرَّر اكتب** (\`surface: null\`) — لا كلمةَ تُخترع — وبقي لـ«أَتْقِنْ».
+ *
+ * **وتُعلَن الساقطاتُ في صفحة الأسس**: «اكتبُ يعلّم كتابةَ ما علّمه اقرأ قراءةً».
+ */
+export const Q3_RULING = [
+${list(Q3_RULING)}
+];
+
 /** نسبُ الوحدة: من أيّ بياناتِ اقرأ بُنيت وببصماتها — يفحصه \`make_curriculum.mjs --self-test\`. */
 export const CURRICULUM_SOURCE = ${pretty(SOURCE)};
 
@@ -698,6 +763,14 @@ export const FORM_NAMES = {
 
 /** مسارُ حرفٍ بشكلِ موضعٍ بعينه — \`null\` إن لم يُؤلَّف بعد. */
 export const pathOf = (letter, form = FORMS.ISOLATED) => PATHS[letter]?.[form] || null;
+
+/**
+ * **مفاتيحُ أصوات كلمات المنهج في بنك اقرأ** — مصدرٌ واحد لكلِّ وحدةٍ تنطقها
+ * (شاشةُ النسخ والمراجعة)، فلا تشتقّ كلٌّ قائمتَها فتفترقا يوماً. **وهي حقلُ
+ * \`say\` لا نصُّ الكلمة**: مفتاحُ الملفّ عند اقرأ هو ما يُشغَّل وهو ما يُعلَن،
+ * وفراغُه يعني «تُنسَخ ولا تُملى» (\`METHOD.md §٧\`).
+ */
+export const SPOKEN_WORDS = [...new Set(Object.values(WORDS).map((w) => w.say).filter(Boolean))];
 
 /** بيانُ كلمةٍ من البنك — \`null\` إن لم تكن في المنهج. */
 export const wordInfo = (text) => WORDS[text] || null;
@@ -814,7 +887,14 @@ console.log(`\n  المجموع: ${nodeCount} محطة — محسوبةً من �
 console.log(`  الكلمات: ${usedWords.length} (منطوقةٌ منها ${usedWords.filter((w) => WORDS[w].say).length})`
   + ` · الجمل: ${sentences.length} · العلامات: ${marks.length}`);
 console.log(`  المصادر: ${Object.entries(SOURCE.files).map(([f, sha]) => `${f} ${sha}`).join(' · ')}`);
+// **وحكمُ كلِّ علامةٍ من ق٣ يُطبع** (شرطُ حكم المدير): أين وُجد حاملُها، أو سقوطُها
+console.log('\n— حكمُ علامات ق٣: البحثُ في سطوح اقرأ كلِّها —');
+for (const entry of Q3_RULING) {
+  console.log(`  · «${entry.mark}» ${entry.name}: `
+    + (entry.surface === 'مقرَّرةٌ سلفاً' ? 'في مادّة المنهج سلفاً'
+      : entry.surface ? `حاملُها «${entry.word}» من ${entry.surface} — ضُمّت آلياً`
+        : '**لا حاملَ لها في سطوح اقرأ كلِّها — سقطت من مقرَّر اكتب وبقيت لأتقن**'));
+}
 if (missingQ3.length) {
-  console.log(`\n  ⚠ من علامات ق٣ ما لا حاملَ له في بنك اقرأ: ${missingQ3.join(' ')}`
-    + '\n    — لا تُخترع له كلمة، ويُرفَع إلى المدير.');
+  console.log(`  ⚠ الساقطُ: ${missingQ3.join(' ')} — لا كلمةَ تُخترع، ويُعلَن في صفحة الأسس.`);
 }

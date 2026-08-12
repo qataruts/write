@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>محطةُ الوصل والنسخ — «اُكْتُبْ» الجلسة ٨</title>
+<!--
+  **معيارُ قبول الجلسة ٨ في متصفّحٍ حقيقي**: «وصلُ حرفين فثلاثة ثم كلماتُ النسخ
+  كلُّها من بنك اقرأ (يراها ويكتبها)، والمسافةُ بين الكلمات والجلوسُ على السطر»،
+  و«علامات ق٣ في مواضعها ببطاقات تعريفها»، و«بوابة ٢ من أضعف كلماته».
+
+  و`test_words.mjs` يُدخِل مسارات الكلمات على `judge` في node، وهذا يقول ما لا يقوله node:
+    · أنّ **المحطةَ تمشي مادّتَها وحدةً وحدة** بحلقة النسخ الثلاثية (شاهِدْ ← انسُخْ
+      موجَّهاً ← انسُخْ خافتاً)، ولا «اكتُبْهُ وحدَك» فيها.
+    · وأنّ **القياسَ يكتب `نسخ` بوحدة الكلمة** (`<كلمة>|كلمة|copy`) — لا حرفَ وهميّ.
+    · وأنّ **سطرَ الكرّاسة مرسومٌ من الكلمة نفسِها** (`ref.line`)، وأنّ **سطرَ المسافة**
+      يُعرَض كلمتين في لوحٍ واحد.
+    · وأنّ **بطاقةَ العلامة تسبق أوّلَ كلمةٍ تحملها** وتُعرَض العلامةُ فيها **مرسومةً
+      من مسارها المؤلَّف** لا بخطّ نصّ.
+    · وأنّ **بوابةَ النسخ** تسأل عن **أضعف** ما في يد الطفل، وتُبنى تمارينُها من جديد
+      في كل محاولة، ولا رسوبَ فيها.
+    · 🔒 وأنّ الدورةَ كلَّها **بصفر طلباتٍ شبكية من الصفحة** — مسارُ الطفل لا يغادر جهازه.
+-->
+<style>
+  body { font: 15px/1.7 system-ui, sans-serif; margin: 0; background: #111; color: #eee; }
+  #log { padding: 1rem; white-space: pre-wrap; }
+  iframe { width: 460px; height: 900px; border: 0; position: fixed; inset-inline-end: 0; top: 0; }
+  .ok { color: #7ec97e; } .bad { color: #e08a80; }
+</style>
+</head>
+<body>
+<div id="log"></div>
+<iframe id="app" src="/"></iframe>
+<script type="module">
+const results = [];
+const log = document.getElementById('log');
+const frame = document.getElementById('app');
+
+function ok(cond, msg) {
+  results.push({ ok: !!cond, msg });
+  const line = document.createElement('div');
+  line.className = cond ? 'ok' : 'bad';
+  line.textContent = (cond ? '✓ ' : '✗ ') + msg;
+  log.append(line);
+}
+
+const errors = [];
+window.addEventListener('error', (e) => errors.push(String(e.message)));
+window.addEventListener('unhandledrejection', (e) => errors.push(String(e.reason)));
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const send = () => fetch('/result', {
+  method: 'POST', body: JSON.stringify({ from: 'write', rows: results }),
+});
+
+// عدّادُ أبواب الخروج من الجهاز (نظيرُ `browser_forms.html`)
+const netCalls = [];
+function watchNetwork(win) {
+  const realFetch = win.fetch.bind(win);
+  win.fetch = (input, init) => {
+    netCalls.push(`fetch:${input && input.url ? input.url : input}`);
+    return realFetch(input, init);
+  };
+  const realOpen = win.XMLHttpRequest.prototype.open;
+  win.XMLHttpRequest.prototype.open = function (method, url, ...rest) {
+    netCalls.push(`xhr:${url}`);
+    return realOpen.call(this, method, url, ...rest);
+  };
+  Object.defineProperty(win.navigator, 'sendBeacon', {
+    configurable: true, value: (url) => { netCalls.push(`beacon:${url}`); return false; },
+  });
+  win.WebSocket = class { constructor(url) { netCalls.push(`ws:${url}`); } };
+  win.EventSource = class { constructor(url) { netCalls.push(`sse:${url}`); } };
+}
+
+(async () => {
+  let win;
+  let doc;
+  try {
+    // ————— تهيئةُ الحال: طفلٌ أتمّ حروفَه وأشكالَه فبلغ محطةَ الوصل —————
+    //
+    // **والموضعُ يُحسب من الرحلة لا يُكتب**: أوّلُ عقدةِ وصلٍ فيها، ويُملأ ما قبلها.
+    localStorage.clear();
+    const progress = await import('/js/progress.js');
+    const nodes = progress.allNodes();
+    const first = nodes.findIndex((n) => n.type === 'join');
+    ok(first > 0, `محطةُ الوصل في الرحلة، وأوّلُ عقدةٍ منها بعد ${first} عقدة`);
+    // **وتُفتَح عقدُ الوصل كلُّها**: هذه سَوقةُ شاشةٍ لا سَوقةُ قفل — والقفلُ التسلسليّ
+    // محروسٌ في `--suite gate` و`--suite field`، ولو تُرك هنا لَرَدّ الموجّهُ الاختبارَ
+    // إلى الخريطة عند أوّل عقدةٍ لم تُتَمّ (وهو ما وقع في أوّل تشغيل).
+    for (const node of nodes.slice(0, first)) progress.setStars(node.id, 3);
+    for (const node of nodes.filter((n) => n.type === 'join' || n.type === 'gate')) {
+      progress.setStars(node.id, 3);
+    }
+
+    const joinNodes = nodes.filter((n) => n.type === 'join');
+    const pairNode = joinNodes.find((n) => (n.joins || []).length);
+    const marked = joinNodes.find((n) => (n.marks || []).length);
+    ok(Boolean(pairNode) && Boolean(marked),
+      `عقدُ الوصل ${joinNodes.length}: منها ${joinNodes.filter((n) => (n.marks || []).length)
+        .length} عقدةً تفتح بطاقةَ علامة`);
+
+    frame.src = '/';
+    await new Promise((r) => frame.addEventListener('load', r, { once: true }));
+    win = frame.contentWindow;
+    doc = frame.contentDocument;
+    win.addEventListener('error', (e) => errors.push(String(e.message)));
+    win.addEventListener('unhandledrejection', (e) => errors.push(String(e.reason)));
+    watchNetwork(win);
+    await wait(700);
+
+    const { WORD_PATHS } = await import('/js/word_paths.js');
+    const { unitsOf } = await import('/js/copy.js');
+
+    // ————— إصبعٌ على اللوح —————
+    let pointerId = 1;
+    const surfaceEl = () => doc.querySelector('.pen-surface');
+    const toClient = ([x, y]) => {
+      const rect = surfaceEl().getBoundingClientRect();
+      const size = Math.min(rect.width, rect.height);
+      return {
+        clientX: rect.left + (rect.width - size) / 2 + (x / 1000) * size,
+        clientY: rect.top + (rect.height - size) / 2 + (y / 1000) * size,
+      };
+    };
+    const fire = (type, point, id) => {
+      surfaceEl().dispatchEvent(new win.PointerEvent(type, {
+        bubbles: true, cancelable: true, composed: true,
+        pointerId: id, pointerType: 'touch', isPrimary: true, ...toClient(point),
+      }));
+    };
+    async function writeStroke(points) {
+      const id = ++pointerId;
+      fire('pointerdown', points[0], id);
+      for (const p of points.slice(1)) fire('pointermove', p, id);
+      await wait(30);
+      fire('pointerup', points[points.length - 1], id);
+      await wait(40);
+    }
+    const tap = async (at) => writeStroke([at, at, at]);
+    /** يدُ طفلٍ مصنوعة: تمشي المسارَ المرجعيّ نفسَه ثم تنقط بعد الجسم كلِّه. */
+    async function writeWord(ref) {
+      for (const stroke of ref.strokes) await writeStroke(stroke.points);
+      for (const dot of ref.dots) {
+        for (let i = 0; i < (dot.count || 1); i++) await tap(dot.at);
+      }
+    }
+
+    const stored = () => {
+      try { return JSON.parse(win.localStorage.getItem('uktub.progress.v1') || '{}'); }
+      catch { return {}; }
+    };
+    const STEP_WAIT = 5200;          // فوق أطولِ احتياطٍ محسوبٍ لنصٍّ لم يُصرَّف بعد
+
+    // ————— §١ عقدةُ الوصل: حرفان فثلاثة —————
+    log.append(Object.assign(document.createElement('h3'),
+      { textContent: '§١ الوصل — وحداتُ العقدة بحلقتها الثلاثية' }));
+
+    const netMark = netCalls.length;
+    win.location.hash = `#/join/${encodeURIComponent(pairNode.part)}`;
+    await wait(700);
+
+    ok(Boolean(doc.querySelector('main.lesson-copy')),
+      `شاشةُ النسخ فُتحت بعنوانها (#/join/${pairNode.part})`);
+    ok(doc.querySelectorAll('main .dots .dot').length === 3,
+      'وحلقتُها ثلاثُ خطوات — لا «اكتُبْهُ وحدَك» في النسخ');
+    const units = unitsOf(pairNode);
+    ok(doc.querySelectorAll('main .unit-strip .unit').length === units.length,
+      `وشريطُ الوحدات يقول كم فيها (${units.length}: ${units.map((u) => u.text).join(' · ')})`);
+    ok(Boolean(doc.querySelector('.lesson-board .pen-baseline')),
+      'ولوحُها يرسم **سطرَ الكرّاسة** — من الكلمة نفسِها لا من زينة');
+    const seat = Number(doc.querySelector('.pen-baseline')?.getAttribute('y1'));
+    ok(Math.abs(seat - units[0].ref.line) < 0.5,
+      `وموضعُ السطر عينُ سطر الكلمة (${seat} = ${units[0].ref.line})`);
+
+    // تُمشى العقدةُ كلُّها: لكلِّ وحدةٍ ثلاثُ خطوات (الأولى نقرةٌ، والثنتان كتابة)
+    for (const unit of units) {
+      const act = doc.querySelector('main .foot .btn');
+      act.click();                            // «اُنْسُخْ» — من العرض إلى الكتابة
+      // **والانتظارُ بقدر الكلام لا بقدر الرسم** (عقدُ قناة ٤ج): الانتقالُ بعد النقرة
+      // **ينتظر تمامَ ما يُقال**، فلو كُتب قبله لَوقع الحبرُ على لوح العرض وضاع —
+      // وهو ما وقع في أوّل تشغيل (بقيت الشاشةُ على أوّل وحدةٍ وقُيّد مفتاحٌ واحد).
+      await wait(STEP_WAIT);
+      for (let step = 0; step < 2; step++) {
+        await writeWord(unit.ref);
+        await wait(STEP_WAIT);
+      }
+    }
+    await wait(600);
+
+    // **وأين وقف الطفلُ يُقال ولا يُخمَّن**: الوحدةُ الجارية من شريط الوحدات نفسِه
+    const nowUnit = doc.querySelector('main .unit--now')?.getAttribute('aria-label');
+    const doneUnits = doc.querySelectorAll('main .unit--done').length;
+    ok(!nowUnit, `والمحطةُ تمّت — الوحدةُ الجارية: ${nowUnit || 'لا شيء'}`
+      + ` · المنجَزُ ${doneUnits}/${units.length}`);
+
+    const skills = stored().skills || {};
+    const wanted = units.map((u) => `${u.text}|كلمة|copy`);
+    const written = wanted.filter((key) => skills[key]);
+    ok(written.length === wanted.length,
+      `والقياسُ يكتب بوحدة الكلمة (${written.length}/${wanted.length}): ${wanted[0]}`
+      + (written.length < wanted.length
+        ? ` — غائب: ${wanted.filter((k) => !skills[k]).join('، ')}` : ''));
+    ok(Object.entries(skills).every(([key, s]) => !key.endsWith('|copy') || s.box > 0),
+      'وإصابةُ الطفل ترفع صندوقَ ليتنر — فالمراجعةُ تجدولها');
+    ok(Object.keys(skills).every((key) => !key.includes('|isolated|copy')),
+      'ولا مفتاحَ نسخٍ على حرفٍ — الكلمةُ وحدةُ هذه المرحلة (لا حرفَ وهميّ في اللوحة)');
+    ok(Boolean(doc.querySelector('main .big-stars')),
+      'وتُختَم المحطةُ بنجومها بعد إتمام وحداتها');
+    ok(progress.getStars(pairNode.id) > 0, 'ونجومُها محفوظةٌ في تقدّم الطفل');
+    ok(netCalls.length === netMark,
+      `🔒 وصفرُ طلباتٍ شبكية في دورة النسخ كلِّها (${netCalls.length - netMark})`);
+
+    // ————— §٢ بطاقةُ العلامة تسبق كلمتَها —————
+    log.append(Object.assign(document.createElement('h3'),
+      { textContent: '§٢ ق٣ — بطاقةُ تعريف العلامة قبل أوّل كلمةٍ تحملها' }));
+
+    win.location.hash = `#/join/${encodeURIComponent(marked.part)}`;
+    await wait(800);
+    const card = doc.querySelector('main .mark-card');
+    ok(Boolean(card), `عقدةُ «${marked.part}» تفتح ببطاقة العلامة (${(marked.marks || []).join(' ')})`);
+    ok(Boolean(card?.querySelector('.mark-glyph path')),
+      'والعلامةُ مرسومةٌ **من مسارها المؤلَّف** لا بخطّ نصّ — تُكتب كما تُعرَض');
+    ok(!doc.querySelector('main .pen-surface'),
+      'ولا لوحَ كتابةٍ تحتها — تُقرأ ثم تُغلَق بيد الطفل');
+    const close = card?.querySelector('.btn');
+    ok(Boolean(close) && close.getBoundingClientRect().height >= 64,
+      `وزرُّها هدفُ لمسٍ ≥ ٦٤ بكسل (${Math.round(close?.getBoundingClientRect().height || 0)})`);
+    close.click();
+    await wait(700);
+    ok(Boolean(doc.querySelector('main .pen-surface')),
+      'وبإغلاقها يفتح لوحُ الكتابة على كلمتها');
+
+    // ————— §٣ سطرُ المسافة بين الكلمتين —————
+    log.append(Object.assign(document.createElement('h3'),
+      { textContent: '§٣ المسافةُ بين الكلمات — كلمتان في لوحٍ واحد' }));
+    const spaced = joinNodes.map((n) => ({ n, u: unitsOf(n) })).find(({ u }) => u.some((x) => x.space));
+    ok(Boolean(spaced),
+      spaced ? `عقدةُ «${spaced.n.part}» تختم بسطر مسافة: «${
+        spaced.u.find((x) => x.space).text}»` : 'لا سطرَ مسافةٍ في المحطة');
+    if (spaced) {
+      const line = spaced.u.find((x) => x.space);
+      ok(Boolean(WORD_PATHS[line.text]) && line.text.includes(' '),
+        'ومسارُه كلمتان بينهما فراغُ المُشكِّل — مادّةُ «المسافة بين الكلمات»');
+    }
+
+    // ————— §٤ بوابةُ النسخ: من أضعف كلماته، ولا رسوب —————
+    log.append(Object.assign(document.createElement('h3'),
+      { textContent: '§٤ بوابةُ النسخ — الأضعفُ مادّةً وإعادةٌ بلا حدّ' }));
+
+    const gateNode = nodes.find((n) => n.type === 'gate' && n.id.includes('copy'));
+    ok(Boolean(gateNode), 'بوابةُ النسخ في الرحلة');
+    // يُضعَف مفتاحُ كلمةٍ بعينها فتصير أضعفَ ما في يده — والبوابةُ تسأل عنها
+    const weakWord = units[0].text;
+    for (let i = 0; i < 3; i++) progress.recordAttempt(weakWord, 'كلمة', 'copy', false);
+    const { gateItems } = await import('/js/gate.js');
+    const items = gateItems();
+    ok(items.length > 0 && items.every((it) => it.kind === 'copy'),
+      `وتمارينُها من مهارات النسخ (${items.length} تمريناً)`);
+    ok(items[0].unit === weakWord,
+      `وأوّلُها **أضعفُ** كلماته («${items[0].unit}» = «${weakWord}») — لا ما حان موعدُه`);
+    const again = gateItems();
+    ok(again.length > 0, 'وتُبنى تمارينُها من جديد في كل محاولة (لا نمطٌ يُحفَظ)');
+
+    win.location.hash = `#/gate/${encodeURIComponent(gateNode.part)}`;
+    await wait(800);
+    ok(Boolean(doc.querySelector('main .exercise .pen-surface')),
+      'وشاشتُها تفتح على لوحِ نسخٍ حقيقيّ');
+    ok(Boolean(doc.querySelector('.pen-baseline')),
+      'وفيه سطرُ الكرّاسة كما في المحطة — لا لوحان يفترقان');
+
+    ok(doc.documentElement.scrollWidth <= win.innerWidth + 1,
+      `ولا فائضَ أفقيّ (${doc.documentElement.scrollWidth} ≤ ${win.innerWidth})`);
+    ok(errors.length === 0,
+      errors.length ? `أخطاءُ جافاسكربت: ${errors.join(' · ')}` : 'لا أخطاء جافاسكربت');
+  } catch (e) {
+    ok(false, `استثناء: ${e && e.message}`);
+  }
+  await send();
+})();
+</script>
+</body>
+</html>
