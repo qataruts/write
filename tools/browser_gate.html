@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>بوابةُ الحرف المعزول على الشاشة — «اُكْتُبْ» الجلسة ٦</title>
+<!--
+  **معيارُ قبول الجلسة ٦ بحرفه، مقيساً في متصفّحٍ حقيقي**: «البوابةُ تُبنى من الأضعف
+  وتُعاد بلا حدّ».
+
+  و`test_measure.mjs` يقرأ `gate.js` نصّاً فيشهد أنه ينادي `weakestSkills` و`buildSession`،
+  وهذا يقول ما لا يقوله النصّ:
+    · أنّ البوابةَ **تقف مقفلةً** قبل تمام الحروف الـ٢٨، وتُفتَح بتمامها — قفلُ الرحلة
+      لا زينةَ خريطة.
+    · وأنّ تمارينها **من أضعف ما في يد الطفل**: حرفٌ صندوقُه عالٍ لا يدخلها ما دام
+      الضعيفُ يملأها — وهو الفارقُ بين `weakestSkills` و`dueSkills` بعينه.
+    · وأنّ **دون العتبة لا رسوبَ ولا حدَّ لإعادة**: «لَيْسَ بَعْدُ» ثم إعادةٌ فورية،
+      **وتمارينُها تُبنى من جديد في كل محاولة**، ولا نجمةَ تُكتب ولا عقدةَ تُفتَح.
+    · وأنّ **العبور بإصابة ≥٨٠٪ من المحاولات** — تُمشى بإصبعٍ حقيقيّ: خطأان في عشرة
+      يعبران، وعشرةُ أخطاءٍ لا تعبر.
+    · 🔒 وأنّ دورةَ البوابة كلَّها **بصفر طلباتٍ شبكية من الصفحة** — مسارُ الطفل لا
+      يغادر جهازه، والصوتُ وحدَه يمرّ بعنصر `Audio`.
+-->
+<style>
+  body { font: 15px/1.7 system-ui, sans-serif; margin: 0; background: #111; color: #eee; }
+  #log { padding: 1rem; white-space: pre-wrap; }
+  iframe { width: 460px; height: 900px; border: 0; position: fixed; inset-inline-end: 0; top: 0; }
+  .ok { color: #7ec97e; } .bad { color: #e08a80; }
+</style>
+</head>
+<body>
+<div id="log"></div>
+<iframe id="app" src="/"></iframe>
+<script type="module">
+const results = [];
+const log = document.getElementById('log');
+const frame = document.getElementById('app');
+
+function ok(cond, msg) {
+  results.push({ ok: !!cond, msg });
+  const line = document.createElement('div');
+  line.className = cond ? 'ok' : 'bad';
+  line.textContent = (cond ? '✓ ' : '✗ ') + msg;
+  log.append(line);
+}
+
+const errors = [];
+window.addEventListener('error', (e) => errors.push(String(e.message)));
+window.addEventListener('unhandledrejection', (e) => errors.push(String(e.reason)));
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const send = () => fetch('/result', {
+  method: 'POST', body: JSON.stringify({ from: 'write', rows: results }),
+});
+
+// عدّادُ أبواب الخروج من الجهاز (نظيرُ `browser_lesson.html`)
+const netCalls = [];
+function watchNetwork(win) {
+  const realFetch = win.fetch.bind(win);
+  win.fetch = (input, init) => {
+    netCalls.push(`fetch:${input && input.url ? input.url : input}`);
+    return realFetch(input, init);
+  };
+  const realOpen = win.XMLHttpRequest.prototype.open;
+  win.XMLHttpRequest.prototype.open = function (method, url, ...rest) {
+    netCalls.push(`xhr:${url}`);
+    return realOpen.call(this, method, url, ...rest);
+  };
+  Object.defineProperty(win.navigator, 'sendBeacon', {
+    configurable: true, value: (url) => { netCalls.push(`beacon:${url}`); return false; },
+  });
+  win.WebSocket = class { constructor(url) { netCalls.push(`ws:${url}`); } };
+  win.EventSource = class { constructor(url) { netCalls.push(`sse:${url}`); } };
+}
+
+(async () => {
+  try {
+    await new Promise((r) => frame.addEventListener('load', r, { once: true }));
+    const win = frame.contentWindow;
+    const doc = frame.contentDocument;
+    win.addEventListener('error', (e) => errors.push(String(e.message)));
+    win.addEventListener('unhandledrejection', (e) => errors.push(String(e.reason)));
+    watchNetwork(win);
+    await wait(700);
+
+    const progress = await import('/js/progress.js');
+    const curriculum = await import('/js/curriculum.js');
+    const gate = await import('/js/gate.js');
+    const ui = await import('/js/ui.js');
+    const { PATHS, FORMS, GATES } = curriculum;
+    const ISO = FORMS.ISOLATED;
+
+    // ————— العتبةُ دالّةٌ نقيّة: ٨٠٪ من المحاولات لا من التمارين —————
+    ok(gate.PASS_RATE === 0.8 && gate.passed(8, 2) && !gate.passed(7, 3),
+      `العبورُ بإصابة ≥${Math.round(gate.PASS_RATE * 100)}٪ من المحاولات:`
+      + ' ٨ من ١٠ تعبر و٧ لا تعبر — والحكمُ بالمحاولة لا بالتمرين');
+    ok(!gate.passed(0, 0), 'وجلسةٌ بلا محاولةٍ واحدة لا تفتح بوابة');
+
+    // ————— البوابةُ عقدةٌ في الرحلة تقف قبل أشكال المواقع —————
+    const one = GATES[0];
+    const node = progress.findNode(`gate:${one.id}`);
+    ok(Boolean(node) && one.before === 'initial',
+      `وبوابةُ «${one.title}» عقدةٌ في الرحلة تقف قبل «${one.before}»`);
+    ok(!progress.isNodeUnlockedById(node.id),
+      'وهي **مقفلةٌ** قبل تمام الحروف — قفلُ الرحلة لا زينةَ خريطة');
+
+    // ————— تهيئةُ الحال: الرحلةُ حتى البوابة مُتَمّة، وسجلُّ ليتنر بقوىً متفاوتة —————
+    //
+    // **ولا يُكتب معرّفُ عقدةٍ بيد**: تُقرأ عقدُ الرحلة كلُّها حتى البوابة من
+    // `allNodes()` نفسِه، فتُتَمّ — فيومَ تُزاد محطةٌ قبلها يمشي الفحصُ عليها.
+    const before = [];
+    for (const n of progress.allNodes()) {
+      if (n.id === node.id) break;
+      before.push(n);
+      progress.setStars(n.id, 3);
+    }
+    ok(progress.isNodeUnlockedById(node.id),
+      `وبإتمام ما قبلها (${before.length} عقدة) انفتحت البوابة`);
+
+    // خمسةُ حروفٍ ضعيفة (صندوقُ ليتنر صفر بخطأ) وحرفٌ قويّ (صندوقٌ عالٍ بلا خطأ)
+    const letters = Object.keys(PATHS);
+    const weak = letters.slice(0, 5);
+    const strong = letters[5];
+    for (const ch of weak) {
+      for (const kind of [progress.KINDS.TRACE, progress.KINDS.FREE]) {
+        progress.recordAttempt(ch, ISO, kind, false);
+      }
+    }
+    for (const kind of [progress.KINDS.TRACE, progress.KINDS.FREE]) {
+      for (let i = 0; i < 4; i++) progress.recordAttempt(strong, ISO, kind, true);
+    }
+    const boxes = progress.skills().map((s) => `${s.unit}:${s.box}`).join(' ');
+    ok(progress.skills().length === 12, `وسجلُّ ليتنر ١٢ مهارةً بقوىً متفاوتة (${boxes})`);
+
+    /**
+     * **والفارقُ بين «الأضعف» و«المستحقّ» يُقاس لا يُدَّعى**: تُزاح مواعيدُ ليتنر
+     * فيصير **القويُّ وحدَه مستحقّاً اليوم** والضعافُ مؤجَّلين. فبوابةٌ تبني من
+     * `dueSkills` تعرض القويَّ وحدَه، وبوابتُنا تبني من `weakestSkills` فتعرض
+     * الضعافَ — والشاشةُ تفصل بينهما بالعين. (مجرَّبٌ سالباً: بتبديل النداء في
+     * `gate.js` يحمرّ هذا الفحصُ بعينه.)
+     */
+    const raw = JSON.parse(localStorage.getItem('uktub.progress.v1') || '{}');
+    const today = Math.max(...Object.values(raw.skills).map((s) => s.seen));
+    for (const [key, skill] of Object.entries(raw.skills)) {
+      skill.due = key.startsWith(`${strong}|`) ? today : today + 5;
+    }
+    localStorage.setItem('uktub.progress.v1', JSON.stringify(raw));
+
+    /**
+     * **وحالُ الطفل تُقرأ من مخزنه لا من نسختنا**: هذه الصفحةُ تستورد `progress.js`
+     * في عالمها هي، والتطبيقُ في إطاره يستورد نسختَه — فالمخزن (`localStorage`) هو
+     * الجسرُ بينهما وحدَه. فيُعاد تحميلُ الإطار بعد التهيئة ليقرأ ما كُتب، وكلُّ حكمٍ
+     * على الحال بعدها يُقرأ من المخزن نفسِه لا من نسختنا التي تشيخ.
+     */
+    frame.src = '/';
+    await new Promise((r) => frame.addEventListener('load', r, { once: true }));
+    await wait(600);
+    const win2 = frame.contentWindow;
+    const doc2 = frame.contentDocument;
+    win2.addEventListener('error', (e) => errors.push(String(e.message)));
+    win2.addEventListener('unhandledrejection', (e) => errors.push(String(e.reason)));
+    watchNetwork(win2);
+    const stored = () => {
+      try { return JSON.parse(win2.localStorage.getItem('uktub.progress.v1') || '{}'); }
+      catch { return {}; }
+    };
+    const starsOf = (id) => (stored().stars || {})[id] || 0;
+
+
+    // ————— إصبعٌ على اللوح —————
+    let pointerId = 1;
+    const surfaceEl = () => doc2.querySelector('.pen-surface');
+    const toClient = ([x, y]) => {
+      const rect = surfaceEl().getBoundingClientRect();
+      const size = Math.min(rect.width, rect.height);
+      return {
+        clientX: rect.left + (rect.width - size) / 2 + (x / 1000) * size,
+        clientY: rect.top + (rect.height - size) / 2 + (y / 1000) * size,
+      };
+    };
+    const fire = (type, point, id) => {
+      surfaceEl().dispatchEvent(new win2.PointerEvent(type, {
+        bubbles: true, cancelable: true, composed: true,
+        pointerId: id, pointerType: 'touch', isPrimary: true, ...toClient(point),
+      }));
+    };
+    async function writeStroke(points) {
+      const id = ++pointerId;
+      fire('pointerdown', points[0], id);
+      for (const p of points.slice(1)) fire('pointermove', p, id);
+      await wait(30);
+      fire('pointerup', points[points.length - 1], id);
+      await wait(40);
+    }
+
+    /** حرفُ التمرين المعروض — يُقرأ من لوحه نفسِه (`لوحُ مراجعة: <اسم الحرف>`). */
+    const letterNow = () => {
+      const label = surfaceEl()?.getAttribute('aria-label') || '';
+      return letters.find((ch) => label.includes(ui.letterName(ch))) || null;
+    };
+    const stepNow = () => [...doc2.querySelectorAll('.dots .dot')]
+      .findIndex((d) => d.classList.contains('dot--now'));
+
+    /**
+     * يكتب تمرينَ البوابة الحاليّ ثم ينتظر انتقالَ الجلسة.
+     *
+     * **والخطأُ لا يُنهي التمرين** (`METHOD.md §٣.٤`: إرشادٌ لا رفض): المحرّكُ لا يُتِمّ
+     * المحاولةَ إلا بشكلٍ مستوفىً، فالطفلُ الذي أخطأ يعيد حتى يستقيم — **ويُحسَب خطؤه**
+     * (`penExercise` يعدّ الأخطاء فيسجّل المحاولةَ خاطئةً وإن استقام آخرُها). فمَن أردناه
+     * خاطئاً يُكتب معكوساً أوّلاً ثم مستقيماً، وذاك ما يفعله طفلٌ حقيقيّ.
+     */
+    async function answer(right) {
+      const at = stepNow();
+      const ch = letterNow();
+      if (!ch) return null;
+      const ref = PATHS[ch][ISO];
+      const trace = async (back) => {
+        for (const stroke of ref.strokes) {
+          await writeStroke(back ? [...stroke.points].reverse() : stroke.points);
+        }
+        if (back) return;
+        for (const dot of ref.dots) {
+          for (let i = 0; i < (dot.count || 1); i++) await writeStroke([dot.at, dot.at, dot.at]);
+        }
+      };
+      if (!right) await trace(true);        // خطأُ اتجاهٍ يُسجَّل، والتمرينُ يبقى قائماً
+      await trace(false);                   // ثم يستقيم فتنتهي المحاولة
+      for (let i = 0; i < 40 && stepNow() === at && !doc2.querySelector('.celebrate'); i++) {
+        await wait(120);
+      }
+      return ch;
+    }
+
+    // ————— المحاولةُ الأولى: كلُّها معكوسة ⇐ «ليس بعدُ» —————
+    const netMark = netCalls.length;
+    win2.location.hash = `#/gate/${encodeURIComponent(one.id)}`;
+    await wait(700);
+    ok(Boolean(doc2.querySelector('.gate-head')) && doc2.querySelector('.pill')?.textContent === 'بوابة',
+      'وشاشةُ البوابة فُتحت برأسها وشارتها');
+    ok(doc2.querySelectorAll('.dots .dot').length === gate.GATE_SIZE,
+      `ومؤشّرُها ${gate.GATE_SIZE} تمارين`);
+    const seenFirst = [];
+    for (let i = 0; i < gate.GATE_SIZE; i++) seenFirst.push(await answer(false));
+    await wait(400);
+
+    ok(seenFirst.length === gate.GATE_SIZE && seenFirst.every(Boolean)
+      && seenFirst.every((ch) => weak.includes(ch)) && !seenFirst.includes(strong),
+      `ومادّتُها على الشاشة **أضعفُ ما في يده**: ${[...new Set(seenFirst)].join('، ')}`
+      + ` — والقويُّ «${strong}» لم يدخلها **وهو وحدَه المستحقُّ اليومَ**`);
+
+    const card = doc2.querySelector('.celebrate');
+    ok(Boolean(card) && /لَيْسَ بَعْدُ/.test(card.textContent),
+      `ودونَ العتبة: «${card ? card.querySelector('h2')?.textContent : '—'}» — لا لفظَ رسوب`);
+    ok(!/رسوب|فشل|خسر/.test(doc2.body.textContent), 'ولا كلمةَ رسوبٍ في الشاشة كلِّها');
+    ok(starsOf(node.id) === 0,
+      'ولا نجمةَ تُكتب ولا بوابةَ تُفتَح');
+    const again = [...doc2.querySelectorAll('.celebrate .btn')]
+      .find((b) => /أعِد المحاولة/.test(b.textContent));
+    ok(Boolean(again), 'وزرُّ إعادةٍ فوريّ في ذيلها');
+    const acts = [...doc2.querySelectorAll('.celebrate .btn')];
+    const small = acts.filter((b) => b.getBoundingClientRect().height < 64);
+    ok(acts.length >= 2 && small.length === 0,
+      `وأفعالُها (${acts.length}) هدفُ لمسٍ ≥ ٦٤ بكسل`
+      + ` — مقيسةً: ${acts.map((b) => Math.round(b.getBoundingClientRect().height)).join('، ')}`);
+    ok(!doc2.querySelector('.timer, .countdown, [data-timer]'), 'ولا مؤقّتَ في الشاشة');
+
+    // ————— الإعادةُ تبني تمارينَها من جديد، ولا حدَّ لها —————
+    again.click();
+    await wait(500);
+    ok(stepNow() === 0 && doc2.querySelectorAll('.dots .dot').length === gate.GATE_SIZE,
+      'والإعادةُ تبدأ من أوّلها بعشرة تمارين — **تُبنى من جديد** لا نمطٌ يُحفَظ');
+    const secondFirst = await answer(false);
+    ok(Boolean(secondFirst),
+      `وتمرينُها الأوّل يُكتب (${secondFirst}) — محاولةٌ ثانيةٌ بلا حدّ ولا عقاب`);
+    for (let i = 1; i < gate.GATE_SIZE; i++) await answer(false);
+    await wait(400);
+    const twice = doc2.querySelector('.celebrate');
+    ok(Boolean(twice) && /لَيْسَ بَعْدُ/.test(twice.textContent)
+      && [...doc2.querySelectorAll('.celebrate .btn')].some((b) => /أعِد المحاولة/.test(b.textContent)),
+      'وبعد المحاولة الثانية: «ليس بعدُ» وزرُّ الإعادة قائمٌ كما كان — لا حدَّ للمحاولات');
+
+    // ————— المحاولةُ الثالثة: خطأان في عشرة ⇐ العبور —————
+    [...doc2.querySelectorAll('.celebrate .btn')]
+      .find((b) => /أعِد المحاولة/.test(b.textContent)).click();
+    await wait(500);
+    for (let i = 0; i < gate.GATE_SIZE; i++) await answer(i >= 2);   // خطأان ثم ثمانية
+    await wait(500);
+
+    const open = doc2.querySelector('.celebrate');
+    ok(Boolean(open) && /فُتِحَتِ البَوَّابَة/.test(open.textContent),
+      `وبإصابة ثمانيةٍ من عشرٍ: «${open ? open.querySelector('h2')?.textContent : '—'}»`);
+    const stars = doc2.querySelectorAll('.celebrate .big-stars .on').length;
+    ok(stars > 0 && starsOf(node.id) === stars,
+      `ونجومُها ${stars} على الشاشة ومثلُها في مخزن التقدّم`);
+    ok(starsOf(node.id) > 0, 'والبوابةُ صارت مجتازةً في الرحلة — نجمتُها في مخزن الجهاز');
+    ok(/٨٠٪|٨٠ ٪|٨٠/.test(open.textContent),
+      'ونسبةُ إصابته مكتوبةٌ له بالحساب نفسِه الذي فتح البوابة');
+
+    // ————— الخصوصية: صفرُ طلباتٍ من الصفحة في دورة البوابة كلِّها —————
+    const netAdded = netCalls.slice(netMark);
+    ok(netAdded.length === 0,
+      `🔒 وصفرُ طلباتٍ شبكية في دورة البوابة كلِّها (${netAdded.length ? netAdded.join(' · ') : 'لا شيء'})`);
+    ok(errors.length === 0, `لا أخطاء جافاسكربت${errors.length ? `: ${errors.join(' · ')}` : ''}`);
+  } catch (e) {
+    ok(false, `استثناء: ${e && e.message}`);
+  }
+  await send();
+})();
+</script>
+</body>
+</html>

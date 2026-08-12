@@ -743,8 +743,15 @@ function foldSpan(legs, i) {
  * النازل **وهو أمامَه بمئتَي وحدة**، فيقفز تقدّمُه ثم يُقرأ رجوعُه ارتداداً. أمسك
  * ذلك تُوَيْجُ الباء النهائية بعينها (قفزةٌ من ١٨٣ إلى ٤٤٣ ثم `reverse`). فتُقتطع
  * من الذراعين مسافةُ الإزاح، ويُوصَل الضلعان بطرفَيهما — فلا يجتمع فرعان في موضع.
+ *
+ * **والإزاحُ يضيق على استقامةٍ من المفرق إلى القمّة — وتدٌ لا شريطٌ ينثني** (تصحيحُ
+ * الجلسة ٦): كان يُحفَظ تامّاً في ثلاثة أرباع الضلع ثم يُطوى في ربعه الأخير، فيخرج
+ * الضلعان متوازيَين ثم ينكسران عند القمّة — **وليس ذلك شكلَ الحبر**: قلمٌ يصعد ويعود
+ * يترك وتداً أعرضَ ما يكون عند مقعده وأدقَّ ما يكون عند رأسه. والانكسارُ يقرّب ضلعَي
+ * السنّة من جارتها في أعلاها حيث يقع إسقاطُ يدٍ ترتجف. **ومقيسٌ**: بالانحدار المستقيم
+ * عبرت الأشكالُ الـ١١٢ كلُّها عهدَ `child-drift` (أدناها ٤٥ = العهد)، وبالطيّ كانت
+ * ثلاثةٌ دونه (٣٦ و٤٢ و٤٢ — ش معزول ونهائي وس نهائي).
  */
-const CLOSE = 0.25;
 function shifted(spike, target, room) {
   const n = spike.length;
   const fork = spike[0];
@@ -752,7 +759,7 @@ function shifted(spike, target, room) {
   const dy = target[1] - fork[1];
   const full = Math.hypot(dx, dy) || 1;
   return spike.map((p, i) => {
-    const hold = Math.min(1, (n > 1 ? 1 - i / (n - 1) : 0) / CLOSE);
+    const hold = n > 1 ? 1 - i / (n - 1) : 0;
     // **ولا يخرج الضلعُ من حبر حرفه**: الإزاحُ محدودٌ بعرض الحبر **عند تلك النقطة**
     // لا عند المفرق — فالسنّةُ تضيق كلما ارتفعت، ولو أُزيح الضلعُ بعرض قاعدتها
     // لخرج من الخيال في أعلاها. (ويحرس ذلك `browser_paths.html` نقطةً نقطة.)
@@ -769,6 +776,22 @@ const inkHalf = (work, p) => {
   if (mx < 0 || my < 0 || mx >= MASK || my >= MASK) return 0;
   return (work.dt[my * MASK + mx] || 0) * PX;
 };
+
+/**
+ * **ذراعُ الطيّة التي تبدأ المسار**: فرعٌ ثالثٌ عند مفرقها لم يمشِه القلمُ ولا يمشيه
+ * (وصلةُ الحرف قبلها)، فيُقرأ منه اتجاهُ الدخول على مسافة الإزاح نفسِها. ويعود `null`
+ * إن لم يكن عند المفرق فرعٌ واحدٌ لا غير — فلا يُخمَّن اتجاهٌ حيث لا يدلّ الهيكل.
+ */
+function spikeArm(graph, legs, i, fold, fork, grip) {
+  const at = legs[i].from;
+  const used = new Set([legs[i].edge, legs[fold.end + 1]?.edge]);
+  const rest = [...graph.edges.entries()]
+    .filter(([k, e]) => !used.has(k) && (e.a === at || e.b === at));
+  if (rest.length !== 1) return null;
+  const [k, edge] = rest[0];
+  const chain = (edge.a === at ? edge.chain : [...edge.chain].reverse()).map(px2grid);
+  return chain.find((p) => dist(p, fork) >= grip) || chain[chain.length - 1] || null;
+}
 
 /**
  * يمشي إيماءةَ جزءٍ (أرقامُ عُقَد) على الهيكل فيخرج مسارُ القلم خاماً.
@@ -812,11 +835,29 @@ function walkGesture(work, ids) {
     // الحبر لصارت بطحاءَ لا سنّة، فيضيع شكلُها ويلتبس على الحَكَم أمرُها.
     const grip = Math.max(Math.min((work.dt[forkPx] || 0) * PX, prepare(spike).len * 0.35), 10);
     while (points.length > 2 && dist(points[points.length - 1], fork) < grip) points.pop();
-    const armIn = points[points.length - 1] || fork;
     const nextPts = legs[fold.end + 1] ? edgePoints(graph, legs[fold.end + 1]) : [];
     let cut = 0;
     while (cut < nextPts.length - 2 && dist(nextPts[cut], fork) < grip) cut++;
     const armOut = nextPts[cut] || fork;
+    // **وطيّةٌ تبدأ المسارَ لا ذراعَ داخلةً لها** — ولو تُركت بلا إزاحة لانطبق ضلعُها
+    // الصاعد على المفرق وحدَه بينما يُزاح النازلُ، فيتقاربان عند المبدأ ويعود العطبُ
+    // الذي فُكّت الطيّةُ لأجله: يدُ طفلٍ ترتجف عند بدايته يقع إسقاطُها على النازل.
+    // **فيُزاح الصاعدُ مقابلَ الخارجة** (مرآةً حول المفرق) فيفترق الضلعان بعرض الحبر
+    // كاملاً كما في سائر الطيّات. وأمسكها **مدخلُ الموصولة من مقعده** (قاعدةُ الجلسة ٥):
+    // س/نهائي وت/وسطي وش/نهائي وحدَها تبدأ بطيّة.
+    // **وطيّةٌ تبدأ المسارَ لا ذراعَ داخلةً لها** فيبقى ضلعُها الصاعد على حبره ويُزاح
+    // النازلُ وحدَه — **وجُرِّب خلافُه فقِيس أسوأ**: إزاحةُ الصاعد مقابلَ الخارجة
+    // (مرآةً حول المفرق) أنزلت س/نهائي من ٤٥ إلى ٤٢ دون عهد `child-drift`، فرُدَّت.
+    // وهي ثلاثةُ أشكالٍ وحدَها: س/نهائي وش/نهائي وت/وسطي — مدخلُها مقعدُها على السطر
+    // (قاعدةُ الجلسة ٥) فتبدأ بالسنّة نفسِها.
+    // **وطيّةٌ تبدأ المسارَ ذراعُها الداخلة في الهيكل وإن لم تُمشَ**: مدخلُ الموصولة
+    // مقعدُها على السطر (قاعدةُ الجلسة ٥) **والوصلةُ نفسُها يرسمها الحرفُ قبلها**، فلا
+    // يمشيها القلمُ هنا — لكنها حبرٌ قائمٌ في الخيال وفرعٌ قائمٌ عند المفرق. فيُزاح
+    // الضلعُ الصاعد إليها كما يُزاح النازلُ إلى الخارجة، فيفترق الضلعان بعرض الحبر
+    // كسائر الطيّات. **ولولا ذلك لبقي الصاعدُ على حبره وحدَه**: يُزاح النازلُ ولا يُزاح
+    // هو، فيقع خطُّ الطفل الواحد — كما يكتب السنّةَ حقّاً — أقربَ إلى النازل فيُقرأ
+    // عكساً (أمسكه فحصُ المتصفّح على س/نهائي بإصبعٍ حقيقيّ).
+    const armIn = points[points.length - 1] || spikeArm(graph, legs, i, fold, fork, grip) || fork;
     const room = spike.map((p) => inkHalf(work, p));
     // **إعلانُ الطيّة يُقيَّد ساعةَ تُفَكّ**: مبدؤها آخرُ نقطةٍ من الذراع الداخلة،
     // وقمّتُها رأسُ الضلع الصاعد، وآخرُها آخرُ نقطةٍ من النازل — ثلاثةُ أرقامٍ تخرج
@@ -916,22 +957,37 @@ function resample(points) {
 
 /**
  * النقاطُ **تُقرأ من الخيال آلياً**: الأجرامُ الصغيرة المنفصلة عن الجسم. وتُجمَع
- * المتجاورةُ منها في جزءٍ واحد بعدد نقراته (ثاءٌ ثلاثُ نقراتٍ في موضعٍ واحد)،
- * والحدُّ **من سماحة المحرّك نفسِها** (`TOLERANCE.dot`) لا رقماً حرّاً: ما يقبله
- * `pen.js` نقرتين في جزءٍ واحد يُكتب جزءاً واحداً. **وكلُّها `after: true`** —
- * النقاطُ بعد الجسم، قاعدةُ الخطّ المدرسيّ (`METHOD.md §٣.١`).
+ * المتقاربةُ منها في علامةٍ واحدة بعدد نقراتها (ثاءٌ ثلاثُ نقراتٍ في موضعٍ واحد)،
+ * **وكلُّها `after: true`** — النقاطُ بعد الجسم، قاعدةُ الخطّ المدرسيّ (`METHOD.md §٣.١`).
+ *
+ * **والحدُّ من المحرّك نفسِه**: علامتان أقربُ من **دائرة البداية** (`TOLERANCE.start`)
+ * لا يفرّق `pen.js` بين موضعيهما — يقيس ترتيبَ الأجزاء بأقرب جزءٍ إلى موضع النزول —
+ * وهو عينُ ما يفرضه `check_paths.py` على مبادئ الأجزاء. فما لا يُفرَّق بينهما **علامةٌ
+ * واحدةٌ بنقرتين** لا علامتان. ويُدمَج **أقربُ زوجين أوّلاً ثم يُعاد** حتى لا يبقى
+ * مركزان دون الحدّ — فلا تخرج العدّةُ بشكلٍ يردّه الفاحص.
+ *
+ * **وكان الحدُّ `TOLERANCE.dot * 0.7`** (٩٨) وهو **أوسعُ ممّا يفرّقه المحرّك**، فخرجت
+ * ثاءٌ وشينٌ بعلامتين على بُعد ٩٥–١١١ — أمسكها `check_paths` يومَ دخلت المجموعاتُ
+ * الثلاثُ الأخيرة (الجلسة ٦). ولا يتبدّل بالتصحيح شكلٌ كان أخضر: ما مرّ الفاحصَ فمركزاه
+ * فوق الحدّ أصلاً.
  */
 function dotsFrom(marks) {
-  const spread = TOLERANCE.dot * 0.7;
-  const groups = [];
-  for (const mark of marks) {
-    const at = [mark.at[0] * PX, mark.at[1] * PX];
-    const near = groups.find((g) => dist(g.at, at) <= spread);
-    if (near) {
-      near.at = [(near.at[0] * near.count + at[0]) / (near.count + 1),
-        (near.at[1] * near.count + at[1]) / (near.count + 1)];
-      near.count++;
-    } else groups.push({ at, count: 1 });
+  const groups = marks.map((mark) => ({ at: [mark.at[0] * PX, mark.at[1] * PX], count: 1 }));
+  for (;;) {
+    let pair = null;
+    for (let i = 0; i < groups.length; i++) {
+      for (let j = i + 1; j < groups.length; j++) {
+        const gap = dist(groups[i].at, groups[j].at);
+        if (gap < TOLERANCE.start && (!pair || gap < pair.gap)) pair = { i, j, gap };
+      }
+    }
+    if (!pair) break;
+    const keep = groups[pair.i];
+    const [gone] = groups.splice(pair.j, 1);
+    const total = keep.count + gone.count;
+    keep.at = [(keep.at[0] * keep.count + gone.at[0] * gone.count) / total,
+      (keep.at[1] * keep.count + gone.at[1] * gone.count) / total];
+    keep.count = total;
   }
   return groups
     .sort((a, b) => a.at[1] - b.at[1] || b.at[0] - a.at[0])
@@ -993,7 +1049,14 @@ function compose(work, gesture) {
     const walked = walkGesture(work, ids);
     let points = smooth(walked.points, 2, work);
     points = extendEnd(points, work.bodyMask, true);
-    let marks = walked.folds.map((f) => ({ from: f.from + 1, apex: f.apex + 1, to: f.to + 1 }));
+    // **وامتدادُ الطرف امتدادُ ضلع الطيّة إن بدأت المسارَ**: النقطةُ المزيدةُ في الرأس
+    // تقع على استقامة الضلع الصاعد، فتبقى **داخل مدى الطيّة** لا خارجَه — ولو تُركت
+    // خارجه لَقاسها المحرّكُ قياسَ مسارٍ سويّ وهي إلى جوار طرف الضلع النازل، فيقفز
+    // إسقاطُ يدٍ ترتجف من هذه إلى ذاك ويُقرأ عكساً. (وأمسكها س/نهائي وش/نهائي وت/وسطي
+    // — الثلاثةُ وحدَها تبدأ بطيّة، ومدخلُها مقعدُها على السطر بقاعدة الجلسة ٥.)
+    let marks = walked.folds.map((f) => ({
+      from: f.from ? f.from + 1 : 0, apex: f.apex + 1, to: f.to + 1,
+    }));
     points = extendEnd(points, work.bodyMask, false);
     points = smooth(points, 2, work);
     const before = prepare(points);
@@ -1393,7 +1456,12 @@ async function runSheet() {
   const spec = await anchors();
   // اللوحةُ تعرض الأشكالَ الأربعة لكل حرفٍ دائماً — وما لم تُؤلَّف إيماءتُه بعدُ
   // يُعرَض خيالُه وهيكلُه وعُقَدُه وحدَها، فهي لوحةُ التأليف كما هي لوحةُ المراجعة.
-  const list = allForms(spec);
+  //
+  // **و`only` مِصفاةُ حروفٍ للتأليف** (الجلسة ٦): لوحةُ الـ٢٨ كاملةً تُسلَّم للعين،
+  // لكنّ المؤلِّفَ يقرأ أرقامَ العُقَد وهو يؤلّف مجموعةً مجموعة — وأرقامٌ تصغر تحت
+  // التصغير لا تُقرأ. والنافذةُ تتبع العددَ في الحالين (يحسبها السائق).
+  const only = qs.get('only');
+  const list = allForms(spec).filter(({ ch }) => !only || only.includes(ch));
   const board = document.createElement('div');
   board.id = 'sheet';
   document.body.replaceChildren(board);
@@ -1416,7 +1484,19 @@ async function runSheet() {
     }
     board.append(cell);
   }
-  say(true, `لوحةُ المراجعة: ${list.length} شكلاً`);
+  // **والبترُ يُقال ولا يُخفى** (مراجعةُ الجلسة ٥: نافذةٌ مكتوبةٌ بيد بترت لوحةَ
+  // الـ٤٨ صامتةً، **وشاهدُ العين الناقصُ شاهدٌ كاذب**): اللوحةُ تقيس نفسَها في
+  // النافذة التي فُتحت لها، فإن جاوزتها **احمرّ التشغيلُ من نفسه** ولم تُسلَّم صورةٌ
+  // ناقصة على أنها تامّة. والسائقُ يحسب النافذةَ من عدد الصفوف — وهذا الحارسُ يقول
+  // إن أخطأ الحساب.
+  await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)));
+  const need = document.documentElement.scrollHeight;
+  const have = innerHeight;
+  const cols = getComputedStyle(board).gridTemplateColumns.split(' ').length;
+  const rows = Math.ceil(list.length / cols);
+  say(need <= have + 1, `لوحةُ المراجعة: ${list.length} شكلاً في ${rows} صفاً`
+    + (need <= have + 1 ? ` — كلُّها في النافذة (${need} ≤ ${have})`
+      : ` — **النافذةُ تبتُر**: اللوحةُ ${need} بكسلاً والنافذةُ ${have}`));
   await send();
 }
 

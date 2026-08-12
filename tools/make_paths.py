@@ -123,7 +123,41 @@ def paths_module() -> tuple:
 # ————— تشغيلُ العدّة في المتصفّح —————
 
 
-def drive(query: str, port: int, timeout: int, shots: Path = None, show: bool = False) -> list:
+# ————— نافذةُ اللوحة: **تُحسب من عدد الصفوف لا تُكتب** —————
+#
+# مراجعةُ الجلسة ٥ أمسكت هنا رقماً مكتوباً بيد (`1600,1700`): كان يسع ستّةَ عشرَ شكلاً
+# فلمّا صارت ثمانيةً وأربعين **بتر اللوحةَ صامتاً** — وشاهدُ العين الناقصُ شاهدٌ كاذب،
+# وهو من صنف «أرقامٌ محسوبة لا مكتوبة» بعينه ويسري على عدّة المراجعة كما يسري على
+# المنتَج. **فقواعدُ الشبكة تُقرأ من العدّة نفسِها** (أعمدتُها وفجوتُها وحاشيتُها في
+# قاعدة `#sheet`)، والصفوفُ تُحسب من عدد الأشكال المعروضة، والارتفاعُ ثمرتُهما.
+# **والمكتوبُ هنا ضلعُ الخليّة وحدَه** — وهو وحدةُ العين لا وصفُ الصفحة: كم بكسلاً
+# يُعطى الشكلُ الواحد ليُقرأ رسمُه وأرقامُ عُقَده.
+SHEET_CELL = 400
+
+
+def sheet_grid() -> tuple:
+    """أعمدةُ لوحة المراجعة وفجوتُها وحاشيتُها — **مقروءةٌ من قاعدة العدّة**."""
+    css = TOOL_PAGE.read_text(encoding="utf-8")
+    rule = re.search(r"#sheet \{(.*?)\}", css, re.S)
+    body = rule.group(1) if rule else ""
+    cols = re.search(r"repeat\((\d+),", body)
+    gap = re.search(r"gap:\s*(\d+)px", body)
+    pad = re.search(r"padding:\s*(\d+)px", body)
+    return (int(cols.group(1)) if cols else 1,
+            int(gap.group(1)) if gap else 0,
+            int(pad.group(1)) if pad else 0)
+
+
+def sheet_window(cells: int) -> str:
+    """نافذةٌ تسع كلَّ خلايا اللوحة — عرضاً بأعمدتها وارتفاعاً بصفوفها."""
+    cols, gap, pad = sheet_grid()
+    rows = max(1, -(-cells // cols))
+    side = lambda n: pad * 2 + n * SHEET_CELL + max(0, n - 1) * gap  # noqa: E731
+    return f"{side(cols)},{side(rows)}"
+
+
+def drive(query: str, port: int, timeout: int, shots: Path = None, show: bool = False,
+          window: str = None) -> list:
     """يفتح العدّةَ بوضعٍ من أوضاعها ويعيد ما أرسلته (أو يلتقط صورتها)."""
     results = []
     browser_test.PAGES["/__make_paths.html"] = TOOL_PAGE
@@ -135,7 +169,7 @@ def drive(query: str, port: int, timeout: int, shots: Path = None, show: bool = 
     extra = ["--hide-scrollbars"]
     if shots:
         shots.unlink(missing_ok=True)
-        extra += [f"--screenshot={shots}", "--window-size=1600,1700"]
+        extra += [f"--screenshot={shots}", f"--window-size={window}"]
     try:
         proc = browser_test.run_chrome(url, profile, extra, show)
         deadline = time.time() + timeout
@@ -474,6 +508,7 @@ def main() -> int:
     ap.add_argument("--build", action="store_true", help="بناءُ app/js/paths.js")
     ap.add_argument("--sheet", metavar="PNG", help="لوحةُ مراجعةٍ بالعين")
     ap.add_argument("--bare", action="store_true", help="مع --sheet: بلا أرقام العُقَد")
+    ap.add_argument("--only", metavar="حروف", help="مع --sheet: حروفٌ بعينها (للتأليف)")
     ap.add_argument("--out", metavar="JSON", help="مع --nodes: ملفُّ الجرد")
     ap.add_argument("--self-test", action="store_true", help="عهدُ الإيماءة والمسار بلا متصفّح")
     ap.add_argument("--port", type=int, default=8791)
@@ -488,11 +523,18 @@ def main() -> int:
         return nodes(args.port, args.timeout, Path(args.out) if args.out else None)
     if args.sheet:
         out = Path(args.sheet).resolve()
-        query = "?sheet=1" + ("&tags=0" if args.bare else "")
-        results = drive(query, args.port, args.timeout, shots=out)
-        report(results)
+        # **والنافذةُ من عدد الأشكال**: حروفُ الإيماءات (أو ما صُفّي منها بـ`--only`)
+        # × أشكالِ المواقع — وهو عينُ ما تعرضه `allForms` في العدّة.
+        letters = [ch for ch in anchors().get("letters", {})
+                   if not args.only or ch in args.only]
+        query = ("?sheet=1" + ("&tags=0" if args.bare else "")
+                 + (f"&only={args.only}" if args.only else ""))
+        window = sheet_window(len(letters) * len(FORMS))
+        results = drive(query, args.port, args.timeout, shots=out, window=window)
+        good = report(results)
+        print(f"النافذةُ المحسوبة: {window} — {len(letters)} حرفاً")
         print(f"اللوحة: {out}" if out.exists() else "تعذّرت اللقطة")
-        return 0 if out.exists() else 1
+        return 0 if out.exists() and good else 1
     if args.open:
         print("العدّةُ مفتوحةٌ في المتصفّح — أغلِقه لإنهاء الخادم.")
         drive("?open=1", args.port, 3600, show=True)
