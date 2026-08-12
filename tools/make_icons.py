@@ -15,6 +15,7 @@
 
 import argparse
 import http.server
+import re
 import shutil
 import socketserver
 import struct
@@ -26,18 +27,28 @@ import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 ICONS = ROOT / "app" / "icons"
 CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 
 # كل لقطة تُؤخذ بمقاس ٥١٢ (أصغر من ذلك تُهمله نافذة Chrome فتخرج بيضاء)،
 # ثم تُصغَّر بـsips المرافق لـmacOS. (اسم الملف، المقاس، الهامش الآمن، حواف مستديرة، خلفية)
 MASTER = 512
+# و«الخلفية» أرضُ الصفحة تحت العلبة: العلبةُ تملأ المربّع فلا تُرى، **ولا يبقى مع ذلك
+# لونُ أخينا مكتوباً في عدّتنا** (كان `#f5a524` — برتقاليُّ اقرأ) — يُقرأ `--brand-2`
+# من اللوح، فلو انكشفت الأرضُ يوماً بتبدّل هندسةٍ انكشفت بلوننا لا بلونه.
 TARGETS = [
     ("icon-512.png", 512, 0.0, True, None),
     ("icon-192.png", 192, 0.0, True, None),
-    ("maskable-512.png", 512, 0.20, False, "#f5a524"),
-    ("apple-touch-icon.png", 180, 0.0, False, "#f5a524"),
+    ("maskable-512.png", 512, 0.20, False, "--brand-2"),
+    ("apple-touch-icon.png", 180, 0.0, False, "--brand-2"),
 ]
+
+
+def board_color(name: str) -> str:
+    css = (ROOT / "app" / "css" / "app.css").read_text(encoding="utf-8")
+    found = re.search(rf"^\s*{name}:\s*(#[0-9A-Fa-f]{{3,8}})\s*;", css, re.M)
+    return found.group(1) if found else "#000000"
 
 
 def png_size(path: Path):
@@ -46,6 +57,63 @@ def png_size(path: Path):
     if len(data) < 24 or data[:8] != b"\x89PNG\r\n\x1a\n":
         return None
     return struct.unpack(">II", data[16:24])
+
+
+def brand_font() -> tuple:
+    """خطُّ العلامة **من اللوح**: عائلتُه من `--font-brand`، وملفُّه من إعلان وجهه.
+
+    فلا يُكتب اسمُ خطٍّ في هذه العدّة ولا في `icon.html` — ويومَ يُبدَّل خطُّ العلامة
+    تتبعه الأيقونةُ من نفسها. (وقد كان مكتوباً بيدٍ في ثلاثة مواضع حتى الجلسة هـ٢.)
+    """
+    css = (ROOT / "app" / "css" / "app.css").read_text(encoding="utf-8")
+    found = re.search(r"--font-brand:\s*([^;]+);", css)
+    family = found.group(1).split(",")[0].strip().strip("'\"") if found else None
+    if not family:
+        return None, None
+    faces = re.findall(r"@font-face\s*\{([^}]*)\}", css, re.S)
+    mine = [f for f in faces if re.search(rf"font-family:\s*['\"]{re.escape(family)}['\"]", f)]
+    heavy = [f for f in mine if re.search(r"font-weight:[^;]*700", f)] or mine
+    url = re.search(r"url\('([^']+)'\)", heavy[0]) if heavy else None
+    return family, (url.group(1).replace("../fonts/", "/app/fonts/") if url else None)
+
+
+def ink_span(path: Path):
+    """أوسعُ بُعدٍ يشغله **حبرُ الكلمة** في أيقونةٍ منشورة، نسبةً من ضلعها.
+
+    وحبرُ العلامة في أيقونات العائلة الثلاث أبيضُ على تدرّج ملوّن، فيُقرأ بالبياض.
+    """
+    from identity_doors import png_pixels          # فكُّ PNG مكتوبٌ مرّةً واحدة
+    width, height, data, channels = png_pixels(path)
+    left, top, right, bottom = width, height, -1, -1
+    for y in range(height):
+        for x in range(width):
+            at = (y * width + x) * channels
+            if min(data[at], data[at + 1], data[at + 2]) > 200:
+                left, top = min(left, x), min(top, y)
+                right, bottom = max(right, x), max(bottom, y)
+    if right < 0:
+        return None
+    return max(right - left + 1, bottom - top + 1) / width
+
+
+def family_fill():
+    """**نسبةُ الملء من أخوينا لا من ذوق**: ما يشغله حبرُ علامتيهما من علبتيهما.
+
+    فالسؤال الذي يُجيب عنه هذا الرقم: كم يكبر حبرُ الكلمة في مربّع الأيقونة؟ ورقمٌ
+    واحد مضبوطٌ لخطٍّ بعينه (٠٫٣٧ لـMarhey) يَقُصُّ علامةَ خطٍّ أعرضَ ويُقزّم علامةَ
+    خطٍّ أضيق. فتُقرأ **أيقونتا اقرأ واحسب المنشورتان** ويُؤخذ وسطُهما — فتبقى
+    أيقونتُنا في العائلة حضوراً وإن تبدّل رسمُها. وإن غاب المستودعان بقي الحكمُ القديم.
+    """
+    seen = {}
+    for app in ("read", "calc"):
+        path = ROOT.parent / app / "app" / "icons" / "icon-192.png"
+        if path.exists():
+            got = ink_span(path)
+            if got:
+                seen[app] = got
+    if not seen:
+        return None, {}
+    return sum(seen.values()) / len(seen), seen
 
 
 def serve(port: int):
@@ -113,6 +181,18 @@ def main():
     if not Path(CHROME).exists():
         sys.exit(f"لم يُعثر على Chrome في {CHROME}")
 
+    family, src = brand_font()
+    if not family or not src:
+        sys.exit("لم يُقرأ خطُّ العلامة من `--font-brand` في app.css")
+    fill, seen = family_fill()
+    print(f"— خطُّ العلامة من اللوح: {family} ⇐ {src}")
+    if fill:
+        print("— نسبةُ الملء من أخوينا: "
+              + " · ".join(f"{k} {v:.3f}" for k, v in seen.items())
+              + f" ⇒ {fill:.3f}")
+    else:
+        print("— أيقونتا الأخوين غيرُ متاحتين — يبقى الحكمُ القديم (٠٫٣٧ من الحيّز الآمن)")
+
     ICONS.mkdir(parents=True, exist_ok=True)
     server = serve(args.port)
     threading.Thread(target=server.serve_forever, daemon=True).start()
@@ -123,7 +203,9 @@ def main():
             out = ICONS / name
             url = (f"http://127.0.0.1:{args.port}/tools/icon.html"
                    f"?size={MASTER}&pad={pad}&round={'1' if round_ else '0'}"
-                   + (f"&bg={bg.replace('#', '%23')}" if bg else ""))
+                   f"&font={family.replace(' ', '%20')}&src={src}"
+                   + (f"&fill={fill:.4f}" if fill else "")
+                   + (f"&bg={board_color(bg).replace('#', '%23')}" if bg else ""))
             if not shoot(url, out, MASTER, profile, args.timeout):
                 print(f"  ✗ {name} — تعذّرت اللقطة")
                 continue

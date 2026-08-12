@@ -42,20 +42,25 @@
   const pad = +(q.get('pad') || 0);          // نسبة الهامش الآمن (maskable = .2)
   const round = q.get('round') !== '0';      // الأيقونة المقنَّعة تملأ المربّع كاملاً
 
-  // **بابُ المرشَّح** (الجلسة هـ٢، `FAMILY §٩.٤`: خطُّ العلامة قرارُ مراجعةٍ يُقَرّ):
-  // خطُّ العلامة اليومَ **نائبٌ مؤقت**، فيَقبل هذا الملفُّ خطّاً بالرابط ليُصَفَّ
-  // مرشَّحوه في امتحان الأيقونات (`tools/identity_row.html`). **ولا أثرَ لذلك في
-  // التوليد**: `make_icons.py` لا يمرّر هذين، فتُبنى الأيقونةُ بخطّ اللوح كما كانت.
-  const family = q.get('font');
+  // **الخطُّ يُقرأ من اللوح لا يُكتب هنا** (دَينٌ أُدّي في هـ٢): كان اسمُ الخطّ مكتوباً
+  // في هذا الملفّ ثلاث مرّات، فيومَ يُبدَّل خطُّ العلامة تبقى الأيقونةُ تُبنى بالمهجور.
+  // فصار الأصلُ `--font-brand` من `app.css` نفسِه، **ويُقبَل خطٌّ بالرابط** ليُصَفّ
+  // مرشَّحٌ لم يُحكَم له بعدُ في امتحان الأيقونات (`tools/identity_row.html`).
+  const boardFont = getComputedStyle(document.documentElement)
+    .getPropertyValue('--font-brand').split(',')[0].trim().replace(/^['"]|['"]$/g, '');
+  const family = q.get('font') || boardFont;
   const src = q.get('src');
-  if (family && src) {
+  if (q.get('font') && src) {
     document.head.append(Object.assign(document.createElement('style'), {
       textContent: `@font-face{font-family:'${family}';src:url('${src}') format('woff2');`
         + `font-weight:400 700;font-display:block}`,
     }));
-    document.documentElement.style.setProperty('--icon-font', `'${family}'`);
   }
-  const FONT = family || 'Marhey';
+  document.documentElement.style.setProperty('--icon-font', `'${family}'`);
+  const FONT = family;
+  // **نسبةُ ملء الحبر — من أخوينا لا من ذوق**: يُمرّرها `make_icons.py` مقيسةً من
+  // أيقونتَي اقرأ واحسب المنشورتين (انظر علّتها هناك). وإن غابت بقي الحكمُ القديم.
+  const fill = +(q.get('fill') || 0);
 
   document.body.style.width = `${size}px`;
   document.body.style.height = `${size}px`;
@@ -68,11 +73,34 @@
   box.style.borderRadius = round ? `${size * 0.22}px` : '0';
   // مشكولةٌ في كل مقاس (قاعدةُ اقرأ، تسري هنا): العلامةُ واحدةٌ لا تتبدّل بالمقاس،
   // والتشكيلُ في الأيقونة الصغرى زخرفةٌ لا تُقرأ — والأيقونةُ ليست مادّةَ قراءة.
-  // والنسبةُ ٠٫٣٧: الحركاتُ تعلو الكلمةَ وتسفلها فتحتاج هواءً.
-  box.style.fontSize = `${size * (1 - 2 * pad) * 0.37}px`;
+  // والنسبةُ ٠٫٣٧ **حكمٌ قديم ضُبط لحبر Marhey**، ويبقى احتياطاً إن غابت نسبةُ الملء.
+  const SAFE = size * (1 - 2 * pad);
+  box.style.fontSize = `${SAFE * 0.37}px`;
   const word = Object.assign(document.createElement('span'), { textContent: 'اُكْتُبْ' });
   box.append(word);
   document.body.append(box);
+
+  /**
+   * **مقاسُ الكلمة يُقاس بحبرها هي** (دَينٌ أُدّي في هـ٢، وقد أدّاه احسب قبلنا):
+   * رقمٌ واحد مضبوطٌ لخطٍّ بعينه يَقُصُّ علامةَ خطٍّ أعرضَ حبراً ويُقزّم علامةَ خطٍّ
+   * أضيق — وقد رأينا الاثنين في لوحة المرشّحين. فيُقاس حبرُ الكلمة نفسِها ويُضبط
+   * المقاسُ حتى **يشغل الحبرُ من علبته ما يشغله حبرُ أخوينا من علبتيهما** (`fill`).
+   * والمقيسُ **أوسعُ بُعديه**: عرضاً كان أو ارتفاعاً — فلا تُقَصّ حركةٌ عالية.
+   */
+  function fitInk() {
+    if (!fill) return;
+    try {
+      const ctx = document.createElement('canvas').getContext('2d');
+      ctx.font = `700 ${PROBE}px "${FONT}", sans-serif`;
+      const m = ctx.measureText(word.textContent);
+      const w = m.actualBoundingBoxLeft + m.actualBoundingBoxRight;
+      const h = m.actualBoundingBoxAscent + m.actualBoundingBoxDescent;
+      const span = Math.max(w, h);
+      if (span > 0 && Number.isFinite(span)) {
+        box.style.fontSize = `${PROBE * (SAFE * fill) / span}px`;
+      }
+    } catch { /* بلا canvas: الحكمُ القديم كما هو */ }
+  }
 
   // القياس نظيرُ `inkLift` في app/js/ui.js حرفاً بحرف: نصفُ فرقِ صندوق الخطّ ناقصاً
   // نصفَ فرقِ صندوق الحبر — موجبُه يعني أن الحبر يجلس تحت المركز، فالرفعة سالبُه.
@@ -90,10 +118,12 @@
       }
     } catch { /* بلا canvas: توسيطٌ هندسيّ كما كان */ }
   }
+  fitInk();
   applyLift();
   // `font-display: block` يؤخّر الرسم لا التحميل: القياسُ قبل وصول الخطّ قياسُ الاحتياطيّ.
   // فيُعاد بعد وصوله — و`--virtual-time-budget` في make_icons.py يضمن أن اللقطة بعده.
-  document.fonts?.ready.then(applyLift);
+  // **والترتيبُ لازم**: الرفعةُ نسبةٌ من المقاس (`em`)، فتُقاس بعد ضبطه لا قبله.
+  document.fonts?.ready.then(() => { fitInk(); applyLift(); });
 </script>
 </body>
 </html>

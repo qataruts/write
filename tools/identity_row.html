@@ -48,14 +48,19 @@
   try {
     const doors = await (await fetch('/__doors.json')).json();
     const fonts = doors.fonts;
+    // **قبل الحكم يُصَفّ المرشَّحون، وبعده يُصَفّ الملفُّ المنشور وحدَه**: الامتحانُ
+    // سؤالُه «أتُعرَف أيقونتُنا بين أخواتها؟»، وجوابُه بعد الحكم يكون عن الأيقونة التي
+    // على جهاز الطفل لا عن رسمٍ يُحاكيها. والحكمُ يصل في بيان الصفحة لا يُكتب هنا.
+    const ruled = doors.brand.ruled;
     const items = [
       ...doors.icon.row.map((r) => ({ kind: 'file', src: r.iconUrl, name: r.label, sub: 'أيقونتُه المنشورة' })),
-      { kind: 'file', src: '/app/icons/icon-192.png', name: 'اكتب — اليوم', sub: 'النائبُ: Marhey' },
-      ...doors.brand.candidates.map((c) => ({
+      { kind: 'file', src: '/app/icons/icon-192.png', name: 'اكتب',
+        sub: ruled ? `المعتمَد: ${ruled}` : 'النائبُ اليوم' },
+      ...(ruled ? [] : doors.brand.candidates.map((c) => ({
         kind: 'live', name: `اكتب — ${c.family}`, sub: 'مرشَّحٌ يُرسَم حيّاً', slug: c.slug, family: c.family,
         src: (size) => `/tools/icon.html?size=${size}&pad=0&round=1`
           + `&font=${encodeURIComponent(c.slug)}&src=${encodeURIComponent(fonts[c.slug].base + fonts[c.slug].best)}`,
-      })),
+      }))),
     ];
 
     const frames = [];

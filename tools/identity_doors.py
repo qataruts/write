@@ -365,6 +365,13 @@ def payload_for(data: dict, fonts: dict, siblings: dict, specimens: list) -> tup
             row["iconUrl"] = route
     served["fonts"] = table
     served["specimens"] = specimens
+    # **الحكمُ يصل الصفحةَ بياناً لا يُكتب فيها**: امتحانُ الصفّ يصفّ المرشَّحين قبله
+    # والملفَّ المنشور بعده، فلا تعرض لوحةٌ بعد الحكم رسماً يحاكي ما صار على الجهاز.
+    said = verdict("العلامة")
+    # واسمُ الخطّ يُنتزَع من نصّ الحكم بمقابلته بالمرشّحين — فلا يُكتب في الصفحة تاريخٌ
+    # ولا سطرُ حكمٍ كاملاً تحت أيقونة.
+    named = next((c["family"] for c in data["brand"]["candidates"] if c["family"] in said), said)
+    served["brand"]["ruled"] = "" if said == WAITING else named
     return json.dumps(served, ensure_ascii=False).encode("utf-8"), extra
 
 
@@ -502,6 +509,16 @@ def claim_faults(data: dict, measures: dict) -> list:
 
 # ————— ٦) اللقطات —————
 
+def icon_fill():
+    """نسبةُ ملء حبر الأيقونة — تُقرأ من `make_icons.py` نفسِه، فلا تُحسب مرّتين."""
+    try:
+        import make_icons
+        fill, seen = make_icons.family_fill()
+        return (fill, seen) if fill else None
+    except Exception:
+        return None
+
+
 def shot_jobs(data: dict, siblings: dict) -> list:
     """كلُّ لقطةٍ تعرضها اللوحة: (اسمُها · رابطُها · مقاسُها · ليلٌ؟ · عنوانُها)."""
     jobs = [
@@ -617,27 +634,60 @@ def verdict(key: str) -> str:
     return found.group(1).strip() if found else WAITING
 
 
+DATE_RE = re.compile(r"([٠-٩]{1,2}\s+\S+\s+٢٠٢٦)")
+
+
+def verdict_date(key: str) -> str:
+    """تاريخُ الحكم كما كتبه المالك في بابه — يُقرأ ولا يُكتب في المولّد."""
+    found = DATE_RE.search(read_kept(key))
+    return found.group(1) if found else "—"
+
+
 def door_state(key: str) -> str:
-    return "⏳ معروضٌ — والحكمُ منتظَر" if verdict(key) == WAITING else f"✅ **{verdict(key)}**"
+    """حالُ البابِ في عنوانه: كلمةٌ وتاريخ — ونصُّ الحكم كاملاً في بابه المحفوظ.
 
-
-def brand_hardcoded() -> list:
-    """مواضعُ اسم خطّ العلامة **مكتوبةً بيد** في الشجرة — تُجرَد ولا تُعَدّ بيد.
-
-    فيومَ يحكم المالك بخطٍّ لن يكفيَ تبديلُ رمزٍ في اللوح: هذه المواضعُ تبقى تحمل
-    اسمَ النائب، وبعضُها **حرّاسٌ** يصيرون يحرسون خطّاً مهجوراً ويمرّون خضراً
-    (وهو دَينٌ أدّاه احسب في جلسته بعينه). فيُعلَن العددُ محسوباً قبل الحكم.
+    (وقد كان العنوانُ يحمل سطرَ الحكم كلَّه فيمتدّ سطراً ونصفاً حين يكتب المالكُ
+    ثلاثةَ أحكامٍ في بابٍ واحد — والعناوينُ تُقرأ لا تُدرَس.)
     """
-    family = "Marhey"
+    return ("⏳ معروضٌ — والحكمُ منتظَر" if verdict(key) == WAITING
+            else f"✅ **مُقَرّ** ({verdict_date(key)})")
+
+
+def FAMILY() -> str:
+    """عائلةُ خطّ العلامة **من اللوح** — لا تُكتب في هذه الأداة ولا في لوحاتها."""
+    found = re.search(r"--font-brand:\s*([^;,]+)", P.CSS.read_text(encoding="utf-8"))
+    return found.group(1).strip().strip("'\"") if found else ""
+
+
+def strip_comments(text: str) -> str:
+    """نصُّ الشيفرة مجرَّداً من التعليقات — فلا يُعَدّ شرحُ القرار من آثاره.
+
+    (سنّةُ `test_pen.mjs` في حارس الخصوصية: يُقرأ ما يعمل لا ما يُشرَح.)
+    """
+    text = re.sub(r"/\*[\s\S]*?\*/", " ", text)
+    text = re.sub(r"<!--[\s\S]*?-->", " ", text)
+    text = re.sub(r"(?m)^\s*(//|#)[^\n]*", " ", text)
+    return re.sub(r'(?m)"""[\s\S]*?"""', " ", text)
+
+
+def brand_places(family: str) -> list:
+    """مواضعُ اسم خطٍّ **مكتوبةً بيدٍ في شيفرةٍ تعمل** — تُجرَد ولا تُعَدّ بيد.
+
+    فرقمٌ واحد مكتوبٌ في موضعين لا يُبدَّل معاً يوماً ما: يومَ حُكم لخطٍّ صار كلُّ
+    موضعٍ يحمل اسمَ النائب **حارساً يحرس مهجوراً** أو مصيّراً يبني بالمهجور. فيُجرَد
+    العددُ محسوباً بعد الحكم كما جُرِد قبله — والمعفى **اللوحُ نفسُه**: هناك يُكتب
+    اسمُ الخطّ مرّةً واحدة بحقّ (وجهُه ورمزُه)، ومنه يقرأ الجميع.
+    """
     places = []
     for path in sorted(set(list(APP.rglob("*.css")) + list(APP.rglob("*.js"))
-                              + list(TOOLS.glob("*.html")) + list(TOOLS.glob("*.py")))):
+                           + list(TOOLS.glob("*.html")) + list(TOOLS.glob("*.py")))):
         if not path.exists() or path.name in ("identity_word.html", "identity_fonts.html",
                                               "identity_row.html", "identity_doors.py",
-                                              "doors.json"):
+                                              "identity_panel.py", "doors.json"):
             continue
-        for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
-            if family in line and not line.lstrip().startswith(("*", "//", "<!--")):
+        body = strip_comments(path.read_text(encoding="utf-8"))
+        for number, line in enumerate(body.splitlines(), 1):
+            if family in line:
                 places.append(f"`{path.relative_to(ROOT)}:{AR(number)}`")
     return places
 
@@ -696,8 +746,9 @@ def panel_text(data: dict, measures: dict, fonts: dict, siblings: dict,
     add("ليلُ الهوية **إسقاطٌ لا اختيار**: حكمُ المالك وقع على لوح النهار، فاشتُقّ الليلُ")
     add("بقاعدتين منشورتين (`identity_panel.py §٣ج`) — الأرضيةُ ليلُ اقرأ مضروبٌ إشباعُه في")
     add("معامل الإزاحة نفسِه والإضاءةُ لا تُمَسّ، والمراحلُ لكلٍّ رفعةُ اقرأ لها بعينها ثم")
-    add("**أصغرُ رفعةٍ تبلغ AA** على ورقنا الليليّ. **وهو مطبَّقٌ في اللوح منذ هـ١ وعينُ")
-    add("المالك لم ترَه** — فهذه لقطاتُه:")
+    add("**أصغرُ رفعةٍ تبلغ AA** على ورقنا الليليّ. **وهو مطبَّقٌ في اللوح منذ هـ١**، وهذه")
+    add("لقطاتُه — عُرِضت لعين المالك في هـ٢ " + ("**فأقرّها**:" if verdict("الليل") != WAITING
+        else "وحكمُه منتظَر:"))
     add("")
     lines.extend(shot_table([(name, title) for name, _, title in night_jobs()]))
     add("")
@@ -708,8 +759,12 @@ def panel_text(data: dict, measures: dict, fonts: dict, siblings: dict,
             f" {' · '.join(f'<code>{v}</code>' for v in seen)} — وهو ورقُ الليل في اللوح"
             f" <code>{want}</code> بعينه. فلو غمّق المتصفّحُ الصورةَ من عنده لافترق الرقمان.")
         add("")
-    add("**والمطلوب سطرٌ واحد**: إن رضيت عينُك وجهَ الليل فالحكمُ `مُقَرّ`؛ وإن رأيتَ فيه")
-    add("ما يُصلَح فالإصلاحُ في القاعدة لا في لونٍ يُكتب بيد (`--guide` مثلاً، §٥ من لوحة اللون).")
+    if verdict("الليل") == WAITING:
+        add("**والمطلوب سطرٌ واحد**: إن رضيت عينُك وجهَ الليل فالحكمُ `مُقَرّ`؛ وإن رأيتَ فيه")
+        add("ما يُصلَح فالإصلاحُ في القاعدة لا في لونٍ يُكتب بيد (`--guide` مثلاً، §٥ من لوحة اللون).")
+    else:
+        add("**ولم يُمَسّ بعد الإقرار حرف**: اللقطاتُ أعلاه هي اللوحُ نفسُه كما هو —")
+        add("فالإقرارُ شهادةٌ على المطبَّق لا أمرٌ بتبديله.")
     add("")
     head, tail = kept_block("الليل")
     add(head)
@@ -729,11 +784,32 @@ def panel_text(data: dict, measures: dict, fonts: dict, siblings: dict,
     add("")
     add("\n".join(data["icon"]["note"]))
     add("")
-    add("**وما تُريه اللقطة**: اللونُ فرّق بالفعل — نِيليٌّ بين برتقاليٍّ وفيروزيّ، وهو ثمرةُ")
-    add("هـ١. **والرسمُ لم يفترق بعدُ**: أيقونتُنا اليومَ وأيقونةُ اقرأ **بخطٍّ واحد**")
-    add("(Marhey)، فالفارقُ بينهما لونٌ وحدَه — وذلك عينُ ما رفضه الميثاق. فالبابُ الثاني")
-    add("**معلَّقٌ على الرابع**: يومَ يُحكَم لخطٍّ تُعاد الأيقوناتُ الأربع به.")
-    if extra.get("fit"):
+    if verdict("العلامة") == WAITING:
+        add("**وما تُريه اللقطة**: اللونُ فرّق بالفعل — نِيليٌّ بين برتقاليٍّ وفيروزيّ، وهو ثمرةُ")
+        add("هـ١. **والرسمُ لم يفترق بعدُ**: أيقونتُنا اليومَ وأيقونةُ اقرأ **بخطٍّ واحد**")
+        add("(Marhey)، فالفارقُ بينهما لونٌ وحدَه — وذلك عينُ ما رفضه الميثاق. فالبابُ الثاني")
+        add("**معلَّقٌ على الرابع**: يومَ يُحكَم لخطٍّ تُعاد الأيقوناتُ الأربع به.")
+    else:
+        add("**وما تُريه اللقطة بعد التنفيذ**: افترقت الثلاثُ **لوناً ورسماً معاً** —")
+        add(f"نِيليٌّ قلميّ (`{FAMILY()}`) بين برتقاليٍّ مدوّرٍ وفيروزيٍّ هندسيّ. وكان الفارقُ")
+        add("قبل هذه الجلسة **لوناً وحدَه** لأنّ أيقونتنا وأيقونةَ اقرأ بخطٍّ واحد، وذلك")
+        add("عينُ ما رفضه الميثاق. **والأيقوناتُ الأربع أُعيدت** بالخطّ المُقَرّ (`make_icons.py`).")
+    if verdict("العلامة") != WAITING and extra.get("fill"):
+        fill, seen = extra["fill"]
+        add("")
+        add("**ودَينُ مقاس الحبر أُدِّي** (وقد أدّاه احسب في جلسته): كان مقاسُ الكلمة في")
+        add("`icon.html` **رقماً ضُبط لحبر Marhey** (٠٫٣٧ من الحيّز الآمن) — يَقُصُّ علامةَ")
+        add("خطٍّ أعرضَ حبراً ويُقزّم علامةَ خطٍّ أضيق، وقد رأينا الاثنين في لوحة المرشّحين.")
+        add("فصار **يُقاس بحبر الكلمة نفسِها**: يُرسَم الحبرُ ويُقاس أوسعُ بُعديه، ثم يُضبط")
+        add("المقاسُ حتى يشغل من علبته ما يشغله حبرُ أخوينا من علبتيهما — **ونسبتُهما مقروءةٌ")
+        add("من أيقونتيهما المنشورتين لا مكتوبة**:")
+        add("")
+        add("| الأيقونة | ما يشغله حبرُها من علبتها |")
+        add("|---|---|")
+        for app, got in seen.items():
+            add(f"| {'اقرأ' if app == 'read' else 'احسب'} | {got:.3f} |")
+        add(f"| **وسطُهما — وهو ما تلبسه أيقونتُنا** | **{fill:.3f}** |")
+    elif extra.get("fit"):
         add("")
         add("**وما تُريه اللقطةُ بالعين**: حبرُ الرقعة أرفعُ وأصغرُ في علبته، فيضعف في")
         add("المقاس الصغير (٧٦) حيث تُرى الأيقونةُ في مجلدٍ أو حافظة — وذلك بابُ الدَّين")
@@ -815,8 +891,12 @@ def panel_text(data: dict, measures: dict, fonts: dict, siblings: dict,
     add(f"## ٤. العلامة — {door_state('العلامة')}")
     add("")
     add("«لكل تطبيقٍ رسمُ علامته وخطُّها قرارَ مراجعةٍ يُقَرّ — **وخطُّ Marhey لعلامة اقرأ")
-    add("وحدَها فلا يُورَّث بالنسخ**» (`FAMILY §٩.٤`). وعلامتُنا اليومَ بخطّه، فهو **نائبٌ")
-    add("مؤقت معلَن** لا قرارَ لوحٍ اتُّخذ.")
+    add("وحدَها فلا يُورَّث بالنسخ**» (`FAMILY §٩.٤`).")
+    if verdict("العلامة") == WAITING:
+        add("وعلامتُنا اليومَ بخطّه، فهو **نائبٌ مؤقت معلَن** لا قرارَ لوحٍ اتُّخذ.")
+    else:
+        add(f"**وعلامتُنا اليومَ بخطّ `{FAMILY()}`** بحكم المالك — والنائبُ أُسقط من اللوح")
+        add("ومن الشجرة ومن قشرة العامل، فلا يبقى على جهاز طفلٍ وزنٌ ميتٌ لعلامة أخينا.")
     add("")
     add(f'<a href="{REL}/fonts-board.png"><img src="{REL}/fonts-board.png" width="900"'
         ' alt="لوحةُ خطّ العلامة"></a>')
@@ -889,16 +969,36 @@ def panel_text(data: dict, measures: dict, fonts: dict, siblings: dict,
     add("الذاكرة. **ويُسقَط الخاسرون بعد الحكم** (سنّةُ اقرأ في لوحة خطّها: لا وزنَ ميتاً")
     add("يُصان)، ويبقى المُقَرُّ وحدَه في `app/fonts/`.")
     add("")
-    add("**ودَينُ التنفيذ معلَنٌ ومعدود**: اسمُ خطّ العلامة مكتوبٌ بيدٍ في")
-    add(f"**{AR(len(extra.get('hardcoded', [])))}** موضعاً في الشجرة — منها حرّاسٌ يصيرون")
-    add("يحرسون خطّاً مهجوراً ويمرّون خضراً إن نُسوا:")
-    add("")
-    add(" · ".join(extra.get("hardcoded", [])) or "—")
-    add("")
-    add("فيومَ يحكم المالك: يُجلَب الخطُّ إلى `app/fonts/`، ويُبدَّل `--font-brand` وقاعدةُ")
-    add("`.brand` (وهي اليومَ تكتب الاسمَ بيدها لا تقرأ الرمز)، وتُعاد الأيقوناتُ الأربع،")
-    add("**ويُسقَط ملفُّ النائب من الشجرة ومن قشرة `sw`** (رفعةُ نسخة) — ويحرس ذلك كلَّه")
-    add("`test_identity.mjs` (§٥): لا حِملَ لخطّ أخينا في شجرتنا بعد الحكم.")
+    places = extra.get("hardcoded", [])
+    if verdict("العلامة") == WAITING:
+        add("**ودَينُ التنفيذ معلَنٌ ومعدود**: اسمُ خطّ العلامة مكتوبٌ بيدٍ في")
+        add(f"**{AR(len(places))}** موضعاً في الشجرة — منها حرّاسٌ يصيرون")
+        add("يحرسون خطّاً مهجوراً ويمرّون خضراً إن نُسوا:")
+        add("")
+        add(" · ".join(places) or "—")
+        add("")
+        add("فيومَ يحكم المالك: يُجلَب الخطُّ إلى `app/fonts/`، ويُبدَّل `--font-brand` وقاعدةُ")
+        add("`.brand` (وهي اليومَ تكتب الاسمَ بيدها لا تقرأ الرمز)، وتُعاد الأيقوناتُ الأربع،")
+        add("**ويُسقَط ملفُّ النائب من الشجرة ومن قشرة `sw`** (رفعةُ نسخة) — ويحرس ذلك كلَّه")
+        add("`test_identity.mjs` (§٥): لا حِملَ لخطّ أخينا في شجرتنا بعد الحكم.")
+    else:
+        add("**وما نُفِّذ بالحكم** (والدَّينُ الذي كان معلَناً قبله أُدِّي معه):")
+        add("")
+        add(f"1. ملفّا الخطّ في `app/fonts/` **محلّيَّين لا مورداً خارجياً** (ووزناه مرسومان")
+        add("   لا محورَ فيهما، فلكلٍّ ملفُّه ولا يُصطنع غِلَظٌ بتشويه رسم)، وفي قشرة `sw`")
+        add("   برفعةِ نسخة — **وملفُّ النائب أُسقط منهما معاً**.")
+        add("2. `--font-brand` في اللوح، **وقاعدةُ `.brand` صارت تقرأ الرمز** بعد أن كانت")
+        add("   تكتب الاسمَ بيدها، **و`icon.html` يقرأ الخطَّ من اللوح** بعد أن كتبه ثلاثاً.")
+        add("3. **وحارسان كانا يحرسان اسماً**: `browser_test.html` صار يسأل الشاشةَ «أوصل")
+        add("   ما يعلنه `--font-brand` إلى الكلمة فعلاً؟»، و`cdn_check.py` يجرد ملفَّ الخطّ")
+        add("   من اللوح — ولولا ذلك لمرّا أخضرين على علامةٍ بلا خطّها.")
+        add("4. والأيقوناتُ الأربع أُعيدت بالخطّ المُقَرّ.")
+        add("")
+        add(f"**والجردُ يشهد**: اسمُ الخطّ لم يبقَ مكتوباً بيدٍ في شيفرةٍ تعمل إلا في")
+        add(f"**{AR(len(places))}** مواضعَ، كلُّها **في اللوح نفسِه** (وجهاه وسطرُ رمزه) — ومنه")
+        add("يقرؤه الجميع:")
+        add("")
+        add(" · ".join(places) or "—")
     add("")
     head, tail = kept_block("العلامة")
     add(head)
@@ -909,7 +1009,12 @@ def panel_text(data: dict, measures: dict, fonts: dict, siblings: dict,
     add("> «اِقْرَأْ» لأن كسرتَها تحتها، **وألفُ «اُكْتُبْ» ضمّتُها فوقها** فيحجب الطائرُ")
     add("> التشكيلَ الذي هو تمايزُ العلامة. ولم يُعرَض له تركيبٌ هنا: **موضعُه تابعٌ لرسم")
     add("> الخطّ** — فارتفاعُ الضمّة وميلُها يختلفان من مرشَّحٍ إلى مرشَّح، ورسمُ تركيبٍ")
-    add("> قبل الحكم رسمٌ يُعاد. فيُفتَح بعد حكم الخطّ، ومعه صفحاتُ الترحيب (الجلسة ١١).")
+    if verdict("العلامة") == WAITING:
+        add("> قبل الحكم رسمٌ يُعاد. فيُفتَح بعد حكم الخطّ، ومعه صفحاتُ الترحيب (الجلسة ١١).")
+    else:
+        add(f"> قبل الحكم رسمٌ يُعاد. **وقد حُكم للخطّ** (`{FAMILY()}`)، فصار موضعُ الطائر")
+        add("> قابلاً للرسم على ضمّةٍ معلومة — **ويُفتَح مع صفحات الترحيب** (الجلسة ١١)،")
+        add("> فهي أوّلُ موضعٍ تُرى فيه العلامةُ كبيرةً بحجمٍ يسع طائراً.")
     add("")
 
     # ————— الباب ٥: الحارس —————
@@ -936,10 +1041,17 @@ def panel_text(data: dict, measures: dict, fonts: dict, siblings: dict,
     add("| الباب | الحال | التاريخ |")
     add("|---|---|---|")
     add("| اللوح | ✅ **`indigo / shift`** — حكمُ المالك على لوحةٍ مصيَّرة، ومطبَّق | ١٢ أغسطس ٢٠٢٦ |")
-    add(f"| وجهُ الليل | {door_state('الليل')} — مشتقٌّ ومطبَّق، ولقطاتُه معروضة | — |")
-    add(f"| الأيقونة | {door_state('الأيقونة')} — امتحانُ الصفّ لقطةً | — |")
-    add(f"| الاستعارة | {door_state('الاستعارة')} — ثلاثةُ أبوابٍ مصيَّرة | — |")
-    add(f"| العلامة | {door_state('العلامة')} — {AR(len(data['brand']['candidates']))} خطوطٍ مصيَّرة ومقيسة" f" من {AR(len(data['brand']['candidates']) + len(data['brand']['dropped']))} جُرِّبت | — |")
+    add(f"| وجهُ الليل | {door_state('الليل')} — مشتقٌّ ومطبَّق، ولقطاتُه معروضة"
+        f" | {verdict_date('الليل')} |")
+    add(f"| الأيقونة | {door_state('الأيقونة')} — امتحانُ الصفّ لقطةً"
+        f" | {verdict_date('الأيقونة')} |")
+    add(f"| الاستعارة | {door_state('الاستعارة')} — ثلاثةُ أبوابٍ مصيَّرة"
+        f" | {verdict_date('الاستعارة')} |")
+    count = len(data["brand"]["candidates"])
+    tried = count + len(data["brand"]["dropped"])
+    shown = "خطّان مصيَّران ومقيسان" if count == 2 else f"{AR(count)} خطوطٍ مصيَّرة ومقيسة"
+    add(f"| العلامة | {door_state('العلامة')} — {shown} من {AR(tried)} جُرِّبت"
+        f" | {verdict_date('العلامة')} |")
     add("| حارسُ الهوية | ✅ قائمٌ ومجرَّبٌ سالباً، وفي السَّوقة بالجرد | ١٢ أغسطس ٢٠٢٦ |")
     return "\n".join(lines) + "\n"
 
@@ -1036,9 +1148,11 @@ def self_test() -> int:
         ok(stand_in == siblings["read"]["family"],
            f"حكمُ العلامة منتظَر ⇐ اللوحُ على نائبه المعلَن «{stand_in}»")
     else:
-        want = next((c for c in data["brand"]["candidates"] if c["family"] == said
-                     or c["id"] == said), None)
-        ok(want is not None, f"الحكمُ «{said}» مرشَّحٌ معروف")
+        # **الحكمُ سطرٌ يكتبه المالك بيده**، فقد يزيد فيه تاريخاً أو تعليلاً — والمقروءُ
+        # منه اسمُ المرشَّح الذي يذكره، لا مطابقةُ السطر كلِّه لاسم خطّ.
+        want = next((c for c in data["brand"]["candidates"]
+                     if c["family"] in said or c["id"] in said.split()), None)
+        ok(want is not None, f"حكمُ العلامة «{said.splitlines()[0]}» يسمّي مرشَّحاً معروفاً")
         ok(want is not None and stand_in == want["family"],
            f"واللوحُ يلبسه: `--font-brand` = «{stand_in}»")
     for key in DOOR_KEYS:
@@ -1067,7 +1181,8 @@ def self_test() -> int:
 
     print("\n— الصفحةُ مولَّدةٌ لا تُحرَّر بيد —")
     if PANEL.exists() and MEASURES.exists():
-        extra = {"hardcoded": brand_hardcoded(), "fit": measures.get("fit"),
+        extra = {"hardcoded": brand_places(FAMILY()), "fit": measures.get("fit"),
+                 "fill": icon_fill(),
                  "night_paper": night_paper_ok() if (OUT / "night-map.png").exists() else None}
         remade = panel_text(data, measures, fonts, siblings, tokens, extra)
         ok(panel == remade, "ما على القرص عينُ ما يخرج من المولّد")
@@ -1157,7 +1272,8 @@ def run(args) -> int:
 
     if not args.only:
         tokens = P.root_tokens(P.CSS.read_text(encoding="utf-8"))
-        extra = {"hardcoded": brand_hardcoded(), "fit": measures.get("fit"),
+        extra = {"hardcoded": brand_places(FAMILY()), "fit": measures.get("fit"),
+                 "fill": icon_fill(),
                  "night_paper": night_paper_ok() if (OUT / "night-map.png").exists() else None}
         PANEL.write_text(panel_text(data, measures, fonts, siblings, tokens, extra), encoding="utf-8")
         print(f"\nالصفحة: {PANEL.relative_to(ROOT)}")

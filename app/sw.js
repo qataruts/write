@@ -43,7 +43,9 @@
 // تصل جهازَ الطفل معاً، وثلاثُ ترقياتٍ متتابعة تُعيد بناءَ القشرة ثلاثاً بلا فائدة.
 // v8: **الجلسة ٤ج — قناةُ الصوت الواحدة** (`audio.js`): التتابعُ ينتظر `ended` لا مهلةً،
 // والتزاحمُ طابورٌ لا إسكاتٌ أسرع. ملفُّ قشرةٍ واحدٌ تبدّل، ولا وحدةَ زِيدت إلى `SHELL`.
-const VERSION = 'v10';
+// **و`v11` (الجلسة هـ٢)**: خطُّ العلامة صار `Aref Ruqaa` بحكم المالك — ملفّاه في القشرة
+// **وملفُّ Marhey أُسقط منها**، فلا يبقى على جهاز طفلٍ وزنٌ ميتٌ لعلامةِ أخينا.
+const VERSION = 'v11';
 const SHELL_CACHE = `uktub-shell-${VERSION}`;
 const AUDIO_CACHE = 'uktub-audio';          // ثابتٌ عمداً — لا يحمل VERSION
 const KEEP = [SHELL_CACHE, AUDIO_CACHE];
@@ -57,7 +59,8 @@ const SHELL = [
   'fonts/NotoNaskhArabic-latin.woff2',
   'fonts/BalooBhaijaan2-arabic.woff2',
   'fonts/BalooBhaijaan2-latin.woff2',
-  'fonts/Marhey-arabic.woff2',
+  'fonts/ArefRuqaa-arabic-400.woff2',
+  'fonts/ArefRuqaa-arabic-700.woff2',
   'js/audio.js',
   'js/curriculum.js',
   'js/gate.js',

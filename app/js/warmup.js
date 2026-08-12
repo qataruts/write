@@ -26,6 +26,7 @@ import { penSurface } from './pen.js';
 import { starsForReview } from './review.js';
 import {
   h, icon, go, arNum, starsRow, topbar, brandMark, mascot, cheer, faceEl, nodeTitle,
+  traceFace,
 } from './ui.js';
 
 /** محطةُ التهيئة بجزئها — من الرحلة نفسِها، فلا يُكتب معرّفُ محطةٍ بيد. */
@@ -127,6 +128,9 @@ export function renderWarmup(part) {
    * إلا مستوفىً)، والأخطاءُ في الطريق تُقاس ولا تُعاقَب.
    */
   function finish() {
+    // **أثرُ الطفل يُنسَخ قبل أن يُطوى اللوح**: `releaseWarmup` تُطلق اللوحَ وتمحو
+    // مقبضَه، ولوحُ الشكل يُستبدَل بالاحتفال بعده — فما لم يُؤخذ الآن ضاع.
+    const trace = live?.ink() ?? [];
     releaseWarmup();
     state.done = true;
     const stars = starsForReview(state.faults, shapes.length);
@@ -135,7 +139,10 @@ export function renderWarmup(part) {
     hint.textContent = '';
     board.replaceChildren(h('div', { class: 'celebrate' },
       mascot('mascot mascot--cheer'),
-      faceEl(icon('pen'), 'celebrate-face', 'div'),
+      // **الميداليةُ تحمل ما كتبه هو** (حكمُ المالك، `REVIEW_IDENTITY.md §٣ج`) — أثرَ
+      // آخر شكلٍ أتمّه بيده. وإن خلت يدُه من أثرٍ (لوحٌ لم يُكتب عليه) عادت أيقونةُ
+      // القلم كما كانت، فلا يبقى القرصُ فارغاً.
+      trace.length ? traceFace(trace) : faceEl(icon('pen'), 'celebrate-face', 'div'),
       h('h2', {}, ...cheer('أَحْسَنْتَ')),
       starsRow(stars, 'big-stars'),
       h('p', { class: 'hint' }, `${nodeTitle(node)} — ${

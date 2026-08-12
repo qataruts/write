@@ -47,11 +47,27 @@
 }
 
 /* خطّ العلامة «اُكْتُبْ» حصراً — لا يُكتب به نصٌّ ولا مادّةُ قراءة (DESIGN §٣).
-   مقطع العربية وحدَه: العلامةُ ستةُ حروفٍ عربية، ولا لاتينيّ فيها. */
+   مقطع العربية وحدَه: العلامةُ ستةُ حروفٍ عربية، ولا لاتينيّ فيها.
+
+   **وهو `Aref Ruqaa` بحكم المالك** (الجلسة هـ٢، `docs/REVIEW_IDENTITY.md §٤`): قلمُ
+   الخطّاط — استعارةُ التطبيق البطلة مرسومةً في الخطّ نفسِه. **وMarhey أُسقط**: خطُّ
+   علامة اقرأ لا يُورَّث بالنسخ (`FAMILY §٩.٤`)، ولا يبقى له ملفٌّ ولا سطرٌ في قشرة
+   العامل — يحرسه `tools/test_identity.mjs`. **ووزناه مرسومان لا محورَ فيهما**، فلكلٍّ
+   ملفُّه: الغليظُ للعلامة والأيقونة، والعاديُّ رفيقُه فلا يُصطنع غِلَظٌ بتشويه رسم. */
 @font-face {
-  font-family: 'Marhey';
-  src: url('../fonts/Marhey-arabic.woff2') format('woff2');
-  font-weight: 400 700;
+  font-family: 'Aref Ruqaa';
+  src: url('../fonts/ArefRuqaa-arabic-400.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+  unicode-range: U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0897-08E1,
+    U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74,
+    U+FE76-FEFC;
+}
+
+@font-face {
+  font-family: 'Aref Ruqaa';
+  src: url('../fonts/ArefRuqaa-arabic-700.woff2') format('woff2');
+  font-weight: 700;
   font-display: swap;
   unicode-range: U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0897-08E1,
     U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74,
@@ -107,7 +123,7 @@
 
   --font-ui: 'Baloo Bhaijaan 2', 'Noto Naskh Arabic', 'Geeza Pro', system-ui, sans-serif;
   --font-letter: 'Noto Naskh Arabic', 'Geeza Pro', 'Traditional Arabic', serif;
-  --font-brand: 'Marhey', 'Baloo Bhaijaan 2', 'Geeza Pro', sans-serif;
+  --font-brand: 'Aref Ruqaa', 'Baloo Bhaijaan 2', 'Geeza Pro', sans-serif;
 
   --accent: var(--accent-letters);
 }
@@ -553,7 +569,9 @@ button {
   display: inline-flex;
   align-items: baseline;
   margin: 0;
-  font-family: 'Marhey', var(--font-ui);
+  /* **الرمزُ لا الاسم** (دَينٌ أُدّي في هـ٢): كانت هذه القاعدةُ تكتب اسمَ الخطّ بيدها،
+     فيومَ يُبدَّل خطُّ العلامة تبقى تطلب المهجورَ وتسقط إلى الاحتياطيّ صامتة. */
+  font-family: var(--font-brand);
   font-weight: 700;
   font-size: 1.6rem;
   line-height: 1.9;               /* المشكولُ يحتاج هواءً فوقه وتحته (DESIGN §٣) */
@@ -905,6 +923,13 @@ button {
 }
 
 /* «ليس بعدُ»: وجهٌ هادئ لا احتفال — لا عقاب في الإخفاق ولا حفاوة به */
+/* **أثرُ الطفل في ميدالية الختام** (حكمُ المالك، الجلسة هـ٢): يملأ القرصَ إلا هامشاً
+   مرسوماً في إطار الرسم نفسِه، وحبرُه حبرُ نصّ الميدالية (`--on-accent`). */
+.celebrate-face .trace-ink {
+  width: 100%;
+  height: 100%;
+}
+
 .celebrate--again .celebrate-face {
   background: color-mix(in srgb, var(--accent) 18%, var(--mix));
   color: var(--ink);

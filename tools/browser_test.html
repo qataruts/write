@@ -143,8 +143,14 @@ const send = () => fetch('/result', { method: 'POST', body: JSON.stringify(resul
 
     const brand = doc.querySelector('.brand .brand-word');
     ok(brand && brand.textContent === 'اُكْتُبْ', 'وعلامةُ «اُكْتُبْ» في ترويستها');
+    // **يُسأل اللوحُ لا الذاكرة** (دَينٌ أُدّي في هـ٢): كان اسمُ الخطّ مكتوباً هنا، فيومَ
+    // يُبدَّل خطُّ العلامة يصير الحارسُ يحرس مهجوراً ويمرّ أخضرَ على علامةٍ بلا خطّها.
+    // فالمطلوبُ أن يصل **ما يعلنه `--font-brand`** إلى الكلمة فعلاً على الشاشة.
     const family = brand ? win.getComputedStyle(brand.parentElement).fontFamily : '';
-    ok(/Marhey/.test(family), `وبخطّ العلامة لا خطّ النظام (${family.split(',')[0]})`);
+    const declared = win.getComputedStyle(doc.documentElement)
+      .getPropertyValue('--font-brand').split(',')[0].trim().replace(/^['"]|['"]$/g, '');
+    ok(Boolean(declared) && family.split(',')[0].replace(/^['"]|['"]$/g, '') === declared,
+      `وبخطّ العلامة الذي يعلنه اللوح لا خطّ النظام (${declared} ⇐ ${family.split(',')[0]})`);
 
     // ————— ٢) الخريطةُ الفارغة تقول إنّها فارغة —————
     const notes = [...doc.querySelectorAll('main.map .note')].map((n) => n.textContent);

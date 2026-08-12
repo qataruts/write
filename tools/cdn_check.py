@@ -51,6 +51,7 @@ GitHub Pages** — وهي مئةُ غيغابايت في الشهر، وجهاز
 """
 
 import argparse
+import re
 import json
 import random
 import subprocess
@@ -131,9 +132,23 @@ def shell_sample() -> list:
     فملفٌّ يُضاف غداً (فهرسُ الرموز، بيانُ البصمات) يدخل العيّنةَ يومَ يظهر، وملفٌّ
     لم يُنشأ بعدُ لا يُطلَب من الشبكة فيُرَدّ ٤٠٤ فيبدو عيباً وليس بعيب.
     """
-    want = ("css/app.css", "js/main.js", "js/curriculum.js",
-            "fonts/NotoNaskhArabic-arabic.woff2", "fonts/Marhey-arabic.woff2",
-            "emoji/index.json", "icons/icon-192.png", "audio/versions.json")
+    want = ["css/app.css", "js/main.js", "js/curriculum.js",
+            "fonts/NotoNaskhArabic-arabic.woff2",
+            "emoji/index.json", "icons/icon-192.png", "audio/versions.json"]
+    # **وخطُّ العلامة يُجرَد من اللوح لا يُكتب باسمه** (هـ٢): كان `Marhey` مكتوباً هنا،
+    # فلمّا بُدِّل خطُّ العلامة صار سطرُ العيّنة يطلب ملفّاً لا وجودَ له — يسقط صامتاً
+    # لأنّ الشرطَ `exists()`. فالمقروءُ الآن ما يعلنه `--font-brand` في `app.css`.
+    css = (ROOT / "app" / "css" / "app.css").read_text(encoding="utf-8")
+    brand = re.search(r"--font-brand:\s*([^;,]+)", css)
+    if brand:
+        family = brand.group(1).strip().strip("'\"")
+        faces = re.findall(r"@font-face\s*\{([^}]*)\}", css, re.S)
+        for face in faces:
+            if re.search(rf"font-family:\s*['\"]{re.escape(family)}['\"]", face):
+                url = re.search(r"url\('\.\./([^']+)'\)", face)
+                if url:
+                    want.append(url.group(1))
+                    break
     return [f"{SITE}{p}" for p in want if (ROOT / "app" / p).exists()]
 
 

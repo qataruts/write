@@ -83,10 +83,14 @@
     faces.push(`@font-face{font-family:'KufamRef';src:url('${doors.brand.siblings.calc.url}') format('woff2');font-weight:400 700;font-display:block}`);
     document.head.append(Object.assign(document.createElement('style'), { textContent: faces.join('\n') }));
 
+    // **عمودُ النائب يبقى شاهداً على ما كان**: ملفُّ Marhey أُسقط من شجرتنا يومَ حُكم،
+    // فيُقرأ من مستودع اقرأ (بابُه المسمّى) وتُرسَم أيقونتُه حيّاً — ولولا ذلك لعرض
+    // العمودُ أيقونتَنا المعتمَدة وسمّاها نائباً.
     const columns = [
-      { slug: 'Marhey', family: 'Marhey', title: 'النائبُ اليوم — Marhey',
+      { slug: 'MarheyRef', family: 'Marhey', title: 'النائبُ الذي كان — Marhey',
         note: 'خطُّ علامة اقرأ. ورثته البذرةُ ولم يُقرَّ لنا — والميثاق: «لا يُورَّث بالنسخ».',
-        icon: '/app/icons/icon-192.png' },
+        icon: `/tools/icon.html?size=152&pad=0&round=1&font=MarheyRef`
+          + `&src=${encodeURIComponent(doors.brand.siblings.read.url)}` },
       ...doors.brand.candidates.map((c) => ({
         slug: c.slug, family: c.family, title: c.family, note: c.metaphor,
         icon: `/tools/icon.html?size=152&pad=0&round=1&font=${encodeURIComponent(c.slug)}`
@@ -116,10 +120,8 @@
 
         <div class="slot"><span class="tag">الأيقونة — ١٥٢ و٧٦ بكسلاً</span>
           <div class="icons">
-            ${col.icon.startsWith('/app/')
-              ? `<img src="${col.icon}" width="152" height="152" alt=""><img src="${col.icon}" width="76" height="76" alt="">`
-              : `<iframe src="${col.icon}" width="152" height="152" scrolling="no"></iframe>`
-                + `<iframe src="${col.icon.replace('size=152', 'size=76')}" width="76" height="76" scrolling="no"></iframe>`}
+            <iframe src="${col.icon}" width="152" height="152" scrolling="no"></iframe>
+            <iframe src="${col.icon.replace('size=152', 'size=76')}" width="76" height="76" scrolling="no"></iframe>
           </div>
         </div>
 

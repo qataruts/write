@@ -20,7 +20,7 @@ import { renderPenDev, releasePen } from './pendev.js';
 import { renderWarmup, releaseWarmup } from './warmup.js';
 import {
   h, icon, faceEl, toast, go, arNum, starsRow, topbar, brandMark, shake,
-  nodeTitle, nodeFace, nodeWhere, accentForKind, landmark, DEV,
+  nodeTitle, nodeFace, nodeWhere, accentForKind, landmark, stageTitle, DEV,
 } from './ui.js';
 
 const app = document.getElementById('app');
@@ -35,15 +35,15 @@ const app = document.getElementById('app');
 const FOLD_NEAR = 2;          // محطتان قبل جبهة الطفل ومحطتان بعدها مفرودتان ابتداءً
 const unfolded = new Set();   // ما فرده الطفل بيده — يبقى مفروداً ما دامت الجلسة
 
-/** معلمُ المحطة بنوعها — من معالم البذرة نفسِها، لكل نوعٍ ما يشبهه. */
+/** معلمُ المحطة بنوعها — **من عالمنا: القلمُ والأثر** (`REVIEW_IDENTITY.md §٣أ`). */
 const MARKS = {
-  warmup: 'bridge',   // جسرٌ إلى الحرف: خطوطٌ ومنحنيات قبل أيّ حرف
-  letter: 'house',    // بيتُ الحروف
-  form: 'scales',     // ميزانٌ: الحرفُ نفسُه موزوناً في مواضعه
-  join: 'ladder',     // سلّمٌ: من الحرف إلى الكلمة
-  fade: 'dome',       // خفوتُ النموذج حتى الإملاء — أشقُّ ما في الرحلة
-  sentence: 'book',   // كتابٌ: الجملة
-  gate: 'gate',       // البوابة
+  warmup: 'wave',     // قلمٌ يمرّ فيترك موجة: أوّلُ أثرٍ قبل أيّ حرف
+  letter: 'start',    // نقطةُ بدايةٍ وسهمُ اتجاه — لسانُ المحرّك نفسُه
+  form: 'places',     // ثلاثةُ آثارٍ على سطر: الحرفُ في مواضعه
+  join: 'join',       // أثران يلتقيان بخطٍّ لا يُرفَع فيه القلم
+  fade: 'fade',       // أثرٌ يخفت ويدُ الطفل تُتمّه — الخفوتُ ثم الإملاء
+  sentence: 'lines',  // مسطرةُ الكرّاسة وعليها سطر: الجملة
+  gate: 'gate',       // البوابة تبقى بوابة — مفصلٌ في الرحلة لا مشهدٌ من عالم
 };
 
 /** المحطة التي عليها جبهة الطفل — وآخرُ محطة إن أتمّ الرحلة كلها. */
@@ -182,9 +182,9 @@ function stationEl(section, order, next, folded) {
     className: `station station--${section.kind}${unlocked ? '' : ' station--locked'}${complete ? ' station--done' : ''}`,
     accent: accentForKind(section.kind),
     mark: MARKS[section.kind],
-    label: `${stage.title}${unlocked ? '' : ' — مقفلة'}`,
+    label: `${stageTitle(stage)}${unlocked ? '' : ' — مقفلة'}`,
     badge: stage.face || arNum(order),
-    title: stage.title,
+    title: stageTitle(stage),
     sub: stage.sub || section.nodes.map(nodeTitle).join(' · '),
     meta: unlocked
       ? [h('b', {}, `★ ${arNum(earned)}`), ` / ${arNum(section.nodes.length * progress.MAX_STARS)}`]

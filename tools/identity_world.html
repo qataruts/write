@@ -139,7 +139,13 @@ function paintNames(doc, titles) {
       // «بحروفِها»: العنوانُ يُبنى من حروف المحطة نفسِها كما تعلنها بياناتُ المنهج —
       // لا قائمةَ أسماءٍ تُكتب بيد فتشيخ يومَ يتحرّك ترتيبُ الحروف.
       let titles = found.titles;
-      if (titles === 'letters') {
+      if (titles === 'stage') {
+        // **عمودُ «ما كان» يُبنى من البيان**: العنوانُ المحسوب صار عنوانَ العرض، وبيانُ
+        // المنهج ما زال يحمل ترقيمَ اقرأ — فيُقرأ منه ليبقى العمودُ شاهداً على ما كان.
+        const { STAGES } = await import(`${APP}js/curriculum.js`);
+        titles = Object.fromEntries(STAGES.filter((s) => s.kind === 'letter')
+          .map((s) => [s.id, s.title]));
+      } else if (titles === 'letters') {
         const { STAGES } = await import(`${APP}js/curriculum.js`);
         titles = {};
         for (const stage of STAGES.filter((s) => s.kind === 'letter')) {
@@ -190,7 +196,13 @@ function paintNames(doc, titles) {
       stroke-width="64" stroke-linecap="round" stroke-linejoin="round"
       style="width:100%;height:100%">${paths.map((d) => `<path d="${d}"/>`).join('')}</svg>`;
 
-    if (PICK === 'letter') {
+    if (found.face) {
+      // **وجهُ الواجهة المحايد** (عمودُ «ما كان»): يُبنى من `icon()` نفسِها لا من رسمٍ
+      // يُنسَخ هنا — فما يعرضه العمودُ ما كان يراه الطفلُ بحرفه.
+      const { icon } = await import(`${APP}js/ui.js`);
+      const glyph = icon(found.face);
+      if (glyph) face.replaceChildren(glyph);
+    } else if (PICK === 'letter') {
       // **وجهُ العقدة في الميدالية**: مسارُ الشكل المرجعيّ الذي أتمّه الآن — مرسوماً من
       // `ref` نفسِها التي حكم بها المحرّك، لا رسمٌ ثانٍ يفارقها. (وفي محطة حرفٍ يصير
       // الوجهُ **الحرفَ نفسَه** كما تعلنه `nodeFace` — والجلسة ٥ تبنيها.)
