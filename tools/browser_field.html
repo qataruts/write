@@ -213,11 +213,32 @@ const toastShown = () => {
         await wait(60);
         const mapActs = [...doc.querySelectorAll('main.map button, main.map a')]
           .filter((el) => el.getBoundingClientRect().width && !topmostOver(el).offscreen);
-        const eaten = mapActs.filter((el) => topmostOver(el).covered);
+        /* **وشريطُ العنوان اللاصق يُستثنى — بعلّةٍ مقيسة لا بتساهل**: الشريطُ لاصقٌ
+           بتصميمه (`app.css: .topbar` — `position: sticky`)، فما يقع مركزُه تحته أثرُ
+           **موضع اللفّ** لا أثرُ رسالةٍ عابرة: يُدرَك بلفّةٍ صغيرة ويعود، ولا يبقى
+           مغطّىً مهما انتظر الطفل. وأمّا الرسالةُ فتغطّي حيث وقعت حتى تذهب — وهي
+           بلاغُ الميدان بعينه. **ويُطبَع ما غطّاه الشريطُ** فلا يسقط الخبرُ صامتاً.
+           (ظهر يومَ طالت الخريطةُ بمحطات الأشكال: وقع رأسُ محطةٍ تحت الشريط.) */
+        const isChrome = (hit) => Boolean(hit && hit.closest && hit.closest('.topbar'));
+        const covered = mapActs.filter((el) => topmostOver(el).covered);
+        const eaten = covered.filter((el) => !isChrome(topmostOver(el).hit));
+        const chrome = covered.filter((el) => isChrome(topmostOver(el).hit));
+        if (chrome.length) {
+          log.append(Object.assign(document.createElement('div'),
+            { textContent: `    · تحت شريط العنوان اللاصق (يُدرَك بلفّة): ${chrome.map(eatenBy).join(' · ')}` }));
+        }
         ok(eaten.length === 0,
           `**ورسالةُ المقفل لا تبتلع نقرةً على الخريطة** (${size}: ${mapActs.length} فعلاً في المنظور)`
           + (eaten.length ? ` — ابتُلع: ${eaten.map(eatenBy).join(' · ')}` : ''));
       }
+      /* **وجذرُ الأمان يُقاس لا يُفترَض** (إصلاحُ الجلسة م١ بعينه): الرسالةُ لا تبتلع
+         نقرةً **لأنها لا تقبل النقر أصلاً** — `pointer-events: none` في لوحها. وهذا
+         هو الشرطُ الذي يجعل تغطيتَها فوق زرٍّ غيرَ ضارّة، فيُقرأ من الأسلوب المحسوب:
+         يومَ يسقط يعود بلاغُ الميدان من بابه ولو بقيت الفحوصُ الأخرى خضراً. */
+      ok(win.getComputedStyle(toastEl()).pointerEvents === 'none',
+        'ورسالةُ الشاشة **لا تقبل النقر أصلاً** (`pointer-events: none`) — جذرُ إصلاح م١'
+        + ` (المقروء: ${win.getComputedStyle(toastEl()).pointerEvents})`);
+
       frame.style.width = '768px';
       frame.style.height = '1024px';
       await wait(150);

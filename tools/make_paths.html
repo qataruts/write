@@ -1009,11 +1009,27 @@ function studio(ch, form) {
   const graph = skeletonGraph(skeleton);
   return {
     ch, form, mask, image, bodyMask, skeleton, graph, cal,
-    marks,                                   // أجرامُ العلامات كما هي — تحتاجها `markStrokes`
+    marks,                                   // أجرامُ العلامات كما هي
+    markWork: marks.map(markStudio),         // ولكلِّ علامةٍ هيكلُها وعُقَدُها (حكمُ الشولة)
     dots: dotsFrom(marks),
     sig: fingerprint(mask),
     dt: distance(bodyMask),
   };
+}
+
+/**
+ * **هيكلُ العلامة وعُقَدُها** — كهيكل الجسم سواءً بسواء: تُنحَّف ويُقرأ بيانُها،
+ * فتصير للعلامة **عُقَدٌ تُؤلَّف عليها إيماءةٌ** كما تُؤلَّف على الجسم.
+ *
+ * **وعلّتُه حكمُ المالك في شولة الكاف** (١٢ أغسطس ٢٠٢٦، `REVIEW_HANDWRITING.md §٥`):
+ * «الشولةُ ضربةٌ صغيرة **تُؤلَّف بإيماءتها**» — فلا يكفي أن يُمشى أطولُ سلاسل
+ * التنحيف: البدايةُ والاتجاهُ هما المادّةُ المدرَّسة، فيؤلّفهما المؤلِّفُ بأرقام عُقَد
+ * كما في كلِّ جزءٍ آخر. **ونقطةُ الباء تبقى نقرةً** لأنّ إيماءتَها لا تُعلَن.
+ */
+function markStudio(mark) {
+  const maskOne = maskOf(mark.cells);
+  const skeleton = thin(maskOne);
+  return { bodyMask: maskOne, graph: skeletonGraph(skeleton), dt: distance(maskOne) };
 }
 
 /**
@@ -1026,6 +1042,25 @@ function studio(ch, form) {
  * — فما دام الحكمُ لم يقع فالعلامةُ نقرةٌ كما هي (`METHOD.md §١٠`: رسمُ الشولة من
  * جمال الخطّ لا من مادّة هذا التطبيق).
  */
+/**
+ * **ضربةُ العلامة من إيماءتها** (حكمُ الشولة): لكلِّ علامةٍ في `marks` قائمةُ أرقام
+ * عُقَدٍ من **هيكلها هي** — بدايةً واتجاهاً — فتُمشى كما يُمشى الجسم، وتُصقَل بصقله.
+ */
+function markGesture(work, gestures) {
+  const out = [];
+  for (const [index, ids] of gestures.entries()) {
+    const one = work.markWork[index];
+    if (!one) throw new Error(`لا علامةَ برقم ${index + 1} في هذا الخيال`);
+    const walked = walkGesture(one, ids);
+    let points = smooth(walked.points, 2, one);
+    points = extendEnd(points, one.bodyMask, true);
+    points = extendEnd(points, one.bodyMask, false);
+    points = resample(smooth(points, 2, one));
+    out.push({ points, start: points[0] });
+  }
+  return out;
+}
+
 function markStrokes(work) {
   const out = [];
   for (const mark of work.marks) {
@@ -1102,7 +1137,9 @@ function compose(work, gesture) {
     strokes.push(marks.length ? { points, start: points[0], folds: marks }
       : { points, start: points[0] });
   }
-  // **العلامةُ ضربةً**: مرشّحُ الكرّاسة وحدَه (أعلاه) — فتخرج من النقاط وتدخل الأجزاء
+  // **العلامةُ ضربةً**: `marks` إيماءتُها المؤلَّفة (حكمُ الشولة)، و`markStrokes` مشيُ
+  // هيكلها آلياً (مرشّحُ اللوحة قبل الحكم). وفي الحالين تخرج من النقاط وتدخل الأجزاء.
+  if (gesture.marks) return { strokes: [...strokes, ...markGesture(work, gesture.marks)], dots: [] };
   if (gesture.markStrokes) return { strokes: [...strokes, ...markStrokes(work)], dots: [] };
   return { strokes, dots: work.dots };
 }
@@ -1403,11 +1440,17 @@ function buildAll(spec) {
       if (entry.sig && entry.sig !== work.sig) {
         throw new Error(`${ch}/${FORM_AR[form]}: بصمةُ الخيال ${work.sig} والإيماءةُ على ${entry.sig}`);
       }
-      done[form] = compose(work, entry);
-      // **ومرشّحُ «العلامةُ ضربة» يُقاس على الخيال كلِّه**: ضربتُها في جرم العلامة لا
+      // **والعطبُ يسمّي موضعَه**: شكوى `compose` تخرج بلا اسم الشكل، فيضيع وقتُ من
+      // يبحث عن أيّ إيماءةٍ من مئةٍ واثنتي عشرة اشتكت.
+      try {
+        done[form] = compose(work, entry);
+      } catch (e) {
+        throw new Error(`${ch}/${FORM_AR[form]}: ${e.message}`);
+      }
+      // **والعلامةُ المكتوبة ضربةً تُقاس على الخيال كلِّه**: ضربتُها في جرم العلامة لا
       // في جسم الحرف، فقياسُها على قناع الجسم يقول «خارج الحبر» وهي في حبرها.
       const ink = depthIn(work, done[form].strokes.flatMap((st) => st.points),
-        entry.markStrokes ? work.mask : work.bodyMask);
+        entry.marks || entry.markStrokes ? work.mask : work.bodyMask);
       if (ink.out) {
         throw new Error(`${ch}/${FORM_AR[form]}: ${ink.out} نقطةً خارج خيال الحرف`
           + ` (${ink.stray.slice(0, 3).map((p) => p.join('،')).join(' · ')})`
@@ -1486,6 +1529,11 @@ async function runNodes() {
         nodes: work.graph.nodes.map((n) => ({
           id: n.id, at: n.at.map(round1), deg: n.deg,
           width: round1(work.dt[n.px] * PX * 2),
+        })),
+        // **وعُقَدُ العلامات تُجرَد كعُقَد الجسم** — منها تُؤلَّف إيماءةُ الشولة
+        marks: work.markWork.map((one) => ({
+          nodes: one.graph.nodes.map((n) => ({ id: n.id, at: n.at.map(round1), deg: n.deg })),
+          edges: one.graph.edges.map((e) => ({ a: e.a, b: e.b, len: round1(chainLen(e.chain)) })),
         })),
         edges: work.graph.edges.map((e) => ({ a: e.a, b: e.b, len: round1(chainLen(e.chain)) })),
       };

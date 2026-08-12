@@ -60,16 +60,28 @@ def cases() -> dict:
     return json.loads(CASES.read_text(encoding="utf-8"))
 
 
-def variant_anchors(gestures: dict, mark_strokes: bool) -> dict:
-    """نسخةُ الإيماءات ومعها إيماءةُ المرشّح — **ولا يُكتب هذا على القرص في `tools/`**."""
+def variant_anchors(candidate: dict) -> dict:
+    """نسخةُ الإيماءات ومعها إيماءةُ المرشّح — **ولا يُكتب هذا على القرص في `tools/`**.
+
+    والمرشّحُ قد يحمل **إيماءةَ علامةٍ** (`marks`: ضربةُ الشولة بأرقام عُقَد هيكلها)
+    أو رايةَ مشيٍ آليّ لهيكلها (`markStrokes`) — والأولى ما أقرّه المالك.
+    """
     spec = json.loads(ANCHORS.read_text(encoding="utf-8"))
-    for key, strokes in gestures.items():
+    marks = candidate.get("marks", {})
+    for key, strokes in candidate["gestures"].items():
         ch, form = key.split("/")
         entry = spec["letters"][ch][form]
         if "sameAs" in entry:
             sys.exit(f"{key}: شكلٌ يُدَّعى عينَ غيره — لا يُرشَّح له إيماءةٌ مستقلة")
         entry["strokes"] = copy.deepcopy(strokes)
-        if mark_strokes:
+        # **وكلُّ مرشّحٍ يُعرَض بدعواه هو وحدَها**: تُنزَع من الشكل صفةُ العلامة التي في
+        # ملفّ المشروع ثم تُوضَع دعوى المرشّح — وإلا ورث المرشّحُ الخاسر (النقرة) حكماً
+        # نُفِّذ بعده فظهر في لقطته ما لا يدّعيه، **وصارت اللوحةُ تُري المالكَ غيرَ ما تقول**.
+        entry.pop("marks", None)
+        entry.pop("markStrokes", None)
+        if key in marks:
+            entry["marks"] = copy.deepcopy(marks[key])
+        elif candidate.get("markStrokes"):
             entry["markStrokes"] = True
     return spec
 
@@ -135,7 +147,7 @@ def run_case(case: dict, port: int, timeout: int) -> dict:
     letters = "".join(sorted({s.split("/")[0] for s in case["shapes"]}))
     out = {"case": case, "candidates": []}
     for candidate in case["candidates"]:
-        spec = variant_anchors(candidate["gestures"], candidate.get("markStrokes", False))
+        spec = variant_anchors(candidate)
         spec_file = temp_spec(spec)
         try:
             png = SHOTS / f"{case['id']}-{candidate['id']}.png"
@@ -169,11 +181,25 @@ KEEP_TAIL = "<!-- ⇧ ينتهي المحفوظ: {id} ⇧ -->"
 BLANK = "**الحكم**: ⏳ منتظِرٌ — يُكتب هنا: أيُّ المرشّحَين، وبتاريخه."
 
 
-def kept(source: str, case_id: str) -> str:
-    head, tail = KEEP_HEAD.format(id=case_id), KEEP_TAIL.format(id=case_id)
+def verdict_text(case: dict) -> str:
+    """نصُّ الحكم كما يُقيَّد في بابه — **بتاريخه وبما نُفِّذ به**."""
+    verdict = case.get("verdict")
+    if not verdict:
+        return BLANK
+    title = next((c["title"] for c in case["candidates"] if c["id"] == verdict["choice"]),
+                 verdict["choice"])
+    return (f"**الحكم**: ✅ **{title}** — حكمُ المالك ({verdict['date']}).\n\n"
+            + verdict.get("applied", ""))
+
+
+def kept(source: str, case: dict) -> str:
+    """محفوظُ باب المالك — وما لم يُكتب فيه بيدٍ يُملأ بنصّ الحكم المقيَّد."""
+    head, tail = KEEP_HEAD.format(id=case["id"]), KEEP_TAIL.format(id=case["id"])
     if head in source and tail in source:
-        return source.split(head, 1)[1].split(tail, 1)[0].strip()
-    return BLANK
+        saved = source.split(head, 1)[1].split(tail, 1)[0].strip()
+        if saved and saved != BLANK:
+            return saved
+    return verdict_text(case)
 
 
 def rule_line(row: dict, shape: str) -> str:
@@ -202,17 +228,20 @@ def rule_line(row: dict, shape: str) -> str:
 
 
 def render(results: list, source: str) -> str:
+    ruled = [r for r in results if r["case"].get("verdict")]
     lines = [
-        "# مرجعيةُ الكرّاسة — الحالاتُ الحركية المعلَّقة وجواباها",
+        "# مرجعيةُ الكرّاسة — الحالاتُ الحركية وجواباها وحكمُ المالك فيها",
         "",
         "> ⚠ **ملفٌّ مولَّد** — لا يُحرَّر بيد إلا **أبوابُ حكم المالك** (يحفظها المولّد):",
         ">",
         ">     python3 tools/craft_panel.py",
         ">",
         "> **الاتجاهُ هو المادةُ المدرَّسة** (`METHOD.md §١`)، فلا يجوز أن تُكتب الحالةُ",
-        "> الحركيةُ الواحدة بجوابين في منهجٍ واحد. وهذه الصفحةُ تعرض كلَّ حالةٍ معلَّقة",
-        "> **بجوابيها مبنيَّين مصوَّرَين مقيسَين** — ثم يحكم المالك، **ولا تُعاد إيماءةٌ",
-        "> ولا يُعاد بناءٌ قبل حكمه**.",
+        "> الحركيةُ الواحدة بجوابين في منهجٍ واحد. وهذه الصفحةُ تعرض كلَّ حالةٍ",
+        "> **بجوابيها مبنيَّين مصوَّرَين مقيسَين**، وتحت كلٍّ **حكمُ المالك بتاريخه**.",
+        f"> **والمحكومُ فيه اليومَ {ar(len(ruled))} من {ar(len(results))}** — والمُقَرُّ منها",
+        "> **مطبَّقٌ في الإيماءة بعينه**، يفحص ذلك `craft_panel.py --self-test`: حكمٌ",
+        "> يُكتب هنا ولا يُنفَّذ في `path_anchors.json` يحمرّ من نفسه.",
         "",
         "**كيف تُقرأ اللقطة؟** الرماديُّ الباهت خيالُ الحرف بخطّ النسخ المدرسيّ (ق٢)،",
         "والأزرقُ هيكلُه (مسارُ القلم في قلب الحبر)، **والأحمرُ المسارُ المؤلَّف** ونقطتُه",
@@ -248,14 +277,20 @@ def render(results: list, source: str) -> str:
                 ch, form = shape.split("/")
                 lines.append(f"| {ch} {FORM_AR.get(form, form)} | {rule_line(row, shape)} |")
             lines.append("")
-        lines += [KEEP_HEAD.format(id=case["id"]), kept(source, case["id"]),
+        lines += [KEEP_HEAD.format(id=case["id"]), kept(source, case),
                   KEEP_TAIL.format(id=case["id"]), ""]
     lines += [
-        "## بعد الحكم",
+        "## بعد الحكم — ما يجري",
         "",
-        "تُعاد الإيماءاتُ المخالفة في `tools/path_anchors.json` بيدِ جلسةِ تنفيذ، ثم",
-        "`python3 tools/make_paths.py --build`، ثم تُعاد الحرّاس كلُّها — **والهوامشُ",
-        "والعدّةُ تبقى فوق العهد** (`test_paths.mjs`: عهدُ `child-drift`).",
+        "تُعاد الإيماءاتُ المخالفة في `tools/path_anchors.json` **ومعها علّةُ الحكم في",
+        "`note` كلٍّ**، ثم `python3 tools/make_paths.py --build`، ثم تُعاد الحرّاسُ كلُّها:",
+        "`check_paths` بنيةً، و`test_paths` حكماً على الأشكال المئة والاثني عشر",
+        "(**وأرضيةُ عهد `child-drift` تبقى فوقها كلُّها**)، وعدّةُ المعايرة المجمَّدة",
+        "تُعاد حيث بدّل الحكمُ مسارَها المرجعيّ **بقيدٍ يسمّي الحكم** لا بصمت.",
+        "",
+        "**وما لم يُبدَّل يُقال أيضاً**: حكمٌ يقتضي تبديلاً لا يقبله المحرّكُ (كإغلاقِ",
+        "حلقةٍ قاعُها أقصرُ من سماحة الارتداد) يُقيَّد بعلّته المقيسة في `note` الشكل —",
+        "فيُعرَف أنّ الحكمَ نُفِّذ حيث يُنفَّذ، وأنّ ما بقي بقي بقياسٍ لا بسهو.",
         "",
     ]
     return "\n".join(lines) + "\n"
@@ -286,20 +321,34 @@ def self_test() -> int:
     disk = json.loads(ANCHORS.read_text(encoding="utf-8"))
     planted = [f"{ch}/{form}" for ch, forms in disk["letters"].items()
                for form, entry in forms.items() if entry.get("markStrokes")]
-    ok(not planted, "ولا رايةَ «العلامةُ ضربة» في ملفّ المشروع — لا يُطبَّق مرشّحٌ قبل حكم"
+    ok(not planted,
+       "ولا رايةَ **مشيٍ آليّ** للعلامة في ملفّ المشروع (`markStrokes`) — تلك رايةُ مرشّحٍ"
+       " يُعرَض لا إيماءةٍ تُدرَّس، والمُقَرُّ بحكم المالك يُؤلَّف بإيماءته (`marks`)"
        + (f" — مزروعة: {'، '.join(planted)}" if planted else ""))
 
-    changed = []
+    # **والحكمُ يُفحَص تنفيذُه لا إعلانُه**: ما دام الحكمُ منتظَراً فـ«الحاليّ» هو ما في
+    # ملفّ المشروع بعينه؛ **وإذا صدر الحكمُ فالمُقَرُّ هو الذي يجب أن يكون في الملفّ** —
+    # فحكمٌ يُكتب في الصفحة ولا يُطبَّق في الإيماءة يحمرّ من نفسه.
     for case in spec["cases"]:
-        current = [c for c in case["candidates"] if "الحاليّ" in c["title"]]
-        if not current:
+        verdict = case.get("verdict")
+        wanted = ([c for c in case["candidates"] if c["id"] == verdict["choice"]] if verdict
+                  else [c for c in case["candidates"] if "الحاليّ" in c["title"]])
+        if not wanted:
+            ok(False, f"{case['id']}: حكمُه «{verdict['choice']}» ولا مرشّحَ بهذا المعرّف")
             continue
-        for key, strokes in current[0]["gestures"].items():
+        changed = []
+        for key, strokes in wanted[0]["gestures"].items():
             ch, form = key.split("/")
             if disk["letters"][ch][form].get("strokes") != strokes:
                 changed.append(key)
-    ok(not changed, "و«الحاليّ» في كلِّ حالةٍ هو ما في ملفّ المشروع بعينه — لا مرشّحٌ يُنسَب إليه"
-       + (f" — يخالف: {'، '.join(changed)}" if changed else ""))
+        for key, marks in (wanted[0].get("marks") or {}).items():
+            ch, form = key.split("/")
+            if disk["letters"][ch][form].get("marks") != marks:
+                changed.append(f"{key} (علامة)")
+        ok(not changed,
+           f"{case['id']}: " + (f"حكمُ المالك «{wanted[0]['title']}» **مطبَّقٌ في الإيماءة**"
+                                if verdict else "«الحاليّ» هو ما في ملفّ المشروع بعينه")
+           + (f" — يخالف: {'، '.join(changed)}" if changed else ""))
 
     print("\n" + (f"{fails} فشل" if fails else "عهدُ لوحة المرشّحات قائم"))
     return 1 if fails else 0

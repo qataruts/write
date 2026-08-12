@@ -481,8 +481,12 @@ def self_test() -> int:
                 ok(json.dumps(ref, sort_keys=True) == json.dumps(twin, sort_keys=True),
                    f"{ch}/{form}: مسارُه عينُ «{entry['sameAs']}» كما ادُّعي")
                 continue
-            ok(len(ref["strokes"]) == len(entry["strokes"]),
-               f"{ch}/{form}: أجزاءُ المسار {len(ref['strokes'])} = أجزاءُ الإيماءة {len(entry['strokes'])}")
+            # **والعلامةُ المؤلَّفة جزءٌ كسائر الأجزاء** (حكمُ الشولة، §٥): إيماءتُها في
+            # `marks`، فتُعَدّ في أجزاء الإيماءة وإلا شكا الفاحصُ من عدلٍ هو أحدثه.
+            wanted = len(entry["strokes"]) + len(entry.get("marks", []))
+            ok(len(ref["strokes"]) == wanted,
+               f"{ch}/{form}: أجزاءُ المسار {len(ref['strokes'])} = أجزاءُ الإيماءة {wanted}"
+               + (f" (منها {len(entry['marks'])} علامةً مؤلَّفة)" if entry.get("marks") else ""))
 
     # ————— ٥) نسبُ الرسم: «جسمُ هذا جسمُ ذاك والفارقُ علامتُه» (الجلسة ٧) —————
     #
