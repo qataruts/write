@@ -50,7 +50,11 @@ window.addEventListener('error', (e) => errors.push(String(e.message)));
 window.addEventListener('unhandledrejection', (e) => errors.push(String(e.reason)));
 
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
-const send = () => fetch('/result', { method: 'POST', body: JSON.stringify(results) });
+// **وتقريرُنا مبصومٌ باسمنا** (`calc@16c37dc`): جارٌ في مساحة العمل قد يسبق إلى
+// المنفذ، فيُهمِل خادمُنا كلَّ حمولةٍ بلا هذه البصمة — ولا يُقرأ تقريرُ جارٍ تقريرَنا.
+const send = () => fetch('/result', {
+  method: 'POST', body: JSON.stringify({ from: 'write', rows: results }),
+});
 
 // ————— حارسُ الشبكة على الإطار: كلُّ باب خروجٍ من الجهاز يُعدّ —————
 const netCalls = [];
@@ -104,14 +108,16 @@ const resources = (win) => win.performance.getEntriesByType('resource').map((e) 
     const box = surface.getBoundingClientRect();
     ok(Math.abs(box.width - box.height) <= 2 && box.width >= 240,
       `واللوحُ مربّعٌ بمقاسٍ يكفي يدَ طفل (${Math.round(box.width)}×${Math.round(box.height)})`);
-    // ————— قفلُ المقياس حيٌّ، واللوحُ لم يبتلعه (الجلسة ٤ب) —————
+    // ————— القرصةُ حرة، واللوحُ محروسٌ من جهته (الجلسة م٢ — نقضُ الميدان) —————
     //
-    // القفلُ يُعلَن على `html`، واللوحُ يُعلن `touch-action: none`. **والمقيسُ هنا
-    // المحسوبُ في متصفّحٍ حقيقيّ لا المكتوبُ في اللوح** — فلو غلب العامُّ الخاصَّ يوماً
-    // لصار الإصبعُ يمرّر الصفحةَ بدل أن يكتب، ولَما أمسكه فحصٌ نصيّ.
+    // **قُلب هذا الحارسُ مع أخيه النصيّ**: كان يحرس قفلَ المقياس (الجلسة ٤ب) فصار
+    // يحرس الحريةَ — بلاغُ الميدان فوق الحارس. ولوحُ الكتابة لم يعد يتّكل على القفل
+    // العام: `touch-action: none` عليه أخصُّ فيغلب. **والمقيسُ هنا المحسوبُ في متصفّحٍ
+    // حقيقيّ لا المكتوبُ في اللوح** — فلو غلب العامُّ الخاصَّ يوماً لصار الإصبعُ يمرّر
+    // الصفحةَ بدل أن يكتب، ولَما أمسكه فحصٌ نصيّ.
     const liveViewport = doc.querySelector('meta[name="viewport"]')?.getAttribute('content') || '';
-    ok(/maximum-scale=1\b/.test(liveViewport) && /user-scalable=no/.test(liveViewport),
-      'وقفلُ المقياس حيٌّ في الصفحة نفسِها (لا زومَ يفسد رسمَ الحرف)');
+    ok(!/maximum-scale|user-scalable/.test(liveViewport),
+      'ولا قفلَ للمقياس في الصفحة نفسِها — قرصةُ الطفل لرؤية التشكيل حقٌّ (بلاغ الميدان)');
     ok(win.getComputedStyle(doc.documentElement).touchAction === 'manipulation',
       'ولا تكبيرَ بالنقر المزدوج في التطبيق (html: manipulation) — محسوباً لا مكتوباً');
     ok(win.getComputedStyle(surface).touchAction === 'none',
@@ -189,21 +195,28 @@ const resources = (win) => win.performance.getEntriesByType('resource').map((e) 
 
     // ٣) دورةٌ صحيحة كاملة على لوحٍ نظيف: جسمان ثم نقطة
     //
-    // **وتُكتب بعد عودةٍ من الخلفية** (الجلسة ٤ب): الجزءُ الثالث من القفل يعيد إعلانَ
-    // الميتا عند `pageshow`/`visibilitychange` — فهنا يُطلَق الحدثان قبل الكتابة، ثم
-    // تُكتب الدورةُ كاملةً. **والمدَّعى ما يُقاس**: أنّ الإعادةَ لا ترمي شيئاً، وأنّ
-    // القفلَ يبقى على حاله بعدها، وأنّ **الطفلَ يكتب بعدها كما كان يكتب**.
+    // **وتُكتب بعد عودةٍ من الخلفية** (الجلسة م٢): `resetZoom` يشدّ المقياسَ إلى ١
+    // لحظةً عند `pageshow`/`visibilitychange` ثم يردّ نصَّ الميتا الحرَّ بعد ٨٠ مللي —
+    // فهنا يُطلَق الحدثان قبل الكتابة، **وتُقاس الشدّةُ ثم الحريةُ في وقتيهما** (لا
+    // يكفي أن يُوجَد `resetZoom` في المصدر: المقيسُ أثرُه في متصفّحٍ حقيقيّ)، ثم تُكتب
+    // الدورةُ كاملةً. **والمدَّعى ما يُقاس**: أنّ الشدّةَ تقع، وأنّ الحريةَ تعود،
+    // وأنّ إعلانَ اللوح لم يسقط في الطريق، وأنّ **الطفلَ يكتب بعدها كما كان يكتب**.
     const buttons = [...doc.querySelectorAll('.dev-row .btn')];
     buttons.find((b) => b.textContent.includes('أعِد'))?.click();
     await wait(120);
 
+    const metaEl = doc.querySelector('meta[name="viewport"]');
     win.dispatchEvent(new win.Event('pageshow'));
     doc.dispatchEvent(new win.Event('visibilitychange'));
-    await wait(60);
-    ok((doc.querySelector('meta[name="viewport"]')?.getAttribute('content') || '') === liveViewport
+    const tightened = metaEl?.getAttribute('content') || '';     // في نافذة الـ٨٠ مللي
+    await wait(200);                                             // ثم تُرَدّ الحرية
+    const freedAgain = metaEl?.getAttribute('content') || '';
+    ok(/maximum-scale=1\b/.test(tightened),
+      `والعودةُ من الخلفية تشدّ المقياسَ إلى ١ لحظتَها (${tightened.split(', ').pop()})`);
+    ok(freedAgain === liveViewport && !/maximum-scale|user-scalable/.test(freedAgain)
       && win.getComputedStyle(doc.documentElement).touchAction === 'manipulation'
       && win.getComputedStyle(doc.querySelector('.pen-surface')).touchAction === 'none',
-      'والعودةُ من الخلفية تُعيد إعلانَ الميتا فلا تنقصه ولا تُسقط إعلانَ اللوح');
+      'ثم تردّ الحريةَ بعدها فلا يبقى قفلٌ ولا يسقط إعلانُ اللوح — العلاجُ في موضع العيب وحدَه');
 
     for (const stroke of body) await writeStroke(stroke, 'pen');
     await writeStroke([dot, dot], 'pen');
@@ -211,7 +224,7 @@ const resources = (win) => win.performance.getEntriesByType('resource').map((e) 
 
     const done = doc.querySelector('.dev-readout')?.textContent || '';
     ok(/مقبول/.test(done) && !/غير مقبول/.test(done),
-      `ودورةُ الكتابة الكاملة **بعد القفل والعودة** تُقبَل على الشاشة (${done.split('\n')[0].slice(0, 40)})`);
+      `ودورةُ الكتابة الكاملة **بعد التصحيح والعودة** تُقبَل على الشاشة (${done.split('\n')[0].slice(0, 40)})`);
     const trail = doc.querySelector('.pen-stroke--trail');
     ok(trail && Number(trail.getAttribute('stroke-dashoffset')) < 1,
       'والمسارُ تلوّن تحت القلم حتى آخره (مؤشّرُ التقدّم الحركيّ — METHOD §٥)');

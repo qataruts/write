@@ -43,7 +43,7 @@ export const STAGES = [
     "id": "g1",
     "kind": "letter",
     "title": "المجموعة الأولى",
-    "sub": "حروفُها: ا ب م ل",
+    "sub": "كلُّ حرفٍ وحدَه: من أين يبدأ وإلى أين يتّجه",
     "nodes": [
       { "part": "ا", "letter": "ا" },
       { "part": "ب", "letter": "ب" },
@@ -55,7 +55,7 @@ export const STAGES = [
     "id": "g2",
     "kind": "letter",
     "title": "المجموعة الثانية",
-    "sub": "حروفُها: ن ر د س",
+    "sub": "كلُّ حرفٍ وحدَه: من أين يبدأ وإلى أين يتّجه",
     "nodes": [
       { "part": "ن", "letter": "ن" },
       { "part": "ر", "letter": "ر" },
@@ -67,7 +67,7 @@ export const STAGES = [
     "id": "g3",
     "kind": "letter",
     "title": "المجموعة الثالثة",
-    "sub": "حروفُها: ت و ي ه",
+    "sub": "كلُّ حرفٍ وحدَه: من أين يبدأ وإلى أين يتّجه",
     "nodes": [
       { "part": "ت", "letter": "ت" },
       { "part": "و", "letter": "و" },
@@ -79,7 +79,7 @@ export const STAGES = [
     "id": "g4",
     "kind": "letter",
     "title": "المجموعة الرابعة",
-    "sub": "حروفُها: ع ف ك ق",
+    "sub": "كلُّ حرفٍ وحدَه: من أين يبدأ وإلى أين يتّجه",
     "nodes": [
       { "part": "ع", "letter": "ع" },
       { "part": "ف", "letter": "ف" },
@@ -91,7 +91,7 @@ export const STAGES = [
     "id": "g5",
     "kind": "letter",
     "title": "المجموعة الخامسة",
-    "sub": "حروفُها: ح ج خ",
+    "sub": "كلُّ حرفٍ وحدَه: من أين يبدأ وإلى أين يتّجه",
     "nodes": [
       { "part": "ح", "letter": "ح" },
       { "part": "ج", "letter": "ج" },
@@ -102,7 +102,7 @@ export const STAGES = [
     "id": "g6",
     "kind": "letter",
     "title": "المجموعة السادسة",
-    "sub": "حروفُها: ش ص ز ط",
+    "sub": "كلُّ حرفٍ وحدَه: من أين يبدأ وإلى أين يتّجه",
     "nodes": [
       { "part": "ش", "letter": "ش" },
       { "part": "ص", "letter": "ص" },
@@ -114,7 +114,7 @@ export const STAGES = [
     "id": "g7",
     "kind": "letter",
     "title": "المجموعة السابعة",
-    "sub": "حروفُها: ث ذ ض ظ غ",
+    "sub": "كلُّ حرفٍ وحدَه: من أين يبدأ وإلى أين يتّجه",
     "nodes": [
       { "part": "ث", "letter": "ث" },
       { "part": "ذ", "letter": "ذ" },

@@ -510,18 +510,28 @@ if (!progress.PREVIEW) install.mount();
 // **ولا يبتلع نقرةً** (لوحُه `pointer-events: none`)، ولا يخرج منه شيءٌ من الجهاز.
 if (DEV) probe.mount();
 
-// **والعودةُ من الخلفية بمقياس ١** (منقولٌ من اقرأ، `read@9220ab1`): iPadOS يسترجع
-// التطبيقَ المثبَّت بعد زيارة تطبيقٍ آخر **مكبَّراً** أحياناً — عيبُ استرجاعٍ معروف في
-// المنصّة لا في شيفرتنا. الميتا تمنع التكبير أصلاً (`maximum-scale=1`)، وإعادةُ إعلانها
-// نفسِها عند العودة تُلزم WebKit بإعادة تطبيقها حيث يتلكّأ. **وهنا ألزمُ منه في اقرأ**:
-// الطفلُ يعود إلى **لوحٍ** يكتب عليه، ومقياسٌ منحرفٌ يزيح ما تحت إصبعه عمّا تحت قلمه.
+// **العودةُ من الخلفية بمقياس ١، والقرصةُ حرةٌ فيما سواها** (منقولٌ من اقرأ على عقده
+// المصحَّح، `read@7f18bf0`): iPadOS يسترجع التطبيقَ المثبَّت بعد زيارة تطبيقٍ آخر
+// **مكبَّراً** أحياناً — عيبُ استرجاعٍ في المنصّة لا في شيفرتنا. وعولج أولاً بقفل الميتا
+// الشامل، **فنقضه بلاغُ ميدانٍ ثانٍ**: الطفل كان يكبّر بالقرصة ليرى التشكيل، والقفلُ
+// حرمه إياه — تحويطٌ أوسعُ من عيبه. فصار العلاجُ في موضع العيب وحدَه: عند العودة
+// للواجهة يُشدّ المقياسُ إلى ١ لحظةً (`maximum-scale=1`) ثم يُرَدّ نصُّ الميتا الحرّ بعد
+// ٨٠ مللي — فتزول بقايا الاسترجاع المعيب **وبقايا تكبيرِ ما قبل الخلفية** معاً، وتبقى
+// القرصةُ أثناء الاستعمال حقاً.
+//
+// **وهو عندنا ألزمُ منه في اقرأ**: الطفلُ يعود إلى **لوحٍ** يكتب عليه، ومقياسٌ منحرفٌ
+// يزيح ما تحت إصبعه عمّا تحت قلمه — ولوحُه محروسٌ من جهته (`touch-action: none` أخصُّ
+// فيغلب) لا بقفلٍ عامٍّ يحرم الطفلَ قرصتَه في بقيّة الشاشات.
 const viewportMeta = document.querySelector('meta[name="viewport"]');
-const reassertViewport = () => {
-  if (viewportMeta) viewportMeta.setAttribute('content', viewportMeta.getAttribute('content'));
+const viewportFree = viewportMeta && viewportMeta.getAttribute('content');
+const resetZoom = () => {
+  if (!viewportMeta) return;
+  viewportMeta.setAttribute('content', `${viewportFree}, maximum-scale=1`);
+  setTimeout(() => viewportMeta.setAttribute('content', viewportFree), 80);
 };
-window.addEventListener('pageshow', reassertViewport);
+window.addEventListener('pageshow', resetZoom);
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible') reassertViewport();
+  if (document.visibilityState === 'visible') resetZoom();
 });
 
 window.addEventListener('hashchange', render);

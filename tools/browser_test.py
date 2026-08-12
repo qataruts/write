@@ -67,6 +67,9 @@ DEVICE_SIZES = [
 # **أعلامُ الميكروفون الوهميّ لم تُنقَل**: «اُكْتُبْ» لا يلتقط صوتاً ألبتّة.
 CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 QUEUE_FILE = ROOT / "tools" / "audio_queue.json"
+# **بصمةُ صفحاتنا في تقرير النتيجة** (بلاغ العائلة من احسب، `calc@16c37dc`): تُرسِلها كلُّ
+# صفحةِ فحصٍ في حمولتها، ويُهمِل `do_POST` ما لا يحملها. عِلّتُها في §تصادم المنفذ أدناه.
+REPORT_FROM = "write"
 
 
 def pending_texts() -> list:
@@ -156,6 +159,13 @@ def make_server(port: int, results: list):
             # فأمسك ذلك حارسُ خصوصية القلم يومَ جُرِّب سالباً — زُرع في `pen.js` رفعٌ
             # لمسار الطفل، فحلّت حمولتُه محلَّ نتائج الفحص وانهار العدّاء بدل أن
             # يحمرّ. والرفعُ المزروع الآن يُعدّ في العدّاد ويسقط الفحصُ كما ينبغي.
+            #
+            # **ولا تُقرَأ نتيجةٌ إلا من صفحتنا** (`REPORT_FROM` — بلاغُ العائلة من احسب،
+            # `calc@16c37dc`): «اُكْتُبْ» و«اِقْرَأْ» و«اِحْسِبْ» في مساحة عملٍ واحدة
+            # وعدَدُها من بذرةٍ واحدة، فإن سبق جارٌ إلى منفذنا أرسل متصفّحُه تقريرَه
+            # **إلى خادمنا** فقرأناه تقريرَنا — أخضرَ كاذباً أو أحمرَ بلا سبب. فالبصمةُ
+            # تُغلق البابَ بنيوياً: غريبٌ يُهمَل، وتنتهي المهلةُ بجملة «لم تصل أي نتيجة»
+            # الصادقة — وهي أهونُ ما يقع.
             raw = self.rfile.read(int(self.headers.get("Content-Length", 0)))
             if self.path.partition("?")[0] != "/result":
                 self.send_response(404)
@@ -163,8 +173,10 @@ def make_server(port: int, results: list):
                 return
             try:
                 payload = json.loads(raw.decode("utf-8"))
-                if isinstance(payload, list) and all(isinstance(r, dict) for r in payload):
-                    results[:] = payload
+                if isinstance(payload, dict) and payload.get("from") == REPORT_FROM:
+                    rows = payload.get("rows")
+                    if isinstance(rows, list) and all(isinstance(r, dict) for r in rows):
+                        results[:] = rows
             except json.JSONDecodeError:
                 pass
             self.send_response(204)
@@ -174,7 +186,15 @@ def make_server(port: int, results: list):
             pass
 
     socketserver.TCPServer.allow_reuse_address = True
-    return socketserver.TCPServer(("127.0.0.1", port), Handler)
+    try:
+        return socketserver.TCPServer(("127.0.0.1", port), Handler)
+    except OSError as e:
+        # **والمنفذُ المشغول يُقال ولا يُصمَت عنه** (`calc@16c37dc`): كان الخادمُ يرتمي
+        # أثراً مكدَّساً عارياً، فيُقرأ عطباً في الشيفرة وهو منفذٌ يشغله جارٌ لحظةً —
+        # وأغلى ما يضيع وقتُ من يطارد عطباً لا وجودَ له. فالرسالةُ تسمّي المنفذَ
+        # وتدلّ على المخرج.
+        sys.exit(f"تعذّر فتحُ خادم الفحص على المنفذ {port}: {e}\n"
+                 f"  — منفذٌ مشغولٌ الآن (فحصٌ آخر يعمل؟). جرّب: --port {port + 1}")
 
 
 def run_chrome(url: str, profile: Path, extra: list, show: bool):
@@ -215,7 +235,11 @@ LIFT_TOLERANCE = 1.0
 
 def main():
     ap = argparse.ArgumentParser(description="فحصُ قشرة «اُكْتُبْ» في متصفّح حقيقي")
-    ap.add_argument("--port", type=int, default=8790)
+    # **ومنفذُنا غيرُ منفذ الجيران** (بلاغُ العائلة من احسب، `calc@16c37dc` — وقد لُدغنا
+    # به مرتين في مراجعات المدير): ثلاثةُ تطبيقاتٍ في مساحة عملٍ واحدة وعدَدُها من بذرةٍ
+    # واحدة — اقرأ ٨٧٩٠ واحسب ٨٧٩١ **واكتب ٨٧٩٢** — فمنفذٌ مشترك يجعل تشغيلَ أحدها
+    # يُفشِل الآخر بلا ذنب، أو يجعله يقرأ تقريرَ جارٍ تقريرَه.
+    ap.add_argument("--port", type=int, default=8792)
     ap.add_argument("--timeout", type=int, default=140, help="ثوانٍ قبل الاستسلام")
     ap.add_argument("--shots", metavar="PNG", help="لقطة للمراجعة البصرية بدل تشغيل الاختبارات")
     ap.add_argument("--show", action="store_true", help="متصفّح مرئي")

@@ -43,7 +43,11 @@ const errors = [];
 window.addEventListener('error', (e) => errors.push(String(e.message)));
 window.addEventListener('unhandledrejection', (e) => errors.push(String(e.reason)));
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
-const send = () => fetch('/result', { method: 'POST', body: JSON.stringify(results) });
+// **وتقريرُنا مبصومٌ باسمنا** (`calc@16c37dc`): جارٌ في مساحة العمل قد يسبق إلى
+// المنفذ، فيُهمِل خادمُنا كلَّ حمولةٍ بلا هذه البصمة — ولا يُقرأ تقريرُ جارٍ تقريرَنا.
+const send = () => fetch('/result', {
+  method: 'POST', body: JSON.stringify({ from: 'write', rows: results }),
+});
 
 // عدّادُ أبواب الخروج من الجهاز (نظيرُ `browser_pen.html`)
 const netCalls = [];
