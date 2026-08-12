@@ -24,7 +24,7 @@
     place-items: center;
     background: linear-gradient(160deg, var(--brand-1) 0%, var(--brand-2) 45%, var(--brand-3) 100%);
     color: #fff;
-    font-family: 'Marhey', 'Geeza Pro', 'Al Bayan', sans-serif;
+    font-family: var(--icon-font, 'Marhey'), 'Geeza Pro', 'Al Bayan', sans-serif;
     font-weight: 700;
     line-height: 1;
     overflow: hidden;
@@ -41,6 +41,21 @@
   const size = +(q.get('size') || 512);
   const pad = +(q.get('pad') || 0);          // نسبة الهامش الآمن (maskable = .2)
   const round = q.get('round') !== '0';      // الأيقونة المقنَّعة تملأ المربّع كاملاً
+
+  // **بابُ المرشَّح** (الجلسة هـ٢، `FAMILY §٩.٤`: خطُّ العلامة قرارُ مراجعةٍ يُقَرّ):
+  // خطُّ العلامة اليومَ **نائبٌ مؤقت**، فيَقبل هذا الملفُّ خطّاً بالرابط ليُصَفَّ
+  // مرشَّحوه في امتحان الأيقونات (`tools/identity_row.html`). **ولا أثرَ لذلك في
+  // التوليد**: `make_icons.py` لا يمرّر هذين، فتُبنى الأيقونةُ بخطّ اللوح كما كانت.
+  const family = q.get('font');
+  const src = q.get('src');
+  if (family && src) {
+    document.head.append(Object.assign(document.createElement('style'), {
+      textContent: `@font-face{font-family:'${family}';src:url('${src}') format('woff2');`
+        + `font-weight:400 700;font-display:block}`,
+    }));
+    document.documentElement.style.setProperty('--icon-font', `'${family}'`);
+  }
+  const FONT = family || 'Marhey';
 
   document.body.style.width = `${size}px`;
   document.body.style.height = `${size}px`;
@@ -65,7 +80,7 @@
   function applyLift() {
     try {
       const ctx = document.createElement('canvas').getContext('2d');
-      ctx.font = `700 ${PROBE}px "Marhey", sans-serif`;
+      ctx.font = `700 ${PROBE}px "${FONT}", sans-serif`;
       ctx.textBaseline = 'alphabetic';
       const m = ctx.measureText(word.textContent);
       const base = (m.fontBoundingBoxAscent - m.fontBoundingBoxDescent) / 2;

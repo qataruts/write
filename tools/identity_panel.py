@@ -8,7 +8,7 @@
 
 **ولا يكتب هذا الملفُّ لوناً في التطبيق**: مرشّحاتُه في `tools/palettes.json` تُحقن
 في `:root` ساعةَ اللقطة وحدَها (`tools/identity_shots.html`)، و`app/css/app.css` لا
-يُمَسّ حتى يحكم المالك بنصٍّ في `docs/REVIEW_IDENTITY.md` — **ويحرس ذلك الفحصُ
+يُمَسّ حتى يحكم المالك بنصٍّ في `docs/IDENTITY_COLOR.md` — **ويحرس ذلك الفحصُ
 الذاتيّ**: ما دام الحكمُ منتظَراً فلوحُ التطبيق يجب أن يبقى لوحَ البذرة، ويومَ يُكتب
 الحكمُ ينقلب الشرطُ فيَلزم أن يطابق اللوحُ المرشَّحَ المحكومَ له **بالحرف**. فلا
 يُطبَّق لونٌ بلا حكم، ولا يُترَك حكمٌ بلا تطبيق — بلا سطرٍ يُضاف ولا انتباهٍ يُرجى.
@@ -41,7 +41,7 @@ CSS = APP / "css" / "app.css"
 PALETTES = TOOLS / "palettes.json"
 PAGE = TOOLS / "identity_shots.html"
 OUT = ROOT / "docs" / "identity"
-PANEL = ROOT / "docs" / "REVIEW_IDENTITY.md"
+PANEL = ROOT / "docs" / "IDENTITY_COLOR.md"
 CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 
 # مقاسُ الجهاز: آيباد ١٠٫٩ طولي — من `DEVICE_SIZES` في `browser_test.py` (لا يُكتب مرّتين)
@@ -577,16 +577,23 @@ def make_server(port: int, state: dict, palettes: bytes):
     return socketserver.ThreadingTCPServer(("127.0.0.1", port), Handler)
 
 
-def run_chrome(url: str, profile: Path, shot: Path):
+def run_chrome(url: str, profile: Path, shot: Path, size: tuple = None, dark: bool = False):
+    """**ووسيطُ الليل حقيقيّ لا محقون** (الجلسة هـ٢): `--force-dark-mode` يجعل
+    `prefers-color-scheme: dark` يطابق في الصفحة، فتُصوَّر كتلةُ `@media` كما يقرؤها
+    متصفّحُ الطفل — لا قيمٌ تُحقن في `:root` فنصوّر ما كتبناه نحن.
+    """
     if not Path(CHROME).exists():
         sys.exit(f"لم يُعثر على Chrome في {CHROME}")
+    width, height = size or (DEVICE_W, DEVICE_H)
     cmd = [CHROME, f"--user-data-dir={profile}", "--no-first-run", "--no-default-browser-check",
            "--headless=new", "--disable-gpu", "--hide-scrollbars",
            # **حركةٌ مخفَّضة**: ومضةُ الإرشاد عندنا حركةٌ في CSS، فلقطةٌ في وسطها تختلف
            # من مرشّحٍ إلى مرشّح بلا سبب. وهذه حالُ طفلٍ يطلب جهازُه تخفيفَ الحركة —
            # ولها في `app.css` قاعدتُها المكتوبة، فاللقطةُ تصوّر حالاً موجودة لا مصنوعة.
-           "--force-prefers-reduced-motion",
-           f"--screenshot={shot}", f"--window-size={DEVICE_W},{DEVICE_H}", url]
+           "--force-prefers-reduced-motion"]
+    if dark:
+        cmd.append("--force-dark-mode")
+    cmd += [f"--screenshot={shot}", f"--window-size={width},{height}", url]
     return subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 
@@ -617,7 +624,7 @@ def shot_name(candidate: str, ground: str, scene: str) -> str:
 
 
 def capture(base: str, profile: Path, state: dict, candidate: str, ground: str,
-            scene: str, timeout: int) -> tuple:
+            scene: str, timeout: int, dark: bool = False, out: Path = None) -> tuple:
     """لقطةٌ واحدة — و**بملفِّ متصفّحٍ جديد لكلٍّ**، وهذا شرطٌ لا زينة.
 
     أمسكته اللقطاتُ نفسُها: بملفٍّ مُعاد، يتولّى **عاملُ الخدمة** المسجَّلُ من اللقطة
@@ -625,13 +632,14 @@ def capture(base: str, profile: Path, state: dict, candidate: str, ground: str,
     فصوّرنا خريطةً فارغة ونحن نظنّنا نصوّر لوحاً مكتوباً عليه. والصورةُ خرجت
     «ناجحة» لأن الصفحةَ التي تحرس المشهدَ لم تُشغَّل أصلاً.
     """
-    out = OUT / shot_name(candidate, ground, scene)
+    out = out or (OUT / shot_name(candidate, ground, scene))
+    out.parent.mkdir(parents=True, exist_ok=True)
     out.unlink(missing_ok=True)
     state["ready"] = threading.Event()
     state["failed"] = False
     state["timeout"] = timeout
     url = f"{base}/__identity.html?candidate={candidate}&ground={ground}&scene={scene}"
-    proc = run_chrome(url, profile, out)
+    proc = run_chrome(url, profile, out, dark=dark)
     deadline = time.time() + timeout
     while time.time() < deadline and not out.exists():
         time.sleep(0.3)
@@ -1257,7 +1265,7 @@ def self_test() -> int:
     ok(panel_now == remade, "وما عدا البابَ: اللوحةُ على القرص عينُ ما يخرج من المولّد")
 
     print("\n— «لا لونَ قبل الحكم، ولا حكمَ بلا تطبيق» —")
-    ok(PANEL.exists(), "لوحةُ العرض `docs/REVIEW_IDENTITY.md` موجودة")
+    ok(PANEL.exists(), "لوحةُ العرض `docs/IDENTITY_COLOR.md` موجودة")
     verdict = parse_verdict(read_verdict()) if PANEL.exists() else None
     read_css = ROOT.parent / "read" / "app" / "css" / "app.css"
     if verdict is None:

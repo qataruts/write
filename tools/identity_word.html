@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>عيّناتُ خطّ العلامة — «اُكْتُبْ» الجلسة هـ٢</title>
+<!--
+  **ورقةُ القياس** (لا لوحةُ عرض): تُصيَّر فيها كلمةُ العلامة بكلّ خطٍّ جُرِّب —
+  مشكولةً وغيرَ مشكولة — في شبكةٍ **هندستُها معلومةٌ للآلة**: خليةٌ مربّعةٌ بمقاسٍ
+  ثابت، وترتيبٌ هو ترتيبُ `tools/doors.json` بعينه. فيقصّها `identity_doors.py`
+  خليةً خليةً ويقيس حبرَها: بُعدَ الرسم عن رسم أخيه، وهل الحركاتُ مرسومةٌ فوق
+  الحروف، وهل يرسم الخطُّ حبرَه بلونٍ ليس لونَ العلامة (خطٌّ ملوّنٌ بنفسه).
+
+  ولذلك: حبرٌ أسودُ خالص على أبيضَ خالص — لا لونَ هويةٍ هنا، فهذه ورقةُ مسطرةٍ
+  لا شاشةُ طفل. ولوحةُ العرض على المالك في `tools/identity_fonts.html`.
+-->
+<style>
+  html, body { margin: 0; padding: 0; background: #fff; }
+  /* **الشبكةُ تمشي يساراً وحبرُها يمشي يميناً**: القاصُّ في بايثون يعدّ الخلايا من
+     الزاوية اليسرى العليا، والصفحةُ عربيةٌ فتصفّها من اليمين — فيقيس خليةً بغيرها.
+     (وقد وقع ذلك فعلاً في أوّل تشغيل.) فالشبكةُ `ltr` صريحاً والكلمةُ `rtl` في خليّتها. */
+  #sheet { display: grid; direction: ltr; }
+  .cell {
+    display: grid; place-items: center; background: #fff; color: #000; direction: rtl;
+    line-height: 1.6; font-weight: 700; overflow: hidden;
+  }
+</style>
+</head>
+<body>
+<div id="sheet"></div>
+<img id="hold" src="/__hold" alt="" style="position:fixed;inset-inline-start:0;top:0;width:1px;height:1px;opacity:0">
+<script>
+const CELL = 300;          // مقاسُ الخلية — يقرؤه القاصُّ في بايثون بالرقم نفسِه
+const COLS = 6;
+const SIZE = 108;          // مقاسُ الحبر داخل الخلية
+
+(async () => {
+  try {
+    const doors = await (await fetch('/__doors.json')).json();
+    const fonts = doors.fonts;                     // slug ⇒ { files, axis }
+    const order = doors.specimens;                 // [{ slug, family, text }] بترتيب القياس
+
+    const faces = [];
+    for (const [slug, info] of Object.entries(fonts)) {
+      for (const file of info.files) {
+        const weight = info.axis ? '400 700' : (file.match(/-(\d+)\.woff2$/) || [, '400'])[1];
+        faces.push(`@font-face{font-family:'${slug}';src:url('${info.base}${file}') format('woff2');`
+          + `font-weight:${weight};font-display:block}`);
+      }
+    }
+    const style = document.createElement('style');
+    style.textContent = faces.join('\n');
+    document.head.append(style);
+
+    const sheet = document.getElementById('sheet');
+    sheet.style.gridTemplateColumns = `repeat(${COLS}, ${CELL}px)`;
+    sheet.style.width = `${COLS * CELL}px`;
+    for (const one of order) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.style.width = cell.style.height = `${CELL}px`;
+      cell.style.fontFamily = `'${one.slug}'`;
+      cell.style.fontSize = `${SIZE}px`;
+      cell.textContent = one.text;
+      sheet.append(cell);
+    }
+    // **لا تُقاس صورةٌ رُسمت بخطٍّ احتياطيّ**: `font-display: block` يؤخّر الرسم لا
+    // التحميل، فيُنتظَر وصولُ الوجوه كلِّها قبل إعلان اكتمال المشهد.
+    await document.fonts.ready;
+    const missing = order.filter((one) => !document.fonts.check(`700 ${SIZE}px '${one.slug}'`));
+    if (missing.length) throw new Error('خطوطٌ لم تصل: ' + missing.map((m) => m.slug).join('، '));
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+    await fetch('/__ready');
+  } catch (err) {
+    document.body.innerHTML = `<pre style="font:16px/1.6 system-ui;padding:2rem">تعذّرت الورقة: ${err && err.stack || err}</pre>`;
+    fetch('/__ready?fail=1');
+  }
+})();
+</script>
+</body>
+</html>

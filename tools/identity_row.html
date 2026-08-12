@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>امتحانُ الأيقونات — «اُكْتُبْ» بجوار أخويها</title>
+<!--
+  **امتحانُ الميثاق** (`FAMILY §٩` البند ٢): «تُعرَف من لمحةٍ بين أخواتها — فالتطبيقات
+  ستتجاور على شاشة آيبادٍ واحدة، وأيقونتان بلونٍ واحد عيبُ استعمالٍ لا ذوقٍ فحسب.
+  ومحكُّها: صفُّ أيقونات العائلة معاً، وطفلُ سادسةٍ يسمّي كلَّ واحدةٍ بلا تردّد.»
+
+  فتُصَفّ هنا **بمقاسَي أيقونة الآيباد** (١٥٢ بكسلاً على الشاشة، و٧٦ في مجلدٍ أو
+  في الحافظة) على أرضٍ محايدة — لا على ورقنا فيجمّله لونُنا.
+
+  **والأصولُ من مواضعها لا من نسخةٍ ثانية**: أيقونتا اقرأ واحسب **ملفّاهما المنشوران**
+  يُقرآن من مستودعيهما ولا يُمَسّان، وأيقونتُنا اليومَ ملفُّها المولَّد في
+  `app/icons/`. **ومرشَّحو الخطّ يُرسَمون حيّاً** من `tools/icon.html` نفسِه بخطّ
+  المرشَّح — أي بالمصيّر الذي سيولّد الأيقونةَ يومَ يحكم المالك، لا برسمٍ يشبهه.
+
+  ويقيس هذا الملفُّ ما لا تراه العينُ في لقطةٍ صغيرة: **أتُقَصُّ العلامةُ في علبتها؟**
+  (حبرُ الكلمة أعرضُ من الصندوق) — ويُرسَل الرقمُ إلى السائق فيُكتب في اللوحة.
+-->
+<style>
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: #6E7076;                 /* أرضٌ محايدة — لا لونَ هويةٍ يجمّل أحداً */
+    color: #fff; font-family: system-ui, sans-serif;
+    padding: 28px 24px; direction: rtl;
+  }
+  h1 { font-size: 17px; font-weight: 600; margin: 0 0 4px; }
+  p  { font-size: 13px; margin: 0 0 22px; opacity: .8; }
+  .row { display: flex; gap: 26px; align-items: flex-end; margin-bottom: 30px; flex-wrap: wrap; }
+  .one { text-align: center; }
+  .box { border-radius: 22.4%; overflow: hidden; box-shadow: 0 4px 14px rgba(0,0,0,.35); }
+  .box iframe, .box img { display: block; border: 0; }
+  .name { font-size: 12px; margin-top: 8px; opacity: .92; }
+  .sub  { font-size: 11px; opacity: .6; }
+  .warn { color: #FFD9D4; font-size: 11px; }
+</style>
+</head>
+<body>
+<h1>امتحانُ الميثاق: أيقوناتُ العائلة على شاشةٍ واحدة</h1>
+<p>مقاسُ أيقونة الآيباد ١٥٢ بكسلاً، وتحتها المقاسُ الصغير ٧٦ — والمحكُّ أن يسمّيَ طفلُ سادسةٍ كلَّ واحدةٍ بلا تردّد.</p>
+<div class="row" id="big"></div>
+<div class="row" id="small"></div>
+<img id="hold" src="/__hold" alt="" style="position:fixed;inset-inline-start:0;top:0;width:1px;height:1px;opacity:0">
+<script>
+(async () => {
+  try {
+    const doors = await (await fetch('/__doors.json')).json();
+    const fonts = doors.fonts;
+    const items = [
+      ...doors.icon.row.map((r) => ({ kind: 'file', src: r.iconUrl, name: r.label, sub: 'أيقونتُه المنشورة' })),
+      { kind: 'file', src: '/app/icons/icon-192.png', name: 'اكتب — اليوم', sub: 'النائبُ: Marhey' },
+      ...doors.brand.candidates.map((c) => ({
+        kind: 'live', name: `اكتب — ${c.family}`, sub: 'مرشَّحٌ يُرسَم حيّاً', slug: c.slug, family: c.family,
+        src: (size) => `/tools/icon.html?size=${size}&pad=0&round=1`
+          + `&font=${encodeURIComponent(c.slug)}&src=${encodeURIComponent(fonts[c.slug].base + fonts[c.slug].best)}`,
+      })),
+    ];
+
+    const frames = [];
+    for (const [id, size] of [['big', 152], ['small', 76]]) {
+      const row = document.getElementById(id);
+      for (const item of items) {
+        const one = document.createElement('div');
+        one.className = 'one';
+        const box = document.createElement('div');
+        box.className = 'box';
+        box.style.width = box.style.height = `${size}px`;
+        if (item.kind === 'file') {
+          const img = document.createElement('img');
+          img.src = item.src; img.width = size; img.height = size; img.alt = item.name;
+          box.append(img);
+        } else {
+          const frame = document.createElement('iframe');
+          frame.src = item.src(size); frame.width = size; frame.height = size; frame.scrolling = 'no';
+          box.append(frame);
+          if (size === 152) frames.push([item.slug, frame]);
+        }
+        one.append(box);
+        if (id === 'big') {
+          one.insertAdjacentHTML('beforeend',
+            `<div class="name">${item.name}</div><div class="sub">${item.sub}</div>`);
+        }
+        row.append(one);
+      }
+    }
+
+    await new Promise((r) => setTimeout(r, 2500));      // ريثما تصل الخطوطُ وتُرسَم العلب
+
+    // **أتُقَصُّ العلامةُ؟** حبرُ الكلمة يُقاس في علبته: ما خرج عن الصندوق قُصّ فعلاً
+    // (وهو دَينٌ أدّاه احسب في جلسته يومَ صُيِّر بخطٍّ أعرضَ حبراً من Marhey).
+    const fit = {};
+    for (const [slug, frame] of frames) {
+      const doc = frame.contentDocument;
+      const box = doc.querySelector('.icon');
+      const word = doc.querySelector('.icon span');
+      if (!box || !word) { fit[slug] = null; continue; }
+      const b = box.getBoundingClientRect(), w = word.getBoundingClientRect();
+      fit[slug] = {
+        over: Math.round(Math.max(0, b.left - w.left, w.right - b.right,
+                                  b.top - w.top, w.bottom - b.bottom) * 100) / 100,
+        width: Math.round(w.width * 100) / 100, box: Math.round(b.width * 100) / 100,
+      };
+    }
+    await fetch('/__measure', { method: 'POST', body: JSON.stringify({ fit }) });
+    await fetch('/__ready');
+  } catch (err) {
+    document.body.insertAdjacentHTML('beforeend',
+      `<pre class="warn">تعذّر الصفّ: ${err && err.stack || err}</pre>`);
+    fetch('/__ready?fail=1');
+  }
+})();
+</script>
+</body>
+</html>

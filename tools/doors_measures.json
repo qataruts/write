@@ -1,0 +1,527 @@
+{
+ "_": "ملفٌّ مولَّد — لا يُحرَّر بيد. يكتبه `python3 tools/identity_doors.py`",
+ "fingerprint": {
+  "Alexandria": "ef0ea68f2c0a45ef",
+  "Alkalami": "7e54f704620ab8c2",
+  "Almarai": "f7ec2614d457f161",
+  "Amiri": "e2cfef2a9367423f",
+  "AmiriQuran": "9b208435b7ed5f50",
+  "ArefRuqaa": "69f92a8e99f5c5ea",
+  "ArefRuqaaInk": "c57c17cb4a5cc7d3",
+  "Blaka": "11fe324042a1f988",
+  "CairoPlay": "6ae74a27958f0dea",
+  "Changa": "3f8d2adefdf324c6",
+  "ElMessiri": "9983ee8a280d9344",
+  "Gulzar": "87baa5efe5567424",
+  "Harmattan": "a634ffbd1e06971b",
+  "Jomhuria": "c30d463370e5bf39",
+  "Katibeh": "f28081b17ee46f7a",
+  "Lalezar": "5d59526995470da0",
+  "Lateef": "48278ec4703794fd",
+  "Lemonada": "af101d7f2580e246",
+  "Mada": "2c0f42b0b76b2467",
+  "Mirza": "66ae2cd1a850ddb4",
+  "NotoKufiArabic": "e8a770c94feab880",
+  "Qahiri": "81d52b73f148c08a",
+  "Rakkas": "0c36517fffa8b0bc",
+  "ReadexPro": "1a432d26fc51264a",
+  "ReemKufi": "71b89239d93ca976",
+  "ScheherazadeNew": "1535bf73313e4d93",
+  "Tajawal": "9c74078c718a3709",
+  "Vibes": "04565beaf90df0d7",
+  "@read": "dc16cff1ad9c6efc",
+  "@calc": "9fd9632440b9d04c",
+  "@content": "bb07eddbc50a85b3",
+  "#identity_word.html": "9e6d5f1347c9673d",
+  "#doors.json": "52102d3fe3ec42c8",
+  "#cell": "300x6x128x200"
+ },
+ "floors": {
+  "sibling": 0.7145,
+  "content": 0.5005
+ },
+ "refs": {
+  "read": "Marhey",
+  "calc": "Kufam",
+  "content": "NotoNaskhArabic"
+ },
+ "fonts": {
+  "Marhey": {
+   "ink": 9394,
+   "colored": 0.0,
+   "ratio": 1.649,
+   "marks_above": 0.1791,
+   "marks_below": 0.0,
+   "gap": {
+    "Marhey": 0.0,
+    "Kufam": 0.7145,
+    "NotoNaskhArabic": 0.5005
+   },
+   "bytes": null,
+   "axis": null,
+   "heavy": null
+  },
+  "Kufam": {
+   "ink": 13316,
+   "colored": 0.0,
+   "ratio": 2.027,
+   "marks_above": 0.2365,
+   "marks_below": 0.0,
+   "gap": {
+    "Marhey": 0.7145,
+    "Kufam": 0.0,
+    "NotoNaskhArabic": 0.7482
+   },
+   "bytes": null,
+   "axis": null,
+   "heavy": null
+  },
+  "NotoNaskhArabic": {
+   "ink": 5553,
+   "colored": 0.0,
+   "ratio": 1.544,
+   "marks_above": 0.216,
+   "marks_below": 0.0,
+   "gap": {
+    "Marhey": 0.5005,
+    "Kufam": 0.7482,
+    "NotoNaskhArabic": 0.0
+   },
+   "bytes": null,
+   "axis": null,
+   "heavy": null
+  },
+  "ArefRuqaa": {
+   "ink": 5547,
+   "colored": 0.0,
+   "ratio": 1.013,
+   "marks_above": 0.1307,
+   "marks_below": 0.0,
+   "gap": {
+    "Marhey": 0.7578,
+    "Kufam": 0.8574,
+    "NotoNaskhArabic": 0.7905
+   },
+   "bytes": 84064,
+   "axis": false,
+   "heavy": true
+  },
+  "Amiri": {
+   "ink": 6011,
+   "colored": 0.0,
+   "ratio": 1.338,
+   "marks_above": 0.2611,
+   "marks_below": 0.0,
+   "gap": {
+    "Marhey": 0.7987,
+    "Kufam": 0.8867,
+    "NotoNaskhArabic": 0.7483
+   },
+   "bytes": 208516,
+   "axis": false,
+   "heavy": true
+  },
+  "ArefRuqaaInk": {
+   "ink": 4732,
+   "colored": 1.0,
+   "ratio": 1.034,
+   "marks_above": 0.1342,
+   "marks_below": 0.0,
+   "gap": {
+    "Marhey": 0.7989,
+    "Kufam": 0.8838,
+    "NotoNaskhArabic": 0.8288
+   },
+   "bytes": 123380,
+   "axis": false,
+   "heavy": true
+  },
+  "Qahiri": {
+   "ink": 12128,
+   "colored": 0.0,
+   "ratio": 3.471,
+   "marks_above": 0.0,
+   "marks_below": 0.0,
+   "gap": {
+    "Marhey": 0.7747,
+    "Kufam": 0.7399,
+    "NotoNaskhArabic": 0.8729
+   },
+   "bytes": 5956,
+   "axis": false,
+   "heavy": false
+  },
+  "Vibes": {
+   "ink": 3277,
+   "colored": 0.0,
+   "ratio": 1.286,
+   "marks_above": 0.0,
+   "marks_below": 0.0,
+   "gap": {
+    "Marhey": 0.7727,
+    "Kufam": 0.8359,
+    "NotoNaskhArabic": 0.8027
+   },
+   "bytes": 10696,
+   "axis": false,
+   "heavy": false
+  },
+  "Rakkas": {
+   "ink": 6935,
+   "colored": 0.0,
+   "ratio": 1.344,
+   "marks_above": 0.0076,
+   "marks_below": 0.0,
+   "gap": {
+    "Marhey": 0.6325,
+    "Kufam": 0.752,
+    "NotoNaskhArabic": 0.6718
+   },
+   "bytes": 19324,
+   "axis": false,
+   "heavy": false
+  },
+  "Gulzar": {
+   "ink": 6971,
+   "colored": 0.0,
+   "ratio": 0.941,
+   "marks_above": 0.1268,
+   "marks_below": 0.0,
+   "gap": {
+    "Marhey": 0.8743,
+    "Kufam": 0.8861,
+    "NotoNaskhArabic": 0.8586
+   },
+   "bytes": 191768,
+   "axis": false,
+   "heavy": false
+  },
+  "AmiriQuran": {
+   "ink": 6185,
+   "colored": 0.0,
+   "ratio": 1.348,
+   "marks_above": 0.2516,
+   "marks_below": 0.0,
+   "gap": {
+    "Marhey": 0.7924,
+    "Kufam": 0.8785,
+    "NotoNaskhArabic": 0.7383
+   },
+   "bytes": 45688,
+   "axis": false,
+   "heavy": false
+  },
+  "Lalezar": {
+   "ink": 9129,
+   "colored": 0.0,
+   "ratio": 1.65,
+   "marks_above": 0.1966,
+   "marks_below": 0.0,
+   "gap": {
+    "Marhey": 0.4761,
+    "Kufam": 0.6623,
+    "NotoNaskhArabic": 0.6353
+   },
+   "bytes": 30036,
+   "axis": false,
+   "heavy": false
+  },
+  "Alkalami": {
+   "ink": 8850,
+   "colored": 0.0,
+   "ratio": 1.649,
+   "marks_above": 0.1316,
+   "marks_below": 0.0,
+   "gap": {
+    "Marhey": 0.6302,
+    "Kufam": 0.5655,
+    "NotoNaskhArabic": 0.6843
+   },
+   "bytes": 28340,
+   "axis": false,
+   "heavy": false
+  },
+  "ReadexPro": {
+   "ink": 10659,
+   "colored": 0.0,
+   "ratio": 1.616,
+   "marks_above": 0.226,
+   "marks_below": 0.0,
+   "gap": {
+    "Marhey": 0.5255,
+    "Kufam": 0.66,
+    "NotoNaskhArabic": 0.5286
+   },
+   "bytes": 22764,
+   "axis": true,
+   "heavy": true
+  },
+  "Lemonada": {
+   "ink": 15572,
+   "colored": 0.0,
+   "ratio": 1.887,
+   "marks_above": 0.239,
+   "marks_below": 0.0,
+   "gap": {
+    "Marhey": 0.6512,
+    "Kufam": 0.5115,
+    "NotoNaskhArabic": 0.6988
+   },
+   "bytes": 26596,
+   "axis": true,
+   "heavy": true
+  },
+  "ReemKufi": {
+   "ink": 9100,
+   "colored": 0.0,
+   "ratio": 1.755,
+   "marks_above": 0.2585,
+   "marks_below": 0.0,
+   "gap": {
+    "Marhey": 0.7026,
+    "Kufam": 0.7787,
+    "NotoNaskhArabic": 0.7047
+   },
+   "bytes": 12324,
+   "axis": true,
+   "heavy": true
+  },
+  "NotoKufiArabic": {
+   "ink": 10184,
+   "colored": 0.0,
+   "ratio": 1.639,
+   "marks_above": 0.1905,
+   "marks_below": 0.0,
+   "gap": {
+    "Marhey": 0.5813,
+    "Kufam": 0.761,
+    "NotoNaskhArabic": 0.6229
+   },
+   "bytes": 123796,
+   "axis": true,
+   "heavy": true
+  },
+  "ScheherazadeNew": {
+   "ink": 7218,
+   "colored": 0.0,
+   "ratio": 1.583,
+   "marks_above": 0.2292,
+   "marks_below": 0.0,
+   "gap": {
+    "Marhey": 0.6118,
+    "Kufam": 0.7663,
+    "NotoNaskhArabic": 0.5376
+   },
+   "bytes": 168656,
+   "axis": false,
+   "heavy": true
+  },
+  "Harmattan": {
+   "ink": 6009,
+   "colored": 0.0,
+   "ratio": 2.092,
+   "marks_above": 0.2477,
+   "marks_below": 0.0,
+   "gap": {
+    "Marhey": 0.6736,
+    "Kufam": 0.6366,
+    "NotoNaskhArabic": 0.7321
+   },
+   "bytes": 268008,
+   "axis": false,
+   "heavy": true
+  },
+  "Lateef": {
+   "ink": 3459,
+   "colored": 0.0,
+   "ratio": 1.298,
+   "marks_above": 0.25,
+   "marks_below": 0.0,
+   "gap": {
+    "Marhey": 0.6299,
+    "Kufam": 0.8215,
+    "NotoNaskhArabic": 0.5796
+   },
+   "bytes": 129736,
+   "axis": false,
+   "heavy": true
+  },
+  "CairoPlay": {
+   "ink": 8179,
+   "colored": 0.1802,
+   "ratio": 1.815,
+   "marks_above": 0.2231,
+   "marks_below": 0.0,
+   "gap": {
+    "Marhey": 0.6137,
+    "Kufam": 0.7116,
+    "NotoNaskhArabic": 0.5751
+   },
+   "bytes": 40932,
+   "axis": true,
+   "heavy": true
+  },
+  "Alexandria": {
+   "ink": 12365,
+   "colored": 0.0,
+   "ratio": 1.521,
+   "marks_above": 0.2275,
+   "marks_below": 0.0,
+   "gap": {
+    "Marhey": 0.4843,
+    "Kufam": 0.7564,
+    "NotoNaskhArabic": 0.4885
+   },
+   "bytes": 31188,
+   "axis": true,
+   "heavy": true
+  },
+  "Mirza": {
+   "ink": 5300,
+   "colored": 0.0,
+   "ratio": 1.612,
+   "marks_above": 0.2241,
+   "marks_below": 0.0,
+   "gap": {
+    "Marhey": 0.5142,
+    "Kufam": 0.6347,
+    "NotoNaskhArabic": 0.4657
+   },
+   "bytes": 81828,
+   "axis": false,
+   "heavy": true
+  },
+  "Blaka": {
+   "ink": 8406,
+   "colored": 0.0,
+   "ratio": 1.804,
+   "marks_above": 0.0619,
+   "marks_below": 0.0,
+   "gap": {
+    "Marhey": 0.5128,
+    "Kufam": 0.6173,
+    "NotoNaskhArabic": 0.6278
+   },
+   "bytes": 7240,
+   "axis": false,
+   "heavy": false
+  },
+  "Jomhuria": {
+   "ink": 4695,
+   "colored": 0.0,
+   "ratio": 1.614,
+   "marks_above": 0.1928,
+   "marks_below": 0.0,
+   "gap": {
+    "Marhey": 0.448,
+    "Kufam": 0.6867,
+    "NotoNaskhArabic": 0.5617
+   },
+   "bytes": 43648,
+   "axis": false,
+   "heavy": false
+  },
+  "Katibeh": {
+   "ink": 5593,
+   "colored": 0.0,
+   "ratio": 1.5,
+   "marks_above": 0.1721,
+   "marks_below": 0.0,
+   "gap": {
+    "Marhey": 0.5654,
+    "Kufam": 0.756,
+    "NotoNaskhArabic": 0.4718
+   },
+   "bytes": 41072,
+   "axis": false,
+   "heavy": false
+  },
+  "Changa": {
+   "ink": 10979,
+   "colored": 0.0,
+   "ratio": 1.706,
+   "marks_above": 0.2517,
+   "marks_below": 0.0,
+   "gap": {
+    "Marhey": 0.5752,
+    "Kufam": 0.6556,
+    "NotoNaskhArabic": 0.6294
+   },
+   "bytes": 23072,
+   "axis": true,
+   "heavy": true
+  },
+  "ElMessiri": {
+   "ink": 8431,
+   "colored": 0.0,
+   "ratio": 1.713,
+   "marks_above": 0.2403,
+   "marks_below": 0.0,
+   "gap": {
+    "Marhey": 0.5865,
+    "Kufam": 0.7363,
+    "NotoNaskhArabic": 0.5595
+   },
+   "bytes": 22316,
+   "axis": true,
+   "heavy": true
+  },
+  "Tajawal": {
+   "ink": 8062,
+   "colored": 0.0,
+   "ratio": 1.574,
+   "marks_above": 0.3121,
+   "marks_below": 0.0,
+   "gap": {
+    "Marhey": 0.6088,
+    "Kufam": 0.7906,
+    "NotoNaskhArabic": 0.6475
+   },
+   "bytes": 17956,
+   "axis": false,
+   "heavy": true
+  },
+  "Almarai": {
+   "ink": 7858,
+   "colored": 0.0,
+   "ratio": 1.697,
+   "marks_above": 0.2348,
+   "marks_below": 0.0,
+   "gap": {
+    "Marhey": 0.5608,
+    "Kufam": 0.7211,
+    "NotoNaskhArabic": 0.4885
+   },
+   "bytes": 37144,
+   "axis": false,
+   "heavy": true
+  },
+  "Mada": {
+   "ink": 9535,
+   "colored": 0.0,
+   "ratio": 1.634,
+   "marks_above": 0.2313,
+   "marks_below": 0.0,
+   "gap": {
+    "Marhey": 0.5004,
+    "Kufam": 0.7053,
+    "NotoNaskhArabic": 0.5412
+   },
+   "bytes": 27440,
+   "axis": true,
+   "heavy": true
+  }
+ },
+ "fit": {
+  "ArefRuqaa": {
+   "over": 0,
+   "width": 80.77,
+   "box": 152
+  },
+  "Amiri": {
+   "over": 0,
+   "width": 112.66,
+   "box": 152
+  }
+ }
+}

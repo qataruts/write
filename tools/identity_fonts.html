@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>لوحةُ خطّ العلامة — «اُكْتُبْ» الجلسة هـ٢</title>
+<!--
+  **لوحةُ العرض على المالك** لبابِ العلامة (`FAMILY §٩.٤`: «لكل تطبيقٍ رسمُ علامته
+  وخطُّها قرارَ مراجعةٍ يُقَرّ — وخطُّ Marhey لعلامة اقرأ وحدَها فلا يُورَّث بالنسخ»).
+  سنّتُها لوحةُ خطوط اقرأ (`read@…:tools/welcome_fonts.html`) ولوحةُ احسب بعدَها:
+  **المرشَّحُ يُصيَّر في شرائحه من مواضعها**، لا في سطر عيّنةٍ عائم:
+
+    · **ترويسةُ التطبيق** — بنيةُ `brandMark()` وقواعدُ `.brand` من `app.css` نفسِه.
+    · **الأيقونة** — من `tools/icon.html` نفسِه (المصيّرُ الذي يولّدها بعد الحكم).
+    · **صفُّ العلامات الثلاث** — «اِقْرَأْ» بخطّها و«اِحْسِبْ» بخطّها وعلامتُنا بالمرشَّح،
+      فالحكمُ على الفرق بين إخوةٍ لا على جمالِ خطٍّ وحدَه.
+    · **وتحتها سطرُ مادّةٍ** بخطّ النموذج (Noto Naskh) — يُثبت أنّ خطّ العلامة
+      **لا يكتب مادّةً** ولا يُشبهها: العلامةُ تُقرأ علامةً والمادّةُ مادّة.
+
+  ولا يُطبَّق منها شيءٌ حتى يحكم المالك — واللوحةُ تُسلَّم لقطةً في `docs/REVIEW_IDENTITY.md`.
+-->
+<link rel="stylesheet" href="../app/css/app.css">
+<style>
+  html, body { margin: 0; padding: 0; }
+  body { background: var(--paper); color: var(--ink); padding: 24px; direction: rtl;
+         font-family: var(--font-ui); }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  .lede { color: var(--ink-soft); font-size: 13px; margin: 0 0 20px; }
+  .cols { display: grid; gap: 16px; align-items: start; }
+  .col { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+         padding: 14px; }
+  .col > h2 { font-size: 14px; margin: 0 0 2px; color: var(--accent-letters); }
+  .col > .note { font-size: 11.5px; color: var(--ink-soft); margin: 0 0 12px; min-height: 2.6em; }
+
+  /* شريحةٌ ١: الترويسة — مأخوذةٌ من `.topbar` و`.brand` في `app.css` */
+  .slot { border-top: 1px dashed var(--line); padding: 10px 0 2px; }
+  .slot > .tag { font-size: 10.5px; color: var(--ink-soft); }
+  .bar { display: flex; align-items: center; justify-content: space-between;
+         background: var(--paper); border-radius: 14px; padding: 4px 12px; margin-top: 4px; }
+  .bar .stars { color: var(--star); font-size: 15px; letter-spacing: 2px; }
+
+  /* شريحةٌ ٢: العلامة كبيرةً — كما تُرى في صفحة الترحيب */
+  .big { font-weight: 700; font-size: 62px; line-height: 1.85; color: var(--brand-word);
+         text-align: center; }
+
+  /* شريحةٌ ٣: الأيقونة من مصيّرها */
+  .icons { display: flex; gap: 12px; align-items: flex-end; justify-content: center; margin-top: 6px; }
+  .icons iframe, .icons img { border: 0; display: block; border-radius: 22.4%;
+         box-shadow: var(--shadow); }
+
+  /* شريحةٌ ٤: صفُّ العلامات الثلاث */
+  .fam { display: flex; gap: 14px; align-items: baseline; justify-content: center;
+         font-weight: 700; font-size: 26px; line-height: 2; margin-top: 4px; }
+  .fam .read { font-family: 'MarheyRef'; color: #E8590C; }
+  .fam .calc { font-family: 'KufamRef'; color: #2F6E8F; }
+  .fam .mine { color: var(--brand-word); }
+
+  /* شريحةٌ ٥: سطرُ المادّة بخطّ النموذج — لا بخطّ العلامة */
+  .body-line { font-family: var(--font-letter); font-size: 19px; text-align: center;
+               color: var(--ink); margin-top: 6px; }
+</style>
+</head>
+<body>
+<h1>خطُّ علامة «اُكْتُبْ» — مرشَّحاتٌ مصيَّرة</h1>
+<p class="lede">الخطُّ الحاليّ نائبٌ مؤقت (Marhey — خطُّ علامة اقرأ، لا يُورَّث بالنسخ). والحكمُ للمالك بعينه.</p>
+<div class="cols" id="cols"></div>
+<img id="hold" src="/__hold" alt="" style="position:fixed;inset-inline-start:0;top:0;width:1px;height:1px;opacity:0">
+<script>
+(async () => {
+  try {
+    const doors = await (await fetch('/__doors.json')).json();
+    const fonts = doors.fonts;
+    const WORD = doors.brand.word;
+
+    const faces = [];
+    for (const [slug, info] of Object.entries(fonts)) {
+      for (const file of info.files) {
+        const weight = info.axis ? '400 700' : (file.match(/-(\d+)\.woff2$/) || [, '400'])[1];
+        faces.push(`@font-face{font-family:'${slug}';src:url('${info.base}${file}') format('woff2');`
+          + `font-weight:${weight};font-display:block}`);
+      }
+    }
+    faces.push(`@font-face{font-family:'MarheyRef';src:url('${doors.brand.siblings.read.url}') format('woff2');font-weight:400 700;font-display:block}`);
+    faces.push(`@font-face{font-family:'KufamRef';src:url('${doors.brand.siblings.calc.url}') format('woff2');font-weight:400 700;font-display:block}`);
+    document.head.append(Object.assign(document.createElement('style'), { textContent: faces.join('\n') }));
+
+    const columns = [
+      { slug: 'Marhey', family: 'Marhey', title: 'النائبُ اليوم — Marhey',
+        note: 'خطُّ علامة اقرأ. ورثته البذرةُ ولم يُقرَّ لنا — والميثاق: «لا يُورَّث بالنسخ».',
+        icon: '/app/icons/icon-192.png' },
+      ...doors.brand.candidates.map((c) => ({
+        slug: c.slug, family: c.family, title: c.family, note: c.metaphor,
+        icon: `/tools/icon.html?size=152&pad=0&round=1&font=${encodeURIComponent(c.slug)}`
+          + `&src=${encodeURIComponent(fonts[c.slug].base + fonts[c.slug].best)}`,
+      })),
+    ];
+
+    const cols = document.getElementById('cols');
+    cols.style.gridTemplateColumns = `repeat(${columns.length}, 1fr)`;
+    for (const col of columns) {
+      const el = document.createElement('div');
+      el.className = 'col';
+      el.innerHTML = `
+        <h2>${col.title}</h2>
+        <p class="note">${col.note}</p>
+
+        <div class="slot"><span class="tag">ترويسةُ التطبيق (١٫٦rem — ما يراه الطفل فوق الخريطة)</span>
+          <div class="bar">
+            <span class="brand" style="font-family:'${col.slug}', var(--font-ui)"><span class="brand-word">${WORD}</span></span>
+            <span class="stars">★ ١٢</span>
+          </div>
+        </div>
+
+        <div class="slot"><span class="tag">العلامةُ كبيرةً (صفحةُ الترحيب)</span>
+          <div class="big" style="font-family:'${col.slug}'">${WORD}</div>
+        </div>
+
+        <div class="slot"><span class="tag">الأيقونة — ١٥٢ و٧٦ بكسلاً</span>
+          <div class="icons">
+            ${col.icon.startsWith('/app/')
+              ? `<img src="${col.icon}" width="152" height="152" alt=""><img src="${col.icon}" width="76" height="76" alt="">`
+              : `<iframe src="${col.icon}" width="152" height="152" scrolling="no"></iframe>`
+                + `<iframe src="${col.icon.replace('size=152', 'size=76')}" width="76" height="76" scrolling="no"></iframe>`}
+          </div>
+        </div>
+
+        <div class="slot"><span class="tag">صفُّ العلامات الثلاث — إخوةٌ لا توائم</span>
+          <div class="fam"><span class="read">اِقْرَأْ</span><span class="calc">اِحْسِبْ</span>
+            <span class="mine" style="font-family:'${col.slug}'">${WORD}</span></div>
+        </div>
+
+        <div class="slot"><span class="tag">وسطرُ المادّة بخطّ النموذج — لا يتبدّل</span>
+          <div class="body-line">بَدَأَ الْقَلَمُ مِنْ هُنَا</div>
+        </div>`;
+      cols.append(el);
+    }
+
+    await document.fonts.ready;
+    await new Promise((r) => setTimeout(r, 2200));
+    await fetch('/__ready');
+  } catch (err) {
+    document.body.insertAdjacentHTML('beforeend',
+      `<pre style="color:#900">تعذّرت اللوحة: ${err && err.stack || err}</pre>`);
+    fetch('/__ready?fail=1');
+  }
+})();
+</script>
+</body>
+</html>

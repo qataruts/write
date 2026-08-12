@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>مرشّحاتُ الاستعارة البطلة — «اُكْتُبْ» الجلسة هـ٢</title>
+<!--
+  **مصيِّرُ عالم «القلم والأثر»** على الشاشات نفسِها (بند الجلسة هـ٢: «تُعرض
+  مرشّحاتُها لقطاتٍ»). يسوقها `tools/identity_doors.py`، وسنّتُها سنّةُ
+  `tools/identity_shots.html` في هـ١ حرفاً: **التطبيقُ لا يُمَسّ** — يُقلَع في إطارٍ
+  بمقاس الجهاز، ثم يُبدَّل في نسخته المعروضة **ما يقترحه المرشَّح وحدَه**:
+
+    · `marks`     — معالمُ المحطات: يُستبدَل حبرُ `.station-mark` بحسب نوع المحطة.
+    · `names`     — أسماءُ المراحل: يُستبدَل عنوانُ محطات الحروف السبع.
+    · `celebrate` — نكهةُ الاحتفال: يُستبدَل وجهُ الميدالية بعد بلوغ الاحتفال كتابةً.
+
+  فما تراه اللقطةُ ما سيراه الطفلُ يومَ يُطبَّق، لا محاكاةً له. **ولا سطرَ يُكتب في
+  `app/` حتى يحكم المالك** — وهذا هو الفرقُ بين العرض والتنفيذ.
+
+  و**الاحتفالُ يُبلَغ بالكتابة لا بالقفز إليه**: تُكتب أشكالُ المحطة بأحداث مؤشّرٍ
+  حقيقية على `pen.js`، فأثرُ الطفل في المرشَّح الثالث **أثرٌ كتبه المحرّك فعلاً** —
+  لا مسارٌ مرجعيٌّ يُلبَس ثوبَ حبرِ طفل.
+-->
+<style>
+  html, body { margin: 0; padding: 0; background: #fff; height: 100%; overflow: hidden; }
+  iframe { display: block; width: 100vw; height: 100vh; border: 0; }
+  #hold { position: fixed; inset-inline-start: 0; top: 0; width: 1px; height: 1px; opacity: 0; }
+  #fail { position: fixed; inset: 0; font: 16px/1.7 system-ui; padding: 2rem;
+          background: #300; color: #fdd; white-space: pre-wrap; display: none; }
+</style>
+</head>
+<body>
+<iframe id="app" title="التطبيق"></iframe>
+<img id="hold" src="/__hold" alt="">
+<pre id="fail"></pre>
+<script type="module">
+const q = new URLSearchParams(location.search);
+const MODE = q.get('mode') || 'marks';       // marks · names · celebrate
+const PICK = q.get('pick') || 'now';
+const APP = '/app/';
+const BOARD_PART = 'curves';                 // محطةُ المنحنيات — كما في لقطات هـ١
+const frame = document.getElementById('app');
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
+function die(err) {
+  const box = document.getElementById('fail');
+  box.textContent = 'تعذّر المشهد: ' + (err && err.stack ? err.stack : err);
+  box.style.display = 'block';
+  fetch('/__ready?fail=1');
+}
+
+/** تقدّمُ الطفل بواجهة `progress.js` نفسِها — لا مخزنٌ يُركَّب بيد (سنّةُ هـ١). */
+async function seed(upto) {
+  const progress = await import(`${APP}js/progress.js`);
+  const { STAGES } = await import(`${APP}js/curriculum.js`);
+  progress.reset();
+  for (const stage of STAGES) {
+    for (const node of progress.stageNodes(stage)) progress.setStars(node.id, 3);
+    if (stage.id === upto) break;
+  }
+}
+
+/** إصبعٌ مصنوع على لوح `pen.js` — أحداثُ مؤشّرٍ حقيقية بإحداثيات الشبكة ١٠٠٠×١٠٠٠. */
+function hand(doc, win) {
+  let pid = 300;
+  const surface = () => doc.querySelector('.pen-surface');
+  const toClient = ([x, y]) => {
+    const rect = surface().getBoundingClientRect();
+    const size = Math.min(rect.width, rect.height);
+    return {
+      clientX: rect.left + (rect.width - size) / 2 + (x / 1000) * size,
+      clientY: rect.top + (rect.height - size) / 2 + (y / 1000) * size,
+    };
+  };
+  const fire = (type, point, id) => surface().dispatchEvent(new win.PointerEvent(type, {
+    bubbles: true, cancelable: true, composed: true,
+    pointerId: id, pointerType: 'touch', isPrimary: true, ...toClient(point),
+  }));
+  return async function stroke(points) {
+    const id = ++pid;
+    fire('pointerdown', points[0], id);
+    for (const p of points.slice(1)) fire('pointermove', p, id);
+    await wait(50);
+    fire('pointerup', points[points.length - 1], id);
+    await wait(80);
+  };
+}
+
+/** معلمُ محطةٍ من بيان المرشَّح — يُكتب في `.station-mark` بصيغة `landmark()` نفسِها. */
+function paintMarks(doc, set) {
+  const kinds = ['warmup', 'letter', 'form', 'join', 'fade', 'sentence', 'gate'];
+  let painted = 0;
+  for (const kind of kinds) {
+    if (!set[kind]) continue;
+    for (const station of doc.querySelectorAll(`.station--${kind} .station-mark`)) {
+      station.innerHTML = `<svg viewBox="0 0 64 48" fill="none" stroke="var(--accent)"
+        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">${set[kind]}</svg>`;
+      painted += 1;
+    }
+  }
+  return painted;
+}
+
+/** أسماءُ مجموعات الحروف السبع بترتيبها على الدرب (`g1`…`g7` — ترتيبُ اقرأ). */
+function paintNames(doc, titles) {
+  const stations = [...doc.querySelectorAll('.station--letter')];
+  let painted = 0;
+  stations.forEach((station, i) => {
+    const head = station.querySelector('h2');
+    const want = titles[`g${i + 1}`];
+    if (head && want) { head.textContent = want; painted += 1; }
+  });
+  return painted;
+}
+
+(async () => {
+  const doors = await (await fetch('/__doors.json')).json();
+
+  if (MODE === 'celebrate') {
+    await seed('warm');
+    frame.src = `${APP}#/warmup/${encodeURIComponent(BOARD_PART)}`;
+  } else {
+    await seed('g1');
+    frame.src = APP;
+  }
+  await new Promise((r) => frame.addEventListener('load', r, { once: true }));
+  const doc = frame.contentDocument;
+  const win = frame.contentWindow;
+  await wait(500);
+
+  if (MODE === 'marks' || MODE === 'names') {
+    if (!doc.querySelector('.station')) throw new Error('لا خريطةَ على الشاشة');
+    if (MODE === 'marks') {
+      const found = doors.world.marks.find((m) => m.id === PICK);
+      if (!found) throw new Error(`مرشَّحُ معالمَ لا وجود له: ${PICK}`);
+      if (found.set && !paintMarks(doc, found.set)) throw new Error('لم يُستبدَل معلمٌ واحد');
+    } else {
+      const found = doors.world.names.find((n) => n.id === PICK);
+      if (!found) throw new Error(`مرشَّحُ أسماءٍ لا وجود له: ${PICK}`);
+      // «بحروفِها»: العنوانُ يُبنى من حروف المحطة نفسِها كما تعلنها بياناتُ المنهج —
+      // لا قائمةَ أسماءٍ تُكتب بيد فتشيخ يومَ يتحرّك ترتيبُ الحروف.
+      let titles = found.titles;
+      if (titles === 'letters') {
+        const { STAGES } = await import(`${APP}js/curriculum.js`);
+        titles = {};
+        for (const stage of STAGES.filter((s) => s.kind === 'letter')) {
+          titles[stage.id] = `حُرُوفُ ${stage.nodes.map((n) => n.letter).join(' ')}`;
+        }
+      }
+      if (titles && !paintNames(doc, titles)) throw new Error('لم يُستبدَل عنوانٌ واحد');
+    }
+    // **رأسُ الخريطة لا موضعُ الجبهة** (درسُ هـ١): تُصوَّر ما يراه الطفلُ أوّلَ ما يفتح،
+    // ولا تُقبَل لقطةٌ في وسط انزلاقها الناعم.
+    win.scrollTo(0, 0);
+    await wait(500);
+    win.scrollTo(0, 0);
+    await wait(200);
+    if (win.scrollY !== 0) throw new Error('الخريطةُ لم تستقرّ على رأسها');
+  } else {
+    const found = doors.world.celebrate.find((c) => c.id === PICK);
+    if (!found) throw new Error(`مرشَّحُ احتفالٍ لا وجود له: ${PICK}`);
+    const { WARMUPS } = await import(`${APP}js/warmups.js`);
+    const shapes = WARMUPS[BOARD_PART].shapes;
+    const stroke = hand(doc, win);
+    if (!doc.querySelector('.pen-surface')) throw new Error('لا لوحَ على الشاشة');
+
+    // حبرُ الطفل يُجمَع أوّلاً بأوّل: لوحُ المحطة يُستبدَل عند الاحتفال، فما لم يُنسَخ
+    // قبله ضاع. (وهو حبرُ `pen.js` نفسِه — مساراتٌ لم تغادر الصفحة، فضلاً عن الجهاز.)
+    // **والمأخوذُ آخرُ شكلٍ كتبه** لا الأشكالُ الثلاثة مركومةً بعضُها فوق بعض: الميداليةُ
+    // قرصٌ واحد، وثلاثةُ آثارٍ فيه لطخة. ويُؤخذ بالفرق عن اللقطة السابقة، فيستوي أن
+    // يمسح اللوحُ حبرَه بين شكلٍ وشكل أو يراكمه.
+    let inks = [], inkShape = shapes.length - 1;
+    for (const [index, shape] of shapes.entries()) {
+      for (const part of shape.ref.strokes) {
+        await stroke(part.points);
+        // **تُلتقط بعد كلّ ضربة**: اللوحُ يُستبدَل لحظةَ إتمام آخر شكل (`finish` تضع
+        // الاحتفالَ مكانَه)، فمن انتظر تمامَ الشكل ليأخذ حبرَه وجد اللوحَ قد ذهب —
+        // وقد وقع ذلك فعلاً. وما يبقى في اليد آخرُ حبرٍ غيرِ فارغ: أثرُ الشكل الأخير.
+        const snap = [...doc.querySelectorAll('.pen-ink path')].map((p) => p.getAttribute('d'));
+        if (snap.length) { inks = snap; inkShape = index; }
+      }
+      await wait(560);
+    }
+    await wait(400);
+    const face = doc.querySelector('.celebrate .celebrate-face');
+    if (!face) throw new Error('لم يبلغ المشهدُ الاحتفال');
+
+    // قرصُ الميدالية دائرة، والأثرُ يُرسَم في مربّعٍ — فيُوسَّع الإطارُ حولَه هامشاً
+    // كي لا يُقَصّ الأثرُ على حافة القرص (وقد قُصّ في أوّل تصيير).
+    const medal = (paths) => `<svg viewBox="-190 -190 1380 1380" fill="none" stroke="currentColor"
+      stroke-width="64" stroke-linecap="round" stroke-linejoin="round"
+      style="width:100%;height:100%">${paths.map((d) => `<path d="${d}"/>`).join('')}</svg>`;
+
+    if (PICK === 'letter') {
+      // **وجهُ العقدة في الميدالية**: مسارُ الشكل المرجعيّ الذي أتمّه الآن — مرسوماً من
+      // `ref` نفسِها التي حكم بها المحرّك، لا رسمٌ ثانٍ يفارقها. (وفي محطة حرفٍ يصير
+      // الوجهُ **الحرفَ نفسَه** كما تعلنه `nodeFace` — والجلسة ٥ تبنيها.)
+      // **الشكلُ نفسُه الذي بقي حبرُه في اليد** — فيقابل المرشَّحان نموذجاً بحبرِ طفل
+      // على شكلٍ واحد، لا شكلين لا يُقارَنان.
+      const last = shapes[inkShape];
+      face.innerHTML = medal([last.ref.strokes.map((k) =>
+        k.points.map(([x, y], i) => `${i ? 'L' : 'M'}${x} ${y}`).join(' ')).join(' ')]);
+    } else if (PICK === 'trace') {
+      // **أثرُ الطفل نفسُه**: الحبرُ الذي خرج من إصبعه قبل ثانية، بحرفه.
+      if (!inks.length) throw new Error('لم يُجمَع حبرٌ للطفل');
+      face.innerHTML = medal(inks);
+    }
+  }
+
+  await wait(350);
+  await fetch('/__ready');
+})().catch(die);
+</script>
+</body>
+</html>
