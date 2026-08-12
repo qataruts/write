@@ -40,10 +40,16 @@ const frame = document.getElementById('app');
    عند احسب وأذنُ المالك تسمع صوتين معاً وثالثاً مقطوشاً. فيُبدَّل عنصرُ الصوت بشاهدٍ
    يسجّل **لحظتَي بدء كل تشغيلٍ وتمامه**، ومنهما يُحكَم: لا لحظةَ فيها صوتان معاً، ولا
    جملةً تُقطَع قبل تمامها إلا بإسكاتٍ مقصود، ولا انتقالاً يسبق تمامَ الكلام. */
-/* **ومدّةُ الملفّ الوهميّ ٩٠٠ مللي** — فوق أطولِ مهلةٍ ثابتة في شاشاتنا (`review.js`
-   ينتقل بعد ٧٥٠ ويعيد بعد ٤٥٠): بذلك يصير **العطبُ الأصليّ مرئياً للحارس** — من
-   انتظر مهلةً بدل `ended` يقطع الجملةَ في منتصفها فيُقرأ «مقطوشاً»، ولولا ذلك لَمرّ.
+/* **ومدّةُ الملفّ الوهميّ ٩٠٠ مللي** — فوق أطولِ مهلةٍ ثابتة كانت في شاشاتنا
+   (`review.js` كان ينتقل بعد ٧٥٠ ويعيد بعد ٤٥٠، **وقد سقطتا في الجلسة ٥** فصار
+   الانتقالُ ينتظر `ended`): بذلك يصير **العطبُ الأصليّ مرئياً للحارس** — من انتظر
+   مهلةً بدل `ended` يقطع الجملةَ في منتصفها فيُقرأ «مقطوشاً»، ولولا ذلك لَمرّ. وتبقى
+   المدّةُ على قدرها حارسةً لعودةِ المهلة يوماً.
    (والمهلةُ الأطولُ من المدّة يكشفها أخوه في `check_speech.mjs` بمدّتين مختلفتين.) */
+/* **ونصوصُ القياس صارت من البنك بأعيانها** (الجلسة ٥): كانت حروفَ هجاءٍ مشكولةً لا
+   ملفَّ لها — تُقاس بها المؤقّتاتُ وحدَها — فلمّا نُسخت أسماءُ الحروف من بنك اقرأ صار
+   الطريقُ المقيسُ هو طريقَ الطفل نفسَه: مفتاحٌ في الفهرس فملفٌّ يُشغَّل، لا احتياطَ
+   نطقٍ آليّ يلتفّ على الشاهد. */
 let audioMs = 900;
 const timeline = [];    // {key, doc, t0, t1} — لحظاتُ كل تشغيلٍ بالمللي، و`doc` نافذتُه
 const failKeys = new Set();   // مفاتيحُ يتعثّر تحميلُها عمداً (فحصُ الاحتياط)
@@ -197,7 +203,7 @@ const send = () => fetch('/result', {
     const seqFrom = performance.now();
 
     // أ) نداءان في اللحظة نفسِها — وهو عينُ ما وقع في ميدان احسب
-    const both = await Promise.all([audio.play('أَلِفْ'), audio.play('بَاءْ')]);
+    const both = await Promise.all([audio.play('أَلِف'), audio.play('باء')]);
     const rows = timeline.filter((r) => r.t0 >= seqFrom);
     const cut = rows.filter((r) => r.t1 - r.t0 < audioMs * 0.9);
     ok(rows.length === 2 && cut.length === 0 && both.every((h) => h === true),
@@ -213,7 +219,7 @@ const send = () => fetch('/result', {
 
     // ب) **وعدُ `play` يتمّ بتمام الكلام** — به تنتظر الشاشةُ قبل أن تنتقل
     const waitFrom = performance.now();
-    await audio.play('جِيمْ');
+    await audio.play('ميم');
     const moved = performance.now();
     const line = timeline.find((r) => r.t0 >= waitFrom);
     ok(line && moved >= line.t1 && line.t1 - line.t0 >= audioMs * 0.9,
@@ -223,27 +229,27 @@ const send = () => fetch('/result', {
 
     // ج) الإسكاتُ يُفرغ الطابور ولا يعطّله (نقرةُ الطفل الناقلة)
     const mark = timeline.length;
-    const dropped = [audio.play('دَالْ'), audio.play('هَاءْ')];
+    const dropped = [audio.play('دال'), audio.play('هاء')];
     audio.stop();
     await Promise.all(dropped);
     ok(timeline.length === mark,
       `والإسكاتُ يُفرغ الطابور: ما صُفّ قبله لا يُشغَّل بعده (${timeline.length - mark} تشغيلاً بعده)`);
-    await audio.play('وَاوْ');
+    await audio.play('واو');
     ok(timeline.length === mark + 1, 'والقناةُ تعمل بعد الإسكات (إفراغٌ لا تعطيل)');
 
     // د) **الاحتياطُ عند تعثّر الملف مهلةٌ محسوبة لا تجميد**: القناةُ تمضي ولا تقف
-    failKeys.add(audio.keyFor('زَايْ'));
+    failKeys.add(audio.keyFor('سين'));
     const stuckFrom = performance.now();
     const raced = await Promise.race([
-      audio.play('زَايْ').then(() => 'مضت'),
+      audio.play('سين').then(() => 'مضت'),
       wait(9000).then(() => 'تجمّدت'),
     ]);
     const stuckMs = performance.now() - stuckFrom;
     // **والمقدارُ شرطٌ كالمضيّ**: «مهلةٌ محسوبة» لا تعني رجوعاً فورياً — من رجع في
     // صفرٍ لم ينتظر شيئاً، وهو العطبُ نفسُه لا علاجُه.
-    ok(raced === 'مضت' && stuckMs >= audio.estimateMs('زَايْ') * 0.4,
+    ok(raced === 'مضت' && stuckMs >= audio.estimateMs('سين') * 0.4,
       `وملفٌّ يتعثّر **يمضي بمهلةٍ محسوبة لا يجمّد القناة ولا يدهسها** `
-      + `(${Math.round(stuckMs)}ms، والحدُّ المقدَّر ${audio.estimateMs('زَايْ')}ms)`);
+      + `(${Math.round(stuckMs)}ms، والحدُّ المقدَّر ${audio.estimateMs('سين')}ms)`);
     failKeys.clear();
 
     // هـ) **وعلى مسار الطفل نفسِه**: نافذةُ التطبيق — لا لحظةَ فيها صوتان معاً.

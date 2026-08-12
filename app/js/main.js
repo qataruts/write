@@ -13,11 +13,12 @@ import * as progress from './progress.js';
 import * as audio from './audio.js';
 import * as install from './install.js';
 import * as probe from './probe.js';
-import { renderReview } from './review.js';
+import { renderReview, releaseReview } from './review.js';
 import { renderGate } from './gate.js';
 import { renderParent, skillsText } from './parent.js';
 import { renderPenDev, releasePen } from './pendev.js';
 import { renderWarmup, releaseWarmup } from './warmup.js';
+import { renderLesson, releaseLesson, lessonReady } from './lesson.js';
 import {
   h, icon, faceEl, toast, go, arNum, starsRow, topbar, brandMark, shake,
   nodeTitle, nodeFace, nodeWhere, accentForKind, landmark, stageTitle, DEV,
@@ -320,7 +321,7 @@ function nodeButton(node, next) {
       }
       // **جبهةُ الرحلة تجيب كما يجيب المقفل** (بلاغُ الميدان ١): محطةٌ مفتوحةٌ لم
       // تُبنَ شاشتُها بعدُ **لا تصمت** — الهزّةُ نفسُها والرسالةُ تُقرأ، ولا انتقالَ.
-      if (awaitingScreen(node.type)) {
+      if (awaitingScreen(node.type, node.part)) {
         comingSoon(node.type, btn);
         return;
       }
@@ -355,7 +356,8 @@ function fillAll(stars) {
 // يقع الطفلُ على طريقٍ مسدود. والسطرُ يُحذف يومَ تُكتب شاشتُه لا قبلها.
 
 const SCREENS = {
-  letter: 'درس الحرف المعزول — الجلسة ٥',
+  // **وسطرُ «درس الحرف» سقط في الجلسة ٥** — كُتبت شاشتُه (`lesson.js`)، فصار
+  // `tools/test_measure.mjs` يطالبها بقياسها من نفسه بلا سطرٍ يُعدَّل هناك.
   form: 'أشكال المواقع — الجلسة ٧',
   join: 'الوصل والنسخ — الجلسة ٨',
   fade: 'خفوت النموذج والإملاء — الجلسة ٩',
@@ -373,8 +375,17 @@ const SCREENS = {
 // **ولا صوتَ يُضاف** — سطرُ شاشةٍ يُقرأ، و`audio_queue.json` لا يُمَسّ.
 const SOON = 'قَرِيبًا… هذه المحطةُ تُعَدُّ لك';
 
-/** أمحطةٌ مفتوحةٌ لم تُبنَ شاشتُها بعد؟ — من جرد `SCREENS` وحدَه، فلا قائمةَ ثانية تشيخ. */
-const awaitingScreen = (type) => Boolean(SCREENS[type]);
+/**
+ * **وحرفٌ بلا مسارٍ مرجعيّ من جنسها** (الجلسة ٥): شاشةُ الدرس مكتوبة، لكنّ حروفَ
+ * المجموعات ٤–٧ تنتظر تأليفَ مساراتها (الجلسة ٦) — ودرسٌ بلا نموذجٍ ولا حَكَم لا
+ * يُفتَح. **ولا قائمةَ تُكتب**: `lessonReady` تقرأ البياناتِ نفسَها، فيومَ يُؤلَّف
+ * مسارُ حرفٍ يُفتَح درسُه بلا سطرٍ يُعدَّل هنا.
+ */
+const SOON_WHY = { letter: 'مساراتُ بقيّة الحروف — الجلسة ٦' };
+
+/** أمحطةٌ مفتوحةٌ لم تُبنَ شاشتُها (أو لم تُؤلَّف مادّتُها) بعد؟ */
+const awaitingScreen = (type, part) => Boolean(SCREENS[type])
+  || (type === 'letter' && !lessonReady(part));
 
 /**
  * جوابُ الجبهة: هزّةٌ ورسالةٌ — **ولا انتقالَ** إلى شاشةٍ ترُدّ الطفلَ من حيث أتى.
@@ -382,7 +393,8 @@ const awaitingScreen = (type) => Boolean(SCREENS[type]);
  */
 function comingSoon(type, el) {
   if (el) shake(el);
-  toast(DEV ? `${SOON} — ${SCREENS[type]}` : SOON, 'smile');
+  const why = SCREENS[type] ?? SOON_WHY[type];
+  toast(DEV && why ? `${SOON} — ${why}` : SOON, 'smile');
 }
 
 let renderToken = 0;
@@ -393,6 +405,8 @@ async function render() {
   // للوحٍ غادره الطفلُ أثرٌ معلَّقٌ على النافذة. (ولكلِّ شاشةٍ تبني لوحاً إطلاقُها.)
   releasePen();
   releaseWarmup();
+  releaseLesson();
+  releaseReview();
   const token = ++renderToken;
   const [name, arg1] = location.hash.replace(/^#\/?/, '').split('/');
 
@@ -427,6 +441,19 @@ async function render() {
     const node = progress.allNodes().find((n) => n.type === 'warmup' && n.part === part);
     if (node && !guard(node.id)) return;
     screen = (node && renderWarmup(part)) || renderMap();
+  } else if (name === 'letter' && arg1) {
+    // **درسُ الحرف** (`METHOD.md §٥`، الجلسة ٥): القفلُ يُحرَس هنا كما في أزرار
+    // الخريطة، **وحرفٌ لم يُؤلَّف مسارُه يُجيب ولا يصمت** (بلاغُ الميدان ١) —
+    // فيعرف الطفلُ أنّ محطتَه تُعَدّ له، ولا يقع على شاشةٍ بيضاء.
+    const part = decodeURIComponent(arg1);
+    const node = progress.allNodes().find((n) => n.type === 'letter' && n.part === part);
+    if (node && !guard(node.id)) return;
+    if (node && !lessonReady(part)) {
+      comingSoon('letter', null);
+      screen = renderMap();
+    } else {
+      screen = (node && renderLesson(part)) || renderMap();
+    }
   } else if (name === 'pen') {
     // صفحةُ تجربة محرّك القلم (الجلسة ١) — خلف `?dev=1` وحدها، و`renderPenDev`
     // تردّ `null` بدونها فيعود الطفلُ إلى خريطته.

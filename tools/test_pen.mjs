@@ -51,8 +51,17 @@ const NET = ['fetch(', 'XMLHttpRequest', 'sendBeacon', 'WebSocket', 'EventSource
  *
  * **و`probe.js` منهم** (الجلسة م١): مسجّلُ الأحداث خلف `?dev=1` يقرأ **موضعَ لمسة
  * الطفل** (`clientX/clientY` و`elementFromPoint`) ليقول أين وقعت النقرةُ ومَن كان
- * فوقها — فهو حاملُ موضعٍ وإن لم يكن حاملَ مسار، وحقُّه حراسةُ الحاملين. */
-const CARRIERS = ['pen.js', 'pendev.js', 'probe.js'];
+ * فوقها — فهو حاملُ موضعٍ وإن لم يكن حاملَ مسار، وحقُّه حراسةُ الحاملين.
+ *
+ * **وكلُّ شاشةٍ تبني لوحاً منهم** (الجلسة ٥): مَن نادى `penSurface` أو تلقّى `onFault`
+ * وصله من المحرّك **موضعُ الخطأ وانزياحُه** — أيْ إحداثيّ إصبع الطفل — فهو حاملُ
+ * موضعٍ كـ`probe.js` سواءً بسواء. **وتُجرَد من القرص لا تُكتب قائمةً**: شاشةٌ تُبنى
+ * غداً (الأشكالُ في الجلسة ٧، والنسخُ في ٨) تدخل الحراسةَ يومَ تُكتب، ولا تنفلت
+ * صامتةً — وهو نمطُ جرد `tracking` أدناه نفسُه.
+ * (وقد كشف هذا الجردُ أنّ `warmup.js` كان خارج الحراسة منذ الجلسة ٤ وهو حاملٌ.) */
+const modules = readdirSync(new URL('js/', APP)).filter((f) => f.endsWith('.js')).sort();
+const boards = modules.filter((f) => /penSurface\s*\(|onFault\s*:/.test(codeOf(read(`js/${f}`))));
+const CARRIERS = [...new Set(['pen.js', 'pendev.js', 'probe.js', ...boards])];
 const netTokens = (code) => NET.filter((token) => code.includes(token));
 
 console.log('\n— ١) الخصوصية: مسارُ الطفل لا يجد طريقاً خارج الجهاز —');
@@ -86,7 +95,6 @@ ok(!/localStorage|indexedDB|IDBDatabase|document\.cookie/.test(penCode),
 // **والوحداتُ تُجرَد من القرص لا تُكتب قائمةً**: قائمةٌ مكتوبة تشيخ بأوّل وحدةٍ
 // تُضاف (أُضيفت `paths.js` في الجلسة ٢)، فتنفلت من الحارس صامتةً. والجردُ يجدها
 // يومَ تُكتب — نظيرُ جرد `test_selftests.mjs`.
-const modules = readdirSync(new URL('js/', APP)).filter((f) => f.endsWith('.js')).sort();
 // **وقراءةُ الموضع حملٌ كتتبّع الحركة** (الجلسة م١): مَن قرأ `clientX` فقد أخذ من
 // إصبع الطفل مكانَه — ولو لم يتتبّعه. فيدخل الجردَ بها كما يدخله بأسر المؤشّر.
 const tracking = modules.filter((f) => /pointermove|setPointerCapture|getCoalescedEvents|clientX/

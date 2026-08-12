@@ -1415,6 +1415,26 @@ button {
 /* الزرّان فعلا شاشةٍ لا زينة: ارتفاعُهما ارتفاعُ «تابع من هنا» نفسُه (`.next`) */
 .warmup .foot .btn { min-width: 8rem; }
 
+/* ————— شاشةُ درس الحرف (`app/js/lesson.js` · METHOD §٥) —————
+   أختُ شاشة التهيئة في هيكلها (لوحٌ واحد وأفعالٌ تحته)، وتفترق عنها في شيءٍ واحد:
+   **خطوةُ «شاهِدْ» عرضٌ لا كتابة** — فلوحُها لا يقبل الحبر، ولمسُه ينقل إلى التتبّع
+   (فلا يبتلع نزولَ الإصبع فيضيع أوّلُ ما يكتبه الطفل). */
+
+.lesson-letter { --accent: var(--accent-letters); }
+.lesson-title { margin: 0 0 .6rem; font-size: 1.35rem; text-align: center; }
+.lesson-letter .dots { margin-bottom: .4rem; }
+.lesson-board { min-height: 12rem; }
+.lesson-letter .hint { margin: .2rem auto .8rem; max-width: 26rem; text-align: center; }
+.lesson-letter .foot { justify-content: center; gap: .6rem; }
+.lesson-letter .foot .btn { min-width: 8rem; }
+
+/* لوحُ العرض: الحبرُ لا يُكتب عليه، والنقرةُ تمرّ إلى الصندوق فتنقل الخطوة */
+.lesson-board--watch .pen-surface { pointer-events: none; }
+.lesson-board--watch .pen-box { cursor: pointer; }
+
+/* تمرينُ المراجعة بالقلم (`review.js`): سطرُ الطلب ثم اللوح */
+.exercise .ask { margin: .2rem auto .4rem; text-align: center; color: var(--ink-soft); }
+
 /* لوحُ قراءةِ المطوّر تحت اللوح (?dev=1) — أرقامُ حكمٍ لا شاشةُ طفل */
 .dev-readout {
   margin: .8rem auto 0;

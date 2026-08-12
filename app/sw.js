@@ -49,7 +49,12 @@
 // `index.html` و`main.js` في القشرة، فبلا رفعةٍ يبقى الجهازُ المثبَّت على قشرته المخزونة —
 // **ويبقى القفلُ على آيباد الطفلة التي جاء منها البلاغُ نفسُه**، وهو أسوأُ ما يقع: تصحيحٌ
 // يُكتب ولا يصل. (كذلك فعل `read@7f18bf0` في بابه.)
-const VERSION = 'v12';
+// **و`v13` (الجلسة ٥)**: أوّلُ شاشةِ درسٍ (`js/lesson.js`) و**أوّلُ بنكِ صوت** —
+// أسماءُ حروف المجموعات ١–٣ منسوخةً من بنك اقرأ ببصماتها (`docs/SEED.md §٥`). فدخل
+// الفهرسُ وبيانُ البصمات قائمةَ القشرة كما طالب `tools/test_pwa.mjs` من نفسه يومَ
+// ظهرا على القرص، **وملفاتُ الصوت نفسُها لا تدخلها**: يخزنها `precacheAudio` من
+// الفهرس (فالفهرسُ سطران في القشرة والصوتُ مئاتٌ في مخزنه الثابت).
+const VERSION = 'v13';
 const SHELL_CACHE = `uktub-shell-${VERSION}`;
 const AUDIO_CACHE = 'uktub-audio';          // ثابتٌ عمداً — لا يحمل VERSION
 const KEEP = [SHELL_CACHE, AUDIO_CACHE];
@@ -65,10 +70,13 @@ const SHELL = [
   'fonts/BalooBhaijaan2-latin.woff2',
   'fonts/ArefRuqaa-arabic-400.woff2',
   'fonts/ArefRuqaa-arabic-700.woff2',
+  'audio/manifest.json',
+  'audio/versions.json',
   'js/audio.js',
   'js/curriculum.js',
   'js/gate.js',
   'js/install.js',
+  'js/lesson.js',
   'js/main.js',
   'js/parent.js',
   'js/paths.js',

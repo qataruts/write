@@ -136,7 +136,14 @@ const stepFor = (len) => Math.max(6, Math.min(TOLERANCE.back, len * HEAD_RATIO) 
 const qs = new URLSearchParams(location.search);
 const results = [];
 const say = (ok, msg, extra = {}) => results.push({ ok: !!ok, msg, ...extra });
-const send = () => fetch('/result', { method: 'POST', body: JSON.stringify(results) });
+// **وحصيلتُنا مبصومةٌ باسمنا** (بلاغُ العائلة من احسب، `calc@16c37dc`): شُدِّد
+// `do_POST` في `browser_test.py` — وهي حظيرتُنا المستعارة — فصار يُهمِل كلَّ حمولةٍ
+// بلا `from`، **وهذه العدّةُ بقيت على صيغتها الأولى فسقطت حصيلتُها صامتة**: يركض
+// البناءُ في المتصفّح تامّاً ويقول السائقُ «لم تصل حصيلةٌ من العدّة». أمسكه أوّلُ
+// تشغيلٍ لها بعد التشديد (الجلسة ٥)، والعلاجُ أن تلبس بصمةَ أخواتها الخمس.
+const send = () => fetch('/result', {
+  method: 'POST', body: JSON.stringify({ from: 'write', rows: results }),
+});
 
 // ————— ١) الخيال: خطُّ النسخ المرجعيّ على الشبكة —————
 

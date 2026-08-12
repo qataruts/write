@@ -16,8 +16,10 @@
 
 import * as progress from './progress.js';
 import * as audio from './audio.js';
+import { pathOf } from './curriculum.js';
+import { penSurface, MODES } from './pen.js';
 import {
-  h, icon, toast, go, arNum, arCount, starsRow, topbar, mascot, cheer, DEV,
+  h, icon, toast, go, arNum, arCount, starsRow, topbar, mascot, cheer, letterName, DEV,
 } from './ui.js';
 
 export const SESSION_SIZE = 6;    // جلسة قصيرة تُنجَز في دقائق (لا تُرهق طفل الخامسة)
@@ -28,15 +30,80 @@ export const starsForReview = (errors, items) => (errors === 0 ? 3 : errors <= i
 
 // ————— سجلُّ التمارين: مُصيِّرٌ لكل نوع قياس —————
 //
-// **مُعلَّقٌ فارغاً بعلّته** (`SESSIONS.md` الجلسة ٠/٤: «ما لا موضوعَ له بعدُ يُعلَّق
-// بإعفاءٍ مكتوبٍ بسببه لا يُحذف»): تمارينُ اكتب تحتاج **محرّك القلم** (`pen.js`،
-// الجلسة ١) و**المساراتِ المرجعية** (الجلسة ٢) و**المنهجَ المشتقّ** (الجلسة ٣) —
-// ولا واحدٌ منها قائمٌ اليوم. **فالجلسة ٥ تملؤه** بتمارين `KINDS` الأربعة.
-//
 // والشكل: `VIEWS[kind] = (item, api) => Node` حيث `api` يحمل ما يحتاجه التمرين من
-// المحرّك — `{ score, wrong, right, next, token }` — فلا يعرف التمرينُ حالةَ الجلسة
-// ولا يكتب في ليتنر إلا من مدخلٍ واحد (`score`).
-export const VIEWS = {};
+// المحرّك — `{ score, wrong, right, next, say, token }` — فلا يعرف التمرينُ حالةَ
+// الجلسة ولا يكتب في ليتنر إلا من مدخلٍ واحد (`score`).
+//
+// **وامتلأ منه في الجلسة ٥ ما تحمله مادّةُ اليوم**: التتبّعُ والكتابةُ الحرّة على
+// **الحروف** — وهما ما يقيسه درسُ الحرف (`lesson.js`). **والنسخُ والإملاءُ يبقيان
+// معلَّقَين بعلّتهما**: مادّتُهما كلماتٌ لم تُدرَّس كتابةً بعد (الجلستان ٨ و٩)، ولو
+// وُضعا اليوم لَسألا الطفلَ ما لم يتعلّمه — وهو عينُ ما يمنعه `check_writable.py`.
+//
+// 🔒 **ومن حملة مسار الطفل**: يمرّ بها حبرُه كما يمرّ بدرس الحرف، فتدخل حارسَ
+// الخصوصية النصيّ في `tools/test_pen.mjs`.
+
+/**
+ * **ما تنطقه المراجعةُ — مُعلَنٌ لا مضمَر** (بابُ الإعلان في `tools/check_speech.mjs`):
+ * أسماءُ الحروف وحدَها، **وهي عينُ ما يُعلنه درسُ الحرف** — فتُستورَد منه ولا
+ * تُشتقّ هنا ثانيةً: نصٌّ واحد لا مصدران يفترقان.
+ *
+ * **ولا نصَّ يُؤلَّف للمراجعة** (قيدُها الأول): تمارينُها من مادّة الدرس بأعيانها.
+ */
+export { LETTER_NAMES as SPOKEN } from './lesson.js';
+
+/** لوحُ الطفل المعلَّق في تمرين المراجعة — يُطلَق مع كل رسمةٍ ومع مغادرة الشاشة. */
+let live = null;
+
+/** إطلاقُ لوح المراجعة (نظيرُ `releaseWarmup`) — يناديه الموجّه مع كل رسمة. */
+export function releaseReview() {
+  live?.destroy();
+  live = null;
+}
+
+/**
+ * **تمرينُ قلمٍ واحد**: يُعرَض الحرفُ من مساره المرجعيّ نفسِه ويُحكَم عليه بالشروط
+ * الأربعة (`METHOD.md §٣.٣`) — موجَّهاً في «تتبّع»، وصندوقاً فارغاً في «حرّ».
+ *
+ * **ولا محتوى جديد**: مادّتُه مهارةٌ في سجلّ الطفل، ونصُّه المنطوق اسمُ الحرف من
+ * بنك اقرأ — فلا نصَّ يُؤلَّف للمراجعة (قيدُ `review.js` الأول).
+ */
+function penExercise(item, api, mode) {
+  const ref = pathOf(item.unit, item.form);
+  // مهارةٌ لا مسارَ لها (شكلُ موقعٍ لم يُؤلَّف بعد): تُقال ولا تُخفى، ويمضي التمرين
+  if (!ref) return h('p', { class: 'hint' }, `لا مسارَ لـ«${item.unit}» بعدُ.`);
+
+  const box = h('div', { class: 'exercise' });
+  let faults = 0;
+  releaseReview();
+  const surface = penSurface({
+    ref,
+    mode,
+    label: `لوحُ مراجعة: ${letterName(item.unit)}`,
+    onFault: (fault) => { faults++; progress.recordFault(item.unit, fault.code); },
+    onDone: () => {
+      api.score(item, item.unit, item.form, faults === 0);
+      if (faults === 0) api.right(surface.el);
+      else api.wrong(surface.el, () => api.next());
+    },
+  });
+  live = surface;
+  box.append(
+    h('p', { class: 'ask' }, mode === MODES.FREE ? 'اُكْتُبْهُ وحدَك' : 'تتبّعِ المسار'),
+    surface.el,
+  );
+  surface.play();
+  surface.el.addEventListener('pointerdown', () => surface.stop(), { capture: true });
+  api.say(letterName(item.unit));
+  return box;
+}
+
+export const VIEWS = {
+  [progress.KINDS.TRACE]: (item, api) => penExercise(item, api, MODES.GUIDED),
+  [progress.KINDS.FREE]: (item, api) => penExercise(item, api, MODES.FREE),
+  // **`نسخ` و`إملاء` معلَّقان بعلّتهما**: مادّتُهما كلماتٌ (`METHOD.md §٤` المرحلتان
+  // ١٢ و١٣)، وشاشتاهما للجلستين ٨ و٩ — ويومَ تُكتبان يمتلئ هذا الموضع، ويُطالِب
+  // `tools/test_measure.mjs` بهما من نفسه (لكل قياسٍ تمرينٌ يراجعه).
+};
 
 /**
  * تمارين جلسةٍ واحدة من مهارات مستحقّة.
@@ -53,7 +120,9 @@ export function buildSession({ due = [], size = SESSION_SIZE } = {}) {
   for (const skill of due) {
     if (out.length >= size) break;
     if (!VIEWS[skill.kind]) continue;      // نوعٌ لا مُصيِّر له بعدُ: لا يُقحَم
-    out.push({ ...skill });
+    // ونصُّ التمرين المنطوق للتحميل المسبق: **اسمُ الحرف من بنك اقرأ** — ولا نصَّ
+    // يُؤلَّف للمراجعة (قيدُها الأول). ومهارةُ الكلمة نصُّها للجلستين ٨ و٩.
+    out.push({ ...skill, texts: progress.isWordSkill(skill) ? [] : [letterName(skill.unit)] });
   }
   return out;
 }
@@ -94,13 +163,14 @@ export function renderSession({ make, verdict, pill, accent = ACCENT, leaveAsk, 
 
   function paint() {
     audio.stop();
+    releaseReview();
     state.token++;
     paintDots();
     const item = items[state.index];
     audio.preload(itemTexts(item));
     const view = VIEWS[item.kind];
     body.replaceChildren(view
-      ? view(item, { score, wrong, right, next, token: () => state.token, root: () => root })
+      ? view(item, { score, wrong, right, next, say, token: () => state.token, root: () => root })
       // تمرينٌ بلا مُصيِّر لا يقع اليوم (`buildSession` تسقطه)، ويبقى الحارسُ ظاهراً
       // بدل شاشةٍ بيضاء: **العطبُ يُقال ولا يُخفى** (قاعدةُ اقرأ في بلاغات الميدان).
       : h('p', { class: 'hint' }, `لا تمرينَ لهذا النوع بعدُ (${item.kind}).`));
@@ -125,6 +195,31 @@ export function renderSession({ make, verdict, pill, accent = ACCENT, leaveAsk, 
   };
 
   /**
+   * **كلامُ التمرين يمرّ من هنا** (قناةُ ٤ج): يصفّ في القناة كسائر كلام التطبيق،
+   * ويُحفَظ وعدُه — **فينتظره الانتقالُ ولا يدهسه**.
+   */
+  const say = (text) => { spoken = audio.play(text); return spoken; };
+  let spoken = Promise.resolve(false);
+
+  /**
+   * **الانتقالُ بعد الكلام ينتظر تمامَه** (`ended`) لا مهلةً ثابتة — عهدُ الجلسة ٤ج
+   * (`calc@ad59c56`): «التتابعُ ينتظر `ended` لا مهلة».
+   *
+   * **وكانت هنا مهلتان ثابتتان** (٧٥٠ للصواب و٤٥٠ للخطأ) وُرِثتا من بذرة اقرأ حين لم
+   * تكن في التطبيق شاشةٌ ناطقة — فلمّا نطقت أولاها (هذه الجلسة) صارتا العطبَ بعينه:
+   * ملفٌّ أطولُ من المهلة يُدهَس في منتصفه. **والفارقُ يُقاس**: حارسُ المتصفّح
+   * (`browser_test.html §٧`) يشغّل ملفاً مدّتُه ٩٠٠ مللي — فوق المهلتين معاً.
+   *
+   * وحين لا يُقال شيءٌ يبقى للعين لحظتُها: وعدٌ مُسوّىً يعود في نبضةٍ واحدة، فيمضي
+   * الأثرُ البصريّ ولا يقف الدرس.
+   */
+  async function after(fn) {
+    const mine = state.token;
+    await spoken;
+    if (mine === state.token) fn();
+  }
+
+  /**
    * خطأ: **إرشادٌ لا رفض** (`METHOD.md §٣.٤`). ولا شاشةَ «خطأ» ولا مؤقّت ولا عقاب —
    * وميضُ نقطة البداية وسهمُ الاتجاه يملكهما `pen.js`، وهنا أثرٌ بصريّ فحسب.
    */
@@ -134,10 +229,10 @@ export function renderSession({ make, verdict, pill, accent = ACCENT, leaveAsk, 
     void el.offsetWidth;               // إعادة تشغيل الحركة
     el.classList.add('shake', 'bad');
     setTimeout(() => el.classList.remove('bad'), 700);
-    if (replay) setTimeout(replay, 450);
+    if (replay) after(replay);
   }
 
-  /** صواب: أثرٌ بصريّ ثم التمرين التالي — بمهلةٍ يُسمَع فيها الفاصل (`DESIGN.md §٥`). */
+  /** صواب: أثرٌ بصريّ ثم التمرين التالي — **بعد تمام ما قيل** (`DESIGN.md §٥`). */
   function right(el) {
     if (el) {
       el.classList.add('good');
@@ -145,7 +240,7 @@ export function renderSession({ make, verdict, pill, accent = ACCENT, leaveAsk, 
       void el.offsetWidth;
       el.classList.add('pop');
     }
-    setTimeout(next, 750);
+    after(next);
   }
 
   // ————— الختام —————

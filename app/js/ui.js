@@ -5,7 +5,7 @@
 // نصُّ العلامة ومصيّرُها، ومفرداتُ العقد (`nodeTitle`/`nodeWhere`/`nodeFace`)
 // على أنواع محطات اكتب لا محطات اقرأ.
 
-import { FORM_NAMES, stageById } from './curriculum.js';
+import { FORM_NAMES, LETTERS, stageById } from './curriculum.js';
 
 export const DEV = typeof location !== 'undefined'
   && new URLSearchParams(location.search).get('dev') === '1';
@@ -56,13 +56,17 @@ export function arCount(n, [one, two, few, many]) {
 }
 
 /**
- * اسم الحرف كما يُقرأ في العناوين: «حرف باء».
+ * **اسمُ الحرف — من `LETTERS` وحدَها** (وهي `LETTERS` اقرأ بأعيانها، `SEED.md §٦`):
+ * «باء» · «أَلِف». وهو **نصُّ ملفّه الصوتيّ في بنك اقرأ نفسُه** (`METHOD.md §٧`)،
+ * فمصدرٌ واحد لما يُقرأ على الشاشة ولما يُسمَع في الأذن — ولا اسمَ يُكتب بيد هنا.
  *
- * **مُعلَّقٌ على اسم الحرف** حتى الجلسة ٥: أسماءُ الحروف بأصواتها في بنك اقرأ
- * (`METHOD.md §٧`)، وتُنسخ ببصماتها حين تُبنى شاشةُ الدرس — فحتى ذلك يُعرَض الحرفُ
- * نفسُه ولا يُخترَع له اسمٌ في هذا الملف (ولا نصَّ منطوقاً هنا بحال).
+ * (وكان هذا الموضعُ مُعلَّقاً حتى الجلسة ٥ بنصّه: «تُنسخ الأصواتُ ببصماتها حين تُبنى
+ * شاشةُ الدرس» — وقد نُسخت اليوم فسقط التعليق.)
  */
-export const letterTitle = (ch) => `حرف ${ch}`;
+export const letterName = (ch) => LETTERS[ch]?.name ?? ch;
+
+/** اسم الحرف كما يُقرأ في العناوين: «حرف باء». */
+export const letterTitle = (ch) => `حرف ${letterName(ch)}`;
 
 /** اسمُ شكل الموقع كما يُقرأ: «معزول» · «ابتدائي» · «وسطي» · «نهائي». */
 export const formTitle = (form) => FORM_NAMES[form] ?? '';

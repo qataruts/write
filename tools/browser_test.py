@@ -44,6 +44,7 @@ PAGES = {
     "/__paths.html": TOOLS / "browser_paths.html",
     "/__warmup.html": TOOLS / "browser_warmup.html",
     "/__field.html": TOOLS / "browser_field.html",
+    "/__lesson.html": TOOLS / "browser_lesson.html",
 }
 # سَوقةُ الصفحات: `--suite <اسم>` يختار أيَّها يُشغَّل، والافتراضُ فحصُ القشرة.
 SUITES = {
@@ -52,6 +53,7 @@ SUITES = {
     "paths": "/__paths.html",      # الجلسة ٢: كلُّ حرفٍ يُعرض من مساره ويُحكم عليه
     "warmup": "/__warmup.html",    # الجلسة ٤: إصبعٌ يعبر محطات التهيئة الستّ بقفلها
     "field": "/__field.html",      # الجلسة م١: جوابُ الجبهة + قياسُ زرّ العودة (بلاغُ الميدان ١)
+    "lesson": "/__lesson.html",    # الجلسة ٥: درسُ حرفٍ كامل بحلقته الأربع وقياسِه وصوتِه
 }
 # نافذة Chrome بلا واجهة تحجز ٨٧ بكسلاً لإطارٍ وهميّ فوق المنظور — فلولا تعويضها لقِسنا
 # جهازاً أقصر من الجهاز. والصفحة تعيد منظورها الحقيقي، والعدّاء يرفض أي انحرافٍ عن المطلوب.
@@ -200,7 +202,13 @@ def make_server(port: int, results: list):
 def run_chrome(url: str, profile: Path, extra: list, show: bool):
     if not Path(CHROME).exists():
         sys.exit(f"لم يُعثر على Chrome في {CHROME}")
-    cmd = [CHROME, f"--user-data-dir={profile}", "--no-first-run", "--no-default-browser-check"]
+    # **والصوتُ يُشغَّل بلا لمسةِ إذن** (الجلسة ٥): سياسةُ التشغيل التلقائي تمنع
+    # `play()` بلا إيماءة مستعمل، فيرفض الوعدُ **قبل أن يُطلَب الملفّ أصلاً** — فيُقاس
+    # صفرُ طلباتٍ صوتية ويُقرأ «لم يُسمَع من البنك» وهو سليم. والإيماءةُ في يد الطفل
+    # لا في يد الفاحص، فتُرفَع هنا ليُقاس **طريقُ الطفل الحقيقيّ**: مفتاحٌ في الفهرس
+    # فملفٌّ يُطلَب من الخادم (يعدّه `/__audio_hits.json`).
+    cmd = [CHROME, f"--user-data-dir={profile}", "--no-first-run", "--no-default-browser-check",
+           "--autoplay-policy=no-user-gesture-required"]
     if not show:
         cmd += ["--headless=new", "--disable-gpu"]
     cmd += extra + [url]

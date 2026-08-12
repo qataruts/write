@@ -113,11 +113,25 @@ const toastShown = () => {
 
 (async () => {
   try {
-    // ————— تهيئةُ الحال: طفلٌ أتمّ التهيئة وبلغ أوّل حرف (حالُ الميدان بعينها) —————
+    // ————— تهيئةُ الحال: طفلٌ بلغ **محطةً لم تُبنَ شاشتُها** (حالُ الميدان بعينها) —————
+    //
+    // **والجبهةُ تُحسب ولا تُكتب** (الجلسة ٥): كان هنا «أتمّ التهيئةَ فبلغ أوّل حرف»
+    // — وهي حالُ الميدان يومَ وقع البلاغ. فلمّا كُتبت شاشةُ درس الحرف صار ذلك الحرفُ
+    // **يُفتَح** لا يجيب، فمرّ الحارسُ على غير موضوعه. **والمحروسُ ليس الحرفَ بل
+    // جوابَ الجبهة**: محطةٌ بلغها الطفلُ ولم تُبنَ شاشتُها. فتُقرأ الأنواعُ المنتظِرة
+    // من `SCREENS` في الموجّه نفسِه — **مَن يقرؤه الطفلُ يقرؤه الفاحص** (نظيرُ
+    // `test_measure.mjs`) — ويُملأ ما قبل أوّلِ محطةٍ منها بالنجوم. فيومَ تُكتب شاشةُ
+    // الأشكال (الجلسة ٧) ينتقل الحارسُ إلى ما بعدها من نفسه، بلا سطرٍ يُعدَّل.
     localStorage.clear();
     const progress = await import('/js/progress.js');
-    const warmups = progress.allNodes().filter((n) => n.type === 'warmup');
-    for (const node of warmups) progress.setStars(node.id, 3);
+    const mainSrc = await (await fetch('/js/main.js')).text();
+    const awaiting = new Set([...(mainSrc.match(/const SCREENS = \{(.*?)\n\};/s)?.[1] ?? '')
+      .matchAll(/(\w+):\s*'/g)].map((m) => m[1]));
+    const nodes = progress.allNodes();
+    const frontier = nodes.findIndex((n) => awaiting.has(n.type));
+    for (const node of nodes.slice(0, frontier < 0 ? nodes.length : frontier)) {
+      progress.setStars(node.id, 3);
+    }
 
     frame.src = '/';
     await new Promise((r) => frame.addEventListener('load', r, { once: true }));
@@ -138,8 +152,8 @@ const toastShown = () => {
     log.append(Object.assign(document.createElement('h3'), { textContent: '§١ جوابُ الجبهة' }));
 
     const next = progress.nextNode();
-    ok(next && next.type === 'letter',
-      `جبهةُ الطفل بعد التهيئة الستّ محطةُ حرف (${next && next.type}/${next && next.part})`
+    ok(next && awaiting.has(next.type),
+      `جبهةُ الطفل محطةٌ لم تُبنَ شاشتُها بعد (${next && next.type}/${next && next.part})`
       + ' — وهي الحالُ التي وقف عندها الميدان');
 
     const card = doc.querySelector('main.map .continue:not(.continue--review)');
@@ -168,11 +182,11 @@ const toastShown = () => {
 
     // (٣) العنوانُ المكتوب (مَن جاءه من عنوانٍ محفوظ لا من نقرة)
     toastEl().hidden = true;
-    win.location.hash = `#/letter/${encodeURIComponent(next.part)}`;
+    win.location.hash = `#/${next.type}/${encodeURIComponent(next.part)}`;
     await wait(300);
     const hashSaid = toastShown();
     ok(hashSaid.includes('قَرِيبًا'),
-      `والعنوانُ المكتوب `+ `#/letter/… يجيب كذلك: «${hashSaid || 'لا شيء'}»`);
+      `والعنوانُ المكتوب `+ `#/${next.type}/… يجيب كذلك: «${hashSaid || 'لا شيء'}»`);
     ok(Boolean(doc.querySelector('main.map')), 'ويردّه إلى خريطته لا إلى بياض');
 
     // (٤) والمقفلُ يبقى مقفلاً بجوابه هو — فلا يبتلع الجوابُ الجديد جوابَ القفل
@@ -406,7 +420,14 @@ const toastShown = () => {
     // **ومجرَّبٌ سالباً على نفسه**: زرٌّ يُغطّى بغطاءٍ شفّاف ⇐ يقرأ «لا زرَّ تحت الإصبع»
     devWin.location.hash = '#/';
     await wait(400);
-    const victim = devDoc.querySelector('main.map .continue');
+    // **وتُردّ الخريطةُ إلى رأسها قبل القياس**: «تابع من هنا» في صدرها، والخريطةُ
+    // تُسحَب إلى جبهة الطفل عند فتحها (`revealNext`) — فكلّما تقدّمت جبهتُه بَعُدت
+    // البطاقةُ عن المنظور، فيقع الغطاءُ خارجه ويُقرأ الزرُّ تامّاً وهو مغطّى.
+    devWin.scrollTo(0, 0);
+    await wait(200);
+    // **وبطاقةُ الجبهة هي الضحيّة** لا بطاقةُ المراجعة: صارت الأخيرةُ تُرسَم فوقها
+    // يومَ صار للطفل حصيلةٌ تُراجَع (الجلسة ٥) — و`.continue` تُصيبهما معاً.
+    const victim = devDoc.querySelector('main.map .continue:not(.continue--review)');
     const vbox = victim.getBoundingClientRect();
     const cover = devDoc.createElement('div');
     cover.style.cssText = `position:fixed;left:${vbox.left}px;top:${vbox.top}px;`

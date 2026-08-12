@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>درسُ الحرف على الشاشة — «اُكْتُبْ» الجلسة ٥</title>
+<!--
+  **معيارُ قبول الجلسة ٥ بحرفه، مقيساً في متصفّحٍ حقيقي**: «فحصُ متصفّحٍ **لدرسٍ
+  كامل**» و«القياسُ يكتب لكل خطوة بمفتاحها» و«أخطاءُ الاتجاه تُسجَّل بموضعها الحركيّ».
+
+  و`test_paths.mjs` يُدخِل المساراتِ على `judge` في node، وهذا يقول ما لا يقوله node:
+    · أنّ **حلقةَ `METHOD.md §٥` أربعُ خطواتٍ على الشاشة** يمشيها إصبعٌ حقيقيّ:
+      شاهِدْ ← تتبّعْ موجَّهاً ← تتبّعْ خافتاً ← اكتُبْهُ وحدَك — ولكلٍّ لوحُها بنمطها.
+    · وأنّ **القياس يُكتب فعلاً على الجهاز**: مفتاحان في ليتنر (`تتبع` و`حرّ`) بوحدة
+      الحرف وشكلِ موقعه، ونجومٌ في مخزن التقدّم، وخطأُ اتجاهٍ باسمه.
+    · وأنّ **الانحرافَ إرشادٌ لا رفض**: كتابةٌ معكوسة تومض ولا تُخرج الطفلَ من الشاشة.
+    · وأنّ **اسمَ الحرف يُسمَع من بنك اقرأ**: طلبُ ملفٍّ صوتيّ يُعَدّ عند الخادم —
+      فلا نطقَ آليّ يلتفّ على الشاهد.
+    · 🔒 وأنّ دورةَ الكتابة كلَّها **بصفر طلباتٍ شبكية من الصفحة** (`fetch`/XHR/beacon)
+      — مسارُ الطفل لا يغادر جهازه، والصوتُ وحدَه يمرّ بعنصر `Audio`.
+-->
+<style>
+  body { font: 15px/1.7 system-ui, sans-serif; margin: 0; background: #111; color: #eee; }
+  #log { padding: 1rem; white-space: pre-wrap; }
+  iframe { width: 460px; height: 900px; border: 0; position: fixed; inset-inline-end: 0; top: 0; }
+  .ok { color: #7ec97e; } .bad { color: #e08a80; }
+</style>
+</head>
+<body>
+<div id="log"></div>
+<iframe id="app" src="/"></iframe>
+<script type="module">
+const results = [];
+const log = document.getElementById('log');
+const frame = document.getElementById('app');
+
+function ok(cond, msg) {
+  results.push({ ok: !!cond, msg });
+  const line = document.createElement('div');
+  line.className = cond ? 'ok' : 'bad';
+  line.textContent = (cond ? '✓ ' : '✗ ') + msg;
+  log.append(line);
+}
+
+const errors = [];
+window.addEventListener('error', (e) => errors.push(String(e.message)));
+window.addEventListener('unhandledrejection', (e) => errors.push(String(e.reason)));
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const send = () => fetch('/result', {
+  method: 'POST', body: JSON.stringify({ from: 'write', rows: results }),
+});
+
+// عدّادُ أبواب الخروج من الجهاز (نظيرُ `browser_pen.html` و`browser_warmup.html`)
+const netCalls = [];
+function watchNetwork(win) {
+  const realFetch = win.fetch.bind(win);
+  win.fetch = (input, init) => {
+    netCalls.push(`fetch:${input && input.url ? input.url : input}`);
+    return realFetch(input, init);
+  };
+  const realOpen = win.XMLHttpRequest.prototype.open;
+  win.XMLHttpRequest.prototype.open = function (method, url, ...rest) {
+    netCalls.push(`xhr:${url}`);
+    return realOpen.call(this, method, url, ...rest);
+  };
+  Object.defineProperty(win.navigator, 'sendBeacon', {
+    configurable: true, value: (url) => { netCalls.push(`beacon:${url}`); return false; },
+  });
+  win.WebSocket = class { constructor(url) { netCalls.push(`ws:${url}`); } };
+  win.EventSource = class { constructor(url) { netCalls.push(`sse:${url}`); } };
+}
+
+/** كم ملفَّ صوتٍ طُلب من الخادم — شاهدٌ على أنّ البنك يُجلَب فعلاً (يخزنه عاملُ الخدمة). */
+const audioHits = async () => (await (await fetch('/__audio_hits.json')).json()).mp3;
+
+/**
+ * **ولسانُ المتصفّح يُرصَد** (`METHOD.md §٧` وبوّابتُنا المعلَنة): النطقُ الآليّ احتياطٌ
+ * **لِما لا ملفَّ له** — وهي اليومَ تعليماتُ الشاشة المصفوفةُ في `audio_queue.json`.
+ * أمّا **اسمُ الحرف فله ملفُّه المنسوخ من بنك اقرأ**، فلو نطقه اللسانُ الآليُّ لَكان
+ * ذلك نقضاً للوعد ولَسُمع في أذن معلّمٍ يقيّم. فيُسجَّل كلُّ ما يُطلَب نطقُه آلياً.
+ */
+const robot = [];
+function watchRobot(win) {
+  const synth = win.speechSynthesis;
+  if (!synth) return;
+  const real = synth.speak.bind(synth);
+  synth.speak = (u) => { robot.push(String(u && u.text)); return real(u); };
+}
+
+(async () => {
+  try {
+    await new Promise((r) => frame.addEventListener('load', r, { once: true }));
+    const win = frame.contentWindow;
+    const doc = frame.contentDocument;
+    win.addEventListener('error', (e) => errors.push(String(e.message)));
+    win.addEventListener('unhandledrejection', (e) => errors.push(String(e.reason)));
+    watchNetwork(win);
+    watchRobot(win);
+    await wait(700);
+
+    const { PATHS, FORMS } = await import('/js/curriculum.js');
+    const { STEPS } = await import('/js/lesson.js');
+    const letter = Object.keys(PATHS)[0];              // أوّلُ حرفٍ في المنهج بمساره
+    const ref = PATHS[letter][FORMS.ISOLATED];
+    ok(Boolean(ref), `أوّلُ حرفٍ مؤلَّفٍ مسارُه: «${letter}»`);
+    ok(STEPS.length === 4, `وحلقةُ الدرس أربعُ خطوات (${STEPS.map((s) => s.id).join(' ← ')})`);
+
+    // ————— إصبعٌ على اللوح —————
+    let pointerId = 1;
+    const surfaceEl = () => doc.querySelector('.pen-surface');
+    const toClient = ([x, y]) => {
+      const rect = surfaceEl().getBoundingClientRect();
+      const size = Math.min(rect.width, rect.height);
+      return {
+        clientX: rect.left + (rect.width - size) / 2 + (x / 1000) * size,
+        clientY: rect.top + (rect.height - size) / 2 + (y / 1000) * size,
+      };
+    };
+    const fire = (type, point, id) => {
+      surfaceEl().dispatchEvent(new win.PointerEvent(type, {
+        bubbles: true, cancelable: true, composed: true,
+        pointerId: id, pointerType: 'touch', isPrimary: true, ...toClient(point),
+      }));
+    };
+    async function writeStroke(points) {
+      const id = ++pointerId;
+      fire('pointerdown', points[0], id);
+      for (const p of points.slice(1)) fire('pointermove', p, id);
+      await wait(40);
+      fire('pointerup', points[points.length - 1], id);
+      await wait(60);
+    }
+    const tap = async (at) => writeStroke([at, at, at]);
+    /** يدُ طفلٍ مصنوعة: تمشي على المسار المرجعيّ نفسِه (وتعكسه إن طُلب)، ثم تنقط. */
+    async function writeShape(back) {
+      for (const stroke of ref.strokes) {
+        await writeStroke(back ? [...stroke.points].reverse() : stroke.points);
+      }
+      for (const dot of ref.dots) {
+        for (let i = 0; i < (dot.count || 1); i++) await tap(dot.at);
+      }
+    }
+
+    const stored = () => {
+      try { return JSON.parse(win.localStorage.getItem('uktub.progress.v1') || '{}'); }
+      catch { return {}; }
+    };
+    const nodeOf = () => Object.keys(stored().stars || {}).find((id) => id.endsWith(`:${letter}`));
+
+    // ————— أوّلاً: القفلُ يُفتَح بإتمام التهيئة (الرحلةُ حبلٌ واحد) —————
+    const { WARMUPS } = await import('/js/warmups.js');
+    for (const [part, station] of Object.entries(WARMUPS)) {
+      win.location.hash = `#/warmup/${encodeURIComponent(part)}`;
+      await wait(400);
+      for (const shape of station.shapes) {
+        for (const stroke of shape.ref.strokes) await writeStroke(stroke.points);
+        await wait(520);
+      }
+    }
+    ok(Object.keys(stored().stars || {}).length === Object.keys(WARMUPS).length,
+      `محطاتُ التهيئة أُتمّت فانفتح بابُ الحروف (${Object.keys(stored().stars || {}).length})`);
+
+    // ————— الدرس: أربعُ خطواتٍ بحلقة `METHOD.md §٥` —————
+    const netMark = netCalls.length;
+    const hitsBefore = await audioHits();
+    win.location.hash = `#/letter/${encodeURIComponent(letter)}`;
+    await wait(600);
+
+    ok(Boolean(doc.querySelector('main.lesson-letter')), 'شاشةُ الدرس فُتحت للحرف الأول');
+    ok(doc.querySelectorAll('main.lesson-letter .dots .dot').length === 4,
+      'ومؤشّرُ الخطوات أربعُ نقاط');
+
+    // **خطوةُ «شاهِدْ» عرضٌ لا كتابة**: لوحُها لا يقبل الحبر، وزرُّها ينقل إلى التتبّع
+    const board = doc.querySelector('.lesson-board');
+    ok(board?.classList.contains('lesson-board--watch'),
+      'وأولى الخطوات «شاهِدْ» — لوحُ عرضٍ لا يُكتب عليه');
+    const drawn = doc.querySelectorAll('.pen-stroke--trail').length;
+    ok(drawn === ref.strokes.length,
+      `واللوحُ يرسم النموذجَ من المسار المرجعيّ نفسِه (${drawn} جزءاً)`);
+
+    const acts = [...doc.querySelectorAll('main.lesson-letter .foot .btn')];
+    const small = acts.filter((b) => b.getBoundingClientRect().height < 64);
+    ok(acts.length >= 2 && small.length === 0,
+      `وأفعالُ الشاشة (${acts.length}) هدفُ لمسٍ ≥ ٦٤ بكسل`
+      + (small.length ? ` — دونها: ${small.map((b) => Math.round(b.getBoundingClientRect().height)).join('، ')}` : ''));
+
+    acts[0].click();                       // «تَتَبَّعْ» → الخطوةُ الثانية
+    await wait(500);
+    ok(!doc.querySelector('.lesson-board')?.classList.contains('lesson-board--watch')
+      && doc.querySelector('.pen-box--guided'),
+      'والانتقالُ إلى «تتبّعْ موجَّهاً»: لوحٌ يُكتب عليه والمسارُ ظاهر');
+
+    // **الانحرافُ إرشادٌ لا رفض**: معكوسٌ أوّلاً — لا يُقبَل ولا يُخرج الطفلَ
+    await writeShape(true);
+    await wait(200);
+    ok(Boolean(doc.querySelector('main.lesson-letter .pen-surface')),
+      'والمعكوسُ لا يُقبَل **ولا يُخرِج الطفلَ من الشاشة** — إرشادٌ لا رفض');
+    const faultsNow = Object.keys(stored().faults || {});
+    ok(faultsNow.some((k) => k.startsWith(`${letter}|`)),
+      `وخطؤه سُجِّل بموضعه الحركيّ (${faultsNow.join('، ') || 'لا شيء'}) — عدّادُ أخطاء الاتجاه`);
+
+    // ثم تُمشى الخطواتُ الكاتبةُ الثلاث.
+    // **والانتظارُ بينها انتظارُ كلامٍ لا زينة**: الشاشةُ تنتقل بعد تمام جملتها
+    // (عهدُ ٤ج)، فمَن استعجلها كتب الخطوةَ الثانية على لوح الأولى — وقد وقع ذلك
+    // فعلاً في أوّل تشغيلٍ لهذا الفحص (ثلاثُ محاولاتٍ في صندوق «تتبّع» ولا حرّ).
+    const STEP_WAIT = 5200;              // فوق أطولِ احتياطٍ محسوبٍ لنصٍّ لم يُصرَّف بعد
+    await writeShape(false);             // ٢) تتبّعٌ موجَّه — صحيحاً
+    await wait(STEP_WAIT);
+    await writeShape(false);             // ٣) تتبّعٌ خافت — صحيحاً
+    await wait(STEP_WAIT);
+    // ٤) «اكتُبْهُ وحدَك»: معكوسٌ أوّلاً ثم صحيح — **فيبقى في صندوقه الأول**
+    //    ويستحقّ المراجعةَ اليومَ نفسَه (ليتنر: الخطأُ يعيد الصندوق إلى الصفر).
+    await writeShape(true);
+    await wait(300);
+    await writeShape(false);
+    await wait(STEP_WAIT);
+
+    const state = stored();
+    const skills = Object.keys(state.skills || {});
+    const kinds = new Set(skills.map((k) => k.split('|')[2]));
+    ok(skills.every((k) => k.split('|')[0] === letter && k.split('|')[1] === FORMS.ISOLATED),
+      `والقياسُ بالمفتاح الثلاثيّ (وحدة × شكل موقع × تمرين): ${skills.join('، ') || 'لا شيء'}`);
+    ok(kinds.has('trace') && kinds.has('free'),
+      `ولكلِّ خطوةٍ كاتبةٍ مفتاحُها — تتبّعٌ وحرّ (${[...kinds].join('، ')})`);
+    const traceKey = skills.find((k) => k.endsWith('|trace'));
+    const tries = (state.skills[traceKey]?.right || 0) + (state.skills[traceKey]?.wrong || 0);
+    ok(tries >= 2, `والتتبّعُ خطوتان فمحاولتان في صندوقه (${tries})`);
+
+    const stars = doc.querySelectorAll('main.lesson-letter .big-stars .on').length;
+    const saved = (state.stars || {})[nodeOf() || ''] || 0;
+    ok(stars > 0 && saved === stars,
+      `والدرسُ أُتمّ — ${stars} نجومٍ على الشاشة و${saved} في مخزن التقدّم`);
+
+    // ————— الصوت: اسمُ الحرف من بنك اقرأ لا من نطقٍ آليّ —————
+    const bank = await import('/js/audio.js');
+    await bank.ready();
+    const name = (await import('/js/ui.js')).letterName(letter);
+    ok(bank.hasFile(name) === true, `واسمُ الحرف «${name}» له ملفُّه في بنك التطبيق`);
+    ok(!robot.includes(name),
+      `ولم يُطلَب نطقُه آلياً قطّ — الاحتياطُ لِما لا ملفَّ له وحدَه`
+      + ` (نُطق آلياً: ${robot.length ? robot.join(' · ') : 'لا شيء'})`);
+    ok(hitsBefore > 0, `والبنكُ يُجلَب فعلاً من الخادم (${hitsBefore} ملفاً حتى فتح الدرس)`);
+
+    // ————— الخصوصية والسلامة —————
+    const cycle = netCalls.slice(netMark);
+    ok(cycle.length === 0,
+      '🔒 **صفرُ طلباتٍ شبكية من الصفحة** في الدرس كلِّه — مسارُ الطفل لا يغادر جهازه'
+      + `${cycle.length ? ' — ' + cycle.slice(0, 5).join('، ') : ''}`);
+    const before = netCalls.length;
+    try { await win.fetch('/manifest.webmanifest'); } catch { /* لا يهمّ ردُّه */ }
+    ok(netCalls.length > before, 'والعدّادُ مجرَّبٌ سالباً: طلبٌ متعمَّد بعدها يُمسَك');
+
+    // ————— المراجعة: مادّةُ اليوم تُنتج تمرينَها بالقلم —————
+    win.location.hash = '#/review';
+    await wait(600);
+    const exercise = doc.querySelector('main .exercise .pen-surface');
+    ok(Boolean(exercise), 'وجلسةُ المراجعة تُنتج تمرينَ قلمٍ من مهارات اليوم');
+
+    win.location.hash = '#/';
+    await wait(500);
+    ok(doc.documentElement.scrollWidth <= win.innerWidth + 1,
+      `ولا فائضَ أفقيّ (${doc.documentElement.scrollWidth} ≤ ${win.innerWidth})`);
+    ok(errors.length === 0,
+      errors.length ? `أخطاءُ جافاسكربت: ${errors.join(' · ')}` : 'لا أخطاء جافاسكربت');
+  } catch (e) {
+    ok(false, `استثناء: ${e && e.message}`);
+  }
+  await send();
+})();
+</script>
+</body>
+</html>

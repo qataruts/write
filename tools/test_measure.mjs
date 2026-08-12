@@ -166,7 +166,9 @@ const { VIEWS, buildSession } = await import(new URL('review.js', APP));
 
 for (const kind of Object.values(p.KINDS)) {
   if (!VIEWS[kind]) {
-    skip(`[${kind}] لا مُصيِّرَ له في \`review.js\` بعدُ — تمارينُ القلم للجلسة ٥`);
+    // **وتمارينُ الحروف مُلئت في الجلسة ٥** (`trace` و`free`)، وبقي ما مادّتُه كلماتٌ:
+    // النسخُ للجلسة ٨ والإملاءُ للجلسة ٩ — ولا يُسأل الطفلُ عمّا لم يُدرَّس كتابةً.
+    skip(`[${kind}] لا مُصيِّرَ له في \`review.js\` بعدُ — مادّتُه كلماتٌ (الجلستان ٨ و٩)`);
     continue;
   }
   const built = buildSession({ due: [{ kind, unit: 'ب', form: 'معزول', box: 0, wrong: 1 }] })
