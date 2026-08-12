@@ -3,11 +3,14 @@
 <head>
 <meta charset="utf-8">
 <title>أيقونة «اُكْتُبْ»</title>
+<!-- **ألوانُ الأيقونة تُقرأ من لوح التطبيق نفسِه** (الجلسة هـ١): لا تُكتب هنا مرّةً
+     ثانية فتشيخ يومَ يتحرّك اللوح. والمقروءُ `--brand-1..3` وحدَها — وهي المعلَنُ أنّ
+     موضعَها العلامةُ وأيقونتُها لا الشاشات. -->
+<link rel="stylesheet" href="../app/css/app.css">
 <style>
   /* أيقونة التطبيق: تُرسَم هنا وتُلتقط بـ tools/make_icons.py — لا أصل ثنائيّ يُحرَّر يدوياً.
      المقاس والهامش يأتيان من الرابط: ?size=512&pad=0.20 (الهامش لأيقونة maskable).
-     الخطّ خطُّ العلامة نفسُه (`app/fonts/`) لا خطّ النظام: الأيقونةُ والترويسةُ علامةٌ واحدة.
-     **وألوانُها ألوانُ البذرة** حتى تحسمها الجلسة ١١ مع صفحات welcome (`docs/SEED.md`). */
+     الخطّ خطُّ العلامة نفسُه (`app/fonts/`) لا خطّ النظام: الأيقونةُ والترويسةُ علامةٌ واحدة. */
   @font-face {
     font-family: 'Marhey';
     src: url('../app/fonts/Marhey-arabic.woff2') format('woff2');
@@ -19,7 +22,7 @@
   .icon {
     display: grid;
     place-items: center;
-    background: linear-gradient(160deg, #f7b733 0%, #f5a524 45%, #e8590c 100%);
+    background: linear-gradient(160deg, var(--brand-1) 0%, var(--brand-2) 45%, var(--brand-3) 100%);
     color: #fff;
     font-family: 'Marhey', 'Geeza Pro', 'Al Bayan', sans-serif;
     font-weight: 700;

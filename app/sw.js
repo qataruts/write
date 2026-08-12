@@ -43,7 +43,7 @@
 // تصل جهازَ الطفل معاً، وثلاثُ ترقياتٍ متتابعة تُعيد بناءَ القشرة ثلاثاً بلا فائدة.
 // v8: **الجلسة ٤ج — قناةُ الصوت الواحدة** (`audio.js`): التتابعُ ينتظر `ended` لا مهلةً،
 // والتزاحمُ طابورٌ لا إسكاتٌ أسرع. ملفُّ قشرةٍ واحدٌ تبدّل، ولا وحدةَ زِيدت إلى `SHELL`.
-const VERSION = 'v9';
+const VERSION = 'v10';
 const SHELL_CACHE = `uktub-shell-${VERSION}`;
 const AUDIO_CACHE = 'uktub-audio';          // ثابتٌ عمداً — لا يحمل VERSION
 const KEEP = [SHELL_CACHE, AUDIO_CACHE];

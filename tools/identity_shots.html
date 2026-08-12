@@ -125,7 +125,10 @@ function hand(doc, win) {
   const grounds = { warm: {}, tuned: found ? found.ground : {} };
   if (palettes.shift && palettes.shift.for === CANDIDATE) grounds.shift = palettes.shift.ground;
   if (!grounds[GROUND]) throw new Error(`أرضيةٌ لا وجود لها لهذا المرشَّح: ${GROUND}`);
-  const tokens = CANDIDATE === 'now' ? {} : { ...found.tokens, ...grounds[GROUND] };
+  // **البذرةُ أوّلاً**: لوحُ التطبيق مصبوغٌ بهويته اليوم، فلو حُقن المرشَّحُ فوقه
+  // لورث أرضيتَنا حيث لا يعلن أرضيةً — فتُحقن أرضيةُ العائلة تحتَه أولاً.
+  const tokens = CANDIDATE === 'now' ? {}
+    : { ...(palettes.seed || {}), ...found.tokens, ...grounds[GROUND] };
 
   await seed(SCENE === 'map' ? 'g1' : 'warm');
   frame.src = SCENE === 'map' ? '/' : `/#/warmup/${encodeURIComponent(BOARD_PART)}`;

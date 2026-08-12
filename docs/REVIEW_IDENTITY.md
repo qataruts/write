@@ -34,7 +34,7 @@
 |---|---|---|---|
 | اقرأ | <code>#317873</code> أخضرُ مزرقّ | <code>#FAF4E8</code> | <code>#DFAE3F</code> |
 | احسب | <code>#2F6E8F</code> أزرقُ هادئ | <code>#F7F3EC</code> | <code>#2E8C86</code> |
-| **اكتب اليوم** | <code>#317873</code> **لونُ اقرأ نفسُه** | <code>#FAF4E8</code> | <code>#DFAE3F</code> |
+| **اكتب اليوم** | <code>#3F4C8F</code> **لونُ اقرأ نفسُه** | <code>#FCF4E2</code> | <code>#DFAE3F</code> |
 
 وأرضياتُ القبول **ليست عتباتٍ تُخترع**، بل أدنى ما بلغه لوحُ اقرأ نفسُه:
 
@@ -52,11 +52,11 @@
 | ٠–١٥ | 23.0 🟩 حرّ |
 | ١٥–٣٠ | 20.7 🟨 |
 | ٣٠–٤٥ | 19.6 🟨 |
-| ٤٥–٦٠ | 19.9 🟨 |
-| ٦٠–٧٥ | 17.7 🟨 |
-| ٧٥–٩٠ | 16.5 🟥 مسكون |
-| ٩٠–١٠٥ | 16.7 🟥 مسكون |
-| ١٠٥–١٢٠ | 18.4 🟨 |
+| ٤٥–٦٠ | 18.4 🟨 |
+| ٦٠–٧٥ | 15.6 🟥 مسكون |
+| ٧٥–٩٠ | 14.3 🟥 مسكون |
+| ٩٠–١٠٥ | 14.8 🟥 مسكون |
+| ١٠٥–١٢٠ | 17.3 🟨 |
 | ١٢٠–١٣٥ | 15.4 🟥 مسكون |
 | ١٣٥–١٥٠ | 11.9 🟥 مسكون |
 | ١٥٠–١٦٥ | 9.5 🟥 مسكون |
@@ -92,7 +92,7 @@
 
 **وجُرّب رابعٌ فسقط بالرقم — «رَصاصُ القلم»**: استعارةٌ تليق بتطبيق كتابة أكثرَ من كلّ لون: قلمُ الرصاص نفسُه. وحيّزُه خالٍ من الأخوين لأنه بلا صبغةٍ أصلاً.
 
-غير أنّ الفاحص ردّه بثلاثة أرقام: `accent-garden` **9.4** عن النموذج المرسوم (والأرضيةُ 27.5) — فحبرُ الطفل لا يفارق نموذجَه على اللوح، وهو أوّلُ ما يجب أن يراه · و`accent-garden` على **6.2** من `--locked` — فمحطةٌ مفتوحةٌ تُقرأ مقفلة · وتمايزُ مراحله **7.7**. فلم يُعرَض، وقيدُه في `tools/palettes.json` ليُقاس لا ليُروى.
+غير أنّ الفاحص ردّه بثلاثة أرقام: `accent-garden` **9.4** عن النموذج المرسوم (والأرضيةُ 27.5) — فحبرُ الطفل لا يفارق نموذجَه على اللوح، وهو أوّلُ ما يجب أن يراه · و`accent-garden` على **8.6** من `--locked` — فمحطةٌ مفتوحةٌ تُقرأ مقفلة · وتمايزُ مراحله **7.7**. فلم يُعرَض، وقيدُه في `tools/palettes.json` ليُقاس لا ليُروى.
 
 **وأمّا المرشّحاتُ بعضُها من بعض** — فلا يُعرَض على المالك ثلاثةُ أرديةٍ لثوبٍ واحد:
 
@@ -252,13 +252,13 @@
 
 ## ٤. المقابلة — الشاشةُ الواحدة بألواحها الأربعة
 
-**على الأرضية الدافئة** (وأوّلُ عمودٍ لوحُ اليوم: لونُ اقرأ نيابةً)،
+**على الأرضية الدافئة** — وأوّلُ عمودٍ **لوحُ التطبيق كما هو الآن**: الحكمُ مطبَّقٌ فيه، فمطابقتُه لعمود المرشَّح المحكوم له شهادةٌ بالصورة على أنّ ما لُبس هو ما حُكم له،
 وأرضيةُ كلِّ مرشَّحٍ المعدَّلة في بابه أعلاه.
 
 **الخريطة**
 
 <table><tr>
-<td align="center" width="25%"><a href="identity/now-warm-map.png"><img src="identity/now-warm-map.png" width="200" alt="لوحُ اليوم — الخريطة"></a><br><sub>لوحُ اليوم</sub></td>
+<td align="center" width="25%"><a href="identity/now-warm-map.png"><img src="identity/now-warm-map.png" width="200" alt="لوحُ التطبيق الآن — الخريطة"></a><br><sub>لوحُ التطبيق الآن</sub></td>
 <td align="center" width="25%"><a href="identity/indigo-warm-map.png"><img src="identity/indigo-warm-map.png" width="200" alt="حِبْرٌ نِيليّ — الخريطة"></a><br><sub>حِبْرٌ نِيليّ</sub></td>
 <td align="center" width="25%"><a href="identity/violet-warm-map.png"><img src="identity/violet-warm-map.png" width="200" alt="أُرْجُوانُ الحِبْر — الخريطة"></a><br><sub>أُرْجُوانُ الحِبْر</sub></td>
 <td align="center" width="25%"><a href="identity/mulberry-warm-map.png"><img src="identity/mulberry-warm-map.png" width="200" alt="تُوتٌ وعُنّاب — الخريطة"></a><br><sub>تُوتٌ وعُنّاب</sub></td>
@@ -267,7 +267,7 @@
 **لوحُ الكتابة — محاولةٌ وإرشادُها**
 
 <table><tr>
-<td align="center" width="25%"><a href="identity/now-warm-board.png"><img src="identity/now-warm-board.png" width="200" alt="لوحُ اليوم — لوحُ الكتابة — محاولةٌ وإرشادُها"></a><br><sub>لوحُ اليوم</sub></td>
+<td align="center" width="25%"><a href="identity/now-warm-board.png"><img src="identity/now-warm-board.png" width="200" alt="لوحُ التطبيق الآن — لوحُ الكتابة — محاولةٌ وإرشادُها"></a><br><sub>لوحُ التطبيق الآن</sub></td>
 <td align="center" width="25%"><a href="identity/indigo-warm-board.png"><img src="identity/indigo-warm-board.png" width="200" alt="حِبْرٌ نِيليّ — لوحُ الكتابة — محاولةٌ وإرشادُها"></a><br><sub>حِبْرٌ نِيليّ</sub></td>
 <td align="center" width="25%"><a href="identity/violet-warm-board.png"><img src="identity/violet-warm-board.png" width="200" alt="أُرْجُوانُ الحِبْر — لوحُ الكتابة — محاولةٌ وإرشادُها"></a><br><sub>أُرْجُوانُ الحِبْر</sub></td>
 <td align="center" width="25%"><a href="identity/mulberry-warm-board.png"><img src="identity/mulberry-warm-board.png" width="200" alt="تُوتٌ وعُنّاب — لوحُ الكتابة — محاولةٌ وإرشادُها"></a><br><sub>تُوتٌ وعُنّاب</sub></td>
@@ -276,7 +276,7 @@
 **الاحتفال**
 
 <table><tr>
-<td align="center" width="25%"><a href="identity/now-warm-celebrate.png"><img src="identity/now-warm-celebrate.png" width="200" alt="لوحُ اليوم — الاحتفال"></a><br><sub>لوحُ اليوم</sub></td>
+<td align="center" width="25%"><a href="identity/now-warm-celebrate.png"><img src="identity/now-warm-celebrate.png" width="200" alt="لوحُ التطبيق الآن — الاحتفال"></a><br><sub>لوحُ التطبيق الآن</sub></td>
 <td align="center" width="25%"><a href="identity/indigo-warm-celebrate.png"><img src="identity/indigo-warm-celebrate.png" width="200" alt="حِبْرٌ نِيليّ — الاحتفال"></a><br><sub>حِبْرٌ نِيليّ</sub></td>
 <td align="center" width="25%"><a href="identity/violet-warm-celebrate.png"><img src="identity/violet-warm-celebrate.png" width="200" alt="أُرْجُوانُ الحِبْر — الاحتفال"></a><br><sub>أُرْجُوانُ الحِبْر</sub></td>
 <td align="center" width="25%"><a href="identity/mulberry-warm-celebrate.png"><img src="identity/mulberry-warm-celebrate.png" width="200" alt="تُوتٌ وعُنّاب — الاحتفال"></a><br><sub>تُوتٌ وعُنّاب</sub></td>
@@ -420,7 +420,7 @@
 
 والحكمُ للمالك وحده — يُكتب في السطر أدناه.
 
-**الحكم**: (منتظَر)
+**الحكم**: indigo / shift
 <!-- ⇧ ينتهي المحفوظ ⇧ -->
 
 > وما دام الحكمُ منتظَراً فـ`app/css/app.css` يبقى لوحَ البذرة، **يحرسه**

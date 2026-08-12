@@ -31,6 +31,7 @@ import sys
 import tempfile
 import threading
 import time
+import zlib
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -314,6 +315,77 @@ def derive_shift(read_tokens: dict, calc_tokens: dict, names: list) -> dict:
     }
 
 
+def read_night(text: str) -> dict:
+    """كتلةُ اقرأ الليلية — تُقرأ من ملفّه لا تُكتب هنا (نظيرُ `root_tokens` للنهار)."""
+    block = re.search(r"@media \(prefers-color-scheme: dark\)\s*\{\s*:root\s*\{(.*?)\n  \}",
+                      text, re.S)
+    if not block:
+        return {}
+    return dict(re.findall(r"--([a-z0-9-]+):\s*(#[0-9A-Fa-f]{3,8})\s*;", block.group(1)))
+
+
+# **ليلُ الهوية إسقاطٌ لا اختيار.** حكمُ المالك وقع على لوح النهار، والليلُ وجهُ اللوح
+# نفسِه بعد غروب الشمس — فلا يُختار له لونٌ بذوقٍ لم يُعرَض، ولا يُترَك وجهَ أخيه.
+# فيُشتقّ بقاعدتين منشورتين، كلتاهما رقمٌ يُقرأ من اقرأ نفسِه:
+#
+#   ١) **الأرضية**: ليلُ اقرأ مضروبٌ إشباعُه في **معامل الإزاحة نفسِه** (`k`) الذي أزيح
+#      به نهارُنا — فالإزاحةُ واحدةٌ في الوجهين، والإضاءةُ لا تُمَسّ فيبقى كلُّ تباينٍ
+#      في ليل اقرأ محفوظاً بعينه (البرهانُ عينُ برهان §٣ب).
+#   ٢) **المراحل**: لكلِّ مرحلةٍ **رفعةُ اقرأ لها بعينها** — فرقُ إضاءتها بين نهاره
+#      وليله، ونسبةُ إشباعها — تُجرى على مرحلتنا بصبغتها هي. ثم تُرفَع السلَّمُ كلُّها
+#      **أصغرَ رفعةٍ تبلغ AA** على ورقنا الليليّ: فلوحُنا أدكنُ من لوحه نهاراً (نِيليٌّ
+#      مقابلَ أخضرَ مزرقّ)، فرفعتُه وحدَها لا تكفي أدكنَ مراحلنا.
+#
+# **ولا تُمَسّ ألوانُ الحكم في الليل كما لم تُمَسّ في النهار**: `--star` و`--ok` و`--err`
+# ومشتقّاتُها تبقى قيمَ البذرة الليلية بأعيانها.
+NIGHT_LIFT_GRID = 0.5        # دقّةُ مسح الرفعة (في وحدات `L*`)
+
+
+def derive_night(read_light: dict, read_dark: dict, tokens: dict, shift_ground: dict,
+                 k: float, names: list) -> dict:
+    """لوحُ الليل كاملاً — أرضيةً ومراحلَ — مشتقّاً بالقاعدتين أعلاه."""
+    ground = {}
+    clipped = []
+    for name in shift_ground:
+        got, clip = scale_chroma(read_dark[name], k)
+        ground[name] = got
+        if clip:
+            clipped.append(name)
+
+    plan = {}
+    for name in names:
+        light_l, light_c, hue = lch(tokens[name])
+        was_l, was_c, _ = lch(read_light[name])
+        now_l, now_c, _ = lch(read_dark[name])
+        ratio = now_c / was_c if was_c else 1.0
+        plan[name] = (light_l + (now_l - was_l), light_c * ratio, hue)
+
+    def paint(lift: float) -> dict:
+        out = {}
+        for name, (light, chroma, hue) in plan.items():
+            value, _ = lab_hex(min(97.0, light + lift),
+                               chroma * math.cos(math.radians(hue)),
+                               chroma * math.sin(math.radians(hue)))
+            out[name] = value
+        return out
+
+    lift = 0.0
+    while lift <= 40:
+        accents = paint(lift)
+        if min(contrast(v, ground["paper"]) for v in accents.values()) >= AA:
+            break
+        lift += NIGHT_LIFT_GRID
+    else:
+        raise SystemExit("لم تبلغ رفعةُ الليل AA — راجع القاعدة")
+    below = paint(max(0.0, lift - NIGHT_LIFT_GRID))
+    return {
+        "ground": ground, "accents": accents, "lift": lift, "clipped": clipped,
+        "below": (max(0.0, lift - NIGHT_LIFT_GRID),
+                  min(contrast(v, ground["paper"]) for v in below.values())),
+        "worst": min(contrast(v, ground["paper"]) for v in accents.values()),
+    }
+
+
 def shift_for(data: dict) -> str:
     """أيُّ مرشَّحٍ يلبس الأرضيةَ المزاحة — من البيان لا من الشيفرة."""
     return data.get("shift", {}).get("for", "")
@@ -324,15 +396,30 @@ def grounds_of(data: dict, candidate: str) -> list:
     return GROUNDS + ([SHIFT] if candidate == shift_for(data) else [])
 
 
-def candidate_palette(app_tokens: dict, cand: dict, ground: str, shift: dict = None) -> dict:
-    """لوحُ المرشَّح كاملاً كما سيراه المتصفّح: لوحُ البذرة ثم ما يبدّله المرشَّح."""
-    palette = dict(app_tokens)
+def candidate_palette(base_tokens: dict, cand: dict, ground: str, shift: dict = None) -> dict:
+    """لوحُ المرشَّح كاملاً كما سيراه المتصفّح: **لوحُ البذرة** ثم ما يبدّله المرشَّح.
+
+    **والقاعدةُ لوحُ اقرأ لا لوحُ التطبيق** — وهذا فرقٌ ظهر يومَ صُبغ اللوح: «الأرضيةُ
+    الدافئة كما هي» تعني أرضيةَ العائلة، فلو حُسبت من لوحنا بعد الصبغ لصار عمودُ
+    «الدافئة» يعرض أرضيتَنا المزاحة ويسمّيها دافئةَ العائلة — فتكذب اللوحةُ على قارئها
+    بعد أن صدقت قبل الحكم.
+    """
+    palette = dict(base_tokens)
     palette.update(cand["tokens"])
     if ground == "tuned":
         palette.update(cand["ground"])
     elif ground == SHIFT:
         palette.update(shift["ground"])
     return palette
+
+
+def seed_tokens(app_tokens: dict, siblings: dict) -> dict:
+    """لوحُ البذرة الذي تُقاس عليه المرشّحات: لوحُ اقرأ إن كان مجلدُه متاحاً.
+
+    فما بقي من لوحنا بعد الصبغ ليس أرضيةَ العائلة — وقياسُ مرشَّحٍ على أرضيتنا نحن
+    يقيس مرشَّحاً على نفسِه.
+    """
+    return dict(siblings["read"]["tokens"]) if "read" in siblings else dict(app_tokens)
 
 
 def measure(palette: dict, siblings: dict, base: dict, opacity: float) -> dict:
@@ -383,7 +470,7 @@ def build_report(data: dict, app_tokens: dict, siblings: dict, floor: dict,
     for cand in cands:
         report[cand["id"]] = {}
         for ground in grounds_of(data, cand["id"]):
-            palette = candidate_palette(app_tokens, cand, ground, shift)
+            palette = candidate_palette(seed_tokens(app_tokens, siblings), cand, ground, shift)
             m = measure(palette, siblings, siblings, opacity)
             m["palette"] = palette
             m["complaints"] = complaints(m, floor)
@@ -427,7 +514,7 @@ HOLD_PNG = bytes.fromhex(
     "0557bfabd40000000049454e44ae426082")
 
 
-def served_palettes(data: dict, shift: dict) -> bytes:
+def served_palettes(data: dict, shift: dict, seed: dict) -> bytes:
     """بيانُ المرشّحات كما يُقدَّم للصفحة — **ومعه الأرضيةُ المزاحة مشتقّةً**.
 
     فالقيمُ لا تُكتب في `palettes.json` (نصُّ البيان نفسِه)، والصفحةُ لا تعرف حساب
@@ -436,6 +523,12 @@ def served_palettes(data: dict, shift: dict) -> bytes:
     """
     served = json.loads(json.dumps(data))
     served["shift"] = {**data["shift"], "ground": shift["ground"], "k": shift["k"]}
+    # **وقاعدةُ البذرة تُخدَم معها**: الصفحةُ تحقن المرشَّحَ فوق لوحٍ مصبوغٍ اليوم،
+    # فلولا حقنُ أرضية العائلة تحتَه لظهر عمودُ «الدافئة» بأرضيتنا نحن.
+    served["seed"] = {name: value for name, value in seed.items()
+                      if name.startswith("accent-") or name in
+                      ("paper", "paper-deep", "card", "ink", "ink-soft", "line", "locked",
+                       "brand-1", "brand-2", "brand-3")}
     return json.dumps(served, ensure_ascii=False).encode("utf-8")
 
 
@@ -497,6 +590,28 @@ def run_chrome(url: str, profile: Path, shot: Path):
     return subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 
+def png_bytes(path: Path) -> bytes:
+    """بايتاتُ الصورة مفكوكةَ الضغط (بلا فكّ مرشّحات الصفوف) — للمقابلة لا للرسم."""
+    data = path.read_bytes()
+    idat, i = b"", 8
+    while i < len(data):
+        length = struct.unpack(">I", data[i:i + 4])[0]
+        if data[i + 4:i + 8] == b"IDAT":
+            idat += data[i + 8:i + 8 + length]
+        i += 12 + length
+    return zlib.decompress(idat)
+
+
+def shots_match(one: Path, two: Path) -> float:
+    """نسبةُ ما اختلف بين لقطتين — صفرٌ إن تطابقتا بايتاً."""
+    a, b = png_bytes(one), png_bytes(two)
+    if a == b:
+        return 0.0
+    if len(a) != len(b):
+        return 1.0
+    return sum(1 for x, y in zip(a, b) if x != y) / len(a)
+
+
 def shot_name(candidate: str, ground: str, scene: str) -> str:
     return f"{candidate}-{ground}-{scene}.png"
 
@@ -535,10 +650,10 @@ def capture(base: str, profile: Path, state: dict, candidate: str, ground: str,
     return out, None
 
 
-def capture_all(cands: list, port: int, timeout: int, data: dict, shift: dict) -> int:
+def capture_all(cands: list, port: int, timeout: int, data: dict, shift: dict, seed: dict) -> int:
     OUT.mkdir(parents=True, exist_ok=True)
     state = {"ready": threading.Event(), "failed": False, "timeout": timeout}
-    server = make_server(port, state, served_palettes(data, shift))
+    server = make_server(port, state, served_palettes(data, shift, seed))
     threading.Thread(target=server.serve_forever, daemon=True).start()
     base = f"http://127.0.0.1:{port}"
     fails = 0
@@ -815,10 +930,15 @@ def panel_text(data: dict, app_tokens: dict, siblings: dict, floor: dict, report
 
     add("## ٤. المقابلة — الشاشةُ الواحدة بألواحها الأربعة")
     add("")
-    add("**على الأرضية الدافئة** (وأوّلُ عمودٍ لوحُ اليوم: لونُ اقرأ نيابةً)،")
+    ruled = parse_verdict(read_verdict())
+    add("**على الأرضية الدافئة**" + (
+        " — وأوّلُ عمودٍ **لوحُ التطبيق كما هو الآن**: الحكمُ مطبَّقٌ فيه، فمطابقتُه"
+        " لعمود المرشَّح المحكوم له شهادةٌ بالصورة على أنّ ما لُبس هو ما حُكم له"
+        if ruled else " (وأوّلُ عمودٍ لوحُ اليوم: لونُ اقرأ نيابةً)") + "،")
     add("وأرضيةُ كلِّ مرشَّحٍ المعدَّلة في بابه أعلاه.")
     add("")
-    columns = [("now", "لوحُ اليوم")] + [(c["id"], c["name"]) for c in data["candidates"]]
+    columns = ([("now", "لوحُ التطبيق الآن" if ruled else "لوحُ اليوم")]
+               + [(c["id"], c["name"]) for c in data["candidates"]])
     for scene, scene_title in SCENES:
         add(f"**{scene_title}**")
         add("")
@@ -1164,6 +1284,81 @@ def self_test() -> int:
             ok(not off, f"لوحُ التطبيق مصبوغٌ بـ«{chosen['name']}» ({verdict[1]}) حرفاً"
                         + (f" — يخالف: {off}" if off else ""))
 
+            # **وليلُه إسقاطُ نهاره لا لونٌ ثانٍ**: الكتلةُ الليلية تُقابَل بالاشتقاق
+            # (§٣ج) رمزاً رمزاً — فمن كتب فيها لوناً بيده أو نسي إعادةَ اشتقاقها
+            # يومَ تحرّك اللوحُ يحمرّ هنا، ولا يبقى وجهُ أخٍ في الليل بعد أن زال نهاراً.
+            if read_css.exists():
+                night = derive_night(read_tokens, read_night(read_css.read_text(encoding="utf-8")),
+                                     chosen["tokens"], shift["ground"], shift["k"], STAGE_TOKENS)
+                mine = read_night(CSS.read_text(encoding="utf-8"))
+                want_night = {**night["ground"], **night["accents"],
+                              "on-accent": night["ground"]["paper"]}
+                dark_off = [k for k, v in want_night.items() if mine.get(k) != v]
+                ok(not dark_off, f"وليلُه مشتقٌّ بقاعدته (رفعةٌ +{night['lift']:.1f} ⇐"
+                                 f" أدنى تباينٍ {night['worst']:.2f})"
+                                 + (f" — يخالف: {dark_off}" if dark_off else ""))
+                held_dark = [t for t in ("star", "ok", "err") if mine.get(t) != read_night(
+                    read_css.read_text(encoding="utf-8")).get(t)]
+                ok(not held_dark, "وألوانُ الحكم ليلاً كما ورثها لم تُمَسّ"
+                                  + (f" — تبدّل: {held_dark}" if held_dark else ""))
+
+            # **وشهادةٌ بالصورة تُتِمّ شهادةَ الرمز**: لقطةُ التطبيق كما هو اليوم (`now`)
+            # يجب أن تطابق لقطةَ المرشَّح المحكوم له وهو محقون — فالرمزُ قد يُكتب صحيحاً
+            # ثم يُغلَب (إعلانٌ ثانٍ بعده، أو قاعدةٌ أخصُّ تكتب لوناً فوقه)، والصورةُ لا
+            # تُغلَب. **وحدُّها معلَنٌ**: الحقنُ يبدّل `:root` وحدَه، فلونٌ مكتوبٌ بيدٍ في
+            # قاعدةٍ أخرى يقع في الصورتين معاً فلا تفترقان — وذلك ما يمسكه حارسُ
+            # «لا لونَ منثور» أدناه، جُرِّبا سالباً فأمسك كلٌّ ما لصاحبه.
+            drift = []
+            for scene, _ in SCENES:
+                mine_shot = OUT / shot_name("now", "warm", scene)
+                his = OUT / shot_name(verdict[0], verdict[1], scene)
+                if mine_shot.exists() and his.exists():
+                    gap = shots_match(mine_shot, his)
+                    if gap > 0.001:
+                        drift.append(f"{scene} {gap * 100:.2f}٪")
+            ok(not drift, "ولقطةُ التطبيق اليوم تطابق لقطةَ المرشَّح المحكوم له"
+                          + (f" — تفترق: {'، '.join(drift)}" if drift else ""))
+
+    print("\n— «مواضعُ اللوح لا أرقامٌ منثورة» —")
+    # نصُّ بند الجلسة: «رموزُ الهوية في لوح `app.css` — مواضعُ `--accent` وأخواتها لا
+    # أرقامٌ منثورة». فيُجرَد كلُّ لونٍ مكتوبٍ في `app/` خارج كتلتَي اللوح: ما لم يكن
+    # قيمةً من قيم اللوح نفسِه فهو لونٌ **يشيخ صامتاً** يومَ تتحرّك الهوية — وقد شاخ
+    # فعلاً يومَ صُبغ اللوح: `.btn--primary` و`.continue` بقيتا على حبر اقرأ، ولم
+    # يمسكهما فحصُ الرموز ولا الحارسُ البصريّ (الحقنُ يبدّل `:root` وحدَه فيقع اللونُ
+    # المنثور في الصورتين معاً) — فأمسكهما هذا الجرد. **والمعفى معلَنٌ**: الأبيضُ
+    # والأسودُ ليسا هويةً.
+    NEUTRAL = {"#fff", "#ffffff", "#000", "#000000"}
+    css_text = CSS.read_text(encoding="utf-8")
+    board = {v.lower() for v in root_tokens(css_text).values()} \
+        | {v.lower() for v in read_night(css_text).values()}
+    body = css_text
+    for block in (re.search(r":root\s*\{(.*?)\n\}", css_text, re.S),
+                  re.search(r"@media \(prefers-color-scheme: dark\)\s*\{\s*:root\s*\{(.*?)\n  \}",
+                            css_text, re.S)):
+        if block:
+            body = body.replace(block.group(1), "")
+    # **وبابُ الاستثناء واحد ومكتوبٌ في موضعه**: لونُ أداةٍ لا يخصّ الطفلَ (لوحُ مسجّل
+    # `?dev=1` مثلاً: أخضرُ سطرٍ وأحمرُه على أرضٍ داكنة، لا يتبعان لوحاً) يُعلَن في سطره
+    # بالعلامة أدناه. فما استُثني قيل لِمَ استُثني، ولا يتسلّل استثناءٌ صامت.
+    EXEMPT = "لونُ أداةٍ لا هوية"
+    stray = sorted({m.group(0).lower() for m in re.finditer(r"#[0-9A-Fa-f]{3,8}\b", body)
+                    if EXEMPT not in body[body.rfind("\n", 0, m.start()) + 1:
+                                          body.find("\n", m.end()) if body.find("\n", m.end()) > 0
+                                          else len(body)]} - board - NEUTRAL)
+    ok(not stray, "لا لونَ في `app.css` خارج اللوح إلا معلَنَ العلّة"
+                  + (f" — منثور: {stray}" if stray else ""))
+
+    pages = sorted(APP.glob("**/*.html"))
+    off = [f"{page.name}:{value}" for page in pages
+           for value in re.findall(r'name="theme-color"[^>]*content="(#[0-9A-Fa-f]{3,8})"',
+                                   page.read_text(encoding="utf-8"))
+           if value.lower() not in board]
+    ok(not off, f"ولونُ الواجهة في صفحات `app/` كلِّها ({len(pages)}) من اللوح"
+                + (f" — يخالف: {off}" if off else ""))
+    manifest = json.loads((APP / "manifest.webmanifest").read_text(encoding="utf-8"))
+    ok(manifest["theme_color"].lower() in board and manifest["background_color"].lower() in board,
+       f"وبيانُ التطبيق كذلك ({manifest['theme_color']} · {manifest['background_color']})")
+
     print("\n— اللقطاتُ المصيَّرة —")
     wanted = {shot_name("now", "warm", s) for s, _ in SCENES}
     for cand in cands:
@@ -1236,7 +1431,8 @@ def main() -> int:
         return 0
 
     print("\n— اللقطات —")
-    fails = capture_all(cands, args.port, args.timeout, data, shift)
+    fails = capture_all(cands, args.port, args.timeout, data, shift,
+                        seed_tokens(app_tokens, siblings))
     if not args.only:
         PANEL.write_text(panel_text(data, app_tokens, siblings, floor, report, opacity, shift),
                          encoding="utf-8")
