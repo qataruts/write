@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>محطاتُ أشكال المواقع وتمييزُ المتشابهات — «اُكْتُبْ» الجلسة ٧</title>
+<!--
+  **معيارُ قبول الجلسة ٧ بحرفه، مقيساً في متصفّحٍ حقيقي**: «القياس بمفتاح شكل
+  الموقع»، و«الابتدائي/الوسطي/النهائي لكل مجموعة بعد إتقان معزولها، بحلقة الدرس
+  نفسِها»، و«المتشابهاتُ تُقارَن».
+
+  و`test_paths.mjs` يُدخِل الأشكالَ على `judge` في node، وهذا يقول ما لا يقوله node:
+    · أنّ **محطةَ الشكل تمشي حروفَ مجموعتها واحداً واحداً** بحلقة `METHOD §٥` الأربع
+      — لوحٌ لكلِّ خطوةٍ من كلِّ حرف، وشريطُ وحداتٍ يقول أين هو منها.
+    · وأنّ **القياس يحمل شكلَ الموقع**: مفاتيحُ ليتنر `<حرف>|initial|trace` و`…|free`
+      — لا `isolated` (فالباءُ أوّلَ الكلمة غيرُ الباء وحدَها).
+    · وأنّ **محطةَ التمييز تسأل ولا تُلقّن**: صفُّ الأخوات معروضٌ، **ولا لوحَ عرضٍ
+      يكشف المطلوب** (لا خطوةَ «شاهِدْ» فيها)، والمطلوبُ يُقال باسمه من بنك اقرأ.
+    · وأنّ **جوابَ الأخت يُرَدّ على الشاشة** كما رُدَّ في node: تُكتب أختُ المطلوب
+      فلا تُقبَل، ولا تُخرِج الطفلَ — إرشادٌ لا رفض.
+    · 🔒 وأنّ الدورةَ كلَّها **بصفر طلباتٍ شبكية من الصفحة** — مسارُ الطفل لا يغادر جهازه.
+-->
+<style>
+  body { font: 15px/1.7 system-ui, sans-serif; margin: 0; background: #111; color: #eee; }
+  #log { padding: 1rem; white-space: pre-wrap; }
+  iframe { width: 460px; height: 900px; border: 0; position: fixed; inset-inline-end: 0; top: 0; }
+  .ok { color: #7ec97e; } .bad { color: #e08a80; }
+</style>
+</head>
+<body>
+<div id="log"></div>
+<iframe id="app" src="/"></iframe>
+<script type="module">
+const results = [];
+const log = document.getElementById('log');
+const frame = document.getElementById('app');
+
+function ok(cond, msg) {
+  results.push({ ok: !!cond, msg });
+  const line = document.createElement('div');
+  line.className = cond ? 'ok' : 'bad';
+  line.textContent = (cond ? '✓ ' : '✗ ') + msg;
+  log.append(line);
+}
+
+const errors = [];
+window.addEventListener('error', (e) => errors.push(String(e.message)));
+window.addEventListener('unhandledrejection', (e) => errors.push(String(e.reason)));
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const send = () => fetch('/result', {
+  method: 'POST', body: JSON.stringify({ from: 'write', rows: results }),
+});
+
+// عدّادُ أبواب الخروج من الجهاز (نظيرُ `browser_lesson.html`)
+const netCalls = [];
+function watchNetwork(win) {
+  const realFetch = win.fetch.bind(win);
+  win.fetch = (input, init) => {
+    netCalls.push(`fetch:${input && input.url ? input.url : input}`);
+    return realFetch(input, init);
+  };
+  const realOpen = win.XMLHttpRequest.prototype.open;
+  win.XMLHttpRequest.prototype.open = function (method, url, ...rest) {
+    netCalls.push(`xhr:${url}`);
+    return realOpen.call(this, method, url, ...rest);
+  };
+  Object.defineProperty(win.navigator, 'sendBeacon', {
+    configurable: true, value: (url) => { netCalls.push(`beacon:${url}`); return false; },
+  });
+  win.WebSocket = class { constructor(url) { netCalls.push(`ws:${url}`); } };
+  win.EventSource = class { constructor(url) { netCalls.push(`sse:${url}`); } };
+}
+
+(async () => {
+  let win;
+  let doc;
+  try {
+    // ————— تهيئةُ الحال: طفلٌ أتمّ حروفَه وبوّابتَها فبلغ محطةَ الأشكال —————
+    //
+    // **والموضعُ يُحسب من الرحلة لا يُكتب**: أوّلُ عقدةِ شكلٍ فيها، ويُملأ ما قبلها
+    // بالنجوم (وهو عينُ «بعد إتقان المعزول فقط» الذي يفرضه ترتيبُ الرحلة والقفل).
+    localStorage.clear();
+    const progress = await import('/js/progress.js');
+    const nodes = progress.allNodes();
+    const first = nodes.findIndex((n) => n.type === 'form');
+    ok(first > 0, `محطاتُ الأشكال في الرحلة، وأوّلُ عقدةٍ منها بعد ${first} عقدة`);
+    for (const node of nodes.slice(0, first)) progress.setStars(node.id, 3);
+
+    const formNodes = nodes.filter((n) => n.type === 'form');
+    const plain = formNodes.find((n) => !n.compare);
+    const compare = formNodes.find((n) => n.compare);
+    ok(Boolean(plain) && Boolean(compare),
+      `عقدُ الأشكال ${formNodes.length}: منها ${formNodes.filter((n) => n.compare).length} عقدةَ تمييزٍ للمتشابهات`);
+
+    frame.src = '/';
+    await new Promise((r) => frame.addEventListener('load', r, { once: true }));
+    win = frame.contentWindow;
+    doc = frame.contentDocument;
+    win.addEventListener('error', (e) => errors.push(String(e.message)));
+    win.addEventListener('unhandledrejection', (e) => errors.push(String(e.reason)));
+    watchNetwork(win);
+    await wait(700);
+
+    const { pathOf } = await import('/js/curriculum.js');
+    const { letterName } = await import('/js/ui.js');
+
+    // ————— إصبعٌ على اللوح —————
+    let pointerId = 1;
+    const surfaceEl = () => doc.querySelector('.pen-surface');
+    const toClient = ([x, y]) => {
+      const rect = surfaceEl().getBoundingClientRect();
+      const size = Math.min(rect.width, rect.height);
+      return {
+        clientX: rect.left + (rect.width - size) / 2 + (x / 1000) * size,
+        clientY: rect.top + (rect.height - size) / 2 + (y / 1000) * size,
+      };
+    };
+    const fire = (type, point, id) => {
+      surfaceEl().dispatchEvent(new win.PointerEvent(type, {
+        bubbles: true, cancelable: true, composed: true,
+        pointerId: id, pointerType: 'touch', isPrimary: true, ...toClient(point),
+      }));
+    };
+    async function writeStroke(points) {
+      const id = ++pointerId;
+      fire('pointerdown', points[0], id);
+      for (const p of points.slice(1)) fire('pointermove', p, id);
+      await wait(40);
+      fire('pointerup', points[points.length - 1], id);
+      await wait(60);
+    }
+    const tap = async (at) => writeStroke([at, at, at]);
+    /** يدُ طفلٍ مصنوعة: تمشي على المسار المرجعيّ نفسِه ثم تنقط بعد الجسم. */
+    async function writeShape(ref) {
+      for (const stroke of ref.strokes) await writeStroke(stroke.points);
+      for (const dot of ref.dots) {
+        for (let i = 0; i < (dot.count || 1); i++) await tap(dot.at);
+      }
+    }
+
+    const stored = () => {
+      try { return JSON.parse(win.localStorage.getItem('uktub.progress.v1') || '{}'); }
+      catch { return {}; }
+    };
+    const STEP_WAIT = 5200;          // فوق أطولِ احتياطٍ محسوبٍ لنصٍّ لم يُصرَّف بعد
+
+    // ————— §١ محطةُ شكل الموقع: حروفُ المجموعة بحلقتها —————
+    log.append(Object.assign(document.createElement('h3'),
+      { textContent: '§١ شكلُ الموقع — حروفُ المجموعة واحداً واحداً' }));
+
+    const netMark = netCalls.length;
+    win.location.hash = `#/form/${encodeURIComponent(plain.stageId)}/${encodeURIComponent(plain.part)}`;
+    await wait(700);
+
+    ok(Boolean(doc.querySelector('main.lesson-letter')),
+      `شاشةُ المحطة فُتحت بعنوانها المركّب (#/form/${plain.stageId}/${plain.part})`);
+    ok(doc.querySelectorAll('main .dots .dot').length === 4,
+      'وحلقتُها حلقةُ الدرس نفسُها — أربعُ خطوات');
+    ok(doc.querySelectorAll('main .unit-strip .unit').length === plain.letters.length,
+      `وشريطُ الوحدات يقول كم حرفاً فيها (${plain.letters.length}: ${plain.letters.join(' ')})`);
+    ok(doc.querySelectorAll('main .unit-strip .ref-glyph').length === plain.letters.length,
+      'وشاراتُه مرسومةٌ من المسارات المرجعية نفسِها (`refGlyph`) لا بخطّ نصّ');
+    ok(doc.querySelector('.lesson-board')?.classList.contains('lesson-board--watch'),
+      'وأولى خطواتها «شاهِدْ» — لوحُ عرضٍ لا يُكتب عليه');
+
+    // تُمشى المحطةُ كلُّها: لكلِّ حرفٍ أربعُ خطوات (الأولى نقرةٌ، والثلاثُ كتابة)
+    for (const letter of plain.letters) {
+      const ref = pathOf(letter, plain.form);
+      const act = doc.querySelector('main .foot .btn');
+      act.click();                            // «تَتَبَّعْ» — من العرض إلى الكتابة
+      await wait(700);
+      for (let step = 0; step < 3; step++) {
+        await writeShape(ref);
+        await wait(STEP_WAIT);
+      }
+    }
+
+    const state = stored();
+    const skills = Object.keys(state.skills || {});
+    const mine = skills.filter((key) => key.split('|')[1] === plain.form);
+    ok(mine.length === plain.letters.length * 2,
+      `والقياسُ بمفتاح **شكل الموقع**: ${mine.length} مفتاحاً — ${mine.join('، ')}`);
+    ok(plain.letters.every((ch) => mine.includes(`${ch}|${plain.form}|trace`)
+      && mine.includes(`${ch}|${plain.form}|free`)),
+      'ولكلِّ حرفٍ مفتاحا تتبّعٍ وحرّ في شكله — لا في معزوله');
+    ok(skills.every((key) => key.split('|')[1] !== 'isolated'),
+      'ولم يُكتب شيءٌ على حساب المعزول (فالباءُ أوّلَ الكلمة غيرُ الباء وحدَها)');
+    const stars = (state.stars || {})[plain.id] || 0;
+    ok(stars > 0 && doc.querySelectorAll('main .big-stars .on').length === stars,
+      `والمحطةُ أُتمّت — ${stars} نجومٍ على الشاشة وفي المخزن`);
+
+    const cycle = netCalls.slice(netMark);
+    ok(cycle.length === 0,
+      '🔒 **صفرُ طلباتٍ شبكية من الصفحة** في المحطة كلِّها'
+      + `${cycle.length ? ' — ' + cycle.slice(0, 5).join('، ') : ''}`);
+
+    // ————— §٢ محطةُ التمييز: تسأل ولا تُلقّن —————
+    log.append(Object.assign(document.createElement('h3'),
+      { textContent: '§٢ تمييزُ المتشابهات — تسأل ولا تُلقّن' }));
+
+    // **وقفلُ الرحلة يُفَكّ من داخل التطبيق لا من خارجه**: تقدّمُ الطفل يعيش في
+    // ذاكرة وحدته داخل الإطار، فكتابةٌ عليه من هذه الصفحة تكتب فوق ما أنجزه هو في
+    // §١. فتُستعمل أداةُ التجربة نفسُها (`?dev=1`: «أنجِز الكل بثلاث») — بابُ البانِي
+    // المعلَن، ويبقى ما قِيس في §١ على حاله.
+    frame.src = '/?dev=1';
+    await new Promise((r) => frame.addEventListener('load', r, { once: true }));
+    win = frame.contentWindow;
+    doc = frame.contentDocument;
+    win.addEventListener('error', (e) => errors.push(String(e.message)));
+    await wait(600);
+    const fill = [...doc.querySelectorAll('main .dev-row .btn')]
+      .find((b) => b.textContent.includes('بثلاث'));
+    ok(Boolean(fill), 'وأداةُ التجربة تفتح ما بعدها (`?dev=1`) — فيُبلَغ التمييزُ بلا قفل');
+    fill?.click();
+    await wait(400);
+    win.location.hash = `#/form/${encodeURIComponent(compare.stageId)}/${encodeURIComponent(compare.part)}`;
+    await wait(700);
+
+    const family = compare.compare[0];
+    ok(doc.querySelectorAll('main .compare-row .compare-one').length === family.length,
+      `صفُّ الأخوات معروضٌ (${family.join(' ')}) — والفارقُ بينهنّ في الرسم وحدَه`);
+    ok(!doc.querySelector('.lesson-board--watch'),
+      'ولا خطوةَ «شاهِدْ» فيها — عرضُ الشكل يُبطِل السؤال');
+    const marked = doc.querySelectorAll('main .compare-row [class*="--now"], main .compare-row [aria-current]');
+    ok(marked.length === 0, 'ولا وسمَ على المطلوبة في الصفّ — المطلوبُ يُقال في الأذن');
+    const acts = [...doc.querySelectorAll('main .foot .btn')];
+    const small = acts.filter((b) => b.getBoundingClientRect().height < 64);
+    ok(acts.length >= 2 && small.length === 0,
+      `وأفعالُ الشاشة (${acts.length}) هدفُ لمسٍ ≥ ٦٤ بكسل`
+      + (small.length ? ` — دونها: ${small.map((b) => Math.round(b.getBoundingClientRect().height)).join('، ')}` : ''));
+
+    // **مَن هي المطلوبة؟** — تُقرأ من الشاشة نفسِها كما تُقرأ للطفل: وسمُ لوح الكتابة
+    const asked = family.find((ch) => (surfaceEl()?.getAttribute('aria-label') || '')
+      .includes(letterName(ch)));
+    ok(Boolean(asked), `والمطلوبةُ معلومةٌ للوح (${asked || 'لا شيء'}) — فما يُحكَم به هو ما سُئل عنه`);
+    const other = family.find((ch) => ch !== asked);
+
+    // (١) جوابُ الأخت: يُكتب شكلُ أختها فلا يُقبَل — ولا يُخرِجه من الشاشة
+    const before = Object.keys(stored().faults || {}).length;
+    await writeShape(pathOf(other, compare.form));
+    await wait(400);
+    ok(Boolean(doc.querySelector('main.lesson-letter .pen-surface')),
+      `جوابُ الأخت («${other}» عن «${asked}») لا يُقبَل **ولا يُخرِج الطفلَ** — إرشادٌ لا رفض`);
+    ok(Object.keys(stored().faults || {}).length >= before,
+      'وخطؤه يُسجَّل بموضعه الحركيّ كما في سائر الشاشات');
+    ok(!doc.querySelector('main .big-stars'),
+      'ولم تُختَم المحطةُ بجوابٍ خاطئ');
+
+    // (٢) ثم الجوابُ الصحيح: يُقبَل وتمضي المحطة
+    await writeShape(pathOf(asked, compare.form));
+    await wait(STEP_WAIT);
+    const askedKey = `${asked}|${compare.form}|free`;
+    ok(Boolean(stored().skills?.[askedKey]),
+      `والجوابُ الصحيح يُقاس بمفتاحه (${askedKey})`);
+
+    ok(doc.documentElement.scrollWidth <= win.innerWidth + 1,
+      `ولا فائضَ أفقيّ (${doc.documentElement.scrollWidth} ≤ ${win.innerWidth})`);
+    ok(errors.length === 0,
+      errors.length ? `أخطاءُ جافاسكربت: ${errors.join(' · ')}` : 'لا أخطاء جافاسكربت');
+  } catch (e) {
+    ok(false, `استثناء: ${e && e.message}`);
+  }
+  await send();
+})();
+</script>
+</body>
+</html>

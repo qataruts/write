@@ -149,19 +149,32 @@ def sheet_grid() -> tuple:
 
 
 def sheet_window(cells: int) -> str:
-    """نافذةٌ تسع كلَّ خلايا اللوحة — عرضاً بأعمدتها وارتفاعاً بصفوفها."""
+    """نافذةٌ تسع كلَّ خلايا اللوحة — عرضاً بأعمدتها وارتفاعاً بصفوفها.
+
+    **ويُزاد الإطارُ الوهميّ على الارتفاع**: Chrome بلا واجهة يحجز فوق المنظور
+    شريطاً (`browser_test.VIEWPORT_PAD`) — فنافذةُ ٤١٢ منظورُها ٣٢٥. وكان الحسابُ
+    يغفله فتبتر اللوحةُ الصغيرة **وتقول اللوحةُ ذلك بنفسها** (حارسُ الجلسة ٦):
+    أمسكه أوّلُ استعمالٍ للحساب على لوحةٍ من صفٍّ واحد (مرشّحاتُ الكرّاسة، الجلسة ٧)،
+    ولم تُسلَّم صورةٌ مبتورة على أنها تامّة. **والرقمُ من مصدره لا يُكتب هنا.**
+    """
     cols, gap, pad = sheet_grid()
+    cols = min(cols, max(1, cells))          # لوحةُ شكلين عمودان — كما تفعل العدّة
     rows = max(1, -(-cells // cols))
     side = lambda n: pad * 2 + n * SHEET_CELL + max(0, n - 1) * gap  # noqa: E731
-    return f"{side(cols)},{side(rows)}"
+    return f"{side(cols)},{side(rows) + browser_test.VIEWPORT_PAD}"
 
 
 def drive(query: str, port: int, timeout: int, shots: Path = None, show: bool = False,
-          window: str = None) -> list:
-    """يفتح العدّةَ بوضعٍ من أوضاعها ويعيد ما أرسلته (أو يلتقط صورتها)."""
+          window: str = None, anchors_file: Path = None) -> list:
+    """يفتح العدّةَ بوضعٍ من أوضاعها ويعيد ما أرسلته (أو يلتقط صورتها).
+
+    و`anchors_file` **إيماءةٌ أخرى تُخدَم مكانَ الملفّ** — تستعملها لوحةُ مرشّحات
+    الكرّاسة (`craft_panel.py`، الجلسة ٧): جوابان لحالةٍ حركية يُبنيان ويُصوَّران من
+    ملفّين مؤقّتين، **وملفُّ المشروع لا يُمَسّ حتى يحكم المالك**.
+    """
     results = []
     browser_test.PAGES["/__make_paths.html"] = TOOL_PAGE
-    browser_test.PAGES["/__anchors.json"] = ANCHORS
+    browser_test.PAGES["/__anchors.json"] = anchors_file or ANCHORS
     server = browser_test.make_server(port, results)
     threading.Thread(target=server.serve_forever, daemon=True).start()
     profile = Path(tempfile.mkdtemp(prefix="uktub-paths-"))
@@ -360,6 +373,11 @@ def build(port: int, timeout: int) -> int:
     payload = next((r for r in results if "paths" in r), None)
     if not good or not payload:
         return 1
+    # **ولا تُكتب وحدةٌ من بناءٍ محدود**: `--only` في العدّة قياسُ مرشّحاتٍ لا بناءُ
+    # منهج، ولو كُتبت منه الوحدةُ لخرجت ناقصةَ الحروف صامتةً.
+    if payload.get("partial"):
+        print(f"بناءٌ محدود بـ«{payload['partial']}» — لا تُكتب منه الوحدة.")
+        return 1
     paths = payload["paths"]
     meta = {
         "tool": "tools/make_paths.html",
@@ -465,6 +483,31 @@ def self_test() -> int:
                 continue
             ok(len(ref["strokes"]) == len(entry["strokes"]),
                f"{ch}/{form}: أجزاءُ المسار {len(ref['strokes'])} = أجزاءُ الإيماءة {len(entry['strokes'])}")
+
+    # ————— ٥) نسبُ الرسم: «جسمُ هذا جسمُ ذاك والفارقُ علامتُه» (الجلسة ٧) —————
+    #
+    # حقيقةُ خطٍّ تُعلَن في الإيماءة (`kin`) وتُبنى منها **محطةُ تمييز المتشابهات** في
+    # المنهج. وهنا تُفحَص بنيتُها: أنسبٌ إلى شكلٍ موجود؟ وأليس إلى نفسه؟ **وأتفترق
+    # أختان في علامتهما فعلاً؟** — فأسرةٌ لا فارقَ بين أختيها في النقاط أسرةٌ لا سؤالَ
+    # فيها. (وأمّا أنّ المحرّكَ **يفرّق** بين كلِّ أختين فيُثبته `test_paths.mjs` حكماً.)
+    kin_count = 0
+    for ch, forms in letters.items():
+        for form, entry in forms.items():
+            root = entry.get("kin")
+            if not root:
+                continue
+            kin_count += 1
+            here, there = paths.get(ch, {}).get(form), paths.get(root, {}).get(form)
+            ok(root != ch and there is not None,
+               f"{ch}/{form}: نسبُ رسمه «{root}» — شكلٌ مؤلَّفٌ غيرُ نفسه")
+            if here is None or there is None:
+                continue
+            mark = lambda ref: sorted((round(d["at"][0]), round(d["at"][1]), d["count"])  # noqa: E731
+                                      for d in ref["dots"])
+            ok(mark(here) != mark(there),
+               f"{ch}/{form}: يفترق عن «{root}» في علامته"
+               f" ({len(here['dots'])} علامةً مقابل {len(there['dots'])})")
+    ok(kin_count > 0, f"ونسبُ الرسم مُعلَنٌ في {kin_count} شكلاً — منها تُبنى محطةُ التمييز")
 
     # ————— عهدُ التهيئة: الوحدةُ بُنيت من قسم العدّة، ومحطاتُها محطاتُ المنهج —————
     #

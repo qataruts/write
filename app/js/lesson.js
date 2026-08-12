@@ -1,9 +1,21 @@
-// شاشةُ **درس الحرف** — حلقةُ `METHOD.md §٥` بخطواتها الأربع:
+// شاشةُ **الدرس الكاتب** — حلقةُ `METHOD.md §٥` بخطواتها الأربع:
 //   ١) **شاهِدْ**: الرسمُ المتحرك **من المسار المرجعي نفسِه**، ومعه اسمُ الحرف بصوت
 //      بنك «اِقْرَأْ» (`METHOD.md §٧`) — فيُسمَع الاسمُ الذي تعلّمه الطفلُ قارئاً.
 //   ٢) **تتبّعْ موجَّهاً**: المسارُ ظاهرٌ كاملاً، نقطةُ البداية تومض، سهمُ اتجاه.
 //   ٣) **تتبّعْ خافتاً**: المسارُ يخفت، والاعتمادُ على الذاكرة الحركية يزيد.
 //   ٤) **اكتُبْهُ وحدَك**: صندوقٌ فارغ — والحكمُ بالشروط الأربعة نفسِها.
+//
+// **وثلاثُ محطاتٍ تركب هذه الحلقةَ نفسَها** (الجلسة ٧ — والحلقةُ واحدةٌ فالشاشةُ
+// واحدة، وهو عينُ ما يعلنه `tools/test_measure.mjs`: `letter` و`form` كلاهما
+// `lesson.js`):
+//   · **الحرفُ المعزول** (`type: letter`): وحدةٌ واحدة — الحرفُ بشكله المعزول.
+//   · **شكلُ الموقع** (`type: form`): وحداتٌ متتابعة — حروفُ المجموعة **بشكل موقعها**،
+//     حرفاً بعد حرف بالحلقة نفسِها. ومفتاحُ ليتنر يحمل شكلَ الموقع (`METHOD.md §٦`)،
+//     فما يُقاس هنا غيرُ ما قِيس في المعزول وإن كان الحرفُ واحداً.
+//   · **تمييزُ المتشابهات** (`type: form` وفيها `compare`): أسرةُ متشابهاتٍ تُعرَض
+//     شاراتُها معاً، ويُطلَب **واحدٌ منها باسمه** فيُكتب في صندوقٍ فارغ — نظيرُ «ميّز
+//     بين» في اقرأ، وهي المحطةُ التي تجمع ما باعده المنهجُ قصداً (`METHOD.md §٤`:
+//     «المتشابهاتُ رسماً متباعدةٌ ثم تُقارَن»).
 //
 // **ومؤشّرُ التقدّم الحركيّ مخالفةٌ معلَنة لاقرأ** (`METHOD.md §٥`): المسارُ يتلوّن
 // تحت قلم الطفل في كل خطوة (يملكه `pen.js`)، فالكتابةُ فعلٌ ممتدّ لا نقرة — والطفلُ
@@ -13,7 +25,8 @@
 // `penSurface` وتقرأ حكمَه (`METHOD.md §٣.٣`).
 //
 // **القياس** (`METHOD.md §٦`): كلُّ خطوةٍ كاتبةٍ تكتب في ليتنر بمفتاحها الثلاثيّ
-// (الحرف × معزول × تتبّع/حرّ)، وكلُّ خطأٍ يُسجَّل **بعينه** في عدّاد أخطاء الاتجاه.
+// (الوحدة × شكلُ الموقع × تتبّع/حرّ)، وكلُّ خطأٍ يُسجَّل **بعينه** في عدّاد أخطاء
+// الاتجاه — **وشكلُ الموقع من العقدة نفسِها** لا من ثابتٍ مكتوب.
 //
 // 🔒 **ومن حملة مسار الطفل**: يمرّ بها حبرُه (تتلقّى أخطاءَه من المحرّك)، فتدخل
 // حارسَ الخصوصية النصيّ في `tools/test_pen.mjs` — لا شبكةَ ولا رفعَ ولا عنوانَ
@@ -22,11 +35,11 @@
 import * as progress from './progress.js';
 import * as audio from './audio.js';
 import { pathOf, PATHS, LETTERS, FORMS } from './curriculum.js';
-import { penSurface, MODES } from './pen.js';
+import { penSurface, refGlyph, MODES } from './pen.js';
 import { starsForReview } from './review.js';
 import {
   h, icon, go, arNum, starsRow, topbar, brandMark, mascot, cheer, faceEl,
-  nodeTitle, traceFace, letterName,
+  nodeTitle, traceFace, letterName, formTitle,
 } from './ui.js';
 
 /**
@@ -39,6 +52,9 @@ export const SAY = {
   guided: 'تَتَبَّعِ الْمَسَارْ',
   faint: 'تَتَبَّعْهُ وَهْوَ خَافِتْ',
   free: 'اُكْتُبْهُ وَحْدَكْ',
+  // **تعليمةُ محطة التمييز** (الجلسة ٧): الأخواتُ معروضاتٌ والمطلوبُ يُقال باسمه
+  // بعدها من بنك اقرأ — فالسؤالُ سمعيٌّ والجوابُ حركيّ.
+  compare: 'مَيِّزْ بَيْنَهَا ثُمَّ اُكْتُبِ الْحَرْفَ',
 };
 
 /**
@@ -46,9 +62,9 @@ export const SAY = {
  * منقولُ `calc@ad59c56`): تعليماتُ الخطوات، **وأسماءُ الحروف التي أُلّف مسارُها**
  * فصارت تُدرَّس فعلاً.
  *
- * **ويُشتقّ من المادّة لا يُكتب بيد**: حرفٌ يدخل `PATHS` غداً (الجلسة ٦) يدخل هذا
- * الإعلانَ من نفسه، **فيُطالِب الحارسُ بصوت اسمه** من بنك اقرأ بلا سطرٍ يُضاف — وهو
- * نمطُ «التعليقُ يُطالِب من نفسه».
+ * **ويُشتقّ من المادّة لا يُكتب بيد**: حرفٌ يدخل `PATHS` غداً يدخل هذا الإعلانَ من
+ * نفسه، **فيُطالِب الحارسُ بصوت اسمه** من بنك اقرأ بلا سطرٍ يُضاف — وهو نمطُ
+ * «التعليقُ يُطالِب من نفسه». (وقد وقع ذلك في الجلسة ٦: دخلت المجموعاتُ ٤–٧.)
  */
 export const LETTER_NAMES = Object.keys(PATHS).map((ch) => LETTERS[ch]?.name).filter(Boolean);
 
@@ -65,20 +81,88 @@ export const STEPS = [
   { id: 'free', mode: MODES.FREE, title: 'وَحْدَكْ', say: SAY.free, kind: progress.KINDS.FREE },
 ];
 
-/** عقدةُ درس حرفٍ بجزئها — من الرحلة نفسِها، فلا يُكتب معرّفُ محطةٍ بيد. */
-const letterNode = (part) => progress.allNodes()
-  .find((node) => node.type === 'letter' && node.part === part) || null;
+/**
+ * **خطوةُ التمييز واحدة ولا تُشاهَد**: عرضُ الشكل قبل السؤال يُبطِل السؤالَ نفسَه —
+ * فالمطلوبُ أن يميّز الطفلُ **من ذاكرته الحركية** أيَّ الأخوات هو، لا أن ينقل ما
+ * أمامه. فصندوقٌ فارغ وحكمُ الشروط الأربعة نفسِها.
+ */
+const COMPARE_STEPS = [
+  { id: 'compare', mode: MODES.FREE, title: 'مَيِّزْ', say: SAY.compare, kind: progress.KINDS.FREE },
+];
+
+const stepsOf = (unit) => (unit.family ? COMPARE_STEPS : STEPS);
+
+/** عقدةُ الرحلة بنوعها ومحطتها وجزئها — من الرحلة نفسِها، فلا يُكتب معرّفُ محطةٍ بيد. */
+export const nodeOf = (type, stageId, part) => progress.allNodes().find((node) =>
+  node.type === type && node.part === part && (!stageId || node.stageId === stageId)) || null;
 
 /**
- * **أدرسٌ جاهزٌ لهذا الحرف؟** — أيْ: أُلّف مسارُه المرجعيّ؟ يقرؤها الموجّهُ فيجيب
- * الطفلَ بدل أن يصمت (بلاغُ الميدان ١: «الصمتُ يُقرأ عطباً»)، **ومصدرُ جوابها
- * البياناتُ نفسُها** لا قائمةٌ تشيخ: يومَ تُؤلَّف مساراتُ المجموعات ٤–٧ (الجلسة ٦)
- * تُفتَح دروسُها بلا سطرٍ يُعدَّل هنا ولا هناك.
+ * **أضعفُ الأخوات في يده** — مادّةُ سؤال التمييز: مَن لم يُقَس بعدُ أوّلاً، ثم أدنى
+ * صناديق ليتنر، ثم أكثرُهنّ خطأً. **وهو مبدأُ البوابة نفسُه** (`gate.js`: الأضعفُ لا
+ * المستحقُّ)، فالمحطةُ تسأل عمّا يحتاجه الطفلُ لا عمّا يصادف موعدَه.
  */
-export const lessonReady = (part) => {
-  const node = letterNode(part);
-  return Boolean(node?.letter && pathOf(node.letter, FORMS.ISOLATED));
+function weakest(letters, form) {
+  const rank = (ch) => {
+    const skill = progress.getSkill(progress.skillKey(ch, form, progress.KINDS.FREE));
+    return skill ? [1, skill.box, -skill.wrong] : [0, 0, 0];
+  };
+  return [...letters].sort((a, b) => {
+    const [x, y] = [rank(a), rank(b)];
+    return x[0] - y[0] || x[1] - y[1] || x[2] - y[2] || letters.indexOf(a) - letters.indexOf(b);
+  })[0];
+}
+
+/**
+ * **وحداتُ العقدة**: ما يكتبه الطفلُ فيها واحدةً بعد واحدة — ولكلٍّ مسارُها المرجعيّ
+ * (`ref`) الذي يُعرَض ويُحكَم به معاً.
+ *
+ * **وما لا مسارَ له يسقط لا يُعرَض فارغاً**: درسٌ بلا نموذجٍ ولا حَكَم لا يُفتَح
+ * (`METHOD.md §٣.٨`)، ويحرس `check_paths.py` ألّا يقع ذلك أصلاً.
+ */
+export function unitsOf(node) {
+  if (!node) return [];
+  if (node.type === 'letter') {
+    const ref = node.letter && pathOf(node.letter, FORMS.ISOLATED);
+    return ref ? [{ letter: node.letter, form: FORMS.ISOLATED, ref }] : [];
+  }
+  if (node.type !== 'form') return [];
+  if (node.compare) {
+    // أسرةٌ لكلِّ وحدة: تُعرَض شاراتُ الأخوات كلِّهنّ، ويُطلَب **أضعفُهنّ** باسمه
+    return node.compare
+      .map((family) => {
+        const letter = weakest(family, node.form);
+        const ref = pathOf(letter, node.form);
+        return ref && { letter, form: node.form, ref, family };
+      })
+      .filter(Boolean);
+  }
+  return (node.letters || [])
+    .map((letter) => {
+      const ref = pathOf(letter, node.form);
+      return ref && { letter, form: node.form, ref };
+    })
+    .filter(Boolean);
+}
+
+/**
+ * **أدرسٌ جاهزٌ لهذه العقدة؟** — أيْ: أُلّفت مساراتُ ما تدرّسه؟ يقرؤها الموجّهُ فيجيب
+ * الطفلَ بدل أن يصمت (بلاغُ الميدان ١: «الصمتُ يُقرأ عطباً»)، **ومصدرُ جوابها
+ * البياناتُ نفسُها** لا قائمةٌ تشيخ: يومَ يُؤلَّف مسارُ شكلٍ تُفتَح محطتُه بلا سطرٍ
+ * يُعدَّل هنا ولا هناك.
+ */
+export const nodeReady = (node) => {
+  if (!node) return false;
+  const wanted = node.type === 'letter' ? [node.letter].filter(Boolean)
+    : node.type === 'form' ? (node.compare ? node.compare.flat() : node.letters || [])
+      : [];
+  const form = node.type === 'letter' ? FORMS.ISOLATED : node.form;
+  // **كلُّ ما تعرضه العقدةُ لا ما تكتبه وحدَه**: أخواتُ التمييز تُعرَض شاراتُها،
+  // فشكلٌ منهنّ بلا مسارٍ يترك صفّاً أعورَ — والسؤالُ يقوم على الأخوات مجتمعات.
+  return wanted.length > 0 && wanted.every((ch) => pathOf(ch, form));
 };
+
+/** أدرسُ حرفٍ جاهزٌ بجزئه؟ (بابُ الموجّه القديم — يقرأ من الرحلة نفسِها). */
+export const lessonReady = (part) => nodeReady(nodeOf('letter', null, part));
 
 let live = null;
 
@@ -88,26 +172,28 @@ export function releaseLesson() {
   live = null;
 }
 
-/**
- * شاشةُ درسِ حرفٍ واحد.
- * @param {string} part جزءُ العقدة كما في `curriculum.js` (وهو الحرفُ نفسُه)
- * @returns {Node|null} `null` إن لم تكن عقدةَ حرفٍ أو لم يُؤلَّف مسارُه بعد
- */
-export function renderLesson(part) {
-  const node = letterNode(part);
-  if (!node?.letter) return null;
-  const letter = node.letter;
-  // **ولا يُفتَح درسٌ بلا مسارٍ مرجعيّ** (`METHOD.md §٣.٨`): حروفُ المجموعات ٤–٧
-  // تنتظر تأليفَ مساراتها (الجلسة ٦)، فيردّ الموجّهُ الطفلَ برسالته المعتادة بدل
-  // شاشةٍ بلا نموذجٍ ولا حَكَم.
-  const ref = pathOf(letter, FORMS.ISOLATED);
-  if (!ref) return null;
+/** شاشةُ درسِ حرفٍ معزول — بابُ الموجّه للحرف. */
+export const renderLesson = (part) => renderNode(nodeOf('letter', null, part));
 
-  const state = { index: 0, faults: 0, stepFaults: 0, done: false };
+/** شاشةُ محطة شكل الموقع (أو التمييز) — بابُ الموجّه للأشكال. */
+export const renderForms = (stageId, part) => renderNode(nodeOf('form', stageId, part));
+
+/**
+ * **الشاشةُ الواحدة**: عقدةٌ بوحداتها، وكلُّ وحدةٍ بحلقتها.
+ * @param {object} node عقدةُ الرحلة (`letter` أو `form`)
+ * @returns {Node|null} `null` إن لم تكن عقدةً كاتبةً أو لم تُؤلَّف مساراتُها بعد
+ */
+export function renderNode(node) {
+  const units = unitsOf(node);
+  if (!units.length) return null;
+
+  const state = { unit: 0, index: 0, faults: 0, stepFaults: 0, done: false };
   /** آخرُ ما نطقته الشاشة — **وبه تنتظر الخطوةُ تمامَ الكلام** (قناة ٤ج) لا مهلةً. */
   let speech = Promise.resolve(false);
 
   const dots = h('ol', { class: 'dots' });
+  const strip = h('ol', { class: 'unit-strip' });
+  const family = h('div', { class: 'compare-row' });
   const board = h('div', { class: 'lesson-board' });
   const foot = h('div', { class: 'row foot' });
   const hint = h('p', { class: 'hint' });
@@ -132,11 +218,37 @@ export function renderLesson(part) {
   };
 
   function paintDots() {
-    dots.replaceChildren(...STEPS.map((step, i) => h('li', {
+    const steps = stepsOf(units[state.unit] || units[0]);
+    dots.replaceChildren(...steps.map((step, i) => h('li', {
       class: `dot${!state.done && i === state.index ? ' dot--now' : ''}`
         + `${state.done || i < state.index ? ' dot--done' : ''}`,
       'aria-label': step.title,
     }, state.done || i < state.index ? '✓' : arNum(i + 1))));
+  }
+
+  /**
+   * **شريطُ وحدات المحطة**: شاراتُ ما يُكتب فيها بالترتيب — **مرسومةً من مساراتها
+   * المرجعية** (`refGlyph`)، فيرى الطفلُ أين هو من محطته وكم بقي. ويسقط الشريطُ إذا
+   * كانت الوحدةُ واحدة (درسُ الحرف المعزول) فلا يزاحم لوحَه بما لا يقول شيئاً.
+   */
+  function paintStrip() {
+    if (units.length < 2) return;
+    strip.replaceChildren(...units.map((unit, i) => h('li', {
+      class: `unit${i === state.unit && !state.done ? ' unit--now' : ''}${state.done || i < state.unit ? ' unit--done' : ''}`,
+      'aria-label': letterName(unit.letter),
+    }, refGlyph(unit.ref))));
+  }
+
+  /**
+   * **صفُّ المتشابهات** (محطة التمييز): شاراتُ الأخوات كلِّهنّ **بلا اسمٍ ولا علامةٍ
+   * تدلّ على المطلوب** — فالفارقُ بينهنّ في الرسم وحدَه (نقطةٌ أو نقطتان أو ثلاث)،
+   * والمطلوبُ يُقال في الأذن. ولو وُسمت المطلوبةُ لصار التمرينُ نقلاً لا تمييزاً.
+   */
+  function paintFamily(unit) {
+    if (!unit.family) { family.replaceChildren(); return; }
+    family.replaceChildren(...unit.family.map((ch) => h('div', {
+      class: 'compare-one', 'aria-label': letterName(ch),
+    }, refGlyph(pathOf(ch, unit.form)))));
   }
 
   /**
@@ -146,22 +258,24 @@ export function renderLesson(part) {
    */
   function mount() {
     releaseLesson();
-    const step = STEPS[state.index];
+    const unit = units[state.unit];
+    const step = stepsOf(unit)[state.index];
     state.stepFaults = 0;
     hint.textContent = step.say;
+    paintFamily(unit);
 
     const surface = penSurface({
-      ref,
+      ref: unit.ref,
       mode: step.mode,
-      label: `لوحُ كتابة: ${letterName(letter)}`,
+      label: `لوحُ كتابة: ${letterName(unit.letter)}${unit.form === FORMS.ISOLATED ? '' : ` ${formTitle(unit.form)}`}`,
       // **كلُّ خطأٍ يُسجَّل باسمه** (`METHOD.md §٦`) — ووحدتُه الحرفُ نفسُه، فتقرأ
       // لوحةُ وليّ الأمر «يبدأ الميمَ من أسفل» لا رقماً مبهماً.
       onFault: (fault) => {
         state.faults++;
         state.stepFaults++;
-        progress.recordFault(letter, fault.code);
+        progress.recordFault(unit.letter, fault.code);
       },
-      onDone: () => finishStep(step),
+      onDone: () => finishStep(step, unit),
     });
     live = surface;
     board.replaceChildren(surface.el);
@@ -171,34 +285,39 @@ export function renderLesson(part) {
       // لمسةُ الطفل على لوح العرض تنقله إلى التتبّع — والنقرةُ **تُسكت ثم تُشغّل**
       // (عقدُ ٤ج: كلامُ التطبيق يصفّ، ونقرةُ الطفل تعيش وحدَها).
       surface.el.addEventListener('pointerdown', () => { audio.stop(); nextStep(); });
-      say(letterName(letter), step.say);
+      say(letterName(unit.letter), step.say);
     } else {
       surface.el.addEventListener('pointerdown', () => surface.stop(), { capture: true });
-      say(step.say);
+      // **وفي التمييز يُقال المطلوبُ بعد التعليمة**: التعليمةُ تصف العمل والاسمُ
+      // يعيّن المطلوب — وكلاهما يصفّ في القناة الواحدة فيُسمَعان بترتيبهما.
+      if (step.id === 'compare') say(step.say, letterName(unit.letter));
+      else say(step.say);
     }
     paintDots();
-    paintFoot(step);
+    paintStrip();
+    paintFoot(step, unit);
   }
 
   /**
    * **القياسُ يكتب لكل خطوةٍ بمفتاحها** (`METHOD.md §٦`): الخطوةُ بلا خطأٍ إصابةٌ
    * ترفع صندوقَ ليتنر، وما وقع فيه خطأٌ يعود إلى الصندوق الأول فيُراجَع غداً.
+   * **وشكلُ الموقع من الوحدة** — فالباءُ وسطاً غيرُ الباء معزولةً في السجلّ.
    *
    * **والنوعان مكتوبان بأعيانهما لا بمتغيّر**: `tools/test_measure.mjs` يقرأ هذا
    * الملفَّ نصّاً ليثبت أنّ المحطةَ تكتب ما أعلنته — ولو مُرِّرا في متغيّرٍ لَعمي
    * عنهما الحارسُ ومرّت محطةٌ لا تقيس.
    */
-  function score(step, clean) {
+  function score(step, unit, clean) {
     if (step.kind === progress.KINDS.FREE) {
-      progress.recordAttempt(letter, FORMS.ISOLATED, progress.KINDS.FREE, clean);
+      progress.recordAttempt(unit.letter, unit.form, progress.KINDS.FREE, clean);
     } else if (step.kind === progress.KINDS.TRACE) {
-      progress.recordAttempt(letter, FORMS.ISOLATED, progress.KINDS.TRACE, clean);
+      progress.recordAttempt(unit.letter, unit.form, progress.KINDS.TRACE, clean);
     }
   }
 
   /** خطوةٌ استُوفيت: تُقاس ثم تُسلّم إلى ما بعدها — **بعد تمام الكلام لا بمهلة**. */
-  function finishStep(step) {
-    score(step, state.stepFaults === 0);
+  function finishStep(step, unit) {
+    score(step, unit, state.stepFaults === 0);
     nextStep();
   }
 
@@ -206,8 +325,16 @@ export function renderLesson(part) {
     const token = ++turn;
     await speech;                       // لا يُدهَس كلامٌ يُقال (قناةُ ٤ج)
     if (token !== turn) return;         // سبقتنا خطوةٌ أحدث
-    if (state.index < STEPS.length - 1) {
+    if (state.index < stepsOf(units[state.unit]).length - 1) {
       state.index++;
+      mount();
+      return;
+    }
+    // **وحدةٌ تمّت حلقتُها**: تُسلَّم إلى أختها في المحطة نفسِها بلا خروجٍ ولا احتفالٍ
+    // بينهما — الاحتفالُ للمحطة، والانتقالُ بين حروفها متّصلٌ كما تُكتب الكلمة.
+    if (state.unit < units.length - 1) {
+      state.unit++;
+      state.index = 0;
       mount();
       return;
     }
@@ -215,10 +342,13 @@ export function renderLesson(part) {
   }
   let turn = 0;
 
+  /** عددُ الخطوات الكاتبة في المحطة كلِّها — سقفُ الأخطاء الذي تُقاس عليه النجوم. */
+  const writingSteps = units.reduce((n, unit) => n + stepsOf(unit).filter((s) => s.kind).length, 0);
+
   /**
-   * ختامُ الدرس: نجومٌ بحكم المراجعة نفسِه (`starsForReview`) — ثلاثٌ بلا خطأ،
+   * ختامُ المحطة: نجومٌ بحكم المراجعة نفسِه (`starsForReview`) — ثلاثٌ بلا خطأ،
    * فاثنتان ما دامت الأخطاءُ ≤ عدد الخطوات الكاتبة، وإلا واحدة. **ولا رسوبَ**:
-   * من أتمّ خطواته فقد كتب الحرفَ صحيحاً في النهاية (المحرّكُ لا يُمرّر جزءاً إلا
+   * من أتمّ خطواته فقد كتب كلَّ شكلٍ صحيحاً في النهاية (المحرّكُ لا يُمرّر جزءاً إلا
    * مستوفىً)، والأخطاءُ في الطريق تُقاس ولا تُعاقَب.
    */
   function finish() {
@@ -226,10 +356,11 @@ export function renderLesson(part) {
     const trace = live?.ink() ?? [];
     releaseLesson();
     state.done = true;
-    const writing = STEPS.filter((s) => s.kind).length;
-    const stars = starsForReview(state.faults, writing);
+    const stars = starsForReview(state.faults, writingSteps);
     progress.setStars(node.id, stars);
     paintDots();
+    paintStrip();
+    family.replaceChildren();
     hint.textContent = '';
     board.classList.remove('lesson-board--watch');
     board.replaceChildren(h('div', { class: 'celebrate' },
@@ -245,6 +376,7 @@ export function renderLesson(part) {
       h('button', {
         class: 'btn next',
         onclick: () => {
+          state.unit = 0;
           state.index = 0;
           state.faults = 0;
           state.done = false;
@@ -255,7 +387,7 @@ export function renderLesson(part) {
   }
 
   /** أفعالُ الشاشة: تُبدَّل بالخطوة — وكلُّها أهدافُ لمسٍ ≥ ٦٤ بكسل (`DESIGN §٤`). */
-  function paintFoot(step) {
+  function paintFoot(step, unit) {
     if (step.id === 'watch') {
       foot.replaceChildren(
         h('button', {
@@ -266,12 +398,24 @@ export function renderLesson(part) {
           class: 'btn next',
           // **نقرةُ الطفل تُسكت ثم تُشغّل** (عقدُ قناة ٤ج): فتسقط بقيّةُ ما صُفّ
           // ويُسمَع ما طلبه هو وحدَه — لا يُكدَّس صوتٌ فوق صوت.
-          onclick: () => { audio.stop(); speech = audio.play(letterName(letter)); },
+          onclick: () => { audio.stop(); speech = audio.play(letterName(unit.letter)); },
         }, icon('ear'), ' اسْمَعْ'),
         h('button', {
           class: 'btn next',
           onclick: () => { live?.reset(); live?.play(); },
         }, '↻ أعِدِ العَرْض'),
+      );
+      return;
+    }
+    // **وفي التمييز لا زرَّ «شاهِدْ»**: عرضُ الشكل يُبطِل السؤال — فيبقى زرُّ الأذن
+    // (يعيد اسمَ المطلوب) وزرُّ الإعادة، ولا يُكشَف الجوابُ بنقرة.
+    if (step.id === 'compare') {
+      foot.replaceChildren(
+        h('button', {
+          class: 'btn btn--primary next',
+          onclick: () => { audio.stop(); speech = audio.play(letterName(unit.letter)); },
+        }, icon('ear'), ' أَعِدِ السُّؤَال'),
+        h('button', { class: 'btn next', onclick: () => live?.reset() }, '↻ أعِدْ'),
       );
       return;
     }
@@ -284,7 +428,8 @@ export function renderLesson(part) {
     );
   }
 
-  const main = h('main', { class: 'screen lesson-letter' }, title, dots, board, hint, foot);
+  const main = h('main', { class: 'screen lesson-letter' },
+    title, strip, dots, family, board, hint, foot);
   screen.append(main);
   mount();
   return screen;

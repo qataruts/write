@@ -631,6 +631,29 @@ const pathD = (points) => points
 export const MODES = { GUIDED: 'guided', FAINT: 'faint', FREE: 'free' };
 
 /**
+ * **شارةُ الشكل: المسارُ المرجعيّ مرسوماً ساكناً** — بلا لوحٍ ولا حَكَمٍ ولا حبرِ طفل.
+ *
+ * تحتاجها الشاشاتُ حيث يُذكَر شكلٌ ولا يُكتب: شريطُ حروف محطة الأشكال، وصفُّ
+ * المتشابهات في محطة التمييز (الجلسة ٧). **وموضعُها هنا لا في الشاشة** لأنّ
+ * «النموذجُ هو المقياس» (`METHOD.md §٣.٢`) قاعدةٌ على كلّ رسمٍ لشكلٍ لا على اللوح
+ * وحدَه: ما يراه الطفلُ في الشارة هو عينُ ما يحكم به `createTrial` عليه بعد قليل —
+ * ولا يُرسَم في هذا التطبيق حرفٌ من مصدرٍ آخر.
+ *
+ * **وأجزاؤها أجزاءُ المحرّك** (`partsOf`): الأجسامُ ثم النقاطُ بعددها كما يعرضها
+ * اللوحُ نفسُه، فلا صورتان لشكلٍ واحد.
+ */
+export function refGlyph(ref, className = 'ref-glyph') {
+  const svg = sv('svg', {
+    class: className, viewBox: `0 0 ${GRID} ${GRID}`, 'aria-hidden': 'true',
+  });
+  for (const part of partsOf(ref)) {
+    if (part.kind === 'stroke') svg.append(sv('path', { class: 'ref-stroke', d: pathD(part.poly.pts) }));
+    else svg.append(sv('circle', { class: 'ref-dot', cx: part.at[0], cy: part.at[1], r: 34 }));
+  }
+  return svg;
+}
+
+/**
  * لوحُ الكتابة: عنصرٌ يُدرَج في الشاشة، فيه النموذجُ وحبرُ الطفل والحكم.
  *
  * @param {object} config

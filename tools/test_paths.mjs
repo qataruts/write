@@ -232,9 +232,51 @@ ok(shapes.filter(({ ref }) => !ref.strokes.some((s) => s.folds?.length))
     && !pen.judge(ref, trace(ref, { from: 1, to: 0 })).accepted),
   `والأشكالُ التي لا طيّةَ فيها (${shapes.length - folded.length}) على حكمها كما كانت`);
 
-// ————— ٦) الوصل: الوحدةُ مولَّدةٌ وفي مخزون العمل دون إنترنت —————
+// ————— ٦) تمييزُ المتشابهات: أيفرّق المحرّكُ بين كلِّ أختين؟ (الجلسة ٧) —————
+//
+// محطةُ التمييز تسأل الطفلَ عن **واحدةٍ من أخواتٍ جسمُهنّ واحد** (`METHOD.md §٤`:
+// «المتشابهاتُ رسماً متباعدةٌ ثم تُقارَن»)، فتقوم كلُّها على شرطٍ واحد: **أن يُرَدّ
+// جوابُ الأخت**. فلو قبِل حَكَمُ الثاءِ باءً مكتوبةً لصار السؤالُ بلا جواب خاطئ —
+// وهو سؤالٌ لا يُقاس، وأخضرُ كاذب.
+//
+// **والأسرُ تُقرأ من المنهج نفسِه** (عقدةُ `compare` في محطات الأشكال) لا تُكتب هنا:
+// فأسرةٌ تدخل بتبدّل نسب الرسم تدخل هذا الحارسَ من نفسها.
 
-console.log('\n— ٦) الوصل —');
+console.log('\n— ٦) تمييزُ المتشابهات: جوابُ الأخت يُرَدّ —');
+const compareNodes = curriculum.STAGES
+  .flatMap((stage) => stage.nodes.map((node) => ({ stage, node })))
+  .filter(({ node }) => node.compare);
+ok(compareNodes.length > 0,
+  `محطاتُ التمييز ${compareNodes.length}: `
+  + compareNodes.map(({ stage, node }) => `${curriculum.FORM_NAMES[node.form]} (${
+    node.compare.map((f) => f.join('')).join('، ')})`).join(' · '));
+
+for (const { node } of compareNodes) {
+  for (const familyList of node.compare) {
+    const wrong = [];
+    for (const asked of familyList) {
+      for (const written of familyList) {
+        if (asked === written) continue;
+        const ref = curriculum.pathOf(asked, node.form);
+        const verdict = pen.judge(ref, trace(curriculum.pathOf(written, node.form)));
+        if (verdict.accepted) wrong.push(`${written} ⇐ ${asked}`);
+      }
+    }
+    ok(wrong.length === 0,
+      `${familyList.join('')} ${curriculum.FORM_NAMES[node.form]}: `
+      + `كلُّ أختٍ تُرَدّ عن أختها (${familyList.length * (familyList.length - 1)} مقابلة)`
+      + (wrong.length ? ` — **قُبل خطأً: ${wrong.join('، ')}**` : ''));
+    // **وكلٌّ منهنّ تُقبَل عن نفسها** — فالردُّ للاختلاف لا لضيق المسار
+    ok(familyList.every((ch) => {
+      const ref = curriculum.pathOf(ch, node.form);
+      return pen.judge(ref, trace(ref)).accepted;
+    }), `و${familyList.join('')} ${curriculum.FORM_NAMES[node.form]}: كلٌّ تُقبَل عن نفسها`);
+  }
+}
+
+// ————— ٧) الوصل: الوحدةُ مولَّدةٌ وفي مخزون العمل دون إنترنت —————
+
+console.log('\n— ٧) الوصل —');
 const module = read('js/paths.js');
 ok(/ملفٌّ مولَّد — لا يُحرَّر بيد/.test(module) && /make_paths\.py --build/.test(module),
   'ووحدةُ المسارات تُعلن أنها مولَّدةٌ وتُسمّي مولِّدَها في رأسها');

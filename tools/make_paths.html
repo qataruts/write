@@ -1009,10 +1009,36 @@ function studio(ch, form) {
   const graph = skeletonGraph(skeleton);
   return {
     ch, form, mask, image, bodyMask, skeleton, graph, cal,
+    marks,                                   // أجرامُ العلامات كما هي — تحتاجها `markStrokes`
     dots: dotsFrom(marks),
     sig: fingerprint(mask),
     dt: distance(bodyMask),
   };
+}
+
+/**
+ * **العلامةُ ضربةً لا نقرة** — خيارُ **مرشّح الكرّاسة** وحدَه (الجلسة ٧، شولةُ الكاف):
+ * يُنحَّف جرمُ العلامة كما يُنحَّف جسمُ الحرف، ويُمشى أطولُ سلاسل هيكله **من أعلى إلى
+ * أسفل** (كما ينحدر القلم)، فتخرج العلامةُ جزءاً له بدايةٌ واتجاهٌ يقيسهما المحرّك.
+ *
+ * **ولا يدخل هذا بناءَ المنهج إلا بحكم المالك**: لا إيماءةَ في `path_anchors.json`
+ * تُعلنه اليوم، وإنما تُعلنه ملفّاتُ المرشّحات المؤقّتة التي تبنيها `craft_panel.py`
+ * — فما دام الحكمُ لم يقع فالعلامةُ نقرةٌ كما هي (`METHOD.md §١٠`: رسمُ الشولة من
+ * جمال الخطّ لا من مادّة هذا التطبيق).
+ */
+function markStrokes(work) {
+  const out = [];
+  for (const mark of work.marks) {
+    const sk = thin(maskOf(mark.cells));
+    const graph = skeletonGraph(sk);
+    const edge = graph.edges.slice().sort((a, b) => chainLen(b.chain) - chainLen(a.chain))[0];
+    if (!edge) continue;                       // علامةٌ لا هيكلَ لها (نقطةٌ مستديرة): تبقى نقرة
+    let points = edge.chain.map(px2grid).map((p) => [round1(p[0]), round1(p[1])]);
+    if (points[0][1] > points[points.length - 1][1]) points = points.reverse();
+    points = resample(smooth(points, 2));
+    if (points.length > 1) out.push({ points, start: points[0] });
+  }
+  return out;
 }
 
 /**
@@ -1021,14 +1047,14 @@ function studio(ch, form) {
  * دعوى على الحرف لا وصفٌ له. ويُقاس **غَوصُ** كل نقطةٍ في الحبر (مقياسُ المسافة
  * نفسُه)، فيُعرَف كم بقي للمسار من هامشٍ قبل الحافّة — لا «داخلٌ أو خارج» وحدَه.
  */
-function depthIn(work, points) {
+function depthIn(work, points, mask = work.bodyMask) {
   let least = Infinity;
   let out = 0;
   const stray = [];
   for (const p of points) {
     const mx = Math.round(p[0] / PX - 0.5);
     const my = Math.round(p[1] / PX - 0.5);
-    const inside = mx >= 0 && my >= 0 && mx < MASK && my < MASK && work.bodyMask[my * MASK + mx];
+    const inside = mx >= 0 && my >= 0 && mx < MASK && my < MASK && mask[my * MASK + mx];
     if (!inside) { out++; stray.push(p.map(round1)); }
     least = Math.min(least, inside ? work.dt[my * MASK + mx] * PX : 0);
   }
@@ -1076,6 +1102,8 @@ function compose(work, gesture) {
     strokes.push(marks.length ? { points, start: points[0], folds: marks }
       : { points, start: points[0] });
   }
+  // **العلامةُ ضربةً**: مرشّحُ الكرّاسة وحدَه (أعلاه) — فتخرج من النقاط وتدخل الأجزاء
+  if (gesture.markStrokes) return { strokes: [...strokes, ...markStrokes(work)], dots: [] };
   return { strokes, dots: work.dots };
 }
 
@@ -1376,7 +1404,10 @@ function buildAll(spec) {
         throw new Error(`${ch}/${FORM_AR[form]}: بصمةُ الخيال ${work.sig} والإيماءةُ على ${entry.sig}`);
       }
       done[form] = compose(work, entry);
-      const ink = depthIn(work, done[form].strokes.flatMap((st) => st.points));
+      // **ومرشّحُ «العلامةُ ضربة» يُقاس على الخيال كلِّه**: ضربتُها في جرم العلامة لا
+      // في جسم الحرف، فقياسُها على قناع الجسم يقول «خارج الحبر» وهي في حبرها.
+      const ink = depthIn(work, done[form].strokes.flatMap((st) => st.points),
+        entry.markStrokes ? work.mask : work.bodyMask);
       if (ink.out) {
         throw new Error(`${ch}/${FORM_AR[form]}: ${ink.out} نقطةً خارج خيال الحرف`
           + ` (${ink.stray.slice(0, 3).map((p) => p.join('،')).join(' · ')})`
@@ -1396,8 +1427,24 @@ function buildAll(spec) {
 
 async function runBuild() {
   const spec = await anchors();
+  // **بناءٌ محدودٌ بحروفٍ بعينها** (`only`، الجلسة ٧): تُقاس به **مرشّحاتُ الكرّاسة**
+  // — جوابان لحالةٍ حركية يُبنيان ويُدخَلان على المحرّك قبل أن يحكم المالك. وهو
+  // **قياسٌ لا يُكتب منه ملفّ**: السائقُ يرفض الكتابة إذا صُفّيت الحروف (وإلّا خرجت
+  // وحدةٌ ناقصة)، وأشكالُ التهيئة لا تُبنى معه لأنّ دورانَها يُقرأ من حلقة الميم.
+  const only = qs.get('only');
+  if (only) {
+    spec.letters = Object.fromEntries(
+      Object.entries(spec.letters).filter(([ch]) => only.includes(ch)));
+  }
   try {
     const { paths, report } = buildAll(spec);
+    if (only) {
+      say(true, `بناءٌ محدود بـ«${only}» — قياسٌ لا تُكتب منه وحدة`, {
+        paths, partial: only, meta: { report, grid: GRID },
+      });
+      await send();
+      return;
+    }
     for (const line of report) {
       say(true, `${line.ch} ${FORM_AR[line.form]}: `
         + (line.sameAs ? `عينُ ${FORM_AR[line.sameAs]} — خيالاهما ببصمةٍ واحدة (${line.sig})`
@@ -1460,10 +1507,20 @@ async function runSheet() {
   // **و`only` مِصفاةُ حروفٍ للتأليف** (الجلسة ٦): لوحةُ الـ٢٨ كاملةً تُسلَّم للعين،
   // لكنّ المؤلِّفَ يقرأ أرقامَ العُقَد وهو يؤلّف مجموعةً مجموعة — وأرقامٌ تصغر تحت
   // التصغير لا تُقرأ. والنافذةُ تتبع العددَ في الحالين (يحسبها السائق).
+  // **و`pick` صفُّ أشكالٍ بأعيانها** (`ch/form`، الجلسة ٧): لوحةُ **مرشّحات الكرّاسة**
+  // تعرض الحالةَ الحركية الواحدة في جوابيها، فتُنتقى أشكالُها بأعيانها لا حروفُها —
+  // ولا يُعرَض معها ما لا شأنَ له بالسؤال المعروض على المالك.
   const only = qs.get('only');
-  const list = allForms(spec).filter(({ ch }) => !only || only.includes(ch));
+  const pick = qs.get('pick');
+  const list = pick
+    ? pick.split(',').map((one) => one.split('/')).map(([ch, form]) => ({ ch, form }))
+    : allForms(spec).filter(({ ch }) => !only || only.includes(ch));
   const board = document.createElement('div');
   board.id = 'sheet';
+  // **ولوحةُ المرشّحات تضيق بأشكالها**: أربعةُ أعمدةٍ لصفٍّ من شكلين تترك نصفَ
+  // الصورة فارغاً وتصغّر ما يُراد أن يُقرأ بالعين. فالأعمدةُ أقلُّ العددين، والسائقُ
+  // يحسب النافذةَ بالعدد نفسِه (`sheet_window`) فلا يفترق الرقمان.
+  if (list.length < 4) board.style.gridTemplateColumns = `repeat(${list.length}, 1fr)`;
   document.body.replaceChildren(board);
   const showNodes = qs.get('tags') !== '0';
   for (const { ch, form } of list) {

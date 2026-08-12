@@ -128,6 +128,44 @@ function shape(text) {
 /** علاماتُ نصٍّ: كلُّ محرفٍ ليس من الحروف الثمانية والعشرين — حركاتٌ وشدّةٌ وتنوينٌ ومتغيّرات. */
 const marksOf = (text) => [...text].filter((ch) => ch !== ' ' && !isLetter(ch));
 
+// ————— ١ب. نسبُ الرسم: أسرُ المتشابهات —————
+//
+// **المادّةُ الوحيدة في هذا المولّد التي ليست من اقرأ** — وعلّتُها أنّ اقرأ لا يعرفها:
+// «جسمُ الثاء جسمُ الباء والفارقُ نقاطُها» حقيقةُ **رسمٍ** لا حقيقةُ قراءة، والقراءةُ
+// لا تجمع ب وت وث في باب. فمصدرُها **ملفُّ الإيماءات** (`tools/path_anchors.json`)
+// حيث تُعلَن سائرُ حقائق الرسم المؤلَّفة (من أين يبدأ القلم وإلى أين يمضي)، وتُقرأ
+// هنا آلياً — **ولا تُكتب أسرةٌ في هذا الملف**.
+//
+// **ويثبتها المحرّكُ لا الدعوى**: `tools/test_paths.mjs` يُدخل شكلَ كلِّ أختٍ على
+// حَكَم أختها فيلزم أن يُرَدّ — فسؤالُ التمييز مُحكَمٌ عليه، ولا يمرّ جوابُ أختٍ عن أخت.
+
+const ANCHORS = JSON.parse(readFileSync(new URL('path_anchors.json', import.meta.url), 'utf8'));
+
+/** إيماءةُ شكلٍ بعد فكّ دعوى «عينُ شكلٍ آخر» — فالنسبُ يُقرأ من الشكل الذي بُني منه. */
+function anchorOf(ch, form, seen = new Set()) {
+  const entry = ANCHORS.letters?.[ch]?.[form];
+  if (!entry || seen.has(form)) return null;
+  if (entry.sameAs) return anchorOf(ch, entry.sameAs, seen.add(form));
+  return entry;
+}
+
+/** جذعُ أسرة الشكل: الحرفُ الذي جسمُه جسمُه (ونفسُه إن لم يكن له نسب). */
+const kinRoot = (ch, form) => anchorOf(ch, form)?.kin || ch;
+
+/**
+ * أسرُ المتشابهات بين حروفٍ بعينها في شكلِ موقعٍ بعينه — الأسرةُ عضوان فأكثر،
+ * وترتيبُها ترتيبُ المنهج (فتُعرَض للطفل كما لقيها).
+ */
+function kinFamilies(letters, form) {
+  const groups = new Map();
+  for (const ch of letters) {
+    const root = kinRoot(ch, form);
+    if (!groups.has(root)) groups.set(root, []);
+    groups.get(root).push(ch);
+  }
+  return [...groups.values()].filter((family) => family.length > 1);
+}
+
 // ————— ٢. بنكُ اقرأ: الكلماتُ بترتيبها عنده —————
 //
 // ثلاثةُ مصادرَ بترتيب رحلته: كلماتُ مجموعاته (يهجّيها الطفل حرفاً حرفاً)، ثم كلماتُ
@@ -339,6 +377,29 @@ for (const { form, title, sub } of FORM_STAGES) {
       letters,
       title: group.title,
       face: rc.letterForms(letters[0])[form],     // وجهُ العقدة شكلُ أوّل حروفها — من اقرأ
+    });
+  }
+  // ——— وخاتمةُ المحطة: **تمييزُ المتشابهات رسماً** (`METHOD.md §٤`) ———
+  //
+  // «المتشابهاتُ رسماً (ب ت ث · ج ح خ) **متباعدةٌ ثم تُقارَن**»: التباعدُ وقع من نفسه
+  // — ترتيبُ اقرأ فرّق الباءَ عن التاء عن الثاء في ثلاث مجموعات — **والمقارنةُ عقدةٌ
+  // في ذيل محطة الشكل**: هنا وحدَه تجتمع الأخواتُ اللواتي باعدهنّ المنهجُ قصداً، وقد
+  // كُتب كلُّ شكلٍ منهنّ قبل قليل في هذه المحطة نفسِها.
+  //
+  // **وأسرُ الشبه تُقرأ من نسب الرسم لا تُكتب هنا** (`tools/path_anchors.json: kin`):
+  // «جسمُ هذا الشكل جسمُ ذاك والفارقُ علامتُه» — وهي **لكلِّ شكلِ موقعٍ على حدة**،
+  // فسنّةُ ن وي جسمُ الباء ابتدائيةً ووسطيةً ولا تجتمعان بها نهائيةً (بطنُ النون
+  // وذيلُ الياء جسمان آخران)، وحلقةُ ق حلقةُ الفاء ابتدائيةً ووسطيةً لا نهائيةً.
+  // فأسرةٌ تدخل أو تخرج بتبدّل نسب الرسم بلا سطرٍ يُعدَّل هنا.
+  const families = kinFamilies(nodes.flatMap((node) => node.letters), form);
+  if (families.length) {
+    nodes.push({
+      part: 'compare',
+      form,
+      letters: families.flat(),
+      compare: families,
+      title: 'مَيِّزْ بَيْنَ المُتَشَابِهَات',
+      face: rc.letterForms(families[0][0])[form],
     });
   }
   stages.push({ id: form, kind: 'form', title, sub, nodes });
@@ -740,6 +801,13 @@ for (const stage of stages) {
     + (load ? `  — ${load} مادّة` : ''));
 }
 console.log(`  · بوابات   ${String(GATES.length).padStart(2)} عقدة   ${GATES.map((g) => g.title).join(' · ')}`);
+
+// **وأسرُ التمييز تُطبع كما قُرئت** من نسب الرسم — لا رقمَ لها مكتوبٌ ولا قائمة
+for (const stage of stages.filter((s) => s.kind === 'form')) {
+  const node = stage.nodes.find((n) => n.compare);
+  console.log(`  · تمييزُ ${stage.title}: `
+    + (node ? node.compare.map((f) => f.join('')).join(' · ') : 'لا أسرةَ متشابهاتٍ فيه'));
+}
 
 const nodeCount = stages.reduce((sum, s) => sum + s.nodes.length, 0) + GATES.length;
 console.log(`\n  المجموع: ${nodeCount} محطة — محسوبةً من بيانات اقرأ لا مكتوبة`);

@@ -18,7 +18,7 @@ import { renderGate } from './gate.js';
 import { renderParent, skillsText } from './parent.js';
 import { renderPenDev, releasePen } from './pendev.js';
 import { renderWarmup, releaseWarmup } from './warmup.js';
-import { renderLesson, releaseLesson, lessonReady } from './lesson.js';
+import { renderLesson, renderForms, releaseLesson, nodeReady } from './lesson.js';
 import {
   h, icon, faceEl, toast, go, arNum, starsRow, topbar, brandMark, shake,
   nodeTitle, nodeFace, nodeWhere, accentForKind, landmark, stageTitle, DEV,
@@ -84,7 +84,7 @@ function renderMap() {
     const card = h('button', {
       class: 'continue',
       css: { '--accent': accentForKind(next.type) },
-      onclick: () => (awaitingScreen(next.type) ? comingSoon(next.type, card) : openNode(next)),
+      onclick: () => (awaitingScreen(next) ? comingSoon(next.type, card) : openNode(next)),
     },
       faceEl(nodeFace(next), 'continue-face'),
       h('span', { class: 'continue-text' },
@@ -321,7 +321,7 @@ function nodeButton(node, next) {
       }
       // **جبهةُ الرحلة تجيب كما يجيب المقفل** (بلاغُ الميدان ١): محطةٌ مفتوحةٌ لم
       // تُبنَ شاشتُها بعدُ **لا تصمت** — الهزّةُ نفسُها والرسالةُ تُقرأ، ولا انتقالَ.
-      if (awaitingScreen(node.type, node.part)) {
+      if (awaitingScreen(node)) {
         comingSoon(node.type, btn);
         return;
       }
@@ -337,8 +337,18 @@ function nodeButton(node, next) {
   return btn;
 }
 
+/**
+ * فتحُ عقدة — **والعنوانُ يعيّنها وحدَها**: جزءُ العقدة يكفي في الحروف والتهيئة
+ * (لكلٍّ جزءٌ فريد)، **أما عقدةُ شكل الموقع فجزؤها مجموعةٌ تتكرّر في المحطات الثلاث**
+ * (`initial:g1` و`medial:g1` و`final:g1`) — فيدخل معرّفُ محطتها في العنوان، وإلا
+ * فتح «الحرفُ أوّلَ الكلمة» ما هو للوسط. **ومعرّفاها يُقرآن من الرحلة** (`stageId`
+ * و`part` من `progress.stageNodes`) لا يُركَّبان هنا.
+ */
 function openNode(node) {
-  go(`#/${node.type}/${encodeURIComponent(node.part)}`);
+  const where = node.type === 'form'
+    ? `${encodeURIComponent(node.stageId)}/${encodeURIComponent(node.part)}`
+    : encodeURIComponent(node.part);
+  go(`#/${node.type}/${where}`);
 }
 
 function fillAll(stars) {
@@ -358,7 +368,8 @@ function fillAll(stars) {
 const SCREENS = {
   // **وسطرُ «درس الحرف» سقط في الجلسة ٥** — كُتبت شاشتُه (`lesson.js`)، فصار
   // `tools/test_measure.mjs` يطالبها بقياسها من نفسه بلا سطرٍ يُعدَّل هناك.
-  form: 'أشكال المواقع — الجلسة ٧',
+  // **وسطرُ «أشكال المواقع» سقط في الجلسة ٧** — تركب شاشةُ الدرس نفسَها بوحداتها
+  // (`lesson.js`: `renderForms`)، ومعها محطةُ تمييز المتشابهات.
   join: 'الوصل والنسخ — الجلسة ٨',
   fade: 'خفوت النموذج والإملاء — الجلسة ٩',
   sentence: 'الجمل القصيرة — الجلسة ٩',
@@ -376,9 +387,9 @@ const SCREENS = {
 const SOON = 'قَرِيبًا… هذه المحطةُ تُعَدُّ لك';
 
 /**
- * **وحرفٌ بلا مسارٍ مرجعيّ من جنسها** (الجلسة ٥): درسٌ بلا نموذجٍ ولا حَكَم لا يُفتَح.
- * **ولا قائمةَ تُكتب**: `lessonReady` تقرأ البياناتِ نفسَها، فيومَ يُؤلَّف مسارُ حرفٍ
- * يُفتَح درسُه بلا سطرٍ يُعدَّل هنا — **وقد وقع ذلك في الجلسة ٦**: أُلّفت مساراتُ
+ * **وشكلٌ بلا مسارٍ مرجعيّ من جنسها** (الجلسة ٥): درسٌ بلا نموذجٍ ولا حَكَم لا يُفتَح.
+ * **ولا قائمةَ تُكتب**: `nodeReady` تقرأ البياناتِ نفسَها، فيومَ يُؤلَّف مسارُ شكلٍ
+ * تُفتَح محطتُه بلا سطرٍ يُعدَّل هنا — **وقد وقع ذلك في الجلسة ٦**: أُلّفت مساراتُ
  * المجموعات ٤–٧ فانفتحت دروسُها كلُّها، وسقط سببُها المكتوب من هنا كما وُعد.
  *
  * **والحارسُ يبقى وإن خلا سببُه**: `check_paths.py` يفرض المسارَ لكلّ حرفٍ مقرَّر،
@@ -388,8 +399,8 @@ const SOON = 'قَرِيبًا… هذه المحطةُ تُعَدُّ لك';
 const SOON_WHY = {};
 
 /** أمحطةٌ مفتوحةٌ لم تُبنَ شاشتُها (أو لم تُؤلَّف مادّتُها) بعد؟ */
-const awaitingScreen = (type, part) => Boolean(SCREENS[type])
-  || (type === 'letter' && !lessonReady(part));
+const awaitingScreen = (node) => Boolean(SCREENS[node?.type])
+  || ((node?.type === 'letter' || node?.type === 'form') && !nodeReady(node));
 
 /**
  * جوابُ الجبهة: هزّةٌ ورسالةٌ — **ولا انتقالَ** إلى شاشةٍ ترُدّ الطفلَ من حيث أتى.
@@ -412,7 +423,7 @@ async function render() {
   releaseLesson();
   releaseReview();
   const token = ++renderToken;
-  const [name, arg1] = location.hash.replace(/^#\/?/, '').split('/');
+  const [name, arg1, arg2] = location.hash.replace(/^#\/?/, '').split('/');
 
   // القفل يُحرس في التوجيه أيضاً، لا في أزرار الخريطة وحدها
   const guard = (id) => {
@@ -452,11 +463,25 @@ async function render() {
     const part = decodeURIComponent(arg1);
     const node = progress.allNodes().find((n) => n.type === 'letter' && n.part === part);
     if (node && !guard(node.id)) return;
-    if (node && !lessonReady(part)) {
+    if (node && !nodeReady(node)) {
       comingSoon('letter', null);
       screen = renderMap();
     } else {
       screen = (node && renderLesson(part)) || renderMap();
+    }
+  } else if (name === 'form' && arg1) {
+    // **محطةُ شكل الموقع** (`METHOD.md §٤` المراحل ٩–١١، الجلسة ٧): عنوانُها محطتُها
+    // وجزؤها معاً (`openNode` أعلاه)، والقفلُ يُحرَس هنا كما في أزرار الخريطة،
+    // **وشكلٌ لم يُؤلَّف مسارُه يُجيب ولا يصمت** (بلاغُ الميدان ١).
+    const [stageId, part] = [decodeURIComponent(arg1), decodeURIComponent(arg2 || '')];
+    const node = progress.allNodes()
+      .find((n) => n.type === 'form' && n.stageId === stageId && n.part === part);
+    if (node && !guard(node.id)) return;
+    if (node && !nodeReady(node)) {
+      comingSoon('form', null);
+      screen = renderMap();
+    } else {
+      screen = (node && renderForms(stageId, part)) || renderMap();
     }
   } else if (name === 'pen') {
     // صفحةُ تجربة محرّك القلم (الجلسة ١) — خلف `?dev=1` وحدها، و`renderPenDev`
