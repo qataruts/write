@@ -10,13 +10,13 @@
 <style>
   /* أيقونة التطبيق: تُرسَم هنا وتُلتقط بـ tools/make_icons.py — لا أصل ثنائيّ يُحرَّر يدوياً.
      المقاس والهامش يأتيان من الرابط: ?size=512&pad=0.20 (الهامش لأيقونة maskable).
-     الخطّ خطُّ العلامة نفسُه (`app/fonts/`) لا خطّ النظام: الأيقونةُ والترويسةُ علامةٌ واحدة. */
-  @font-face {
-    font-family: 'Marhey';
-    src: url('../app/fonts/Marhey-arabic.woff2') format('woff2');
-    font-weight: 400 700;
-    font-display: block;          /* لا نلتقط بخطٍّ احتياطيّ ثم نُسمّيه علامتنا */
-  }
+     الخطّ خطُّ العلامة نفسُه (`app/fonts/`) لا خطّ النظام: الأيقونةُ والترويسةُ علامةٌ واحدة.
+
+     **ولا وجهَ خطٍّ يُعلَن هنا** (تتمّةُ دَين هـ٢، بشرط إتمام مراجعة م٢): كان هنا
+     `@font-face` لخطّ النائب المخلوع، وبقي بعد الحكم **يشير إلى ملفٍّ أُسقط من الشجرة**
+     — وجهٌ ميتٌ لعائلةٍ لا يختارها أحد. والوجهُ الحيُّ يأتي من موضعين لا ثالثَ لهما:
+     لوحُ التطبيق أعلاه (`app.css` بوجهَي العلامة)، أو حَقنُ `make_icons.py` بـ`&font=&src=`
+     ليُصَفَّ مرشَّحٌ لم يُحكَم له بعدُ. **فلا اسمَ خطٍّ مكتوبٌ بيدٍ في هذا الملفّ ألبتّة.** */
   html, body { margin: 0; padding: 0; background: transparent; }
   body { display: grid; place-items: center; }
   .icon {
@@ -24,7 +24,9 @@
     place-items: center;
     background: linear-gradient(160deg, var(--brand-1) 0%, var(--brand-2) 45%, var(--brand-3) 100%);
     color: #fff;
-    font-family: var(--icon-font, 'Marhey'), 'Geeza Pro', 'Al Bayan', sans-serif;
+    /* الاحتياطُ **اللوحُ نفسُه** لا اسمٌ مكتوب: `--icon-font` تكتبه الشيفرةُ أدناه من
+       `--font-brand`، فإن لم تركض بقي المصدرُ هو المصدر — ولا يُلبَس وجهٌ مخلوع. */
+    font-family: var(--icon-font, var(--font-brand)), 'Geeza Pro', 'Al Bayan', sans-serif;
     font-weight: 700;
     line-height: 1;
     overflow: hidden;
@@ -73,7 +75,9 @@
   box.style.borderRadius = round ? `${size * 0.22}px` : '0';
   // مشكولةٌ في كل مقاس (قاعدةُ اقرأ، تسري هنا): العلامةُ واحدةٌ لا تتبدّل بالمقاس،
   // والتشكيلُ في الأيقونة الصغرى زخرفةٌ لا تُقرأ — والأيقونةُ ليست مادّةَ قراءة.
-  // والنسبةُ ٠٫٣٧ **حكمٌ قديم ضُبط لحبر Marhey**، ويبقى احتياطاً إن غابت نسبةُ الملء.
+  // والنسبةُ ٠٫٣٧ **مقاسُ انطلاقٍ موروث** يعلوه `fitInk` أدناه بنسبة الملء المقيسة من
+  // أيقونتَي أخوينا. ولا يبقى وحدَه إلا حيث لا نسبةَ (مستودعا الأخوين غائبان، أو لا
+  // `canvas`) — **وهو حينئذٍ تقديرٌ لا حكم**: ضُبط لحبر خطٍّ لم يعد خطَّنا.
   const SAFE = size * (1 - 2 * pad);
   box.style.fontSize = `${SAFE * 0.37}px`;
   const word = Object.assign(document.createElement('span'), { textContent: 'اُكْتُبْ' });
