@@ -19,6 +19,7 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { prepare, pointAt, TOLERANCE } from '../app/js/pen.js';
 import { PATHS } from '../app/js/paths.js';
+import { WORD_PATHS } from '../app/js/word_paths.js';
 
 const OUT = new URL('./pen_traces.json', import.meta.url);
 
@@ -197,6 +198,18 @@ const TOOTH_LINE = prepare([...TOOTH_ARM_IN, ...TOOTH_SPINE.slice(1),
  * وحكمُ المحرّك على المسارات الستّة عشرة كلِّها (والأرضيةُ الحيّة لاحتمال الرجفة)
  * في `tools/test_paths.mjs` لا هنا.
  */
+/**
+ * **وثلاثُ كلماتٍ من مسارات النسخ** (الجلسة ٨، بأمر المدير بعد حكمه في الانطباقات):
+ * «تمر» و«شمس» و«الشمس» — **أسوأُ ما قِيس** يومَ كُشف الانطباق: كانت هوامشُها صفراً
+ * (تُردّ برجفة وحدةٍ واحدة) لأنّ مسارَ الكلمة **ينطبق على نفسه** في حبر الوصل بلا
+ * إعلان، فيركب مؤشّرُ التقدّم الشقَّ الخطأ. فصارت شاهداً مجمَّداً على ثلاثة أحكام:
+ * الأمينةُ تُقبَل، والمرتجفةُ بعهد أرضيتها تُقبَل، والمعكوسةُ تُرَدّ.
+ *
+ * **وسماحتُها سماحتُها هي** (`tolerance` في مسارها): مقياسُ حروفها فيها — فالحكمُ
+ * عليها بما بُنيت عليه، لا بسماحة حرفٍ يملأ صندوقَه.
+ */
+const WORD_CASES = ['تمر', 'شَمْسْ', 'الشَّمْسْ'];
+
 const LAM_MEDIAL = PATHS['ل'].medial;
 const LAM_POLY = prepare(LAM_MEDIAL.strokes[0].points);
 const BA_MEDIAL = PATHS['ب'].medial;
@@ -412,6 +425,39 @@ function build() {
     [walk(prepare(BA_FINAL.strokes[0].points), { from: 1, to: 0, jitter: 4, rand }),
       ...dotsOf(BA_FINAL, rand)], 'ba-final');
 
+  // ————— كلماتُ النسخ الثلاث: أمينةً ومرتجفةً ومعكوسة (الجلسة ٨) —————
+  //
+  // **والرجفةُ بعهد أرضيتها**: `child-drift` نصفُ السماحة — وسماحةُ الكلمة سماحتُها
+  // هي، فالأرضيةُ تتبعها (`lateral × tolerance × ٠٫٥`). فما يُقبَل هنا هو عهدُ
+  // المحرّك على نفسه مطبَّقاً على مادّة النسخ.
+  let seed = 3000;
+  for (const text of WORD_CASES) {
+    const ref = WORD_PATHS[text];
+    if (!ref) throw new Error(`لا مسارَ للكلمة «${text}» — عدّةُ المعايرة على غير مادّتها`);
+    const id = `word-${WORD_CASES.indexOf(text) + 1}`;
+    const drift = TOLERANCE.lateral * ref.tolerance * 0.5;
+    const body = (rand, opts = {}) => ref.strokes.map((st) => walk(prepare(st.points), { rand, ...opts }));
+    const dots = (rand) => ref.dots
+      .flatMap((d) => Array.from({ length: d.count || 1 }, () => tap(d.at, rand)));
+
+    rand = rng(seed++);
+    add(`${id}-clean`, { accept: true, tolerance: ref.tolerance },
+      `«${text}» أمينةً — والانطباقُ في حبر وصلها مُعلَنٌ طيّةً (حكمُ المدير)`,
+      [...body(rand, { jitter: 2 }), ...dots(rand)], id);
+
+    rand = rng(seed++);
+    add(`${id}-drift`, { accept: true, tolerance: ref.tolerance },
+      `«${text}» بيدٍ ترتجف بعهد أرضيتها (± ${Math.round(drift)} من سماحتها ${
+        Math.round(TOLERANCE.lateral * ref.tolerance)}) — عهدُ \`child-drift\` على مادّة النسخ`,
+      [...body(rand, { jitter: 2, sway: (r) => Math.sin(r * Math.PI * 2) * drift }), ...dots(rand)], id);
+
+    rand = rng(seed++);
+    add(`${id}-reversed`, { accept: false, tolerance: ref.tolerance },
+      `«${text}» معكوسةً — **خصومةُ المعكوس لا تلين**: العودُ غيرُ المعلَن ارتدادٌ كما كان`,
+      [...[...ref.strokes].reverse().map((st) => walk(prepare(st.points), { from: 1, to: 0, jitter: 2, rand })),
+        ...dots(rand)], id);
+  }
+
   return {
     what: 'عدّةُ معايرة محرّك القلم — مساراتٌ مسجّلة تُدخَل على المحرّك آلياً (METHOD.md §٣.٩)',
     refs_note: 'ثلاثةُ أشكالٍ هندسيةٍ محسوبة للعدّة وحدها لا حروف: `sample` مركّبٌ يجمع أصنافَ '
@@ -432,6 +478,7 @@ function build() {
       'lam-medial': LAM_MEDIAL,
       'ba-medial': BA_MEDIAL,
       'ba-final': BA_FINAL,
+      ...Object.fromEntries(WORD_CASES.map((text, i) => [`word-${i + 1}`, WORD_PATHS[text]])),
     },
     cases,
   };

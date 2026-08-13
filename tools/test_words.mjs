@@ -138,6 +138,34 @@ ok(thin.length === 0,
   + ` من أرضية ${worst.floor.toFixed(0)} (×${worst.ratio.toFixed(2)})`
   + (thin.length ? `\n      دون العهد: ${thin.map((r) => `${r.text} ${r.max}<${r.floor.toFixed(0)}`).join(' · ')}` : ''));
 
+// **وما دون العهد يُقاس سببُه ولا يُترَك رقماً**: أهو **انطباقٌ لم يُعلَن** (فيُعاد
+// إلى المولّد بحكم المدير) أم **انحناءٌ** يتقهقر عنده الإسقاط (فهو معايرةُ سماحةٍ،
+// `METHOD §٣.٥` والجلسة ١٢)؟ — فلا يبقى أحمرُ بلا تشخيص.
+if (thin.length) {
+  const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
+  const kinds = { انطباق: [], انحناء: [] };
+  for (const row of thin) {
+    const ref = words.WORD_PATHS[row.text];
+    const apart = pen.TOLERANCE.back * ref.tolerance * 2;
+    let closest = Infinity;
+    for (const s of ref.strokes) {
+      const poly = pen.prepare(s.points);
+      const inFold = (i) => (s.folds || []).some((f) => i >= f.from && i <= f.to);
+      for (let i = 0; i < s.points.length; i++) {
+        for (let j = i + 1; j < s.points.length; j++) {
+          if (poly.cum[j] - poly.cum[i] < apart || (inFold(i) && inFold(j))) continue;
+          closest = Math.min(closest, dist(s.points[i], s.points[j]));
+        }
+      }
+    }
+    kinds[closest < pen.TOLERANCE.lateral * ref.tolerance * 0.25 ? 'انطباق' : 'انحناء']
+      .push(`${row.text}:${Math.round(closest)}`);
+  }
+  console.log(`      · تشخيصُ الساقط: انطباقٌ غيرُ معلَن ${kinds['انطباق'].length}`
+    + ` (${kinds['انطباق'].join(' ') || '—'}) · انحناءٌ لا تطابق ${kinds['انحناء'].length}`
+    + ` (${kinds['انحناء'].join(' ') || '—'})`);
+}
+
 // ————— ٤) الوصلُ والعلامات: بنيةُ الكلمة كما أُلّفت —————
 
 console.log('\n— ٤) بنيةُ الكلمة: وصلٌ وعلاماتٌ وسطر —');

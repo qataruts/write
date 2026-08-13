@@ -1549,7 +1549,7 @@ function snapIntoInk(points, mask) {
  * الارتداد») تُعاد **بعد** التوزيع: التقريبُ إلى أقرب نقطةٍ موزَّعة يقصّ الضلعَ حتى
  * نصفِ خطوةٍ، فطيّةٌ عبرت القاعدةَ قبله قد تسقط عنها بعده — وتسقط بإعلانٍ لا صمتاً.
  */
-function resampleStroke(stroke, dropped, label, scale) {
+function resampleStroke(stroke, dropped, label, scale, inkAt) {
   const before = prepare(stroke.points);
   const spans = (stroke.folds || []).map((f) => [before.cum[f.from], before.cum[f.apex], before.cum[f.to]]);
   const points = resample(stroke.points, scale);
@@ -1575,7 +1575,14 @@ function resampleStroke(stroke, dropped, label, scale) {
         + ` وأقصرُ ضلعيها ${Math.round(Math.min(rise, drop))} — شوكةٌ ضحلةٌ لا تعود من مبدئها`);
     }
   }
-  return folds.length ? { points, start: points[0], folds } : { points, start: points[0] };
+  // **ثم انطباقاتُ القطعة تُعلَن طيّاتٍ** (حكمُ المدير): تُكشف على النقاط الموزَّعة
+  // نفسِها التي سيحكم بها المحرّك، وتُضمّ إلى طيّات السنّ بلا تداخل.
+  const extra = overlapFolds(points, scale, folds, inkAt);
+  for (const fold of extra) {
+    dropped.push(`${label}: انطباقٌ أُعلن طيّةً [${fold.from}،${fold.apex}،${fold.to}]`);
+  }
+  const all = [...folds, ...extra].sort((a, b) => a.from - b.from);
+  return all.length ? { points, start: points[0], folds: all } : { points, start: points[0] };
 }
 
 /**
@@ -1585,6 +1592,114 @@ function resampleStroke(stroke, dropped, label, scale) {
  * فينقطع الوصلُ عنده من نفسه، بلا جدول حروفٍ يُكتب.
  */
 const JOIN_GAP = TOLERANCE.lateral;
+
+/**
+ * **أدنى عرضٍ يُعتَدّ به للحبر** — ما دونه ضجيجُ تقريبٍ لا قياس.
+ *
+ * **وجُرِّبت أرضيةٌ أوسع فقِيست ضارّة**: رُفعت إلى خطوة العيّنة (`stepFor`، وهي
+ * عشرون وحدةً في كلمةٍ متوسطة) فابتلعت **عمودَي لام-ألف** — وهما شقّان متجاوران
+ * لا منطبقان — فأُعلنا طيّةً: نزل هامشُ «هلا» من ٣٢ إلى ٨ و«هَاتِفْ» إلى صفر.
+ * فرُدَّت إلى ضجيج التقريب، **والعتبةُ عرضُ الحبر بحرف الحكم**.
+ */
+const MIN_INK = 6;
+
+/**
+ * **كشفُ الانطباق وإعلانُه طيّةً** — حكمُ المدير (١٣ أغسطس ٢٠٢٦) بعد قياس الجلسة ٨:
+ * «الانطباقاتُ تُعلَن طيّاتٍ آلياً».
+ *
+ * **والعلّةُ عينُ علّة الطيّة الأولى**: الطيّةُ في الحرف صفةٌ تقول «**مكانٌ واحد
+ * يحمل طولين**» فيقسم بها المحرّكُ المسارَ ويقيس التقدّمَ ذهاباً وإياباً. وفي
+ * الكلمة يقع ذلك في موضعٍ ثانٍ لم يكن في الحرف: **حبرُ الوصل يمشيه القلمُ مرّتين**
+ * — مرّةً خارجاً ومرّةً عائداً، أو مرّتين في اتجاهٍ واحد بينهما نزهةٌ في حرفٍ آخر —
+ * فيركب مؤشّرُ التقدّم الشقَّ الخطأ ويسبق قلمَ الطفل، ثم يُقرأ مضيُّه `wander`
+ * (قِيس على «تمر»: شقّان طولُهما ١٦٥ على بُعد ٤ وحدات وبينهما ٥٧٤ من الطول).
+ *
+ * **والكشفُ مقيسٌ لا مقدَّر**: شقّان يجريان **ضمن عرض الحبر** (سماحةُ الانحراف
+ * بمقياس الكلمة — وهي عينُ ما يجعل الإسقاطَ ملتبساً) و**متباعدان في الطول** (فوق
+ * ثلاثة أضعاف سماحة الارتداد، فلا يُعَدّ جوارُ القلم لنفسه انطباقاً)، **ويدومان**
+ * ثلاثَ نقاطٍ فأكثر (فنقطةٌ عابرة تقاطعٌ لا انطباق).
+ *
+ * **ولا إحداثيَّ ولا إعلانَ بيد**: مواضعُها تُقرأ من المسار المؤلَّف، ويُعلَن
+ * `{ from, apex, to }` كما تُعلَن طيّةُ السنّ — والقمّةُ **منتصفُ ما بين الشقّين**
+ * (حيث ينعطف القلمُ أو يتنزّه)، وهي التي يقسم عليها المحرّك.
+ */
+function overlapFolds(points, scale, taken, inkAt) {
+  const poly = prepare(points);
+  // **والعتبةُ عرضُ الحبر عند النقطة نفسِها** (نصُّ حكم المدير: «شقّان يجريان ضمن
+  // عرض الحبر»): يُقرأ من مقياس المسافة في خيال الكلمة — فما تباعد أكثرَ من حبره
+  // **شقّان مختلفان لا انطباق** (عمودا لام-ألف يتجاوران ولا يتطابقان: قِيس أنّ
+  // إعلانهما طيّةً يُنزِل هامشَ «هلا» من ٣٢ إلى ٨). ولا رقمَ يُكتب: الحبرُ يقول.
+  // **والتباعدُ بمقياس المحرّك**: نافذتُه الخلفية `back × ٢` — فما دونها جوارُ القلم
+  // لنفسه (يعرفه المحرّكُ موضعاً واحداً أصلاً)، وما جاوزها **زيارةٌ ثانية**.
+  const apart = TOLERANCE.back * scale * 2;
+  // **والتداخلُ يُقاس بالمدى كلِّه لا بطرفيه**: طيّةٌ تبتلع أخرى أو تُتاخمها لا
+  // تُعلَن — «ولا يقع مكانان في مكان» (أمسك «مِصْبَاحْ» يومَ قِيس بالطرفين).
+  const busy = (lo, hi) => taken.some((f) => lo <= f.to && f.from <= hi);
+
+  // لكلِّ نقطةٍ أقربُ نظيرةٍ متباعدةٍ عنها في الطول
+  const mate = [];
+  for (let i = 0; i < points.length; i++) {
+    let best = -1;
+    // **وعرضُ الحبر عرضُه التامّ**: `inkAt` نصفُ العرض، فالشقّان يجريان «ضمن عرض
+    // الحبر» ما دام بينهما دون عرضه كاملاً — وهو نصُّ الحكم بحرفه.
+    // **ولا يُعلَن ما يفرّقه المحرّك**: العتبةُ عرضُ الحبر، **محدودةً بسماحة
+    // الانحراف بمقياس الكلمة** — فحبرٌ سمينٌ قد يجاوزها، وما جاوزها موضعان يفرّق
+    // المحرّكُ بينهما فلا طيّةَ فيهما (وهو عينُ ما يفرضه `check_paths`، أمسك «مَقْعَدْ»).
+    // **ويُقرأ من طرفٍ واحد لا من الطرفين**: جُرّب أخذُ أسمن الحبرين فابتلع عمودَي
+    // لام-ألف حيث يقع أحدُ طرفيه في حبرٍ سمين — فنزل «هلا» إلى ٨ و«هَاتِفْ» إلى صفر.
+    // فالحبرُ حبرُ الموضع الذي يُسأل عنه، **مقيساً لا موسَّعاً**.
+    let gap = Math.min(Math.max(inkAt(points[i]) * 2, MIN_INK), TOLERANCE.lateral * scale);
+    for (let j = i + 1; j < points.length; j++) {
+      if (poly.cum[j] - poly.cum[i] < apart) continue;
+      const d = dist(points[i], points[j]);
+      if (d < gap) { gap = d; best = j; }
+    }
+    mate[i] = best;
+  }
+
+  // عناقيدُ متتالية: i يتقدّم و j يسير في اتجاهٍ واحد (متقابلاً كان أو متوازياً)
+  const out = [];
+  let run = null;
+  const close = () => {
+    // **ونقطتان متتاليتان تكفيان**: العتبةُ المكانيةُ عرضُ الحبر — وهو حكمٌ حاسم،
+    // فلا يُطلَب معه طولُ عناقٍ ثالث (وثلاثةٌ كانت تُفلِت انطباقاتٍ قصيرةً مقيسة).
+    if (run && run.n >= 2) {
+      const lo = run.i1;
+      const hi = Math.max(run.j1, run.j2);
+      const mid = Math.min(run.j1, run.j2);
+      const apex = Math.round((run.i2 + mid) / 2);
+      if (lo < apex && apex < hi && !busy(lo, hi)
+        && poly.cum[apex] - poly.cum[lo] >= TOLERANCE.back * scale
+        && poly.cum[hi] - poly.cum[apex] >= TOLERANCE.back * scale) {
+        out.push({ from: lo, apex, to: hi });
+      }
+    }
+    run = null;
+  };
+  for (let i = 0; i < points.length; i++) {
+    const j = mate[i];
+    if (j < 0) { close(); continue; }
+    if (run && i === run.i2 + 1 && Math.abs(j - run.j2) <= 2
+      && (run.dir === 0 || Math.sign(j - run.j2) === run.dir || j === run.j2)) {
+      if (run.dir === 0 && j !== run.j2) run.dir = Math.sign(j - run.j2);
+      run.i2 = i;
+      run.j2 = j;
+      run.n++;
+    } else {
+      close();
+      run = { i1: i, i2: i, j1: j, j2: j, n: 1, dir: 0 };
+    }
+  }
+  close();
+
+  // ولا تتداخل طيّتان — ولا يقع مكانان في مكان
+  const kept = [];
+  for (const fold of out.sort((a, b) => a.from - b.from)) {
+    if (kept.some((f) => fold.from <= f.to && f.from <= fold.to)) continue;
+    kept.push(fold);
+  }
+  return kept;
+}
 
 /**
  * تأليفُ مسار الكلمة: وحداتُها تُنزَّل قانونيّاتُها على أجسادها، والقطعُ تُدمَج على
@@ -1616,6 +1731,8 @@ function composeWord(studioWord, canon, canonMarks, log) {
   const scale = Math.round((scales.reduce((a, b) => a + b, 0) / scales.length) * 100) / 100;
 
   const close = () => { if (open) { runs.push(open); open = null; } };
+  /** عرضُ الحبر عند نقطةٍ من الكلمة — يقرؤه مقياسُ المسافة من خيالها. */
+  const ink = (q) => inkHalf(studioWord, q);
 
   for (const unit of units) {
     const source = canon[unit.text]?.[unit.form];
@@ -1731,22 +1848,22 @@ function composeWord(studioWord, canon, canonMarks, log) {
   // القطعُ ثم ضرباتُ العلامات ثم النقاط — والطيّاتُ تُحمَل عبر إعادة التوزيع أطوالاً،
   // والشوارد تُرَدّ إلى الحبر قبل التوزيع (فلا يبقى بعده طرفٌ على حافّة تقريب)
   const strokes = [
-    ...runs.map((r, i) => resampleStroke({ ...r, points: snapIntoInk(r.points, studioWord.mask) }, dropped, `${text}#${i + 1}`, scale)),
-    ...markStrokes.map((m) => resampleStroke({ ...m, points: snapIntoInk(m.points, studioWord.mask) }, dropped, `${text}/${m.why}`, scale)),
+    ...runs.map((r, i) => resampleStroke({ ...r, points: snapIntoInk(r.points, studioWord.mask) }, dropped, `${text}#${i + 1}`, scale, ink)),
+    ...markStrokes.map((m) => resampleStroke({ ...m, points: snapIntoInk(m.points, studioWord.mask) }, dropped, `${text}/${m.why}`, scale, ink)),
   ];
   const ref = { strokes, dots, line: round1(studioWord.line), tolerance: scale };
 
   // **المسارُ داخل خيال الكلمة** — الغَوصُ يُقاس نقطةً نقطة كما في الحرف، **وشكواه
   // تسمّي قطعتَها** (سنّةُ الجلسة ٧: العطبُ يسمّي موضعَه، فلا يُبحَث في كلمةٍ كلِّها)
   const labels = [...runs.map((_, i) => `قطعة ${i + 1}`), ...markStrokes.map((m) => `علامة «${m.why}»`)];
-  const ink = depthIn(studioWord, strokes.flatMap((s) => s.points), studioWord.mask);
-  if (ink.out) {
+  const depth = depthIn(studioWord, strokes.flatMap((s) => s.points), studioWord.mask);
+  if (depth.out) {
     const guilty = strokes.map((s, i) => {
       const one = depthIn(studioWord, s.points, studioWord.mask);
       return one.out ? `${labels[i]}: ${one.out} من ${s.points.length}` : null;
     }).filter(Boolean);
-    throw new Error(`«${text}»: ${ink.out} نقطةً خارج خيال الكلمة — ${guilty.join(' · ')}`
-      + ` (${ink.stray.slice(0, 3).map((p) => p.join('،')).join(' · ')})`);
+    throw new Error(`«${text}»: ${depth.out} نقطةً خارج خيال الكلمة — ${guilty.join(' · ')}`
+      + ` (${depth.stray.slice(0, 3).map((p) => p.join('،')).join(' · ')})`);
   }
 
   // **ولا يخرج من هنا ما لا يقبله محرّكُه**: صحيحُه يُقبَل ومعكوسُ أوّلِه يُرَدّ
@@ -1767,7 +1884,7 @@ function composeWord(studioWord, canon, canonMarks, log) {
 
   log?.({
     text, strokes: strokes.length, dots: dots.length, joins: meta.joins,
-    skew: meta.skew, depth: round1(ink.least), scale, dropped,
+    skew: meta.skew, depth: round1(depth.least), scale, dropped,
     stray: meta.units.filter((u) => u.stray).map((u) => `${u.text}:${u.stray}`),
   });
   return { ref, meta, dropped };

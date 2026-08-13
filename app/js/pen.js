@@ -210,7 +210,43 @@ function foldsOf(stroke, poly) {
   return (stroke?.folds || [])
     .filter((f) => f && whole(f.from) && whole(f.apex) && whole(f.to)
       && f.from < f.apex && f.apex < f.to)
-    .map((f) => ({ from: poly.cum[f.from], apex: poly.cum[f.apex], to: poly.cum[f.to] }))
+    .map((f) => {
+      const from = poly.cum[f.from];
+      const apex = poly.cum[f.apex];
+      const to = poly.cum[f.to];
+      /**
+       * **والمرآةُ صفةُ الشوكة لا صفةُ كلِّ طيّة** (الجلسة ٨، بعد حكم المدير في
+       * الانطباقات): الطيّةُ تقول «مكانٌ واحد بطولين»، ولها وجهان في الكلمة:
+       *   · **شوكةٌ** يعود فيها القلمُ على أثره — فطرفاها موضعٌ واحد، والموضعُ على
+       *     ضلعها الصاعد يقابل نظيرَه على النازل **مرآةً** (ارتفاعٌ بارتفاع).
+       *   · **وانطباقٌ متوازٍ** يمشي فيه القلمُ حبرَ الوصل مرّتين في اتجاهٍ واحد
+       *     بينهما نزهةٌ في حرفٍ آخر — فطرفاها متباعدان، **والمرآةُ فيه كذبٌ**:
+       *     تتقهقر كلّما تقدّم القلم، فتُقرأ حركتُه ارتداداً وهي مصيبة (قِيس على
+       *     «تمر»: القراءةُ المرآةُ تنزل ٥٠٦ ← ٤٩٢ ← ٤٧٨ والقلمُ يصعد ٥٢٩ ← ٥٥٣).
+       * **وتُقرأ من الشكل لا تُعلَن**: طيّةٌ تعود من حيث بدأت (طرفاها أقربُ من أقصر
+       * ضلعيها) شوكةٌ فلها مرآتُها، وما سواها يُقاس على ضلعه وحدَه.
+       */
+      // **والفيصلُ أن يُسأل الشكلُ نفسُه**: تُؤخذ نقطتان على الضلع الأول ويُنظر أين
+      // تقعان من الثاني — فإن **تقهقر** نظيرُهما كلّما تقدّمتا فهي شوكةٌ لها مرآتُها،
+      // وإن **تقدّم معهما** فهو انطباقٌ متوازٍ يُقاس كلُّ ضلعٍ فيه على نفسه.
+      // **والقياسُ يُحبَس في الضلع النازل** (`within`)، **ويُؤخذ من أوثق العيّنات**:
+      // الانطباقُ قد لا يعمّ الضلعَ كلَّه، فعيّنةٌ في موضعٍ لا نظيرَ له تكذب (قِيست
+      // في «السَّمَكْ»: عيّنةُ السبعين بالمئة على بُعد ٥٢ ونظيرُها موهوم). فتُمسَح
+      // تسعُ عيّنات، ويُحكَم بأقربها إلى الحبر: أيتقهقر نظيرُها كلّما تقدّمت؟
+      const shots = [];
+      for (let k = 1; k < 9; k++) {
+        const t = k / 9;
+        const at = pointAt(poly, from + (apex - from) * t).at;
+        const hit = within(nearestOn(poly, at, apex, to), apex, to);
+        shots.push({ t, len: hit.len, d: hit.d });
+      }
+      const solid = shots.sort((a, b) => a.d - b.d).slice(0, 3);
+      let sign = 0;
+      for (const a of solid) {
+        for (const b of solid) if (a.t < b.t) sign += Math.sign(a.len - b.len);
+      }
+      return { from, apex, to, mirror: sign > 0 };
+    })
     .sort((a, b) => a.to - b.to);
 }
 
@@ -397,11 +433,23 @@ export function createTrial(ref, options = {}) {
     // يجاوز ما مشاه بينهما، وله من السماحة ما يحتمل دخولَه وخروجَه عرضياً وارتداده
     // (`lateral × ٢ + back`)، ومن الطيّة ضِعفا سماحة الارتداد ليبلغ مخرجَها. **ولا
     // عتبةَ جديدة**: كلُّها سماحاتُ المحطة نفسُها.
+    //
+    // **وتُوسَّع بمدى الطيّة المعلَنة وحدَها** (الجلسة ٨، بعد حكم المدير في
+    // الانطباقات): الطيّةُ إعلانٌ بأنّ **الطولَ يتقدّم بلا مشي** — القلمُ يصعد ويعود
+    // في مكانٍ واحد، فيقطع من الطول ضِعفَ ضلعها وهو لم يبرح موضعَه. فحدُّ الحركة
+    // يخنقها إن لم يُوسَّع: قِيس على «تمر» أنّ عيّنةَ الطفل تعبر سنّةً مطويّة
+    // فيتخلّف المؤشّرُ عند مبدئها ثم يُقرأ مضيُّه `wander`. **والتوسعةُ مقصورةٌ على
+    // مدى المُعلَن** — فما لم يُعلَن يبقى القفزُ فيه ممنوعاً كما كان.
     const step = stroke.points.length > 1
       ? dist(p, stroke.points[stroke.points.length - 2]) : 0;
     const ahead = Math.max(tol.back * 2, step * 3) + tol.lateral * 2;
+    // **ولمن دخلها وحدَه**: التوسعةُ رخصةُ الطيّة، ورخصتُها لمن بلغ مبدأها — فمن
+    // كان قبلها يبقى على حدّ الحركة، وإلا لَعادت القفزةُ التي حُدّت لأجلها (قِيس:
+    // بتوسعةٍ عمياء يسبق المؤشّرُ القلمَ من أوّل الضربة كما كان).
+    const ready = foldAhead(parts[stroke.aim].folds, stroke.reach);
+    const entered = ready && stroke.reach >= ready.from;
     const lo = stroke.cursor - tol.back * 2;
-    const hi = stroke.cursor + ahead;
+    const hi = Math.max(stroke.cursor + ahead, entered ? ready.to : 0);
 
     // **الطيّة: الشرطُ الثاني يقيس التقدّمَ ذهاباً وإياباً** (`METHOD.md §٣.١`).
     //
@@ -453,8 +501,16 @@ export function createTrial(ref, options = {}) {
     // **والمعنى باقٍ**: مَن أرساه نزولُه **داخل** الطيّة (فوق مدخلها بأكثر من ذلك) لا
     // يرث تقدّمَ ضلعٍ لم يمشِه — ويحرسه `fold-skipped` المجمَّد وحالةُ «أضيقُ
     // المطويّات» في `test_paths.mjs` (المعكوسُ يُرَدّ ولو ضوعفت السماحةُ ثلاثاً).
+    // **ولا تُقرأ الطيّةُ قبل أن يبلغها القلم** (كشفه قياسُ الكلمات، الجلسة ٨):
+    // قراءتا الطيّة (`inFold`) مقصورتان على ضلعيها — **فهما تتخطّيان نافذةَ الحركة**،
+    // وطيّةٌ بعيدةٌ أمامَ القلم تصادف قمّتُها جوارَ موضعه فيقفز المؤشّرُ إليها
+    // (قِيس على «سُلَّمْ»: القلمُ عند ٤٩٠ وقمّةُ طيّةٍ على بُعد تسع وحدات عند ٩٣٣،
+    // فقفز التقدّمُ أربعمئةً ثم قُرئ مضيُّه `wander`). فتُفعَّل الطيّةُ إذا بلغ
+    // جوارَ مبدئها (نافذةُ المحرّك الخلفية `back × ٢` بعينها) — وهو عينُ ما
+    // يفعله حدُّ الحركة في سائر المسار.
     const found = foldAhead(parts[stroke.aim].folds, stroke.reach);
-    const fold = found && stroke.entry <= found.from + tol.back ? found : null;
+    const reached = found && stroke.reach >= found.from - tol.back * 2;
+    const fold = reached && stroke.entry <= found.from + tol.back ? found : null;
 
     /**
      * **القلمُ في حبر الطيّة**: كم ارتفع فيها، ثم أين يقع ذلك من **ضلع الطور**.
@@ -479,7 +535,10 @@ export function createTrial(ref, options = {}) {
       const up = within(nearestOn(poly, p, fold.from, fold.apex), fold.from, fold.apex);
       const down = within(nearestOn(poly, p, fold.apex, fold.to), fold.apex, fold.to);
       const clamp = (s) => (s < 0 ? 0 : s > 1 ? 1 : s);
-      const seen = [(up.len - fold.from) / rise, (fold.to - down.len) / drop]
+      const reads = fold.mirror
+        ? [(up.len - fold.from) / rise, (fold.to - down.len) / drop]
+        : [climbing ? (up.len - fold.from) / rise : (fold.to - down.len) / drop];
+      const seen = reads
         .map((s) => (climbing ? fold.from + clamp(s) * rise : fold.to - clamp(s) * drop))
         // كلتا القراءتين تحتملهما الطيّة، **والفيصلُ اتّصالُ الحركة**: القلمُ يمشي
         // ولا يقفز، فأصدقُ الارتفاعين ما وافق موضعَه قبل لحظة.
