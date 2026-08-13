@@ -1379,6 +1379,20 @@ button {
 .pen-box--playing .pen-head { display: inline; }
 .pen-box--complete .pen-guide { display: none; }
 
+/* **لوحُ السطر** (حكمُ المدير، ١٣ أغسطس ٢٠٢٦): «كلُّ شكلٍ يملأ صندوقَه» — وصندوقُ
+   الجملة **سطرٌ عريض** لا مربّعٌ يخنقها. فنسبتُه تُقرأ من المسار نفسِه (`--pen-ratio`
+   يكتبها `pen.js` من `ref.box`)، ويأخذ عرضَ الشاشة كاملاً كما تأخذه كرّاسةُ السطر —
+   فيكبر خطُّ الجملة تحت إصبع الطفل بدل أن يُحشر في ثُلث اللوح. */
+.pen-box--line {
+  width: 100%;
+  max-width: none;
+  aspect-ratio: var(--pen-ratio, 3);
+}
+
+/* **خفوتُ النموذج** (METHOD §٤ المرحلة ١٣): الجزءُ المحجوب يغيب عن العين **ولا
+   يغيب عن الحَكَم** — يكتبه الطفلُ من ذاكرته الحركية، وشروطُه الأربعة كما هي. */
+.pen-veiled { opacity: 0 !important; }
+
 /* الخطوةُ تحكم ما يُرى: موجَّهٌ فخافتٌ فصندوقٌ فارغ (METHOD §٥) */
 .pen-box--faint .pen-model { opacity: .45; }
 .pen-box--faint .pen-arrow { opacity: 0; }
@@ -1505,6 +1519,33 @@ button {
   stroke-dasharray: 14 12;
   opacity: .3;
 }
+
+/* **سطرُ درجة الخفوت** (محطةُ المرحلة ١٣): كم بقي من النموذج — يقرؤه مَن يقرأ مع
+   الطفل، وللطفل نفسِه نقاطٌ تنطفئ واحدةً بعد واحدة. ولا رقمَ عقوبةٍ فيه ولا مؤقّت. */
+.veil-note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  margin: 0 0 .4rem;
+}
+
+.veil-dots { display: inline-flex; gap: .25rem; }
+
+.veil-dot {
+  width: .5rem;
+  height: .5rem;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: .75;
+}
+
+.veil-dot--gone { background: var(--ink-soft); opacity: .28; }
+
+/* والكلمةُ التي بلغت الإملاء تُعرَض **أذناً لا نصّاً** في شريط الوحدات: لو بقي
+   نصُّها مكتوباً لَقرأه الطفلُ فكتبه نقلاً، وليس ذلك إملاءً. */
+.unit--hushed { font-family: inherit; }
+.unit--hushed .ui-icon { width: 1.15rem; height: 1.15rem; }
 
 /* شريطُ وحدات النسخ: كلماتٌ بنصّها لا شاراتٍ — فالمادّةُ كلمةٌ تُقرأ */
 .unit--word {

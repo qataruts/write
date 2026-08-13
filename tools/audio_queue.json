@@ -78,5 +78,45 @@
   "priority": 100,
   "status": "pending",
   "doneAt": null
+ },
+ {
+  "text": "اُكْتُبْهَا كَمَا تَرَاهَا",
+  "category": "ui",
+  "requestedBy": "session-9",
+  "priority": 100,
+  "status": "pending",
+  "doneAt": null
+ },
+ {
+  "text": "تَذَكَّرِ الْغَائِبَ وَاكْتُبْ",
+  "category": "ui",
+  "requestedBy": "session-9",
+  "priority": 100,
+  "status": "pending",
+  "doneAt": null
+ },
+ {
+  "text": "اِسْتَمِعْ ثُمَّ اُكْتُبْهَا",
+  "category": "ui",
+  "requestedBy": "session-9",
+  "priority": 100,
+  "status": "pending",
+  "doneAt": null
+ },
+ {
+  "text": "اُنْسُخِ الْجُمْلَةَ عَلَى السَّطْرْ",
+  "category": "ui",
+  "requestedBy": "session-9",
+  "priority": 100,
+  "status": "pending",
+  "doneAt": null
+ },
+ {
+  "text": "اِسْتَمِعْ ثُمَّ اُكْتُبِ الْجُمْلَةْ",
+  "category": "ui",
+  "requestedBy": "session-9",
+  "priority": 100,
+  "status": "pending",
+  "doneAt": null
  }
 ]

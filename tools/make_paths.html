@@ -119,6 +119,34 @@ const FORM_AR = { isolated: 'معزول', initial: 'ابتدائي', medial: 'و
 /** دقّةُ قناع الخيال: بكسلٌ لكل وحدتَي شبكة — يكفي لتنحيفٍ نظيف ويبقى سريعاً. */
 const MASK = 500;
 const PX = GRID / MASK;
+
+/**
+ * **صندوقُ المادّة الجاري — مربّعٌ للحرف، وسطرٌ عريضٌ للجملة** (حكمُ المدير، ١٣
+ * أغسطس ٢٠٢٦): «كلُّ شكلٍ يملأ صندوقَه» قاعدةٌ من الجلسة ٢، **وصندوقُ السطر سطرٌ**
+ * لا مربّعٌ يخنقه: جملةٌ نسبتُها ثلاثةٌ إلى واحد تُحشَر في مربّعٍ فيهبط مقياسُ
+ * حروفها إلى ٠٫١٢، **فيُقرأ هيكلُها على عشرين خليّةً من القناع** وتخرج ضرباتُ
+ * علاماتها مكسّرةً — وهو ما قِيس في الجلسة ٩ (ثلاثَ عشرةَ جملةً دون عهد الرجفة).
+ *
+ * فالشبكةُ الجارية **ارتفاعُها ثابتٌ وعرضُها يتبع المادّة**، ودقّةُ القناع كما هي
+ * (`PX` وحدتان لكل خليّة) — فيكبر السطرُ ويكبر معه هيكلُه بلا تغيير في المقياس
+ * المطلق الذي يحكم به المحرّك. وكلُّ ما دون هذا السطر يقرأ `SHEET_W`/`MASK_W`
+ * لا الثابتَ المربّع.
+ */
+let SHEET_W = GRID;
+let SHEET_H = GRID;
+let MASK_W = MASK;
+let MASK_H = MASK;
+
+/** أقصى عرضٍ لصندوق السطر — وقفٌ على الذاكرة لا رأيٌ في المادّة (٢ مليون خليّة). */
+const SHEET_MAX = 4 * GRID;
+
+/** يضبط الشبكةَ الجارية على عرضٍ من مضاعفات الخليّة. */
+function setSheet(width) {
+  SHEET_W = Math.max(GRID, Math.min(SHEET_MAX, Math.round(width / PX) * PX));
+  SHEET_H = GRID;
+  MASK_W = SHEET_W / PX;
+  MASK_H = SHEET_H / PX;
+}
 /** هامشُ الكراسة: لا يلمس الحرفُ حافّةَ الصندوق (وفيه يتنفّس امتدادُ الأطراف). */
 const MARGIN = 90;
 
@@ -223,6 +251,7 @@ function fit(ch, form) {
 
 /** يرسم خيالَ الشكل على القشرة ويعيد قناعَه (١ داخلَ الحبر، ٠ خارجَه). */
 function ghost(ch, form) {
+  setSheet(GRID);                       // خيالُ الحرف مربّعٌ دائماً — صندوقُه صندوقُه
   const cal = fit(ch, form);
   sctx.clearRect(0, 0, GRID, GRID);
   shaper(cal.size);
@@ -258,7 +287,7 @@ function fingerprint(mask) {
 
 /** أجرامُ القناع الموصولة (جوارُ الثمانية) — الأكبرُ جسمُ الحرف وما دونه نقاطُه. */
 function bodies(mask) {
-  const seen = new Int32Array(MASK * MASK).fill(-1);
+  const seen = new Int32Array(MASK_W * MASK_H).fill(-1);
   const list = [];
   for (let i = 0; i < mask.length; i++) {
     if (!mask[i] || seen[i] >= 0) continue;
@@ -269,21 +298,21 @@ function bodies(mask) {
     while (queue.length) {
       const at = queue.pop();
       cells.push(at);
-      const x = at % MASK;
-      const y = (at - x) / MASK;
+      const x = at % MASK_W;
+      const y = (at - x) / MASK_W;
       for (let dy = -1; dy <= 1; dy++) {
         for (let dx = -1; dx <= 1; dx++) {
           const nx = x + dx;
           const ny = y + dy;
-          if (nx < 0 || ny < 0 || nx >= MASK || ny >= MASK) continue;
-          const j = ny * MASK + nx;
+          if (nx < 0 || ny < 0 || nx >= MASK_W || ny >= MASK_H) continue;
+          const j = ny * MASK_W + nx;
           if (mask[j] && seen[j] < 0) { seen[j] = id; queue.push(j); }
         }
       }
     }
     let sx = 0;
     let sy = 0;
-    for (const c of cells) { sx += c % MASK; sy += (c - (c % MASK)) / MASK; }
+    for (const c of cells) { sx += c % MASK_W; sy += (c - (c % MASK_W)) / MASK_W; }
     list.push({ cells, area: cells.length, at: [sx / cells.length, sy / cells.length] });
   }
   list.sort((a, b) => b.area - a.area);
@@ -291,7 +320,7 @@ function bodies(mask) {
 }
 
 const maskOf = (cells) => {
-  const m = new Uint8Array(MASK * MASK);
+  const m = new Uint8Array(MASK_W * MASK_H);
   for (const c of cells) m[c] = 1;
   return m;
 };
@@ -307,21 +336,21 @@ function around(img, x, y) {
   for (let k = 0; k < 8; k++) {
     const nx = x + NB[k][0];
     const ny = y + NB[k][1];
-    NEAR[k] = (nx < 0 || ny < 0 || nx >= MASK || ny >= MASK) ? 0 : img[ny * MASK + nx];
+    NEAR[k] = (nx < 0 || ny < 0 || nx >= MASK_W || ny >= MASK_H) ? 0 : img[ny * MASK_W + nx];
   }
   return NEAR;
 }
 
 /** حدودُ الحبر في القناع — فلا يُمشَّط الفراغُ حول الحرف في كل مرور. */
 function bounds(mask) {
-  let x0 = MASK;
-  let y0 = MASK;
+  let x0 = MASK_W;
+  let y0 = MASK_H;
   let x1 = 0;
   let y1 = 0;
   for (let i = 0; i < mask.length; i++) {
     if (!mask[i]) continue;
-    const x = i % MASK;
-    const y = (i - x) / MASK;
+    const x = i % MASK_W;
+    const y = (i - x) / MASK_W;
     if (x < x0) x0 = x;
     if (x > x1) x1 = x;
     if (y < y0) y0 = y;
@@ -329,7 +358,7 @@ function bounds(mask) {
   }
   return {
     x0: Math.max(1, x0 - 1), y0: Math.max(1, y0 - 1),
-    x1: Math.min(MASK - 2, x1 + 1), y1: Math.min(MASK - 2, y1 + 1),
+    x1: Math.min(MASK_W - 2, x1 + 1), y1: Math.min(MASK_H - 2, y1 + 1),
   };
 }
 
@@ -353,13 +382,13 @@ function thin(src) {
       const drop = [];
       for (let y = box.y0; y <= box.y1; y++) {
         for (let x = box.x0; x <= box.x1; x++) {
-          if (!img[y * MASK + x]) continue;
+          if (!img[y * MASK_W + x]) continue;
           const p = around(img, x, y);
           const on = p.reduce((a, b) => a + b, 0);
           if (on < 2 || on > 6 || crossings(p) !== 1) continue;
           const [p2, p3, p4, p5, p6, p7, p8, p9] = p;   // شمالاً ثم مع عقارب الساعة
           if (step === 0) { if (p2 * p4 * p6 || p4 * p6 * p8) continue; } else if (p2 * p4 * p8 || p2 * p6 * p8) continue;
-          drop.push(y * MASK + x);
+          drop.push(y * MASK_W + x);
           void p3; void p5; void p7; void p9;
         }
       }
@@ -374,10 +403,10 @@ function thin(src) {
     let removed = 0;
     for (let y = box.y0; y <= box.y1; y++) {
       for (let x = box.x0; x <= box.x1; x++) {
-        if (!img[y * MASK + x]) continue;
+        if (!img[y * MASK_W + x]) continue;
         const p = around(img, x, y);
         if (p.reduce((a, b) => a + b, 0) < 3 || crossings(p) !== 1) continue;
-        img[y * MASK + x] = 0;
+        img[y * MASK_W + x] = 0;
         removed++;
       }
     }
@@ -389,27 +418,27 @@ function thin(src) {
 /** مسافةُ كل بكسلٍ عن حافّة الحبر (مربّعاتٌ متعاقبة) — بها يُعرَف نصفُ عرض القلم. */
 function distance(mask) {
   const INF = 1e6;
-  const d = new Float32Array(MASK * MASK).fill(INF);
+  const d = new Float32Array(MASK_W * MASK_H).fill(INF);
   for (let i = 0; i < mask.length; i++) if (!mask[i]) d[i] = 0;
   const relax = (i, j, w) => { if (d[j] + w < d[i]) d[i] = d[j] + w; };
-  for (let y = 0; y < MASK; y++) {
-    for (let x = 0; x < MASK; x++) {
-      const i = y * MASK + x;
+  for (let y = 0; y < MASK_H; y++) {
+    for (let x = 0; x < MASK_W; x++) {
+      const i = y * MASK_W + x;
       if (!d[i]) continue;
       if (x > 0) relax(i, i - 1, 1);
-      if (y > 0) relax(i, i - MASK, 1);
-      if (x > 0 && y > 0) relax(i, i - MASK - 1, 1.4142);
-      if (x < MASK - 1 && y > 0) relax(i, i - MASK + 1, 1.4142);
+      if (y > 0) relax(i, i - MASK_W, 1);
+      if (x > 0 && y > 0) relax(i, i - MASK_W - 1, 1.4142);
+      if (x < MASK_W - 1 && y > 0) relax(i, i - MASK_W + 1, 1.4142);
     }
   }
-  for (let y = MASK - 1; y >= 0; y--) {
-    for (let x = MASK - 1; x >= 0; x--) {
-      const i = y * MASK + x;
+  for (let y = MASK_H - 1; y >= 0; y--) {
+    for (let x = MASK_W - 1; x >= 0; x--) {
+      const i = y * MASK_W + x;
       if (!d[i]) continue;
-      if (x < MASK - 1) relax(i, i + 1, 1);
-      if (y < MASK - 1) relax(i, i + MASK, 1);
-      if (x < MASK - 1 && y < MASK - 1) relax(i, i + MASK + 1, 1.4142);
-      if (x > 0 && y < MASK - 1) relax(i, i + MASK - 1, 1.4142);
+      if (x < MASK_W - 1) relax(i, i + 1, 1);
+      if (y < MASK_H - 1) relax(i, i + MASK_W, 1);
+      if (x < MASK_W - 1 && y < MASK_H - 1) relax(i, i + MASK_W + 1, 1.4142);
+      if (x > 0 && y < MASK_H - 1) relax(i, i + MASK_W - 1, 1.4142);
     }
   }
   return d;
@@ -417,10 +446,10 @@ function distance(mask) {
 
 // ————— ٤) العُقَد: قراءةُ الهيكل بياناً —————
 
-const degreeOf = (img, i) => around(img, i % MASK, (i - (i % MASK)) / MASK)
+const degreeOf = (img, i) => around(img, i % MASK_W, (i - (i % MASK_W)) / MASK_W)
   .reduce((a, b) => a + b, 0);
 
-const px2grid = (i) => [((i % MASK) + 0.5) * PX, (((i - (i % MASK)) / MASK) + 0.5) * PX];
+const px2grid = (i) => [((i % MASK_W) + 0.5) * PX, (((i - (i % MASK_W)) / MASK_W) + 0.5) * PX];
 
 /**
  * **حدودُ الجراحة على الرسم البيانيّ** — بالبكسل، ومنسوبةٌ إلى مقاس القناع لا
@@ -438,7 +467,7 @@ const SPUR = Math.round(0.05 * MASK);
 const SPLIT = Math.round(0.12 * MASK);
 const BEND = Math.round(0.02 * MASK);
 
-const pxAt = (i) => [i % MASK, (i - (i % MASK)) / MASK];
+const pxAt = (i) => [i % MASK_W, (i - (i % MASK_W)) / MASK_W];
 const chainPx = (chain) => {
   let len = 0;
   for (let i = 1; i < chain.length; i++) {
@@ -467,8 +496,8 @@ function rawGraph(img) {
     for (const [dx, dy] of NB) {
       const nx = x + dx;
       const ny = y + dy;
-      if (nx < 0 || ny < 0 || nx >= MASK || ny >= MASK) continue;
-      const j = ny * MASK + nx;
+      if (nx < 0 || ny < 0 || nx >= MASK_W || ny >= MASK_H) continue;
+      const j = ny * MASK_W + nx;
       if (j !== prev && img[j]) return j;
     }
     return -1;
@@ -479,8 +508,8 @@ function rawGraph(img) {
     for (const [dx, dy] of NB) {
       const nx = x + dx;
       const ny = y + dy;
-      if (nx < 0 || ny < 0 || nx >= MASK || ny >= MASK) continue;
-      const first = ny * MASK + nx;
+      if (nx < 0 || ny < 0 || nx >= MASK_W || ny >= MASK_H) continue;
+      const first = ny * MASK_W + nx;
       if (!img[first] || walked.has(`${px}>${first}`)) continue;
       const chain = [px, first];
       seen[px] = 1;
@@ -650,7 +679,7 @@ function skeletonGraph(img) {
 /** ترتيبٌ حتميّ للعُقَد (من أعلى فأيمن — ترتيبُ القراءة) فرقمُ العقدة نفسُه في كل تشغيل. */
 function orderNodes(graph) {
   const order = graph.nodes
-    .map((n, i) => ({ i, px: n.px, x: n.px % MASK, y: (n.px - (n.px % MASK)) / MASK }))
+    .map((n, i) => ({ i, px: n.px, x: n.px % MASK_W, y: (n.px - (n.px % MASK_W)) / MASK_W }))
     .sort((a, b) => (a.y - b.y) || (b.x - a.x));
   const map = new Map(order.map((o, k) => [o.i, k]));
   const edges = graph.edges.map((e) => ({ a: map.get(e.a) + 1, b: map.get(e.b) + 1, chain: e.chain }));
@@ -781,8 +810,8 @@ function shifted(spike, target, room) {
 const inkHalf = (work, p) => {
   const mx = Math.round(p[0] / PX - 0.5);
   const my = Math.round(p[1] / PX - 0.5);
-  if (mx < 0 || my < 0 || mx >= MASK || my >= MASK) return 0;
-  return (work.dt[my * MASK + mx] || 0) * PX;
+  if (mx < 0 || my < 0 || mx >= MASK_W || my >= MASK_H) return 0;
+  return (work.dt[my * MASK_W + mx] || 0) * PX;
 };
 
 /**
@@ -898,7 +927,7 @@ function smooth(points, passes = 3, work = null) {
     if (!work) return true;
     const mx = Math.round(p[0] / PX - 0.5);
     const my = Math.round(p[1] / PX - 0.5);
-    return mx >= 0 && my >= 0 && mx < MASK && my < MASK && work.bodyMask[my * MASK + mx];
+    return mx >= 0 && my >= 0 && mx < MASK_W && my < MASK_H && work.bodyMask[my * MASK_W + mx];
   };
   let out = points.map((p) => [p[0], p[1]]);
   for (let k = 0; k < passes; k++) {
@@ -930,7 +959,7 @@ function extendEnd(points, mask, atStart) {
   const inside = (p) => {
     const mx = Math.round(p[0] / PX - 0.5);
     const my = Math.round(p[1] / PX - 0.5);
-    return mx >= 0 && my >= 0 && mx < MASK && my < MASK && mask[my * MASK + mx];
+    return mx >= 0 && my >= 0 && mx < MASK_W && my < MASK_H && mask[my * MASK_W + mx];
   };
   let grown = tip;
   for (let step = 1; step <= 40; step++) {
@@ -1097,9 +1126,9 @@ function depthIn(work, points, mask = work.bodyMask) {
   for (const p of points) {
     const mx = Math.round(p[0] / PX - 0.5);
     const my = Math.round(p[1] / PX - 0.5);
-    const inside = mx >= 0 && my >= 0 && mx < MASK && my < MASK && mask[my * MASK + mx];
+    const inside = mx >= 0 && my >= 0 && mx < MASK_W && my < MASK_H && mask[my * MASK_W + mx];
     if (!inside) { out++; stray.push(p.map(round1)); }
-    least = Math.min(least, inside ? work.dt[my * MASK + mx] * PX : 0);
+    least = Math.min(least, inside ? work.dt[my * MASK_W + mx] * PX : 0);
   }
   return { out, stray, least: least === Infinity ? 0 : least };
 }
@@ -1213,7 +1242,7 @@ async function svgPaint(text, size, x, baseline, visible = null) {
   const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
   const body = [...text].map((ch, i) =>
     `<tspan fill="${!visible || visible.has(i) ? '#000' : 'transparent'}">${esc(ch)}</tspan>`).join('');
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${GRID}" height="${GRID}">`
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${SHEET_W}" height="${SHEET_H}">`
     + `<style>@font-face{font-family:'${FAMILY}';src:url(data:font/woff2;base64,${fontInline}) format('woff2')}</style>`
     + `<text x="${x}" y="${baseline}" direction="rtl" text-anchor="middle"`
     + ` style="font:${size}px '${FAMILY}'">${body}</text></svg>`;
@@ -1223,24 +1252,28 @@ async function svgPaint(text, size, x, baseline, visible = null) {
     img.onerror = () => rej(new Error('تعذّر تصيير SVG'));
     img.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
   });
-  wordCtx.clearRect(0, 0, GRID, GRID);
+  if (wordSheet.width !== SHEET_W || wordSheet.height !== SHEET_H) {
+    wordSheet.width = SHEET_W;
+    wordSheet.height = SHEET_H;
+  }
+  wordCtx.clearRect(0, 0, SHEET_W, SHEET_H);
   wordCtx.drawImage(img, 0, 0);
-  return wordCtx.getImageData(0, 0, GRID, GRID);
+  return wordCtx.getImageData(0, 0, SHEET_W, SHEET_H);
 }
 
-/** قناعُ صورةٍ على دقّة القناع (كقناع `ghost` سواءً). */
+/** قناعُ صورةٍ على دقّة القناع (كقناع `ghost` سواءً) — على الشبكة الجارية. */
 function imageMask(image) {
   const data = image.data;
-  const mask = new Uint8Array(MASK * MASK);
-  for (let y = 0; y < MASK; y++) {
-    for (let x2 = 0; x2 < MASK; x2++) {
+  const mask = new Uint8Array(MASK_W * MASK_H);
+  for (let y = 0; y < MASK_H; y++) {
+    for (let x2 = 0; x2 < MASK_W; x2++) {
       let on = 0;
       for (let dy = 0; dy < PX; dy++) {
         for (let dx = 0; dx < PX; dx++) {
-          if (data[(((y * PX + dy) * GRID) + (x2 * PX + dx)) * 4 + 3] > 128) on++;
+          if (data[(((y * PX + dy) * SHEET_W) + (x2 * PX + dx)) * 4 + 3] > 128) on++;
         }
       }
-      mask[y * MASK + x2] = on * 2 >= PX * PX ? 1 : 0;
+      mask[y * MASK_W + x2] = on * 2 >= PX * PX ? 1 : 0;
     }
   }
   return mask;
@@ -1248,14 +1281,14 @@ function imageMask(image) {
 
 /** حدودُ قناعٍ بوحدات الشبكة — `null` إن لم يكن فيه حبر. */
 function maskBox(mask) {
-  let x0 = MASK;
-  let y0 = MASK;
+  let x0 = MASK_W;
+  let y0 = MASK_H;
   let x1 = -1;
   let y1 = -1;
   for (let i = 0; i < mask.length; i++) {
     if (!mask[i]) continue;
-    const x = i % MASK;
-    const y = (i - x) / MASK;
+    const x = i % MASK_W;
+    const y = (i - x) / MASK_W;
     if (x < x0) x0 = x;
     if (x > x1) x1 = x;
     if (y < y0) y0 = y;
@@ -1274,17 +1307,33 @@ function maskBox(mask) {
  * وموضعُها — فلا تُستعار مقاييسُ لوحٍ آخر (أمسك المسبارُ فرقَ مرساتَي canvas وSVG:
  * النصُّ كان يخرج عن اللوح كلِّه). والكلمةُ تملأ صندوقَها كما يملؤه الحرف —
  // والنسبُ **بين** حروفها من التشكيل (قرارُ الجلسة ٢ بلازمه).
+ *
+ * **وصندوقُ السطر سطرٌ لا مربّع** (حكمُ المدير، ١٣ أغسطس ٢٠٢٦): ما كان أعرضَ من
+ * ارتفاعه **يملأ ارتفاعَه** ويأخذ من العرض قدرَه — فيبقى مقياسُ حروفه قريباً من
+ * مقياس الكلمة المفردة بدل أن يُخنَق إلى ثُلثه، **ويكبر معه هيكلُه في القناع**
+ * فتخرج ضرباتُ علاماته مقروءةً لا مكسّرة. والعرضُ **يُحسب من نسبة المادّة** لا
+ * يُختار، ويُقيَّد في المسار (`box`) ليقرأه اللوحُ والحارس.
  */
 async function wordFit(text) {
+  setSheet(GRID);                       // المسبارُ على مربّعٍ ثم يُوسَّع بنسبته
   const probe = imageMask(await svgPaint(text, 100, GRID / 2, GRID / 2));
   const box = maskBox(probe);
   if (!box) throw new Error(`لا حبرَ في مسبار «${text}»`);
   const span = GRID - 2 * MARGIN;
-  const scale = span / Math.max(box.w, box.h);
+  // **والسطرُ ما فيه فراغٌ بين كلمتين** — لا كلُّ مادّةٍ عرضُها فوق ارتفاعها: حكمُ
+  // المدير في **الجملة** («صندوقُها سطرٌ عريض»)، والكلمةُ المفردة تملأ مربّعَها كما
+  // أُقرّت في الجلسة ٢ فلا يُعاد ما حُكم فيه.
+  const wide = text.includes(' ');
+  const scale = wide ? span / box.h : span / Math.max(box.w, box.h);
+  const width = wide ? box.w * scale + 2 * MARGIN : GRID;
+  setSheet(width);
+  // **وإن بلغ السقفَ رجع المقياسُ إلى العرض** — فلا يخرج حبرٌ عن صندوقه بحال
+  const fit = Math.min(scale, (SHEET_W - 2 * MARGIN) / box.w);
   return {
-    size: 100 * scale,
-    x: GRID / 2 + (GRID / 2 - box.cx) * scale,
-    baseline: GRID / 2 + (GRID / 2 - box.cy) * scale,
+    size: 100 * fit,
+    x: SHEET_W / 2 - (box.cx - GRID / 2) * fit,
+    baseline: SHEET_H / 2 - (box.cy - GRID / 2) * fit,
+    box: [SHEET_W, SHEET_H],
   };
 }
 
@@ -1528,14 +1577,14 @@ function snapIntoInk(points, mask) {
   return points.map((p) => {
     const mx = Math.round(p[0] / PX - 0.5);
     const my = Math.round(p[1] / PX - 0.5);
-    if (mx >= 0 && my >= 0 && mx < MASK && my < MASK && mask[my * MASK + mx]) return p;
+    if (mx >= 0 && my >= 0 && mx < MASK_W && my < MASK_H && mask[my * MASK_W + mx]) return p;
     let best = null;
     let gap = Infinity;
     for (let dy = -RANGE; dy <= RANGE; dy++) {
       for (let dx = -RANGE; dx <= RANGE; dx++) {
         const nx = mx + dx;
         const ny = my + dy;
-        if (nx < 0 || ny < 0 || nx >= MASK || ny >= MASK || !mask[ny * MASK + nx]) continue;
+        if (nx < 0 || ny < 0 || nx >= MASK_W || ny >= MASK_H || !mask[ny * MASK_W + nx]) continue;
         const d = dx * dx + dy * dy;
         if (d < gap) { gap = d; best = [(nx + 0.5) * PX, (ny + 0.5) * PX]; }
       }
@@ -1592,6 +1641,29 @@ function resampleStroke(stroke, dropped, label, scale, inkAt) {
  * فينقطع الوصلُ عنده من نفسه، بلا جدول حروفٍ يُكتب.
  */
 const JOIN_GAP = TOLERANCE.lateral;
+
+/**
+ * **وشرطُ الوصل الثاني: أن يكون بين الطرفين حبرٌ يُمشى** (الجلسة ٩) — والقربُ وحدَه
+ * لا يكفي. فـ`JOIN_GAP` طولٌ **مطلق** معايَرٌ على حرفٍ يملأ صندوقَه، وحرفُ السطر
+ * جزءٌ صغير منه: في جملةٍ مقياسُ حروفها ٠٫١٥ يصير التسعون وحدةً مسافةً تعبر بياضاً،
+ * فيُجسَر ما لا حبرَ بينه ويمشي القلمُ في الفراغ — **وأمسكه الغَوصُ نفسُه** (عشرُ
+ * نقاطٍ خارج الخيال في سبع عشرة جملةً من عشرين، كلُّها على جسر وصلٍ مزعوم).
+ *
+ * **والحدُّ حبرُ الخيال لا رقمٌ يُشَدّ**: يُمشى الجسرُ خليّةً خليّة في قناع الكلمة —
+ * فإن كان كلُّه في الحبر فهو وصلةٌ يمشيها القلمُ حقّاً، وإلا **رُفع القلمُ** كما
+ * ترفعه الكرّاسة. وهو عينُ «النموذجُ هو المقياس» في موضع الوصل، ولا يمسّ الكلماتِ
+ * القائمة: جسورُها في حبرها أصلاً (وإلا لَسقطت بالغوص يومَ بُنيت).
+ */
+function inkBridge(work, a, b) {
+  const steps = Math.max(1, Math.ceil(dist(a, b) / PX));
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps;
+    const mx = Math.round((a[0] + (b[0] - a[0]) * t) / PX - 0.5);
+    const my = Math.round((a[1] + (b[1] - a[1]) * t) / PX - 0.5);
+    if (mx < 0 || my < 0 || mx >= MASK_W || my >= MASK_H || !work.mask[my * MASK_W + mx]) return false;
+  }
+  return true;
+}
 
 /**
  * **أدنى عرضٍ يُعتَدّ به للحبر** — ما دونه ضجيجُ تقريبٍ لا قياس.
@@ -1769,7 +1841,7 @@ function composeWord(studioWord, canon, canonMarks, log) {
         const inNext = (q) => {
           const mx = Math.round(q[0] / PX - 0.5);
           const my = Math.round(q[1] / PX - 0.5);
-          return mx >= 0 && my >= 0 && mx < MASK && my < MASK && unit.bodyMask[my * MASK + mx];
+          return mx >= 0 && my >= 0 && mx < MASK_W && my < MASK_H && unit.bodyMask[my * MASK_W + mx];
         };
         let cut = -1;
         for (let j = open.points.length - 1; j >= from; j--) {
@@ -1784,7 +1856,7 @@ function composeWord(studioWord, canon, canonMarks, log) {
         }
         const near = dist(open.points[cut], points[0]);
         const trimmed = open.points.length - 1 - cut;
-        if (near <= JOIN_GAP) {
+        if (near <= JOIN_GAP && inkBridge(studioWord, open.points[cut], points[0])) {
           meta.joins.push({ at: unit.text, gap: round1(near), trimmed });
           // وطيّةٌ تقع فيما قُصّ تسقط صفتُها بإعلان — لا تبقى بأرقامٍ شاخت
           open.folds = open.folds.filter((f) => {
@@ -1795,12 +1867,13 @@ function composeWord(studioWord, canon, canonMarks, log) {
           open.points = open.points.slice(0, cut + 1).concat(points);
           const offset = cut + 1;
           open.folds.push(...folds.map((f) => ({ from: f.from + offset, apex: f.apex + offset, to: f.to + offset })));
+          open.at.push(unit.text);
           return;
         }
         meta.joins.push({ at: unit.text, gap: round1(near), cut: true });
       }
       close();
-      open = { points: [...points], folds: [...folds] };
+      open = { points: [...points], folds: [...folds], at: [unit.text] };
     });
     if (source.ref.strokes.length > bodyCount || unit.kind === 'liga') close();
 
@@ -1851,11 +1924,15 @@ function composeWord(studioWord, canon, canonMarks, log) {
     ...runs.map((r, i) => resampleStroke({ ...r, points: snapIntoInk(r.points, studioWord.mask) }, dropped, `${text}#${i + 1}`, scale, ink)),
     ...markStrokes.map((m) => resampleStroke({ ...m, points: snapIntoInk(m.points, studioWord.mask) }, dropped, `${text}/${m.why}`, scale, ink)),
   ];
+  // **وصندوقُ المادّة يسافر معها**: مربّعٌ للكلمة وسطرٌ عريضٌ للجملة — يقرؤه اللوحُ
+  // فيرسم بمقاسه، ويقرؤه الحارسُ فيقيس عليه. (ويسقط إن كان مربّعاً، فلا رقمَ زائد.)
+  const box = studioWord.cal.box;
   const ref = { strokes, dots, line: round1(studioWord.line), tolerance: scale };
+  if (box && box[0] !== GRID) ref.box = [box[0], box[1]];
 
   // **المسارُ داخل خيال الكلمة** — الغَوصُ يُقاس نقطةً نقطة كما في الحرف، **وشكواه
   // تسمّي قطعتَها** (سنّةُ الجلسة ٧: العطبُ يسمّي موضعَه، فلا يُبحَث في كلمةٍ كلِّها)
-  const labels = [...runs.map((_, i) => `قطعة ${i + 1}`), ...markStrokes.map((m) => `علامة «${m.why}»`)];
+  const labels = [...runs.map((r, i) => `قطعة ${i + 1} (${(r.at || []).join('')})`), ...markStrokes.map((m) => `علامة «${m.why}»`)];
   const depth = depthIn(studioWord, strokes.flatMap((s) => s.points), studioWord.mask);
   if (depth.out) {
     const guilty = strokes.map((s, i) => {
@@ -1903,6 +1980,7 @@ async function markCanonical(mark, entry) {
   // التصفيةَ بالمركز تُبقي الشريطَ الممدود. فالحاملُ يُرسَم مرّتين — به وبلا العلامة —
   // والفرقُ حبرُها وحدَه، وهو مبدأُ عزو حركات الكلمة بعينه.
   const carrier = 'ـ';
+  setSheet(GRID);                       // وقانونيُّ العلامة كذلك: صندوقُه مربّع
   const inkOf = async (size, x, y) => maskMinus(
     imageMask(await svgPaint(carrier + mark, size, x, y)),
     imageMask(await svgPaint(carrier, size, x, y)));
@@ -1984,6 +2062,11 @@ function canonOf(works, done, forms) {
  * (وصلاتُ مرحلة الوصل ثم كلماتُ الجداول كلُّها) **ولا كلمةَ تُكتب هنا**. وأسطرُ
  * المسافة (كلمتان تتجاوران بمسافةٍ من المُشكِّل — مادّةُ «المسافة بين الكلمات»)
  * تُشتقّ بقاعدةٍ معلنة: أولا كلمتَي كلِّ عقدة نسخٍ غير عقد العلامات.
+ *
+ * **والجملُ من سلّم اقرأ تُؤلَّف كما تُؤلَّف الكلمة** (الجلسة ٩، `METHOD.md §٤`
+ * المرحلة ١٤): نصٌّ واحدٌ يُصيَّره المُشكِّل، فيخرج منه **اتجاهُ السطر والمسافةُ بين
+ * الكلمات** حقيقةً مقيسةً لا تركيباً — وهي مادّةُ المحطة بعينها. ولا فرقَ في
+ * التأليف بين جملةٍ وسطرِ مسافة: كلاهما كلماتٌ على سطرٍ واحد.
  */
 async function buildWords(spec, canon) {
   const cur = await import('/js/curriculum.js');
@@ -1997,10 +2080,14 @@ async function buildWords(spec, canon) {
   const pairs = (stage?.nodes || [])
     .filter((n) => (n.words || []).length >= 2 && !String(n.part).startsWith('sign-'))
     .map((n) => `${n.words[0]} ${n.words[1]}`);
+  // وجملُ المحطة الأخيرة من سلّم اقرأ — تُقرأ من عقدها كما تُقرأ الكلماتُ من جدولها
+  const sentences = (cur.STAGES.find((s) => s.kind === 'sentence')?.nodes || [])
+    .flatMap((n) => n.sentences || []);
 
   // العلاماتُ المطلوبة قانونيّاتُها: كلُّ حركةٍ وردت في المادّة — فعلامةٌ بلا إيماءةٍ
   // مؤلَّفةٍ تُسقط البناءَ باسمها، ولا تدخل كلمةٌ حركتُها نقرةٌ عمياء.
-  const needed = [...new Set([...joins, ...words].flatMap((t) => [...t].filter((c) => HARAKA.test(c))))];
+  const needed = [...new Set([...joins, ...words, ...sentences]
+    .flatMap((t) => [...t].filter((c) => HARAKA.test(c))))];
   const canonMarks = {};
   for (const mark of needed) {
     if (!spec.marks?.[mark]?.strokes?.length) {
@@ -2026,20 +2113,27 @@ async function buildWords(spec, canon) {
       if (e.ref) failRefs[text] = e.ref;
     }
   }
-  // أسطرُ المسافة تُقاس ككل شيء — وما ضاق عن مقياس المحرّك سقط بإعلانٍ لا صمتاً
-  for (const text of pairs) {
-    try {
-      const st = await wordStudio(text);
-      out[text] = composeWord(st, canon, canonMarks, (line) => report.push(line)).ref;
-    } catch (e) {
-      failedPairs.push(`${text}: ${e.message}`);
+  // أسطرُ المسافة والجملُ تُقاس ككل شيء — وما ضاق عن مقياس المحرّك سقط **بإعلانٍ لا
+  // صمتاً**، وتمضي محطتُه بما بقي من مادّتها (وعقدةٌ خلت تُجيب الطفلَ ولا تصمت).
+  const failedSentences = [];
+  for (const [list, bag] of [[pairs, failedPairs], [sentences, failedSentences]]) {
+    for (const text of list) {
+      try {
+        const st = await wordStudio(text);
+        out[text] = composeWord(st, canon, canonMarks, (line) => report.push(line)).ref;
+      } catch (e) {
+        bag.push(`${text}: ${e.message}`);
+      }
     }
   }
   const glyphs = {};
   for (const [mark, cm] of Object.entries(canonMarks)) glyphs[mark] = cm.glyph;
   return {
-    words: out, report, glyphs, failedPairs, failed, failRefs,
-    counts: { joins: joins.length, words: words.length, pairs: pairs.length },
+    words: out, report, glyphs, failedPairs, failedSentences, failed, failRefs,
+    counts: {
+      joins: joins.length, words: words.length, pairs: pairs.length,
+      sentences: sentences.length,
+    },
   };
 }
 
@@ -2432,10 +2526,12 @@ async function runBuild() {
         + (line.dropped.length ? ` · ⚠ ${line.dropped.join(' · ')}` : ''));
     }
     for (const fail of built.failedPairs) say(true, `⚠ سطرُ مسافةٍ سقط بإعلان: ${fail}`);
+    for (const fail of built.failedSentences) say(true, `⚠ جملةٌ سقطت بإعلان: ${fail}`);
     for (const fail of built.failed) say(false, `كلمةٌ لم تُبنَ — ${fail}`);
     say(true, `الكلماتُ المؤلَّفة: ${Object.keys(built.words).length}`
       + ` (وصلات ${built.counts.joins} · كلمات ${built.counts.words}`
-      + ` · أسطرُ مسافة ${built.counts.pairs - built.failedPairs.length}/${built.counts.pairs})`);
+      + ` · أسطرُ مسافة ${built.counts.pairs - built.failedPairs.length}/${built.counts.pairs}`
+      + ` · جمل ${built.counts.sentences - built.failedSentences.length}/${built.counts.sentences})`);
     if (built.failed.length) {
       say(false, `${built.failed.length} كلمةً لم تُبنَ — لا تُكتب وحدةٌ ناقصة`, { failRefs: built.failRefs });
       await send();
@@ -2449,7 +2545,8 @@ async function runBuild() {
       markGlyphs: built.glyphs,
       meta: {
         report, grid: GRID, spin: warm.spin, warmups: warm.report,
-        words: built.report, failedPairs: built.failedPairs, wordCounts: built.counts,
+        words: built.report, failedPairs: built.failedPairs,
+        failedSentences: built.failedSentences, wordCounts: built.counts,
       },
     });
   } catch (e) {

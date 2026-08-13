@@ -65,7 +65,11 @@
 // (`js/word_paths.js`، وحدةٌ ثالثةٌ مولَّدة) وأصواتُ الكلمات من بنك اقرأ ببصماتها.
 // **والرفعةُ شرطُ وصول الوحدة الجديدة**: `main.js` يستوردها، فجهازٌ مثبَّتٌ على قشرته
 // القديمة يقف عند أوّل كلمةٍ يُطلب نسخُها.
-const VERSION = 'v16';
+// **و`v17` (الجلسة ٩)**: خفوتُ النموذج والإملاءُ والجمل — شاشتان جديدتان
+// (`js/fade.js` و`js/sentence.js`) ومساراتُ الجمل في `js/word_paths.js` وأصواتُها
+// العشرون من سلّم اقرأ ببصماتها، **فالفهرسُ في القشرة**: جهازٌ مثبَّتٌ على فهرسه
+// المخزون يصمت عنده صوتُ أوّل جملةٍ تُملى وهي في البنك.
+const VERSION = 'v17';
 const SHELL_CACHE = `uktub-shell-${VERSION}`;
 const AUDIO_CACHE = 'uktub-audio';          // ثابتٌ عمداً — لا يحمل VERSION
 const KEEP = [SHELL_CACHE, AUDIO_CACHE];
@@ -86,6 +90,7 @@ const SHELL = [
   'js/audio.js',
   'js/copy.js',
   'js/curriculum.js',
+  'js/fade.js',
   'js/gate.js',
   'js/install.js',
   'js/lesson.js',
@@ -97,6 +102,7 @@ const SHELL = [
   'js/probe.js',
   'js/progress.js',
   'js/review.js',
+  'js/sentence.js',
   'js/ui.js',
   'js/warmup.js',
   'js/warmups.js',

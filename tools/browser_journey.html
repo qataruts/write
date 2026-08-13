@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>الرحلةُ كاملةً — «اُكْتُبْ» الجلسة ٩</title>
+<!--
+  **المعيارُ الأكبر للجلسة ٩**: «محاكاةُ الرحلة كاملةً بلا انسداد — فحصُ متصفّحٍ يعبر
+  من أوّل محطة تهيئةٍ إلى ختام بوابة ٣». وهذا أوّلُ يومٍ تكتمل فيه الرحلةُ بناءً، فهو
+  أوّلُ يومٍ يمكن فيه هذا الفحص.
+
+  ————— كيف يمشيها؟ بيدٍ واحدة عمياء، لا بجدولِ شاشاتٍ يُكتب —————
+
+  الطفلُ الاصطناعيُّ هنا **لا يعرف اسمَ شاشةٍ ولا خطواتِها**. يفتح عقدةَ الرحلة
+  بعنوانها، ثم ينظر إلى ما بين يديه ويفعل ما يفعله الطفل:
+    · بطاقةُ علامةٍ؟ يغلقها.  · لوحُ عرضٍ («شاهِدْ»)؟ يمضي منه.
+    · لوحٌ يُكتب عليه؟ **يكتب ما عليه**.  · نجومٌ؟ فقد تمّت المحطة.
+  ولا شيءَ في هذه الصفحة يعرف أنّ للنسخ ثلاثَ خطواتٍ وللدرس أربعاً — **فبنيةُ أيّ
+  شاشةٍ تتغيّر غداً ولا يُعدَّل هنا سطر**، وإن انسدّ طريقٌ ظهر باسم عقدته.
+
+  **وما يكتبه يُقرأ من اللوح نفسِه**: مساراتُ النموذج المرسومة في `.pen-model` تُقابَل
+  بمساراتِ المنهج كلِّها (حروفٌ وتهيئةٌ وكلماتٌ وجمل) فيُعرَف **أيُّ مادّةٍ معروضةٌ
+  الآن** — ثم تُمشى بنقاطها ونقاطُها بعد جسمها. فلا يُملى على الفحص ما يكتب، ولو
+  عرضت شاشةٌ مادّةً ليست من المنهج لَما عرفها هذا الطفلُ وسقط الفحصُ باسمها.
+
+  **والقفلُ التسلسليّ يعمل كما هو**: التقدّمُ يبدأ من الصفر، ولا تُزرَع نجمةٌ واحدة —
+  فكلُّ عقدةٍ تُفتَح بإتمام ما قبلها فعلاً. **وهذا هو الانسدادُ المقيس**: عقدةٌ لا
+  تُفتَح، أو شاشةٌ لا تُبنى، أو لوحٌ لا يُقبَل ما كُتب عليه، أو بوابةٌ لا تُعبَر.
+
+  🔇 **والصوتُ يُعجَّل ولا يُلغى**: وسيطُ النطق وعنصرُ الصوت يُبدَّلان بسريعَين يُنهيان
+  فوراً، فتمرّ الرحلةُ في دقائقَ لا في ساعة. **والقناةُ نفسُها تعمل كما هي** (الانتقالُ
+  ينتظر تمامَ الكلام)، وحكمُ زمنِها محروسٌ في `check_speech.mjs` و`browser_test.html §٧`
+  حيث موضعُه — ولا يُعاد هنا.
+-->
+<style>
+  body { font: 14px/1.6 system-ui, sans-serif; margin: 0; background: #111; color: #eee; }
+  #log { padding: 1rem; white-space: pre-wrap; }
+  iframe { width: 420px; height: 860px; border: 0; position: fixed; inset-inline-end: 0; top: 0; }
+  .ok { color: #7ec97e; } .bad { color: #e08a80; } .dim { color: #888; }
+  h3 { margin: 1rem 0 .3rem; color: #cbb7ff; }
+</style>
+</head>
+<body>
+<div id="log"></div>
+<iframe id="app" src="about:blank"></iframe>
+<script type="module">
+const results = [];
+const log = document.getElementById('log');
+const frame = document.getElementById('app');
+
+function ok(cond, msg) {
+  results.push({ ok: !!cond, msg });
+  const line = document.createElement('div');
+  line.className = cond ? 'ok' : 'bad';
+  line.textContent = (cond ? '✓ ' : '✗ ') + msg;
+  log.append(line);
+}
+const note = (msg) => {
+  const line = document.createElement('div');
+  line.className = 'dim';
+  line.textContent = '  · ' + msg;
+  log.append(line);
+};
+const head = (msg) => {
+  const el = document.createElement('h3');
+  el.textContent = msg;
+  log.append(el);
+};
+
+const errors = [];
+window.addEventListener('error', (e) => errors.push(String(e.message)));
+window.addEventListener('unhandledrejection', (e) => errors.push(String(e.reason)));
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const send = () => fetch('/result', {
+  method: 'POST', body: JSON.stringify({ from: 'write', rows: results }),
+});
+
+/**
+ * 🔇 **تعجيلُ الصوت**: وسيطُ نطقٍ ينتهي فوراً وعنصرُ صوتٍ ينتهي فوراً — فالقناةُ
+ * تعمل ببنيتها (كلُّ انتقالٍ ينتظر تمامَ الكلام) ويمضي الزمنُ في لحظة.
+ */
+function hurryAudio(win) {
+  Object.defineProperty(win, 'speechSynthesis', {
+    configurable: true,
+    value: { cancel() {}, speak(u) { setTimeout(() => u.onend && u.onend(), 0); } },
+  });
+  Object.defineProperty(win, 'SpeechSynthesisUtterance', {
+    configurable: true,
+    value: class { constructor(text) { this.text = text; } },
+  });
+  win.Audio = class {
+    constructor() { this.handlers = {}; this.duration = 0.04; }
+    addEventListener(type, fn) { (this.handlers[type] ||= []).push(fn); }
+    removeAttribute() {}
+    load() {}
+    pause() {}
+    play() {
+      setTimeout(() => { for (const fn of this.handlers.ended || []) fn(); }, 0);
+      return Promise.resolve();
+    }
+  };
+}
+
+(async () => {
+  try {
+    // ————— طفلٌ جديد: لا نجمةَ مزروعة، والقفلُ التسلسليّ يعمل —————
+    localStorage.clear();
+    const progress = await import('/js/progress.js');
+    const pen = await import('/js/pen.js');
+    const { PATHS } = await import('/js/paths.js');
+    const { WARMUPS } = await import('/js/warmups.js');
+    const { WORD_PATHS } = await import('/js/word_paths.js');
+
+    const nodes = progress.allNodes();
+    const kinds = [...new Set(nodes.map((n) => n.type))];
+    ok(nodes.length > 0 && kinds.includes('warmup') && kinds.includes('gate'),
+      `الرحلةُ ${nodes.length} عقدةً في ${kinds.length} نوعاً: ${kinds.join('، ')}`);
+    ok(nodes[0].type === 'warmup',
+      `وأوّلُها محطةُ تهيئةٍ حركية («${nodes[0].part}») — قبل أيّ حرف`);
+    const last = nodes[nodes.length - 1];
+    ok(last.type === 'gate' && last.part === 'end',
+      `وآخرُها **بوابةُ الختام** («${last.part}») — بابُ «أَتْقِنْ»`);
+
+    // ————— جردُ المادّة كلِّها: بها يعرف الطفلُ ما على اللوح —————
+    const library = [];
+    for (const [ch, forms] of Object.entries(PATHS)) {
+      for (const [form, ref] of Object.entries(forms)) library.push({ name: `${ch}/${form}`, ref });
+    }
+    for (const [part, entry] of Object.entries(WARMUPS)) {
+      for (const shape of entry.shapes) library.push({ name: `${part}/${shape.id}`, ref: shape.ref });
+    }
+    for (const [text, ref] of Object.entries(WORD_PATHS)) library.push({ name: text, ref });
+    note(`مادّةُ المنهج المعروفة لليد: ${library.length} مساراً`);
+
+    let win;
+    let doc;
+    /**
+     * **فتحُ التطبيق من جديد** — ويُعاد بعد كلِّ تبديلٍ في تقدّم الطفل من خارجه:
+     * وحدةُ التقدّم في هذه الصفحة **غيرُ وحدته في التطبيق** (لكلِّ سياقٍ نسخته)،
+     * فما يُكتب هنا يبلغ القرصَ ولا يبلغ ذاكرةَ تلك — والفتحُ الجديد يقرأ القرص.
+     */
+    async function open() {
+      frame.src = '/';
+      await new Promise((r) => frame.addEventListener('load', r, { once: true }));
+      win = frame.contentWindow;
+      doc = frame.contentDocument;
+      win.addEventListener('error', (e) => errors.push(String(e.message)));
+      win.addEventListener('unhandledrejection', (e) => errors.push(String(e.reason)));
+      hurryAudio(win);
+      await wait(400);
+    }
+    await open();
+
+    // ————— إصبعٌ على اللوح (نظيرُ `browser_copy.html`) —————
+    let pointerId = 1;
+    const surfaceEl = () => doc.querySelector('.pen-surface');
+    // **وصندوقُ اللوح يُقرأ من اللوح نفسِه** (`viewBox`): مربّعٌ للحرف والكلمة
+    // وسطرٌ عريضٌ للجملة — فيدُ الفحص تعرف أين تضع إصبعَها بلا رقمٍ مكتوب.
+    const toClient = (el, [x, y]) => {
+      const rect = el.getBoundingClientRect();
+      const vb = el.viewBox.baseVal;
+      const unit = Math.min(rect.width / vb.width, rect.height / vb.height);
+      return {
+        clientX: rect.left + (rect.width - vb.width * unit) / 2 + x * unit,
+        clientY: rect.top + (rect.height - vb.height * unit) / 2 + y * unit,
+      };
+    };
+    const fire = (el, type, point, id) => {
+      el.dispatchEvent(new win.PointerEvent(type, {
+        bubbles: true, cancelable: true, composed: true,
+        pointerId: id, pointerType: 'touch', isPrimary: true, ...toClient(el, point),
+      }));
+    };
+    async function writeStroke(el, points) {
+      const id = ++pointerId;
+      fire(el, 'pointerdown', points[0], id);
+      for (const p of points.slice(1)) fire(el, 'pointermove', p, id);
+      await wait(6);
+      fire(el, 'pointerup', points[points.length - 1], id);
+      await wait(8);
+    }
+    /** يدُ طفلٍ مصنوعة: تمشي أجزاءَ المسار بترتيبها، والنقاطُ بعد الجسم كلِّه. */
+    async function writeRef(el, ref) {
+      for (const stroke of ref.strokes) {
+        if (!doc.contains(el)) return;
+        await writeStroke(el, stroke.points);
+      }
+      for (const dot of ref.dots || []) {
+        for (let i = 0; i < (dot.count || 1); i++) {
+          if (!doc.contains(el)) return;
+          await writeStroke(el, [dot.at, dot.at, dot.at]);
+        }
+      }
+    }
+
+    /**
+     * **ما المادّةُ المعروضة الآن؟** — تُقرأ من نموذج اللوح نفسِه (عددُ قطعه وأوّلُ
+     * نقطةٍ فيه) وتُقابَل بمادّة المنهج. فلا يُملى على الفحص ما يكتب.
+     */
+    function shownRef(el) {
+      const ds = [...el.querySelectorAll('.pen-model .pen-stroke')]
+        .map((p) => (p.getAttribute('d') || '').match(/-?\d+(\.\d+)?/g) || []);
+      const dots = el.querySelectorAll('.pen-model .pen-dot').length;
+      if (!ds.length) return null;
+      const near = (a, b) => Math.abs(a - b) < 0.2;
+      for (const item of library) {
+        const strokes = item.ref.strokes || [];
+        if (strokes.length !== ds.length) continue;
+        if ((item.ref.dots || []).length !== dots) continue;
+        // **المطابقةُ بطرفَي كلِّ قطعةٍ وعدّةِ نقاطها** — لا بأوّل قطعةٍ وحدَها:
+        // أشكالُ محطةٍ واحدة تشترك في مبدئها، فمطابقةُ الرأس تخلط بينها.
+        const same = strokes.every((stroke, i) => {
+          const nums = ds[i];
+          if (nums.length !== stroke.points.length * 2) return false;
+          const head = stroke.points[0];
+          const tail = stroke.points[stroke.points.length - 1];
+          return near(Number(nums[0]), head[0]) && near(Number(nums[1]), head[1])
+            && near(Number(nums[nums.length - 2]), tail[0])
+            && near(Number(nums[nums.length - 1]), tail[1]);
+        });
+        if (same) return item;
+      }
+      return null;
+    }
+
+    const starsOf = (id) => {
+      try {
+        return (JSON.parse(win.localStorage.getItem('uktub.progress.v1') || '{}').stars || {})[id] || 0;
+      } catch { return 0; }
+    };
+
+    const route = (node) => (node.type === 'form'
+      ? `#/form/${encodeURIComponent(node.stageId)}/${encodeURIComponent(node.part)}`
+      : `#/${node.type}/${encodeURIComponent(node.part)}`);
+
+    /**
+     * **مشيُ عقدةٍ واحدة بيدٍ عمياء**: ينظر إلى الشاشة ويفعل ما يفعله الطفل، حتى
+     * تُكتَب نجومُها أو ينفد صبرُه — وحينئذٍ يُقال أين وقف.
+     */
+    async function walk(node, budget = 90) {
+      win.location.hash = route(node);
+      await wait(140);
+      const seen = { writes: 0, clicks: 0, cards: 0, material: new Set() };
+      let stuck = null;
+      let lastBoard = null;
+      for (let step = 0; step < budget; step++) {
+        if (starsOf(node.id) > 0) return { done: true, ...seen };
+        const card = doc.querySelector('main .mark-card .btn');
+        if (card) { card.click(); seen.cards++; await wait(80); continue; }
+        const board = doc.querySelector('main .lesson-board--watch');
+        const el = surfaceEl();
+        if (board || !el) {
+          const btn = doc.querySelector('main .foot .btn, main .row .btn, main .screen-card .btn');
+          if (!btn) { stuck = 'لا لوحَ ولا زرَّ يمضي به'; break; }
+          btn.click();
+          seen.clicks++;
+          await wait(80);
+          continue;
+        }
+        const item = shownRef(el);
+        if (!item) { stuck = 'مادّةٌ على اللوح لا يعرفها المنهج'; break; }
+        seen.material.add(item.name);
+        // **ومن أخطأ يُعيد من أوّلها** (`METHOD.md §٣.٤`: إعادةٌ بلا حدّ): لوحٌ بقي
+        // بعد كتابةٍ تامّة يعني أنّ جزءاً لم يُستوفَ — والطفلُ حينئذٍ يضغط «أعِدْ»
+        // ويبدأ من رأس المادّة، لا يُكمل على تقدّمٍ نصفِ مكتوب.
+        if (el === lastBoard) {
+          const redo = [...doc.querySelectorAll('main .foot .btn')]
+            .find((b) => b.textContent.includes('أَعِدْ') || b.textContent.includes('أعِدْ'));
+          if (redo) { redo.click(); seen.clicks++; await wait(60); }
+        }
+        lastBoard = el;
+        await writeRef(el, item.ref);
+        seen.writes++;
+        await wait(60);
+      }
+      const main = doc.querySelector('main');
+      const where = `صنفُ الشاشة «${main?.className || 'لا شاشة'}»`
+        + ` · خطوةٌ ${doc.querySelectorAll('main .dot--done').length}/${doc.querySelectorAll('main .dot').length}`
+        + ` · وحدةٌ ${doc.querySelector('main .unit--now')?.getAttribute('aria-label') || '—'}`
+        + ` · أخطاءٌ ${Object.keys(JSON.parse(win.localStorage.getItem('uktub.progress.v1') || '{}').faults || {}).slice(-4).join('، ')}`;
+      return { done: starsOf(node.id) > 0, stuck: (stuck || 'نفد الصبرُ قبل تمامها') + ' — ' + where, ...seen };
+    }
+
+    // ————— الرحلةُ عقدةً عقدة، من أوّلها إلى آخرها —————
+    head('§١ العبور: كلُّ عقدةٍ تُفتَح بما قبلها وتُتَمّ بشاشتها');
+
+    const blocked = [];
+    const byKind = {};
+    let writes = 0;
+    // **والقفلُ يُقاس بالمشي لا بالدعوى**: العقدةُ تُفتَح لأنّ ما قبلها تَمّ فعلاً،
+    // ولا نجمةَ تُزرَع — فانسدادٌ في أيّها يقف الرحلةَ عنده ويُقال باسمه.
+    for (const node of nodes) {
+      const res = await walk(node);
+      writes += res.writes;
+      byKind[node.type] = (byKind[node.type] || 0) + (res.done ? 1 : 0);
+      if (!res.done) {
+        blocked.push(`${node.id} (${node.type}): ${res.stuck}`);
+        note(`✗ ${node.id}: ${res.stuck} — كتاباتٌ ${res.writes} · نقراتٌ ${res.clicks}`
+          + ` · مادّةٌ مُشِيت: ${[...res.material].join('، ') || 'لا شيء'}`);
+        break;      // انسدادٌ واحد يكفي: ما بعده لا يُفتَح أصلاً
+      }
+    }
+
+    ok(blocked.length === 0,
+      blocked.length ? `**انسدادٌ في الرحلة**: ${blocked.join(' · ')}`
+        : `الرحلةُ عُبرت كاملةً — ${nodes.length} عقدةً بلا انسداد (${writes} كتابةً على اللوح)`);
+    note(`المنجَزُ بنوعه: ${Object.entries(byKind).map(([k, n]) => `${k} ${n}`).join(' · ')}`);
+
+    // ————— §٢ الختام: بوابةُ الختام عُبرت والرحلةُ تمّت —————
+    head('§٢ الختام — بوابةُ ٣ وأثرُها في تقدّم الطفل');
+
+    ok(starsOf(last.id) > 0, `بوابةُ الختام مجتازةٌ بنجومها (${starsOf(last.id)})`);
+
+    const stored = JSON.parse(win.localStorage.getItem('uktub.progress.v1') || '{}');
+    const skills = stored.skills || {};
+    const keys = Object.keys(skills);
+    const kindsWritten = new Set(keys.map((k) => k.split('|')[2]));
+    ok(kindsWritten.has('trace') && kindsWritten.has('free')
+      && kindsWritten.has('copy') && kindsWritten.has('dictate'),
+      `وأنواعُ القياس الأربعةُ كُتبت في الرحلة (${[...kindsWritten].join('، ')})`);
+    const forms = new Set(keys.map((k) => k.split('|')[1]));
+    ok(forms.has('كلمة') && forms.has('جملة'),
+      `ومحاورُ الوحدات فيها الكلمةُ والجملةُ معاً (${[...forms].join('، ')})`);
+    ok(keys.length > 0 && Object.values(skills).every((s) => s.box > 0),
+      `وكلُّ مهارةٍ قِيست ارتفع صندوقُها (${keys.length} مهارة) — فالمراجعةُ تجدولها`);
+
+    const doneNodes = nodes.filter((n) => starsOf(n.id) > 0).length;
+    ok(doneNodes === nodes.length,
+      `وتقدّمُ الطفل يقول إنّ الرحلةَ تمّت (${doneNodes}/${nodes.length} عقدة)`);
+
+    // ————— §٣ الخفوتُ والإملاء: عدّادُ الأداء المتباعد يعمل —————
+    head('§٣ الخفوتُ ثم الإملاء — بالعدّاد المتباعد لا بالجلسة');
+
+    const fadeNode = nodes.find((n) => n.type === 'fade');
+    const fade = await import('/js/fade.js');
+    const word = (fadeNode.words || [])[0];
+    const reads = stored.reads || {};
+    // **وتقدّمُ الرحلة يُستعاد في هذه الصفحة قبل أن تكتب فيه**: مَن كتبه هو التطبيقُ
+    // في إطاره، ولهذه الصفحة نسختُها من وحدة التقدّم — فلولا الاستعادةُ لكتبت فوقه
+    // حالةً فارغة. وبابُ الاستعادة بابُ التطبيق نفسِه (`restore`) لا سطرٌ يُخترَع.
+    ok(progress.restore({ state: stored }) === true,
+      'وتقدّمُ الرحلة يُقرأ في هذه الصفحة كما كتبه التطبيق (نسخةٌ احتياطية تُستعاد)');
+    ok(Boolean(reads[word]) && reads[word].n === 1,
+      `كلمةُ «${word}» صعدت درجةً واحدة في عدّاد الخفوت بعد إصابةٍ نظيفة (${reads[word]?.n ?? 0})`);
+    ok(fade.levelOf(word) === 0 && fade.HITS_PER_STEP === 3,
+      'ودرجةُ خفوتها **لم تتغيّر بعدُ** — ثلاثُ إصاباتٍ متباعدة تُخفي درجةً لا إصابةٌ واحدة');
+    // **ويومٌ واحد لا يزيد العدّاد إلا مرة**: تُعاد الكلمةُ في اليوم نفسِه فلا تصعد
+    const again = progress.recordRead(word);
+    ok(again === false, 'وإعادةُ الكلمة في اليوم نفسِه لا تزيد العدّاد — «متباعدة» شرطٌ بنيويّ');
+
+    // وبثلاث إصاباتٍ متباعدة (يومٌ لكلٍّ) تخفت درجةً، وبتسعٍ تصير إملاءً صرفاً
+    const day = progress.dayNumber();
+    for (let i = 1; i <= 8; i++) progress.recordRead(word, day + i);
+    ok(fade.levelOf(word) === fade.VEIL_STEPS,
+      `وبتسع إصاباتٍ متباعدة تبلغ الكلمةُ **الإملاءَ السماعيّ الصرف** (درجة ${fade.levelOf(word)}/${fade.VEIL_STEPS})`);
+    const ref = WORD_PATHS[word];
+    ok(fade.veilOf(ref, fade.VEIL_STEPS) === pen.partsOf(ref).length
+      && fade.veilOf(ref, 0) === 0,
+      'وفي الدرجة الأخيرة يُحجَب النموذجُ كلُّه — وفي الأولى لا يُحجَب منه شيء');
+    ok(fade.modeOf(fade.VEIL_STEPS) === 'free' && fade.kindOf(fade.VEIL_STEPS) === 'dictate',
+      'وقياسُها حينئذٍ **إملاء** لا نسخ — العدّادُ نفسُه يفصل بينهما');
+
+    // **والكشفُ تراجعٌ درجةً لا تصفير**
+    const before = progress.readCount(word);
+    const after = progress.revealRead(word);
+    ok(after === before - 1,
+      `والكشفُ تراجعٌ **درجةً واحدة** لا تصفيراً (${before} ← ${after})`);
+
+    // ————— §٤ الشاشتان الجديدتان في المتصفّح —————
+    head('§٤ الشاشتان: خفوتٌ وجُمَل — كما يراهما الطفل');
+
+    await open();          // ليقرأ التطبيقُ عدّادَ الخفوت الذي كُتب في §٣
+    win.location.hash = route(fadeNode);
+    await wait(400);
+    ok(Boolean(doc.querySelector('main.lesson-fade')),
+      `شاشةُ الخفوت تفتح بعنوانها (${route(fadeNode)})`);
+    ok(Boolean(doc.querySelector('main .veil-dots .veil-dot')),
+      'وتقول درجةَ النموذج بنقاطٍ تنطفئ — لا رقمَ عقوبةٍ ولا مؤقّت');
+    ok(Boolean(doc.querySelector('.lesson-board .pen-baseline')),
+      'ولوحُها يرسم سطرَ الكرّاسة من الكلمة نفسِها');
+    const veiled = doc.querySelectorAll('main .pen-model .pen-veiled').length;
+    ok(veiled > 0,
+      `وأجزاءُ الكلمة المخفوتة محجوبةٌ عن العين (${veiled} جزءاً) — والحَكَمُ لا يعلم بالحجاب`);
+    const earBtn = [...doc.querySelectorAll('main .foot .btn')]
+      .find((b) => b.textContent.includes('اسْمَعْ'));
+    ok(Boolean(earBtn) && earBtn.getBoundingClientRect().height >= 64,
+      `وزرُّ «اسْمَعْ» بابُها الأوّلُ وهدفُ لمسٍ ≥ ٦٤ بكسل (${
+        Math.round(earBtn?.getBoundingClientRect().height || 0)})`);
+
+    const sentNode = nodes.find((n) => n.type === 'sentence');
+    win.location.hash = route(sentNode);
+    await wait(400);
+    ok(Boolean(doc.querySelector('main.lesson-sentence')),
+      `وشاشةُ الجمل تفتح بعنوانها (${route(sentNode)})`);
+    ok(doc.querySelectorAll('main .dots .dot').length === 2,
+      'وحلقتُها خطوتان: نسخٌ ثم إملاء — نصُّ المرحلة ١٤ حرفاً');
+    const sentence = (sentNode.sentences || [])[0];
+    const sref = WORD_PATHS[sentence];
+    const seat = Number(doc.querySelector('.pen-baseline')?.getAttribute('y1'));
+    ok(Boolean(sref) && Math.abs(seat - sref.line) < 0.5,
+      `وسطرُ الجملة عينُ سطرها في مسارها (${seat} = ${sref?.line}) — «${sentence}»`);
+    const xs = sref.strokes.flatMap((s) => s.points).map((p) => p[0]);
+    ok(Math.max(...xs) - Math.min(...xs) > 500,
+      `والجملةُ تمتدّ على سطرها امتدادَ كلماتها (${Math.round(Math.max(...xs) - Math.min(...xs))} وحدة)`);
+
+    ok(doc.documentElement.scrollWidth <= win.innerWidth + 1,
+      `ولا فائضَ أفقيّ (${doc.documentElement.scrollWidth} ≤ ${win.innerWidth})`);
+    ok(errors.length === 0,
+      errors.length ? `أخطاءُ جافاسكربت: ${errors.slice(0, 4).join(' · ')}` : 'لا أخطاء جافاسكربت');
+  } catch (e) {
+    ok(false, `استثناء: ${e && e.message}`);
+  }
+  await send();
+})();
+</script>
+</body>
+</html>

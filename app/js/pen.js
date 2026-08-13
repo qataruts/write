@@ -177,6 +177,14 @@ export function pointAt(poly, len) {
  * **وهو مشتركٌ بين اليد والحَكَم**: الشاشةُ ترسم ما يُحكَم عليه بعينه، والعدّةُ
  * تُعيد الحكمَ على المسار المسجَّل فتخرج بالنتيجة نفسها — فلا يفترق ما رآه الطفلُ
  * عمّا فُحص. ومعه يبقى عددُ النقاط صغيراً على آيباد ٦ (`METHOD.md §٣.٦`).
+ *
+ * **وآخِرُ نقطةٍ موضعُ رفع القلم فلا تُطرَح** (كشفه قياسُ الجمل، الجلسة ٩): كان
+ * الطرحُ يبلع ذيلَ الحركة حتى **خطوةٍ كاملة** — فمن مشى الجزءَ كلَّه يُقرأ له تقدّمٌ
+ * أنقصُ بستّ وحدات. ولا يظهر ذلك على حرفٍ يملأ صندوقَه (ستٌّ من خمسمئة = ١٪)،
+ * **ويقتل ضربةَ العلامة في السطر**: شولةُ سكونٍ في جملةٍ طولُها ٣٩ وحدة تُقرأ تغطيتُها
+ * ٠٫٨٦ دون عتبة ٠٫٨٨ **فتُردّ كتابتُها الصحيحة قِصَراً** (قِيس على «السَّرِيرُ نَظِيفْ»)
+ * — ويقع في يد طفلٍ حقيقية كما يقع في الحَكَم، فالتبسيطُ واحد. **ولا عتبةَ جديدة**:
+ * ما بعد آخر نقطةٍ محفوظة ليس ضجيجَ يدٍ بل **نهايةُ حركتها**.
  */
 export const MIN_STEP = 6;
 export function simplify(points, minStep = MIN_STEP) {
@@ -184,7 +192,11 @@ export function simplify(points, minStep = MIN_STEP) {
   for (const p of points) {
     if (!out.length || dist(out[out.length - 1], p) >= minStep) out.push([p[0], p[1]]);
   }
-  if (points.length && out.length === 1 && points.length > 1) out.push(points[points.length - 1]);
+  const last = points[points.length - 1];
+  if (last && out.length > 1 && (out[out.length - 1][0] !== last[0] || out[out.length - 1][1] !== last[1])) {
+    out.push([last[0], last[1]]);
+  }
+  if (points.length && out.length === 1 && points.length > 1) out.push([last[0], last[1]]);
   return out;
 }
 
@@ -737,6 +749,19 @@ const pathD = (points) => points
 export const MODES = { GUIDED: 'guided', FAINT: 'faint', FREE: 'free' };
 
 /**
+ * **صندوقُ المادّة — مربّعٌ للحرف والكلمة، وسطرٌ عريضٌ للجملة** (حكمُ المدير، ١٣
+ * أغسطس ٢٠٢٦): «كلُّ شكلٍ يملأ صندوقَه» (قرارُ الجلسة ٢) يسري على الجملة كما سرى
+ * على الحرف — **وصندوقُ السطر سطر**، فلا يُحشَر في مربّعٍ يخنق مقياسَ حروفه.
+ * والمسافاتُ في المحرّك **مطلقةٌ على الشبكة كما هي**، وإنما يتّسع الصندوقُ فتكبر
+ * المادّةُ فيه. ومَن لا صندوقَ في مساره فشبكتُه `١٠٠٠×١٠٠٠` كما كانت.
+ */
+export const boxOf = (ref) => {
+  const box = ref?.box;
+  return Array.isArray(box) && box.length === 2 && box[0] > 0 && box[1] > 0
+    ? [box[0], box[1]] : [GRID, GRID];
+};
+
+/**
  * **شارةُ الشكل: المسارُ المرجعيّ مرسوماً ساكناً** — بلا لوحٍ ولا حَكَمٍ ولا حبرِ طفل.
  *
  * تحتاجها الشاشاتُ حيث يُذكَر شكلٌ ولا يُكتب: شريطُ حروف محطة الأشكال، وصفُّ
@@ -749,8 +774,9 @@ export const MODES = { GUIDED: 'guided', FAINT: 'faint', FREE: 'free' };
  * اللوحُ نفسُه، فلا صورتان لشكلٍ واحد.
  */
 export function refGlyph(ref, className = 'ref-glyph') {
+  const [bw, bh] = boxOf(ref);
   const svg = sv('svg', {
-    class: className, viewBox: `0 0 ${GRID} ${GRID}`, 'aria-hidden': 'true',
+    class: className, viewBox: `0 0 ${bw} ${bh}`, 'aria-hidden': 'true',
   });
   for (const part of partsOf(ref)) {
     if (part.kind === 'stroke') svg.append(sv('path', { class: 'ref-stroke', d: pathD(part.poly.pts) }));
@@ -768,20 +794,25 @@ export function refGlyph(ref, className = 'ref-glyph') {
  * @param {number|object} [config.tolerance] سماحةُ المحطة
  * @param {boolean} [config.bounds] يرسم **ممرَّ السماحة** حول المسار (محطةُ التحكّم)
  * @param {number} [config.baseline] **سطرُ الكرّاسة** يُرسم تحت المادّة (محطةُ النسخ)
+ * @param {number} [config.veil] **خفوتُ النموذج**: كم جزءاً من آخر الأجزاء يُخفى (محطةُ الخفوت)
  * @param {Function} [config.onFault] خطأٌ وقع — للقياس ولإرشاد الشاشة
  * @param {Function} [config.onPart] جزءٌ استُوفي
  * @param {Function} [config.onDone] اكتملت الأجزاء — ومعها حصيلةُ المحاولة
  */
 export function penSurface(config) {
   const {
-    ref, mode = MODES.GUIDED, tolerance, bounds = false, baseline = null,
+    ref, mode = MODES.GUIDED, tolerance, bounds = false, baseline = null, veil = 0,
     onFault, onPart, onDone, label = 'لوحُ الكتابة',
   } = config;
 
+  const [bw, bh] = boxOf(ref);
   const box = document.createElement('div');
-  box.className = `pen-box pen-box--${mode}`;
+  // **واللوحُ يتبع صندوقَ مادّته**: مربّعٌ للحرف والكلمة، **وسطرٌ للجملة** — يُعلَن
+  // صنفاً ونسبةَ أبعادٍ معاً، فيرسم المتصفّحُ سطراً حيث المادّةُ سطر.
+  box.className = `pen-box pen-box--${mode}${bw !== bh ? ' pen-box--line' : ''}`;
+  if (bw !== bh) box.style.setProperty('--pen-ratio', String(bw / bh));
   const svg = sv('svg', {
-    class: 'pen-surface', viewBox: `0 0 ${GRID} ${GRID}`, role: 'img', 'aria-label': label,
+    class: 'pen-surface', viewBox: `0 0 ${bw} ${bh}`, role: 'img', 'aria-label': label,
   });
   /**
    * **سطرُ الكرّاسة — من المادّة لا من زينة** (محطةُ النسخ، `METHOD.md §٤`: «الجلوسُ
@@ -792,7 +823,7 @@ export function penSurface(config) {
   const rule = sv('g', { class: 'pen-rule', 'aria-hidden': 'true' });
   const seat = baseline ?? ref?.line ?? null;
   if (seat != null) {
-    rule.append(sv('line', { class: 'pen-baseline', x1: 0, y1: seat, x2: GRID, y2: seat }));
+    rule.append(sv('line', { class: 'pen-baseline', x1: 0, y1: seat, x2: bw, y2: seat }));
   }
   const fence = sv('g', { class: 'pen-bounds' });      // ممرُّ السماحة (اختياريّ)
   const model = sv('g', { class: 'pen-model' });
@@ -801,6 +832,17 @@ export function penSurface(config) {
   const inkLayer = sv('g', { class: 'pen-ink' });
   svg.append(rule, fence, model, trailed, guide, inkLayer);
   box.append(svg);
+
+  /**
+   * **خفوتُ النموذج — عرضٌ لا حكم** (`METHOD.md §٤` المرحلة ١٣): يُخفى من آخر
+   * الأجزاء ما تقول به المحطةُ، فيبقى **مبدأُ الكلمة** مرئياً ويُستدعى ما بعده من
+   * الذاكرة الحركية — والنقاطُ والعلاماتُ آخِرُ الأجزاء فتخفت أوّلاً.
+   *
+   * **والحَكَمُ لا يعلم بالخفوت**: الشروطُ الأربعة على المسار كاملاً كما هي — «النموذجُ
+   * هو المقياس» (§٣.٢) قاعدةٌ على ما يُحكَم به، والخفوتُ حجابٌ على العين لا نقصٌ في
+   * المادّة. فما يُطلَب من الطفل هو الكلمةُ نفسُها في كل درجة.
+   */
+  const hidden = Math.max(0, Math.min(veil, partsOf(ref).length));
 
   const trial = createTrial(ref, {
     tolerance,
@@ -813,7 +855,8 @@ export function penSurface(config) {
   // وهو **مؤشّرُ التقدّم الحركيّ** (مخالفةُ اكتب المعلَنة لاقرأ، `METHOD.md §٥`).
   const modelPaths = [];
   const trailPaths = [];
-  for (const part of parts) {
+  const veiled = (i) => i >= parts.length - hidden;
+  for (const [order, part] of parts.entries()) {
     if (part.kind === 'stroke') {
       const d = pathD(part.poly.pts);
       /**
@@ -830,12 +873,14 @@ export function penSurface(config) {
         'stroke-dasharray': part.poly.len,
         'stroke-dashoffset': part.poly.len,
       });
+      if (veiled(order)) { shape.classList.add('pen-veiled'); trail.classList.add('pen-veiled'); }
       model.append(shape);
       trailed.append(trail);
       modelPaths.push(shape);
       trailPaths.push(trail);
     } else {
       const mark = sv('circle', { class: 'pen-dot', cx: part.at[0], cy: part.at[1], r: 34 });
+      if (veiled(order)) mark.classList.add('pen-veiled');
       model.append(mark);
       modelPaths.push(mark);
       trailPaths.push(null);
@@ -906,11 +951,12 @@ export function penSurface(config) {
   let inkPath = null;
   let inkPoints = [];
 
+  /** إحداثيُّ الإصبع على شبكة المادّة — **بصندوقها هي** لا بمربّعٍ مفترَض. */
   function toGrid(event) {
-    const size = Math.min(rect.width, rect.height) || 1;
-    const ox = rect.left + (rect.width - size) / 2;
-    const oy = rect.top + (rect.height - size) / 2;
-    return [(event.clientX - ox) / size * GRID, (event.clientY - oy) / size * GRID];
+    const unit = Math.min(rect.width / bw, rect.height / bh) || 1;
+    const ox = rect.left + (rect.width - bw * unit) / 2;
+    const oy = rect.top + (rect.height - bh * unit) / 2;
+    return [(event.clientX - ox) / unit, (event.clientY - oy) / unit];
   }
 
   /** الرسمُ والحكمُ في `requestAnimationFrame` — لا في كل حدثِ حركة (`METHOD.md §٣.٦`). */
@@ -966,6 +1012,24 @@ export function penSurface(config) {
     active = null;
     listen(false);
     if (frame) { cancelAnimationFrame(frame); pump(); }
+    /**
+     * **وموضعُ رفع القلم يُقرأ ولا يُطرَح** (الجلسة ٩، نظيرُ ما في `simplify`):
+     * مرشِّحُ الخطوة الصغرى في `pump` يبلع آخرَ ما مشاه القلمُ إن كان دون ستّ وحدات
+     * من آخر نقطةٍ محفوظة — **فيُقرأ للطفل تقدّمٌ أنقصُ ممّا مشى**. ولا يظهر على حرفٍ
+     * يملأ صندوقَه، **ويقف بالطفل على ضربة العلامة في السطر**: شولةٌ طولُها بضعُ
+     * وحداتٍ وثلاثون تُقرأ تغطيتُها دون العتبة فتُردّ كتابتُها الصحيحة قِصَراً، ثم
+     * تُقاس ضربتُه التالية على جزءٍ لم يُستوفَ فتتوالى الشكاوى (`order`/`start-far`)
+     * **فينسدّ الطريق**. وأمسكه فحصُ الرحلة عند «وَاسِعَةْ نَظِيفْ».
+     *
+     * **ولا عتبةَ جديدة**: نقطةُ الرفع موضعٌ حقيقيّ مشاه القلمُ، وحقُّها أن تُقرأ.
+     */
+    const end = toGrid(event);
+    const tip = inkPoints[inkPoints.length - 1];
+    if (tip && dist(tip, end) > 0) {
+      inkPoints.push(end);
+      trial.move(end[0], end[1]);
+      if (inkPath) inkPath.setAttribute('d', pathD(inkPoints));
+    }
     const result = trial.up();
     if (result?.ok) {
       onPart?.(result);
@@ -1016,6 +1080,8 @@ export function penSurface(config) {
       const elapsed = (now - started) / 1000;
       const walked = Math.min(current.poly.len, elapsed * SPEED);
       trailPaths[part].setAttribute('stroke-dashoffset', String(current.poly.len - walked));
+      // ورأسُ القلم يغيب حيث غاب النموذج — وإلا كشف العرضُ ما أخفاه الخفوت
+      head.classList.toggle('pen-veiled', veiled(part));
       const { at } = pointAt(current.poly, walked);
       head.setAttribute('cx', at[0]);
       head.setAttribute('cy', at[1]);

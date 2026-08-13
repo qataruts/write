@@ -44,7 +44,7 @@ const REQUESTED_BY = process.env.QUEUE_BY || 'session-5';
 const ENGINE = new Set(['audio.js']);          // محرّكُ النطق لا مصدرَ نصّ
 
 /** الأضيقُ أولاً: نصٌّ ورد في موضعين يأخذ فئتَه الأضيق. */
-const CATEGORY_ORDER = ['letter_name', 'word_bank', 'ui'];
+const CATEGORY_ORDER = ['letter_name', 'word_bank', 'sentence_bank', 'ui'];
 
 const read = (url) => readFileSync(url, 'utf8');
 
@@ -68,6 +68,9 @@ async function declaredTexts() {
   // ١ب) **ومفاتيحُ أصوات الكلمات** (الجلسة ٨): منسوخةٌ من بنك اقرأ كأسماء الحروف
   // سواءً — فلا تدخل القائمةَ أبداً، وفئتُها تقول من أين جاءت.
   const wordSays = new Set(curriculum.SPOKEN_WORDS || []);
+  // ١ج) **ومفاتيحُ أصوات الجمل** (الجلسة ٩): منسوخةٌ من سلّم اقرأ كأخواتها — فالجملةُ
+  // تُملى بالصوت الذي تعلّمها به الطفلُ قراءةً، ولا تدخل القائمةَ فتُولَّد ثانيةً.
+  const sentenceSays = new Set(curriculum.SPOKEN_SENTENCES || []);
 
   // ٢) ما تُعلنه الشاشاتُ الناطقة — وفئتُه من موضعه: اسمُ حرفٍ أم تعليمةُ شاشة
   // (والإعلانُ تصريحٌ أو إعادةُ تصدير — والعلّةُ في `check_speech.mjs` عند `DECLARES`)
@@ -79,6 +82,7 @@ async function declaredTexts() {
     for (const text of mod.SPOKEN) {
       if (names.has(text)) add(text, 'letter_name');
       else if (wordSays.has(text)) add(text, 'word_bank');
+      else if (sentenceSays.has(text)) add(text, 'sentence_bank');
       else if (screen.has(text)) add(text, 'ui');
       else errors.push(`نصٌّ في «${file}» لا اسمَ حرفٍ ولا قيمةَ في \`SAY\`: «${text}»`);
     }

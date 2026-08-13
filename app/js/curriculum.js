@@ -1287,6 +1287,13 @@ export const pathOf = (letter, form = FORMS.ISOLATED) => PATHS[letter]?.[form] |
  */
 export const SPOKEN_WORDS = [...new Set(Object.values(WORDS).map((w) => w.say).filter(Boolean))];
 
+/**
+ * **ومفاتيحُ أصوات الجمل** — نظيرُها للسطر (الجلسة ٩، المرحلة ١٤): مصدرٌ واحد لشاشة
+ * الجمل ولمراجعتها، وفراغُه يعني «تُنسَخ ولا تُملى» (`METHOD.md §٧`).
+ */
+export const SPOKEN_SENTENCES = [...new Set(
+  Object.values(SENTENCES).map((s) => s.say).filter(Boolean))];
+
 /** بيانُ كلمةٍ من البنك — `null` إن لم تكن في المنهج. */
 export const wordInfo = (text) => WORDS[text] || null;
 

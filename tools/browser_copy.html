@@ -113,12 +113,16 @@ function watchNetwork(win) {
     // ————— إصبعٌ على اللوح —————
     let pointerId = 1;
     const surfaceEl = () => doc.querySelector('.pen-surface');
+    // **وصندوقُ اللوح يُقرأ من اللوح نفسِه** (`viewBox`، الجلسة ٩): سطرُ المسافة
+    // صندوقُه سطرٌ عريض بحكم المدير، فلا يُفترَض مربّعٌ في يد الفحص.
     const toClient = ([x, y]) => {
-      const rect = surfaceEl().getBoundingClientRect();
-      const size = Math.min(rect.width, rect.height);
+      const el = surfaceEl();
+      const rect = el.getBoundingClientRect();
+      const vb = el.viewBox.baseVal;
+      const unit = Math.min(rect.width / vb.width, rect.height / vb.height);
       return {
-        clientX: rect.left + (rect.width - size) / 2 + (x / 1000) * size,
-        clientY: rect.top + (rect.height - size) / 2 + (y / 1000) * size,
+        clientX: rect.left + (rect.width - vb.width * unit) / 2 + x * unit,
+        clientY: rect.top + (rect.height - vb.height * unit) / 2 + y * unit,
       };
     };
     const fire = (type, point, id) => {

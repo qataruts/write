@@ -110,7 +110,8 @@ def warmups_module() -> tuple:
 
 
 def word_material() -> list:
-    """مادّةُ النسخ التي يطلبها المنهج — وصلاتُ محطة الوصل وكلماتُ جدولها."""
+    """مادّةُ الكتابة التي يطلبها المنهج — وصلاتُ محطة الوصل وكلماتُ جدولها،
+    **وجملُ محطة الجمل** (الجلسة ٩: تُنسَخ ثم تُملى كما تُنسَخ الكلمة وتُملى)."""
     if not CURRICULUM.exists():
         return []
     src = CURRICULUM.read_text(encoding="utf-8")
@@ -119,10 +120,12 @@ def word_material() -> list:
     out = list(json.loads(words.group(1))) if words else []
     if stages:
         for stage in json.loads(stages.group(1)):
-            if stage.get("kind") != "join":
-                continue
-            for node in stage.get("nodes", []):
-                out += node.get("joins", []) + node.get("words", [])
+            if stage.get("kind") == "join":
+                for node in stage.get("nodes", []):
+                    out += node.get("joins", []) + node.get("words", [])
+            elif stage.get("kind") == "sentence":
+                for node in stage.get("nodes", []):
+                    out += node.get("sentences", [])
     return sorted(set(out))
 
 
@@ -395,6 +398,9 @@ WORD_HEADER = """\
 // `curriculum.js` (وهي بنكُ اقرأ)، ومسارُ كلِّ حرفٍ فيها **مسارُه القانونيُّ بعينه**
 // — المؤلَّفُ بإيماءته المحكومة بأحكام المالك الخمسة — مُنزَّلاً على جسده في خيال
 // الكلمة المُشكَّل، والوصلُ يُدمَج حيث يبلغ خروجُ الحرف مقعدَ ما بعده (حكم ٤)،
+// **وصندوقُ المادّة يسافر معها** (`box`، حكمُ المدير ١٣ أغسطس ٢٠٢٦): مربّعٌ للكلمة
+// **وسطرٌ عريضٌ للجملة** — «كلُّ شكلٍ يملأ صندوقَه» وصندوقُ السطر سطر؛ ومَن لا `box`
+// له فشبكتُه ١٠٠٠×١٠٠٠ كما كانت.
 // والعلاماتُ ضرباتٌ بإيماءات قانونيّاتها (منظومة حكم ٥)، والنقاطُ بعد جسم الكلمة
 // كلِّه. و`MARK_PATHS` شاراتُ العلامات لبطاقات تعريفها — من المسار المؤلَّف نفسِه.
 
@@ -414,6 +420,9 @@ def write_words(words: dict, glyphs: dict, meta: dict) -> str:
     texts = list(words.items())
     for wi, (text, ref) in enumerate(texts):
         lines.append(f'  "{text}": {{')
+        # **صندوقُ المادّة**: يسقط إن كان الشبكةَ المربّعة، ويُكتب للسطر العريض
+        if ref.get("box"):
+            lines.append(f'   "box": [{num(ref["box"][0])}, {num(ref["box"][1])}],')
         if ref.get("line") is not None:
             lines.append(f'   "line": {num(ref["line"])},')
         # **سماحةُ الكلمة تسافر معها**: مقياسُ حروفها فيها — تقرؤه شاشةُ النسخ

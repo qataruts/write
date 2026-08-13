@@ -128,10 +128,20 @@ const toastShown = () => {
     const awaiting = new Set([...(mainSrc.match(/const SCREENS = \{(.*?)\n\};/s)?.[1] ?? '')
       .matchAll(/(\w+):\s*'/g)].map((m) => m[1]));
     const nodes = progress.allNodes();
+    /**
+     * **ويومَ لا يبقى نوعٌ بلا شاشة يسقط موضوعُ §١ ولا يسقط الحارس** (الجلسة ٩):
+     * `SCREENS` فرغ — كُتبت شاشتا الخفوت والجمل فلم تبقَ في الرحلة محطةٌ مفتوحةٌ
+     * بلا شاشة، **وذلك خبرٌ سارّ لا فشل**. فتُعلَن §١ ساقطةَ الموضوع بسببها، ويبقى
+     * **§٢ حيّاً**: ابتلاعُ الرسالةِ للنقرة (بلاغُ الميدان الثاني) لا يتعلّق بشاشةٍ
+     * لم تُبنَ بل بالخريطة نفسِها. **ويستيقظ §١ من نفسه** يومَ يدخل نوعٌ جديد.
+     *
+     * وحينئذٍ يُوقَف الطفلُ **عند أوّل محطة وصل** بدل ملء الرحلة كلِّها: فتبقى على
+     * الخريطة عقدٌ مقفلة (وهي مادّةُ §٢) ولا تُدَّعى رحلةٌ تامّة.
+     */
     const frontier = nodes.findIndex((n) => awaiting.has(n.type));
-    for (const node of nodes.slice(0, frontier < 0 ? nodes.length : frontier)) {
-      progress.setStars(node.id, 3);
-    }
+    const stop = frontier >= 0 ? frontier
+      : Math.max(1, nodes.findIndex((n) => n.type === 'join'));
+    for (const node of nodes.slice(0, stop)) progress.setStars(node.id, 3);
 
     frame.src = '/';
     await new Promise((r) => frame.addEventListener('load', r, { once: true }));
@@ -152,11 +162,17 @@ const toastShown = () => {
     log.append(Object.assign(document.createElement('h3'), { textContent: '§١ جوابُ الجبهة' }));
 
     const next = progress.nextNode();
+    const card = doc.querySelector('main.map .continue:not(.continue--review)');
+    if (!awaiting.size) {
+      ok(true, '○ §١ ساقطةُ الموضوع اليوم: **لا نوعَ في الرحلة بلا شاشة** '
+        + '(`SCREENS` فارغ) — فلا جبهةَ تنتظر جواباً، ويستيقظ البابُ يومَ يدخل نوعٌ جديد');
+      ok(Boolean(card) && Boolean(next),
+        `وبطاقةُ «تابع من هنا» على الخريطة تشير إلى محطةٍ مبنيّة (${next && next.type})`);
+    } else {
     ok(next && awaiting.has(next.type),
       `جبهةُ الطفل محطةٌ لم تُبنَ شاشتُها بعد (${next && next.type}/${next && next.part})`
       + ' — وهي الحالُ التي وقف عندها الميدان');
 
-    const card = doc.querySelector('main.map .continue:not(.continue--review)');
     ok(Boolean(card), 'وبطاقةُ «تابع من هنا» على الخريطة');
 
     // (١) البطاقة: هزّةٌ ورسالةٌ ولا انتقال
@@ -188,6 +204,7 @@ const toastShown = () => {
     ok(hashSaid.includes('قَرِيبًا'),
       `والعنوانُ المكتوب `+ `#/${next.type}/… يجيب كذلك: «${hashSaid || 'لا شيء'}»`);
     ok(Boolean(doc.querySelector('main.map')), 'ويردّه إلى خريطته لا إلى بياض');
+    }
 
     // (٤) والمقفلُ يبقى مقفلاً بجوابه هو — فلا يبتلع الجوابُ الجديد جوابَ القفل
     toastEl().hidden = true;

@@ -16,7 +16,7 @@
 
 import * as progress from './progress.js';
 import * as audio from './audio.js';
-import { pathOf, WORDS, SPOKEN_WORDS } from './curriculum.js';
+import { pathOf, WORDS, SENTENCES, SPOKEN_WORDS, SPOKEN_SENTENCES } from './curriculum.js';
 import { WORD_PATHS } from './word_paths.js';
 import { penSurface, MODES } from './pen.js';
 import {
@@ -54,7 +54,7 @@ import { starsForReview } from './progress.js';
  */
 import { LETTER_NAMES } from './lesson.js';
 
-export const SPOKEN = [...LETTER_NAMES, ...SPOKEN_WORDS];
+export const SPOKEN = [...LETTER_NAMES, ...SPOKEN_WORDS, ...SPOKEN_SENTENCES];
 
 /** لوحُ الطفل المعلَّق في تمرين المراجعة — يُطلَق مع كل رسمةٍ ومع مغادرة الشاشة. */
 let live = null;
@@ -103,15 +103,22 @@ function penExercise(item, api, mode) {
 }
 
 /**
- * **تمرينُ نسخِ كلمة** (الجلسة ٨): الكلمةُ تُعرَض من مسارها المرجعيّ وتُنسَخ عليه —
- * وهو عينُ ما تفعله محطةُ النسخ، **بسماحة الكلمة التي في مسارها ومسطرتِها**.
+ * **تمرينُ الكلمة والجملة: نسخاً أو إملاءً** (الجلستان ٨ و٩): المادّةُ تُعرَض من
+ * مسارها المرجعيّ **بسماحتها ومسطرتِها**، فيُنسَخ عليها (`GUIDED`) أو تُملى في صندوقٍ
+ * فارغ (`FREE`) — وهو عينُ ما تفعله محطتاهما.
  *
- * **ولا محتوى جديد**: مادّتُه كلمةٌ في سجلّ الطفل، ونصُّه المنطوق **صوتُها من بنك
+ * **والإملاءُ نسخٌ نُزع نموذجُه**: الحَكَمُ واحد والمسارُ واحد والمسطرةُ واحدة، ولا
+ * يفترق التمرينان إلا فيما **يُرى**. فلا نسختان من الشيفرة تفترقان يوماً في تسجيل
+ * الخطأ أو في السؤال.
+ *
+ * **ولا محتوى جديد**: مادّتُه ممّا في سجلّ الطفل، ونصُّه المنطوق **صوتُها من بنك
  * اقرأ** — فلا نصَّ يُؤلَّف للمراجعة (قيدُ `review.js` الأول).
  */
 function wordExercise(item, api, mode) {
   const ref = WORD_PATHS[item.unit];
   if (!ref) return h('p', { class: 'hint' }, `لا مسارَ لـ«${item.unit}» بعدُ.`);
+  const dictation = mode === MODES.FREE;
+  const sound = WORDS[item.unit]?.say || SENTENCES[item.unit]?.say || null;
 
   const box = h('div', { class: 'exercise' });
   let faults = 0;
@@ -121,19 +128,24 @@ function wordExercise(item, api, mode) {
     mode,
     tolerance: ref.tolerance,
     baseline: ref.line,
-    label: `لوحُ نسخ: ${item.unit}`,
+    label: `${dictation ? 'لوحُ إملاء' : 'لوحُ نسخ'}: ${item.unit}`,
     onFault: (fault) => { faults++; progress.recordFault(item.unit, fault.code); },
     onDone: () => {
-      api.score(item, item.unit, progress.WORD_FORM, faults === 0);
+      // **ومحورُ المهارة محورُها هي** — لا يُعاد تسميتُه هنا، فيرجع إلى صندوقه بعينه
+      api.score(item, item.unit, item.form || progress.WORD_FORM, faults === 0);
       if (faults === 0) api.right(surface.el);
       else api.wrong(surface.el, () => api.next());
     },
   });
   live = surface;
-  box.append(h('p', { class: 'ask' }, 'اُنْسُخِ الكلمة'), surface.el);
+  const sentence = item.form === progress.SENTENCE_FORM;
+  box.append(h('p', { class: 'ask' }, dictation
+    ? `اِسْتَمِعْ ثُمَّ اُكْتُبِ ${sentence ? 'الجملة' : 'الكلمة'}`
+    : `اُنْسُخِ ${sentence ? 'الجملة' : 'الكلمة'}`), surface.el);
   surface.play();
   surface.el.addEventListener('pointerdown', () => surface.stop(), { capture: true });
-  if (WORDS[item.unit]?.say) api.say(WORDS[item.unit].say);
+  // **وفي الإملاء الصوتُ هو السؤال كلُّه** — ولا نموذجَ يُرى (`MODES.FREE`)
+  if (sound) api.say(sound);
   return box;
 }
 
@@ -143,8 +155,9 @@ export const VIEWS = {
   // **والنسخُ امتلأ في الجلسة ٨**: مادّتُه كلماتٌ دُرِّست كتابةً في محطة الوصل،
   // فصار للقياس تمرينٌ يراجعه — وبه تسأل **بوابةُ النسخ** عن أضعف كلماته.
   [progress.KINDS.COPY]: (item, api) => wordExercise(item, api, MODES.GUIDED),
-  // **و`إملاء` معلَّقٌ بعلّته**: نموذجُه يخفت حتى يغيب (`METHOD.md §٤` المرحلة ١٣)،
-  // وشاشتُه للجلسة ٩ — ويومَ تُكتب يمتلئ هذا الموضع ويُطالِب `test_measure` من نفسه.
+  // **والإملاءُ امتلأ في الجلسة ٩**: مادّتُه ما بلغ الخفوتُ به آخرَه (كلمةً) وما
+  // أُمليَ في محطة الجمل (سطراً) — وبه تسأل **بوابةُ الختام** عن أضعف الرحلة كلِّها.
+  [progress.KINDS.DICTATE]: (item, api) => wordExercise(item, api, MODES.FREE),
 };
 
 /**
@@ -165,7 +178,7 @@ export function buildSession({ due = [], size = SESSION_SIZE } = {}) {
     // ونصُّ التمرين المنطوق للتحميل المسبق: **اسمُ الحرف** للحرف، **وصوتُ الكلمة من
     // بنك اقرأ** للكلمة — ولا نصَّ يُؤلَّف للمراجعة (قيدُها الأول).
     const texts = progress.isWordSkill(skill)
-      ? [WORDS[skill.unit]?.say].filter(Boolean)
+      ? [WORDS[skill.unit]?.say || SENTENCES[skill.unit]?.say].filter(Boolean)
       : [letterName(skill.unit)];
     out.push({ ...skill, texts });
   }

@@ -46,17 +46,38 @@ function walk(points, { from = 0, to = 1, step = 12, sway = 0 } = {}) {
   return out;
 }
 const taps = (ref) => ref.dots.flatMap((d) => Array.from({ length: d.count || 1 }, () => [d.at, d.at, d.at]));
-const trace = (ref, opts) => [...ref.strokes.map((s) => walk(s.points, opts)), ...taps(ref)];
+
+/**
+ * **وخطوةُ اليد المصنوعة تتبع سماحةَ من يحكم** (قانونُ الجلسة ٨ في عيّنة المسار،
+ * يسري على عيّنة الحارس كما سرى على عيّنة المولّد): كانت اثنتي عشرة وحدةً لكلِّ
+ * مادّة — وهي أقلُّ من سماحة ارتداد الحرف (٧٠) فلا تُرى، **وأكبرُ من سماحة ارتداد
+ * الجملة** (٩٫٨ بمقياس ٠٫١٤): فتقفز اليدُ المصنوعة أبعدَ ممّا يحتمله الحَكَم فتُقرأ
+ * ارتداداً — عيبُ عيّنةٍ لا عيبُ مسار. **ولا تنزل عن `MIN_STEP`**: تلك أرضيةُ يد
+ * الطفل نفسِها (`pen.js`)، فما دونها ادّعاءُ يدٍ أدقَّ من كلِّ يد.
+ *
+ * **ولا يبدّل هذا حكماً قائماً**: مادّةُ الحروف والكلمات سماحةُ ارتدادها فوق اثنتي
+ * عشرة وحدة فتبقى خطوتُها كما كانت — قِيست الثمانيةُ المسمّاةُ (دَينُ المنعطف) قبله
+ * وبعده فخرجت أرقامُها **بأعيانها**.
+ */
+const stepFor = (ref) => Math.max(pen.MIN_STEP,
+  Math.min(12, pen.TOLERANCE.back * (ref.tolerance || 1)));
+const trace = (ref, opts = {}) => [
+  ...ref.strokes.map((s) => walk(s.points, { step: stepFor(ref), ...opts })), ...taps(ref)];
 
 // ————— ١) التغطية: مادّةُ النسخ كلُّها مؤلَّفة —————
 
 console.log('\n— ١) التغطية: لكلِّ ما يُنسَخ مسارُه —');
 const stage = curriculum.STAGES.find((s) => s.kind === 'join');
 const material = (stage?.nodes || []).flatMap((n) => [...(n.joins || []), ...(n.words || [])]);
-ok(entries.length > 0, `مساراتُ النسخ ${entries.length} — منها ${material.length} تطلبها محطةُ الوصل`);
+/** وجملُ المحطة الأخيرة مادّةٌ كمادّة النسخ (الجلسة ٩) — تُنسَخ ثم تُملى. */
+const sentences = curriculum.STAGES
+  .filter((s) => s.kind === 'sentence')
+  .flatMap((s) => (s.nodes || []).flatMap((n) => n.sentences || []));
+ok(entries.length > 0, `مساراتُ النسخ ${entries.length} — منها ${material.length} تطلبها محطةُ الوصل`
+  + ` و${sentences.length} محطةُ الجمل`);
 
-const missing = material.filter((text) => !words.WORD_PATHS[text]);
-ok(missing.length === 0, 'ولا مادّةَ في محطة الوصل بلا مسار'
+const missing = [...material, ...sentences].filter((text) => !words.WORD_PATHS[text]);
+ok(missing.length === 0, 'ولا مادّةَ في محطتَي الوصل والجمل بلا مسار'
   + (missing.length ? ` — ناقص: ${missing.join('، ')}` : ''));
 
 // **وكلماتُ الجداول كلُّها** (تحتاجها المراجعةُ والبوابةُ والجلستان ٩ و١٠)
@@ -65,7 +86,7 @@ ok(bank.length === 0, `وكلُّ كلمةٍ في جدول المنهج لها �
   + (bank.length ? ` — ناقص: ${bank.join('، ')}` : ''));
 
 // **ولا مسارَ لا مادّةَ له**: ما ليس مادّةً ولا سطرَ مسافةٍ من كلمتين دخيلٌ
-const known = new Set([...material, ...Object.keys(curriculum.WORDS)]);
+const known = new Set([...material, ...sentences, ...Object.keys(curriculum.WORDS)]);
 const alien = entries.map(([text]) => text).filter((text) => !known.has(text)
   && !text.split(' ').every((one) => known.has(one)));
 ok(alien.length === 0, 'ولا مسارَ في الوحدة بلا مادّةٍ تطلبه'
@@ -84,7 +105,8 @@ const wrongVerdict = [];
 for (const [text, ref] of entries) {
   const good = pen.judge(ref, trace(ref));
   // **والمعكوسُ عكسُ القطع كلِّها بترتيبها المقلوب** — كما يكتبها من عكس الحركة
-  const back = pen.judge(ref, [...[...ref.strokes].reverse().map((s) => walk(s.points, { from: 1, to: 0 })), ...taps(ref)]);
+  const back = pen.judge(ref, [...[...ref.strokes].reverse()
+    .map((s) => walk(s.points, { from: 1, to: 0, step: stepFor(ref) })), ...taps(ref)]);
   judged++;
   if (!good.accepted || back.accepted) {
     wrongVerdict.push(`${text}: الصحيحُ ${good.accepted ? 'يُقبَل' : `يُرفَض «${good.primary}»`}`
@@ -96,7 +118,8 @@ ok(wrongVerdict.length === 0, `الكلماتُ ${judged}: الصحيحُ يُق
 
 // **والمعكوسُ مرفوضٌ باتجاهه لا بدقّته**: تُضاعَف السماحةُ فيبقى مرفوضاً
 const stubborn = entries.filter(([, ref]) => !pen.judge(ref,
-  [...[...ref.strokes].reverse().map((s) => walk(s.points, { from: 1, to: 0 })), ...taps(ref)],
+  [...[...ref.strokes].reverse()
+    .map((s) => walk(s.points, { from: 1, to: 0, step: stepFor(ref) })), ...taps(ref)],
   { tolerance: 2 }).accepted);
 ok(stubborn.length === entries.length,
   `والمعكوسُ يُرَدّ ولو ضوعفت السماحة (${stubborn.length}/${entries.length})`);
@@ -105,7 +128,8 @@ ok(stubborn.length === entries.length,
 const dotted = entries.filter(([, ref]) => ref.dots.length);
 ok(dotted.length > 0, `والمنقوطُ من الكلمات ${dotted.length}`);
 const early = dotted.filter(([, ref]) =>
-  pen.judge(ref, [...taps(ref), ...ref.strokes.map((s) => walk(s.points))]).primary !== pen.FAULTS.DOTS_FIRST);
+  pen.judge(ref, [...taps(ref),
+    ...ref.strokes.map((s) => walk(s.points, { step: stepFor(ref) }))]).primary !== pen.FAULTS.DOTS_FIRST);
 ok(early.length === 0, 'والنقطةُ قبل الجسم تُردّ بخطئها في المنقوط كلِّه'
   + (early.length ? ` — سكت عن: ${early.map(([t]) => t).join('، ')}` : ''));
 
@@ -138,6 +162,17 @@ ok(thin.length === 0,
   + ` من أرضية ${worst.floor.toFixed(0)} (×${worst.ratio.toFixed(2)})`
   + (thin.length ? `\n      دون العهد: ${thin.map((r) => `${r.text} ${r.max}<${r.floor.toFixed(0)}`).join(' · ')}` : ''));
 
+// **والدَّينُ يُقسَم صنفين لا يُخلَطان** (مراجعةُ الجلسة ٨: «كلُّ بلاغِ جلسةٍ قادم
+// يذكره استثناءً»): دَينُ **الكلمة المفردة** هو المسمَّى المجدولُ للميدان (الجلسة ١٢)،
+// و**السطرُ** (كلمتان أو جملة) مادّةٌ استُحدثت في الجلسة ٩ وله حسابُه هو — فلا يُخفي
+// أحدُهما الآخر ولا يُعَدّ نموُّ الأول من نموِّ الثاني.
+if (thin.length) {
+  const line = (r) => r.text.includes(' ');
+  console.log(`      · الصنفان: كلمةٌ مفردة ${thin.filter((r) => !line(r)).length}`
+    + ` (${thin.filter((r) => !line(r)).map((r) => r.text).join('، ') || '—'})`
+    + ` · سطرٌ من كلمتين ${thin.filter(line).length}`);
+}
+
 // **وما دون العهد يُقاس سببُه ولا يُترَك رقماً**: أهو **انطباقٌ لم يُعلَن** (فيُعاد
 // إلى المولّد بحكم المدير) أم **انحناءٌ** يتقهقر عنده الإسقاط (فهو معايرةُ سماحةٍ،
 // `METHOD §٣.٥` والجلسة ١٢)؟ — فلا يبقى أحمرُ بلا تشخيص.
@@ -164,6 +199,20 @@ if (thin.length) {
   console.log(`      · تشخيصُ الساقط: انطباقٌ غيرُ معلَن ${kinds['انطباق'].length}`
     + ` (${kinds['انطباق'].join(' ') || '—'}) · انحناءٌ لا تطابق ${kinds['انحناء'].length}`
     + ` (${kinds['انحناء'].join(' ') || '—'})`);
+
+  // **وأينَ ينكسر؟** — الشكوى الأولى وطولُ قطعتها: فيُعرَف أهو **جسمُ حرف** أم
+  // **ضربةُ علامة** (وهي في السطر أصغرُ من جسمه بأضعاف، فتنكسر أولاً).
+  const where = thin.map((row) => {
+    const ref = words.WORD_PATHS[row.text];
+    const v = pen.judge(ref, trace(ref, { sway: Math.ceil(row.floor) }), { tolerance: ref.tolerance });
+    const f = v.faults[0];
+    const part = f ? pen.partsOf(ref)[f.part] : null;
+    const len = part?.kind === 'stroke' ? Math.round(part.poly.len) : 0;
+    return { text: row.text, code: f?.code || '—', len };
+  });
+  const marks = where.filter((w) => w.len && w.len < 120);
+  console.log(`      · وأينَ ينكسر: على ضربةٍ قصيرة (<١٢٠ وحدة) ${marks.length} من ${where.length}`
+    + ` — ${where.map((w) => `${w.text}:${w.code}@${w.len}`).join(' · ')}`);
 }
 
 // ————— ٤) الوصلُ والعلامات: بنيةُ الكلمة كما أُلّفت —————
@@ -191,8 +240,22 @@ ok(Object.values(words.MARK_PATHS).every((ref) => ref.strokes?.length
   'وشاراتُ العلامات مساراتٌ ببداياتٍ لا صورٌ — العلامةُ تُكتب كما تُعرَض');
 
 // **وأسطرُ المسافة كلمتان بينهما فراغ** — مادّةُ «المسافة بين الكلمات»
-const pairs = entries.filter(([text]) => text.includes(' '));
+const known2 = new Set(sentences);
+const pairs = entries.filter(([text]) => text.includes(' ') && !known2.has(text));
 ok(pairs.length > 0, `وأسطرُ المسافة ${pairs.length} — كلمتان في سطرٍ واحد`);
+// **والجملُ أسطرٌ كأسطرها** (الجلسة ٩): لكلِّ جملةٍ سطرُ جلوسٍ واحد تجلس عليه
+// كلماتُها، **وبينها فراغٌ من المُشكِّل لا من تقديرنا** — يُقاس فلا يُدَّعى.
+const lines = entries.filter(([text]) => known2.has(text));
+ok(lines.length === sentences.length,
+  `وجملُ محطة الجمل مؤلَّفةٌ كلُّها (${lines.length}/${sentences.length})`);
+const gapless = lines.filter(([text, ref]) => {
+  const cut = text.indexOf(' ');
+  const xs = ref.strokes.flatMap((s) => s.points).map((p) => p[0]);
+  // كلمتان في سطرٍ واحد: مدى الحبر أعرضُ من نصف الشبكة، وسطرُ الجلوس واحدٌ لهما
+  return cut < 0 || Math.max(...xs) - Math.min(...xs) < pen.GRID * 0.5;
+});
+ok(gapless.length === 0, 'وكلُّ جملةٍ تمتدّ على سطرها امتدادَ كلماتها'
+  + (gapless.length ? ` — ضاقت: ${gapless.map(([t]) => t).join('، ')}` : ''));
 const glued = pairs.filter(([text, ref]) => {
   const [right] = text.split(' ');
   const rightEnd = Math.min(...ref.strokes.flatMap((s) => s.points).map((p) => p[0]));

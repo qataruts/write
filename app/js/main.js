@@ -20,6 +20,8 @@ import { renderPenDev, releasePen } from './pendev.js';
 import { renderWarmup, releaseWarmup } from './warmup.js';
 import { renderLesson, renderForms, releaseLesson, nodeReady } from './lesson.js';
 import { renderCopy, releaseCopy, nodeReady as copyReady } from './copy.js';
+import { renderFade, releaseFade, nodeReady as fadeReady } from './fade.js';
+import { renderSentence, releaseSentence, nodeReady as sentenceReady } from './sentence.js';
 import {
   h, icon, faceEl, toast, go, arNum, starsRow, topbar, brandMark, shake,
   nodeTitle, nodeFace, nodeWhere, accentForKind, landmark, stageTitle, DEV,
@@ -372,9 +374,11 @@ const SCREENS = {
   // **وسطرُ «أشكال المواقع» سقط في الجلسة ٧** — تركب شاشةُ الدرس نفسَها بوحداتها
   // (`lesson.js`: `renderForms`)، ومعها محطةُ تمييز المتشابهات.
   // **وسطرُ «الوصل والنسخ» سقط في الجلسة ٨** — كُتبت شاشتُه (`copy.js`)، فصار قياسُها
-  // `نسخ` مطالَباً من نفسه، وانتقل حارسُ بلاغ الميدان إلى ما بعدها (الخفوت).
-  fade: 'خفوت النموذج والإملاء — الجلسة ٩',
-  sentence: 'الجمل القصيرة — الجلسة ٩',
+  // `نسخ` مطالَباً من نفسه.
+  // **وسطرا «الخفوت» و«الجمل» سقطا في الجلسة ٩** — كُتبت شاشتاهما (`fade.js`
+  // و`sentence.js`)، فصار `إملاء` مطالَباً من نفسه ولم يبقَ في الرحلة نوعٌ بلا شاشة:
+  // **الجردُ فارغٌ اليومَ ولا يُحذَف** — هو موضعُ الإعلان لمن يزيد نوعاً غداً، ويقرؤه
+  // `test_measure.mjs` إعفاءً مؤقّتاً كما كان.
 };
 
 // ————— جوابُ الجبهة (بلاغُ الميدان ١، ١١ أغسطس ٢٠٢٦ — الجلسة م١) —————
@@ -403,7 +407,9 @@ const SOON_WHY = {};
 /** أمحطةٌ مفتوحةٌ لم تُبنَ شاشتُها (أو لم تُؤلَّف مادّتُها) بعد؟ */
 const awaitingScreen = (node) => Boolean(SCREENS[node?.type])
   || ((node?.type === 'letter' || node?.type === 'form') && !nodeReady(node))
-  || (node?.type === 'join' && !copyReady(node));
+  || (node?.type === 'join' && !copyReady(node))
+  || (node?.type === 'fade' && !fadeReady(node))
+  || (node?.type === 'sentence' && !sentenceReady(node));
 
 /**
  * جوابُ الجبهة: هزّةٌ ورسالةٌ — **ولا انتقالَ** إلى شاشةٍ ترُدّ الطفلَ من حيث أتى.
@@ -425,6 +431,8 @@ async function render() {
   releaseWarmup();
   releaseLesson();
   releaseCopy();
+  releaseFade();
+  releaseSentence();
   releaseReview();
   const token = ++renderToken;
   const [name, arg1, arg2] = location.hash.replace(/^#\/?/, '').split('/');
@@ -498,6 +506,30 @@ async function render() {
       screen = renderMap();
     } else {
       screen = (node && renderCopy(part)) || renderMap();
+    }
+  } else if (name === 'fade' && arg1) {
+    // **محطةُ خفوت النموذج والإملاء** (`METHOD.md §٤` المرحلة ١٣، الجلسة ٩): القفلُ
+    // يُحرَس هنا كما في أزرار الخريطة، **وكلمةٌ لم يُؤلَّف مسارُها تُجيب ولا تصمت**.
+    const part = decodeURIComponent(arg1);
+    const node = progress.allNodes().find((n) => n.type === 'fade' && n.part === part);
+    if (node && !guard(node.id)) return;
+    if (node && !fadeReady(node)) {
+      comingSoon('fade', null);
+      screen = renderMap();
+    } else {
+      screen = (node && renderFade(part)) || renderMap();
+    }
+  } else if (name === 'sentence' && arg1) {
+    // **محطةُ الجمل القصيرة** (`METHOD.md §٤` المرحلة ١٤، الجلسة ٩): كسابقتها في
+    // حراسة القفل وفي جواب الجبهة — **ولا شاشةَ بيضاء** ولو سقط مسارُ جملة.
+    const part = decodeURIComponent(arg1);
+    const node = progress.allNodes().find((n) => n.type === 'sentence' && n.part === part);
+    if (node && !guard(node.id)) return;
+    if (node && !sentenceReady(node)) {
+      comingSoon('sentence', null);
+      screen = renderMap();
+    } else {
+      screen = (node && renderSentence(part)) || renderMap();
     }
   } else if (name === 'pen') {
     // صفحةُ تجربة محرّك القلم (الجلسة ١) — خلف `?dev=1` وحدها، و`renderPenDev`

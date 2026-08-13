@@ -316,7 +316,8 @@ def load_words() -> dict:
 
 
 def copy_material() -> set:
-    """مادّةُ النسخ التي يطلبها المنهج — وصلاتُ محطة الوصل وكلماتُ جدولها."""
+    """مادّةُ الكتابة التي يطلبها المنهج — وصلاتُ محطة الوصل وكلماتُ جدولها،
+    **وجملُ محطة الجمل** (الجلسة ٩): لا جملةَ تُكتب بلا مسارٍ عابرٍ لهذا الفحص."""
     if not CURRICULUM.exists():
         return None
     src = CURRICULUM.read_text(encoding="utf-8")
@@ -326,11 +327,13 @@ def copy_material() -> set:
         return None
     out = set(json.loads(words.group(1)))
     for stage in json.loads(stages.group(1)):
-        if stage.get("kind") != "join":
-            continue
-        for node in stage.get("nodes", []):
-            out.update(node.get("joins", []))
-            out.update(node.get("words", []))
+        if stage.get("kind") == "join":
+            for node in stage.get("nodes", []):
+                out.update(node.get("joins", []))
+                out.update(node.get("words", []))
+        elif stage.get("kind") == "sentence":
+            for node in stage.get("nodes", []):
+                out.update(node.get("sentences", []))
     return out
 
 
@@ -347,12 +350,16 @@ def check_words(words: dict, tol: dict, material: set) -> list:
 
     for text, ref in words.items():
         tag = f"كلمة «{text}»"
+        # **وصندوقُ المادّة يُقرأ منها** (حكمُ المدير، ١٣ أغسطس ٢٠٢٦): مربّعٌ للكلمة
+        # **وسطرٌ عريضٌ للجملة** — فحدُّ الشبكة حدُّ صندوقها هي لا مربّعٌ مفترَض.
+        box = ref.get("box") or [grid, grid]
+        gw, gh = float(box[0]), float(box[1])
         scale = ref.get("tolerance")
         if not isinstance(scale, (int, float)) or not 0 < scale <= 1:
             bad.append(f"{tag}: بلا سماحةٍ في مسارها (`tolerance`) — والسماحةُ تُحمَل لا تُفترَض")
             continue
         line = ref.get("line")
-        if not isinstance(line, (int, float)) or not 0 < line < grid:
+        if not isinstance(line, (int, float)) or not 0 < line < gh:
             bad.append(f"{tag}: بلا سطرِ جلوسٍ على الشبكة (`line`)")
         # حدودُ المحرّك مشدودةً بمقياس الكلمة — فما يحكم به يُفحَص به
         wtol = {**tol, "start": tol["start"] * scale, "back": tol["back"] * scale,
@@ -381,7 +388,7 @@ def check_words(words: dict, tol: dict, material: set) -> list:
             elif dist(start, points[0]) > 0.05:
                 bad.append(f"{where}: `start` ليس أوّلَ نقاطه")
             starts.append((where, start or points[0]))
-            out = [p for p in points if not (0 <= p[0] <= grid and 0 <= p[1] <= grid)]
+            out = [p for p in points if not (0 <= p[0] <= gw and 0 <= p[1] <= gh)]
             if out:
                 bad.append(f"{where}: {len(out)} نقطةً خارج الشبكة ({out[0]})")
             length = poly_len(points)
@@ -402,7 +409,7 @@ def check_words(words: dict, tol: dict, material: set) -> list:
             if not at or len(at) != 2:
                 bad.append(f"{where}: بلا موضع")
                 continue
-            if not (0 <= at[0] <= grid and 0 <= at[1] <= grid):
+            if not (0 <= at[0] <= gw and 0 <= at[1] <= gh):
                 bad.append(f"{where}: خارج الشبكة ({at})")
             if dot.get("after") is not True:
                 bad.append(f"{where}: لا تُعلن `after: true` — والنقاطُ بعد جسم الكلمة كلِّه")
@@ -410,25 +417,32 @@ def check_words(words: dict, tol: dict, material: set) -> list:
 
         # **تمايزُ المبادئ — وإعفاءٌ واحدٌ مكتوبٌ بسببه**: القاعدةُ كما في الحرف
         # (بدايتان أقربُ من دائرة البداية لا يفرّق بينهما المحرّك). **ويُستثنى
-        # المتراكبان على حرفٍ واحد** (شدّةٌ وحركتُها): العربيةُ تركّبهما فوق بعضهما
-        # بحكم الرسم لا بحكم تأليفنا — لا موضعَ آخرَ لهما — والمسافةُ بينهما **رأسيةٌ
-        # لا أفقية** فيفرّقهما نزولُ الطفل بأقرب الجزأين إليه (وهو ما يقيسه `down`).
-        # **ويُعلَن العددُ ولا يُسكَت عنه**، فما استُثني معلومٌ لا مستور.
+        # المتراكبان على حرفٍ واحد** (شدّةٌ وحركتُها): العربيةُ تركّبهما بحكم الرسم لا
+        # بحكم تأليفنا — لا موضعَ آخرَ لهما — **ويفرّقهما نزولُ الطفل بأقرب الجزأين
+        # إليه** (وهو ما يقيسه `down`).
+        #
+        # **وحدُّ التفريق سماحةُ الارتداد لا اتجاهُ الإزاحة** (الجلسة ٩): كان المقيسُ
+        # أن تكون الإزاحةُ **رأسيةً** — وهو وصفُ حالةٍ لا حدُّ محرّك: لمّا اتّسع صندوقُ
+        # السطر خرجت الشدّةُ وحركتُها على «الصُّنْبُورُ نَظِيفْ» **قُطرِيّتَين** (٣٦
+        # أفقياً و٣١ رأسياً) فسقط الوصفُ وبقي الحالُ حالَه. والحدُّ الصادق كمّيّ:
+        # **ما جاوز سماحةَ الارتداد موضعان يفرّقهما أقربُ الجزأين**، وما دونها موضعٌ
+        # واحد (وهو نصُّ الشرط الثاني في المحرّك بعينه). ويبقى الإعفاءُ **للضربات
+        # وحدَها** — لا للنقطة، فسماحتُها أوسع. **ويُعلَن العددُ ولا يُسكَت عنه.**
         for a in range(len(starts)):
             for b in range(a + 1, len(starts)):
                 pa, pb = starts[a][1], starts[b][1]
                 gap = dist(pa, pb)
                 if gap >= wtol["start"]:
                     continue
-                stacked = abs(pa[1] - pb[1]) > abs(pa[0] - pb[0])
-                if stacked and "جزء" in starts[a][0] and "جزء" in starts[b][0]:
+                strokes_pair = "جزء" in starts[a][0] and "جزء" in starts[b][0]
+                if strokes_pair and gap > wtol["back"]:
                     stacks.append(f"{text}: {gap:.0f}")
                     continue
                 bad.append(f"{tag}: بدايتا «{starts[a][0]}» و«{starts[b][0]}» "
                            f"على بُعد {gap:.0f} < {wtol['start']:.0f} — لا يفرّق بينهما المحرّك")
     if stacks:
-        print("  ○ مُستثنىً بسببه (علامتان متراكبتان على حرفٍ واحد — رأسيتان يفرّقهما "
-              "أقربُ الجزأين إلى نزول الطفل): " + " · ".join(stacks))
+        print("  ○ مُستثنىً بسببه (ضربتا علامةٍ متراكبتان على حرفٍ واحد، بينهما فوق "
+              "سماحة الارتداد — يفرّقهما أقربُ الجزأين إلى نزول الطفل): " + " · ".join(stacks))
     return bad
 
 
