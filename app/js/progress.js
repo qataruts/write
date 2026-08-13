@@ -47,6 +47,22 @@ export const KINDS = {
   DICTATE: 'dictate',   // إملاءٌ سماعيّ صرف
 };
 
+/**
+ * **اسمُ نوع التمرين كما يُقرأ في لوحة وليّ الأمر** — بجوار مفاتيحه كما `FORM_NAMES`
+ * بجوار `FORMS`: مصدرٌ واحد لا نسختان تفترقان. وألفاظُه ألفاظُ `METHOD.md §٦`
+ * (`تتبع` · `حر` · `نسخ` · `إملاء`)، والمفاتيحُ إنجليزيةٌ لأنها تدخل مفاتيحَ ليتنر
+ * على القرص فلا تُقلَب بتعريبٍ متأخّر يُسقِط سجلَّ طفلٍ قائم.
+ *
+ * **ونوعٌ يُضاف بلا اسمٍ يُمسِكه `test_measure`** (لكلِّ مقيسٍ موضعٌ في اللوحة،
+ * `METHOD.md §٦`) — فلا يظهر لوليّ الأمر رمزٌ لاتينيّ في شاشةٍ عربية.
+ */
+export const KIND_NAMES = {
+  [KINDS.TRACE]: 'تتبّع',
+  [KINDS.FREE]: 'كتابةٌ حرّة',
+  [KINDS.COPY]: 'نسخ',
+  [KINDS.DICTATE]: 'إملاء',
+};
+
 /** شكلُ موقعِ وحدةِ الكلمة — الكلمةُ لا شكلَ موقعٍ لها، فلها محورُها المعلَن. */
 export const WORD_FORM = 'كلمة';
 
@@ -93,6 +109,9 @@ function blank() {
     stars: {},        // معرّف عقدة ← نجوم
     skills: {},       // «وحدة|شكل موقع|تمرين» ← {right, wrong, box, due, seen}
     faults: {},       // «وحدة|رمزُ الخطأ الحركيّ» ← {n, seen} — انظر `recordFault`
+    // **وسمُ بنية الرحلة** (الجلسة ١٠): بصمةُ عقدها ساعةَ رآها هذا الجهاز آخرَ مرّة —
+    // بها وحدَها يُعرَف أنّ البنية تحرّكت فيلزم الترحيلُ الرحيم (`migrateJourney`).
+    journey: '',
     days: {},         // «YYYY-MM-DD» ← ثوانٍ من الاستعمال الفعلي
     reviews: {},      // «YYYY-MM-DD» ← {items, right, at}
     // **عدّادُ الخفوت** (`METHOD.md §٤` مرحلة ١٣): «كلمة» ← {n, day} — ثلاثُ
@@ -139,20 +158,45 @@ let state = load();
 const SPLIT_NODES = {};
 
 /**
+ * **بصمةُ بنية الرحلة**: معرّفاتُ عقدها بترتيبها مطويّةً في وسمٍ قصير. يُحفظ في حال
+ * الطفل، فيُعرَف بمقابلته **هل تغيّرت البنيةُ منذ آخر مرّةٍ رآها هذا الجهاز**.
+ * (بصمةٌ لا رقمُ نسخة: ما يعني الترحيلَ تحرّكُ العقد نفسِها لا رقمٌ نرفعه بأيدينا.)
+ */
+function journeyStamp() {
+  const nodes = allNodes();
+  const ids = nodes.map((n) => n.id).join('|');
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < ids.length; i++) {
+    hash ^= ids.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193) >>> 0;
+  }
+  return `${nodes.length}:${hash.toString(36)}`;
+}
+
+/**
  * **ترحيلٌ رحيم**: إعادةُ ترتيب الرحلة شأنُنا نحن لا تقصيرُ الطفل، فلا يُحبَس أحد
  * رجعياً — العقدةُ المشقوقة نجومُها لشطريها، والمحطةُ المستحدثة **خلف موضع الطفل**
  * تُعدّ متجاوَزةً فلا يُقفَل عليه ما كان مفتوحاً. ترحيلٌ بالبيانات لا برقم نسخة.
+ *
+ * **ولا يجري إلا حين تتحرّك البنية** (إصلاحُ الجلسة ١٠، أمسكه فحصُ النسخة الاحتياطية):
+ * كان يجري في **كل إقلاع**، فيملأ كلَّ عقدةٍ بلا نجمةٍ خلف موضع الطفل — ولا يفرّق
+ * بين محطةٍ استحدثناها نحن ومحطةٍ **صفّرها وليُّ الأمر بيده** ليعيد طفلُه تدريبَها.
+ * فكان زرُّ «صفِّر هذه المحطة» يفي بوعده في الجلسة نفسِها **ويُنقَض عند أوّل فتحٍ
+ * للتطبيق**: تعود العقدُ منجَزةً بنجمةٍ ويعود الطفلُ إلى حيث كان. والعلاجُ من علّة
+ * الترحيل نفسِها: موضوعُه **تغيُّرُ البنية**، فيُقاس بوسمها لا يُفترض بلا قياس.
  */
 function migrateJourney() {
-  if (!Object.keys(state.stars).length) return;   // طفلٌ جديد: لا شيء يُرحَّل
-  let changed = false;
+  const stamp = journeyStamp();
+  if (state.journey === stamp) return;            // البنيةُ كما رآها هذا الجهاز آخرَ مرّة
+  const fresh = !Object.keys(state.stars).length;
+  state.journey = stamp;
+  if (fresh) return;                              // طفلٌ جديد: لا ماضيَ يُرحَّل، والوسمُ يُكتب مع أوّل حفظ
 
   for (const [old, heirs] of Object.entries(SPLIT_NODES)) {
     const stars = state.stars[old];
     if (!stars) continue;
     for (const heir of heirs) if (!state.stars[heir]) state.stars[heir] = stars;
     delete state.stars[old];
-    changed = true;
   }
 
   const nodes = allNodes();
@@ -160,18 +204,13 @@ function migrateJourney() {
   for (const [i, node] of nodes.entries()) if (state.stars[node.id] > 0) last = i;
   for (const [i, node] of nodes.entries()) {
     if (state.stars[node.id] || i >= last) continue;
-    if (node.type === 'gate') {
-      state.stars[node.id] = MAX_STARS;           // بوابةٌ عبَر مفصلَها قبل وجودها ⇒ مجتازة
-      changed = true;
-    } else {
-      // محطةٌ استحدثناها خلف موضع الطفل: نجمةُ إتمامٍ واحدة تفكّ حبسه ولا تدّعي إتقاناً —
-      // فتبقى تدعوه إلى لعبها (النجوم لا تنقص، فما يكسبه حين يلعبها يعلو عليها).
-      state.stars[node.id] = 1;
-      changed = true;
-    }
+    // بوابةٌ عبَر مفصلَها قبل وجودها ⇒ مجتازة. ومحطةٌ استحدثناها خلف موضع الطفل:
+    // نجمةُ إتمامٍ واحدة تفكّ حبسه ولا تدّعي إتقاناً — فتبقى تدعوه إلى لعبها
+    // (النجوم لا تنقص، فما يكسبه حين يلعبها يعلو عليها).
+    state.stars[node.id] = node.type === 'gate' ? MAX_STARS : 1;
   }
 
-  if (changed) save();
+  save();   // الوسمُ وحدَه يستحقّ حفظاً وإن لم تتبدّل نجمة — وإلا أُعيد الترحيلُ غداً
 }
 
 /* **وضعُ المعاينة** (أمر المالك، ١٣ أغسطس ٢٠٢٦: «هل ينبغي أن نفتح كل شيء لمن
@@ -822,6 +861,9 @@ export function backupSummary(bundle) {
     stars: done.reduce((sum, n) => sum + Math.min(MAX_STARS, stars[n.id]), 0),
     skills: Object.keys(bundle?.state?.skills || {}).length,
     reads: Object.keys(bundle?.state?.reads || {}).length,
+    // **وعدّادُ الاتجاه يُعَدّ في الحصيلة** (الجلسة ١٠): هو الذي تُبنى منه خرائطُ
+    // اللوحة، فنسخةٌ تُستعاد فوق أخرى تُفقِده — فيُقرأ عددُه قبل التأكيد لا بعده.
+    faults: Object.keys(bundle?.state?.faults || {}).length,
     seconds: bundle?.state?.seconds || 0,
   };
 }
@@ -978,5 +1020,9 @@ export function snapshot() {
 
 export function reset() {
   state = blank();
+  // **وحالٌ فارغة تُوسَم ببنية اليوم** (الجلسة ١٠): جهازٌ مُحي ثم مشى في الرحلة لم
+  // تتغيّر تحته بنيةٌ، فلا موضوعَ للترحيل الرحيم عند إقلاعه التالي — ولولا الوسمُ
+  // لَجرى مرّةً وأعاد زرعَ ما صفّره وليُّ الأمر بعد المحو.
+  migrateJourney();
   save();
 }

@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>لوحةُ وليّ الأمر على الشاشة — «اُكْتُبْ» الجلسة ١٠</title>
+<!--
+  **معيارا قبول الجلسة ١٠ بحرفهما، مقيسَين في متصفّحٍ حقيقي**: «جملةُ الخطأ الحركي
+  تُبنى من عدّاد الاتجاه آلياً» و«البوابةُ الحسابية تعمل».
+
+  و`test_parent.mjs` يسأل الدوالَّ الخالصة فتُجيب، وهذا يقول ما لا تقوله الدالّة:
+    · أنّ **البوابة تقف فعلاً**: اللوحةُ لا تُرى قبلها، وجوابٌ خاطئ يُبدّل السؤال
+      ولا يفتح، وجوابٌ صحيح يفتحها — والسؤالُ **ضربٌ من رقمين** يعجز عنه ابنُ السادسة.
+    · وأنّ **الجملة تظهر نصاً على الشاشة**: «حرف ميم — يبدأ من الطرف الآخر» تُقرأ
+      في لوح الوالد بحرفها، **ولا رقمَ مبهم** ولا «أخطأ في الميم».
+    · وأنّ **لكلِّ نوع تمرينٍ موضعَه** بالاسم العربيّ، وأنّ الكلمةَ **بطاقةٌ واحدة**
+      فيها نسخُها وإملاؤها لا بطاقتان بنصٍّ واحد.
+    · وأنّ **النسخة الاحتياطية تدور بزرّها**: يُنقَر «انسخ تقدّم طفلي» فيخرج ملفٌّ،
+      ويُمحى الجهاز، ويُستعاد منه — فتعود اللوحةُ بأرقامها ذاتِها.
+    · وأنّ **المعاينة تفتح ولا تكتب**: يُنقَر زرُّها فتُفتَح الرحلةُ كلُّها ويظهر
+      شريطُها، **والمخزنُ لا يتبدّل حرفاً**.
+    · 🔒 وأنّ الدورة كلَّها **بصفر طلباتٍ شبكية** و**صفرِ نطق**: لوحةُ بالغٍ تُقرأ.
+-->
+<style>
+  body { font: 15px/1.7 system-ui, sans-serif; margin: 0; background: #111; color: #eee; }
+  #log { padding: 1rem; white-space: pre-wrap; }
+  iframe { width: 460px; height: 900px; border: 0; position: fixed; inset-inline-end: 0; top: 0; }
+  .ok { color: #7ec97e; } .bad { color: #e08a80; }
+</style>
+</head>
+<body>
+<div id="log"></div>
+<iframe id="app" src="/"></iframe>
+<script type="module">
+const results = [];
+const log = document.getElementById('log');
+const frame = document.getElementById('app');
+
+function ok(cond, msg) {
+  results.push({ ok: !!cond, msg });
+  const line = document.createElement('div');
+  line.className = cond ? 'ok' : 'bad';
+  line.textContent = (cond ? '✓ ' : '✗ ') + msg;
+  log.append(line);
+}
+
+const errors = [];
+window.addEventListener('error', (e) => errors.push(String(e.message)));
+window.addEventListener('unhandledrejection', (e) => errors.push(String(e.reason)));
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const send = () => fetch('/result', {
+  method: 'POST', body: JSON.stringify({ from: 'write', rows: results }),
+});
+
+// عدّادُ أبواب الخروج من الجهاز (نظيرُ `browser_gate.html`) — وهذه الشاشةُ أولى
+// بالحراسة: بين يديها تقدّمُ الطفل كلُّه وخريطةُ أخطائه.
+const netCalls = [];
+const playCalls = [];
+function watchWindow(win) {
+  const realFetch = win.fetch.bind(win);
+  win.fetch = (input, init) => {
+    netCalls.push(`fetch:${input && input.url ? input.url : input}`);
+    return realFetch(input, init);
+  };
+  const realOpen = win.XMLHttpRequest.prototype.open;
+  win.XMLHttpRequest.prototype.open = function (method, url, ...rest) {
+    netCalls.push(`xhr:${url}`);
+    return realOpen.call(this, method, url, ...rest);
+  };
+  Object.defineProperty(win.navigator, 'sendBeacon', {
+    configurable: true, value: (url) => { netCalls.push(`beacon:${url}`); return false; },
+  });
+  win.WebSocket = class { constructor(url) { netCalls.push(`ws:${url}`); } };
+  win.EventSource = class { constructor(url) { netCalls.push(`sse:${url}`); } };
+  // **وجردُ النطق** (عهدُ قناة الصوت الواحدة): اللوحةُ تُقرأ ولا تُسمَع، فالمنتظَر صفر
+  const realPlay = win.HTMLMediaElement.prototype.play;
+  win.HTMLMediaElement.prototype.play = function (...rest) {
+    playCalls.push(this.currentSrc || this.src || '—');
+    return realPlay.apply(this, rest);
+  };
+}
+
+/** رقمٌ عربيّ ← عدد (لقراءة سؤال البوابة كما يقرؤه وليّ الأمر). */
+const fromAr = (text) => Number(String(text).replace(/[٠-٩]/g,
+  (d) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d))));
+
+(async () => {
+  try {
+    await new Promise((r) => frame.addEventListener('load', r, { once: true }));
+    await wait(600);
+
+    const progress = await import('/js/progress.js');
+    const pen = await import('/js/pen.js');
+    const parent = await import('/js/parent.js');
+
+    // ————— حالُ طفلٍ في منتصف رحلته، تُكتب في المخزن ثم يُعاد تحميل الإطار —————
+    //
+    // **ولا معرّفَ يُكتب بيد**: العقدُ والحروفُ والكلماتُ تُقرأ من الرحلة نفسِها،
+    // فيومَ يتحرّك المنهجُ تمشي هذه الصفحةُ على ما صار لا على ما كان.
+    progress.reset();
+    const NODES = progress.allNodes();
+    const letter = NODES.find((n) => n.type === 'letter').letter;
+    const warm = NODES.find((n) => n.type === 'warmup');
+    const word = NODES.find((n) => n.type === 'fade').words[0];
+    const line = NODES.find((n) => n.type === 'sentence').sentences[0];
+
+    for (const node of NODES.slice(0, 20)) progress.setStars(node.id, 3);
+    progress.recordAttempt(letter, 'معزول', progress.KINDS.TRACE, true);
+    progress.recordAttempt(letter, 'معزول', progress.KINDS.FREE, false);
+    progress.recordAttempt(word, progress.WORD_FORM, progress.KINDS.COPY, true);
+    progress.recordAttempt(word, progress.WORD_FORM, progress.KINDS.DICTATE, false);
+    progress.recordAttempt(line, progress.SENTENCE_FORM, progress.KINDS.COPY, true);
+    progress.addSeconds(300);
+    for (let i = 0; i < 4; i++) progress.recordFault(letter, pen.FAULTS.START_END);
+    progress.recordFault(letter, pen.FAULTS.DOTS_FIRST);
+    progress.recordFault(warm.part, pen.FAULTS.REVERSE);
+    progress.recordFault(word, pen.FAULTS.SHORT);
+
+    const wanted = `${parent.unitTitle(letter)} — ${pen.FAULT_TEXT[pen.FAULTS.START_END]}`;
+
+    /**
+     * **فتحُ اللوحة بإقلاعٍ حقيقيّ**: حالُ الطفل تُقرأ من المخزن ساعةَ الإقلاع، وهذه
+     * الصفحةُ تكتبها في نسختها هي — فالجسرُ بينهما إعادةُ تحميل الإطار. **وتبديلُ
+     * القطعة وحدَها لا يُقلِع** (تنقّلُ جزءٍ في الصفحة نفسِها لا يُطلِق `load`)، فيُزاد
+     * وسمٌ في العنوان يجعله عنواناً جديداً بحقّ.
+     */
+    let win = frame.contentWindow;
+    let doc = frame.contentDocument;
+    let boot = 0;
+    async function openApp(hash = '#/parent') {
+      frame.src = `/?r=${++boot}${hash}`;
+      await new Promise((r) => frame.addEventListener('load', r, { once: true }));
+      await wait(600);
+      win = frame.contentWindow;
+      doc = frame.contentDocument;
+      win.addEventListener('error', (e) => errors.push(String(e.message)));
+      win.addEventListener('unhandledrejection', (e) => errors.push(String(e.reason)));
+      watchWindow(win);
+    }
+    await openApp();
+
+    // ————— ١) البوابةُ الحسابية تقف فعلاً —————
+
+    const gateEl = () => doc.querySelector('.gate');
+    const askText = () => doc.querySelector('.gate .giant')?.textContent || '';
+    ok(Boolean(gateEl()) && !doc.querySelector('.audit'),
+      'اللوحةُ خلف بوابةٍ: لا يُرى منها شيءٌ قبل الجواب');
+
+    const [a, b] = askText().split('×').map((part) => fromAr(part.trim()));
+    ok(a >= 6 && b >= 6 && a * b > 40,
+      `والسؤالُ ضربُ رقمين لا يحلّه ابنُ السادسة: ${askText().trim()} (${a}×${b})`);
+
+    const input = () => doc.querySelector('.gate input');
+    const enter = (value) => {
+      input().value = value;
+      doc.querySelector('.gate-go').click();
+    };
+
+    enter(String(a * b + 1));                        // جوابٌ خاطئ
+    await wait(60);
+    ok(Boolean(gateEl()) && !doc.querySelector('.audit'),
+      'وجوابٌ خاطئ لا يفتحها');
+    ok(input().value === '' && doc.querySelector('.gate .hint').textContent.includes('ليس هذا'),
+      'ويُقال له إنّ الناتج ليس هذا — بالعربية لا برسالة متصفّح');
+
+    const [c, d] = askText().split('×').map((part) => fromAr(part.trim()));
+    enter(String(c * d));                            // جوابٌ صحيح
+    await wait(120);
+    ok(!doc.querySelector('.gate') && Boolean(doc.querySelector('.audit')),
+      'والجوابُ الصحيح يفتح اللوحة');
+
+    // ————— ٢) جملةُ الخطأ الحركيّ تُقرأ نصّاً على الشاشة —————
+
+    const panel = () => doc.querySelector('.audit');
+    const text = () => panel().textContent.replace(/\s+/g, ' ');
+    const faultLines = () => [...doc.querySelectorAll('.faults .fault')]
+      .map((el) => el.textContent.replace(/\s+/g, ' ').trim());
+
+    ok(faultLines().length >= 4,
+      `وفي اللوحة ${faultLines().length} سطرَ خطأٍ مسمّى`);
+    ok(faultLines()[0].startsWith(wanted),
+      `وأوّلُها أكثرُها تكراراً بحرفه: «${faultLines()[0]}»`);
+    ok(faultLines()[0].includes('٤ مرات'),
+      'ومعه عددُ مرّاته بالعربية لا برقمٍ لاتينيّ');
+    ok(faultLines().some((l) => l.startsWith(warm.title))
+      && faultLines().some((l) => l.startsWith(word)),
+      'وتدخلها التهيئةُ بعنوانها والكلمةُ بنصّها — لا رمزَ برمجيّ في شاشة الوالد');
+    ok(!/lines-h|start-end|dots-first|undefined|NaN/.test(text()),
+      'ولا رمزَ محرّكٍ ولا «undefined» يظهر لوليّ الأمر');
+    // **وكلُّ سطرٍ يقول «كيف» لا «كم»**: نصُّ محرّكٍ يصف الحركة، لا عدداً مبهماً
+    // ولا «أخطأ في الميم». يُقابَل السطرُ بنصوص `FAULT_TEXT` نفسِها لا بعبارةٍ نتوقّعها.
+    const clauses = Object.values(pen.FAULT_TEXT);
+    ok(faultLines().every((l) => clauses.some((c) => l.includes(c))),
+      'وكلُّ سطرٍ منها يصف الحركةَ بنصّ المحرّك — لا «أخطأ في …» ولا رقمٌ وحدَه');
+
+    // ————— ٣) لكلِّ نوع تمرينٍ موضعُه، والكلمةُ بطاقةٌ واحدة —————
+
+    for (const kind of Object.values(progress.KINDS)) {
+      ok(text().includes(progress.KIND_NAMES[kind]),
+        `[${kind}] يقرؤه وليُّ الأمر باسمه «${progress.KIND_NAMES[kind]}»`);
+    }
+    const tags = [...doc.querySelectorAll('.vchip--tag')];
+    const wordTags = tags.filter((el) => el.textContent.includes(word));
+    ok(wordTags.length === 1,
+      `و«${word}» بطاقةٌ واحدة لا بطاقتان (${wordTags.length})`);
+    ok(wordTags[0].textContent.includes(progress.KIND_NAMES[progress.KINDS.COPY])
+      && wordTags[0].textContent.includes(progress.KIND_NAMES[progress.KINDS.DICTATE]),
+      `وفيها نوعاها معاً: «${wordTags[0].textContent.replace(/\s+/g, ' ').trim()}»`);
+    ok(tags.some((el) => el.textContent.includes(line)),
+      'والجملةُ في صفّها هي — لا في صفّ الكلمات');
+
+    // ————— ٤) النسخةُ الاحتياطية تدور بزرّها —————
+    //
+    // **الملفُّ يُلتقط من بابه لا من دالّةٍ تُنادى**: يُنقر الزرُّ الذي ينقره وليُّ
+    // الأمر، ويُؤخذ ما وضعه في `Blob` — فما نفحصه هو ما ينزل على جهازه بعينه.
+    let saved = null;
+    const realCreate = win.URL.createObjectURL.bind(win.URL);
+    win.URL.createObjectURL = (blob) => { saved = blob; return realCreate(blob); };
+    doc.querySelector('.backup-save').click();
+    await wait(80);
+    ok(Boolean(saved), 'زرُّ «انسخ تقدّم طفلي» يُخرِج ملفاً');
+
+    const fileText = await saved.text();
+    const readBack = progress.readBackup(fileText);
+    ok(!readBack.error, `والملفُّ يُقرأ (${readBack.error || 'سليم'})`);
+    const sum = progress.backupSummary(readBack.bundle);
+    ok(sum.faults === 4 && sum.skills === 5 && sum.nodes === 20,
+      `وفيه خريطةُ الاتجاه كاملةً (${sum.faults} حركات · ${sum.skills} مهارات · ${sum.nodes} عقدة)`);
+    ok(!/"points"|"strokes"|"clientX"|"off"/.test(fileText),
+      '🔒 ولا إحداثيَّ لمسةٍ فيه — مسارُ قلم الطفل لا يغادر جهازه');
+
+    const starsBefore = progress.totalStars();
+    progress.reset();                                  // كحذف التطبيق أو تبديل الجهاز
+    ok(progress.totalStars() === 0 && progress.faults().length === 0, 'ثم يُمحى الجهاز');
+    ok(progress.restore(progress.readBackup(fileText).bundle), 'وتُقبَل الاستعادة منه');
+    ok(progress.totalStars() === starsBefore
+      && progress.faultsOf(letter).find((f) => f.code === pen.FAULTS.START_END)?.n === 4,
+      'فتعود النجومُ وخريطةُ الاتجاه كما كانت');
+
+    await openApp();
+    const [e2, f2] = (doc.querySelector('.gate .giant')?.textContent || '').split('×')
+      .map((part) => fromAr(part.trim()));
+    doc.querySelector('.gate input').value = String(e2 * f2);
+    doc.querySelector('.gate-go').click();
+    await wait(120);
+    ok([...doc.querySelectorAll('.faults .fault')][0]?.textContent.includes(wanted),
+      'واللوحةُ بعد الاستعادة تقرأ الجملةَ نفسَها — عادت معرفةُ الوالد بطفله');
+
+    // ————— ٥) المعاينةُ تفتح ولا تكتب —————
+
+    const KEY = 'uktub.progress.v1';
+    const diskBefore = win.localStorage.getItem(KEY);
+    const previewBtn = [...doc.querySelectorAll('.audit button')]
+      .find((el) => el.textContent.includes('وضع المعاينة'));
+    ok(Boolean(previewBtn), 'وفي اللوحة بابُ المعاينة — خلف البوابة لا في شاشة الطفل');
+    previewBtn.click();
+    await new Promise((r) => frame.addEventListener('load', r, { once: true }));
+    await wait(700);
+    doc = frame.contentDocument;
+    win = frame.contentWindow;
+    win.addEventListener('error', (e) => errors.push(String(e.message)));
+    watchWindow(win);
+    ok(win.location.search.includes('preview=1') && doc.querySelector('.preview-bar'),
+      'فتُفتَح المعاينةُ بشريطها المعلَن');
+    ok(doc.querySelector('.preview-bar').textContent.includes('لا يُحفَظ'),
+      'ويقول الشريطُ إنّ شيئاً لا يُحفَظ — فلا يظنّ المقيّمُ أنّ هذا ما يراه الطفل');
+    const locked = [...doc.querySelectorAll('.station--locked')];
+    ok(locked.length === 0, `ولا عقدةَ مقفلة على المقيّم (${locked.length})`);
+    ok(win.localStorage.getItem(KEY) === diskBefore,
+      'والمخزنُ لم يتبدّل حرفاً بفتحها');
+
+    // ————— ٦) 🔒 صفرُ طلباتٍ وصفرُ نطق —————
+
+    ok(netCalls.length === 0,
+      `دورةُ اللوحة كلُّها بصفر طلباتٍ شبكية${netCalls.length ? ` — وقعت: ${netCalls.join('، ')}` : ''}`);
+    ok(playCalls.length === 0,
+      `ولا نطقَ فيها ألبتّة — لوحةُ بالغٍ تُقرأ (${playCalls.length})`);
+    ok(errors.length === 0, `ولا خطأ جافاسكربت واحد${errors.length ? ': ' + errors.join(' | ') : ''}`);
+  } catch (err) {
+    ok(false, `انكسر الفحص: ${err && err.stack ? err.stack : err}`);
+  }
+  await send();
+})();
+</script>
+</body>
+</html>

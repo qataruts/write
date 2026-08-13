@@ -185,19 +185,42 @@ ok(/buildSession/.test(gateSrc) && /weakestSkills/.test(gateSrc),
 //
 // كلُّ نوعٍ إمّا أن يدخل لوحةَ الحروف (وحدتُه حرفٌ × شكلُ موقع)، وإمّا أن يكون له
 // **قسمُه** (الكلمةُ لا حرفَ لها) — ولا نوعَ يُقاس ثم يختفي من اللوحة كلها.
+//
+// **وهذا فحصٌ حيّ لا نصّيّ** (مُلئ في الجلسة ١٠): تُسجَّل مهارةٌ من كلِّ نوع، ثم
+// يُسأل **بناةُ اللوحة أنفسُهم** — `letterStats` و`wordUnits` و`kindPlaces` — أين
+// وقعت. فبطاقةٌ تسقط من صفّها تُحمِر هذا السطر، ولا يكفي أن يُذكَر اسمُ القسم نصّاً.
 
 console.log('\n— لوحة وليّ الأمر: لكل مقيسٍ موضعُه —');
 const parentSrc = readFileSync(new URL('parent.js', APP), 'utf8');
+const parent = await import(new URL('parent.js', APP));
+
+const LETTER = p.allNodes().find((n) => n.type === 'letter').letter;
+const WORD = p.allNodes().find((n) => n.type === 'fade').words[0];
 for (const kind of Object.values(p.KINDS)) {
-  const letterUnit = { kind, unit: 'ب', form: 'معزول' };
-  const wordUnit = { kind, unit: 'بابا', form: p.WORD_FORM };
-  const section = p.isLetterSkill(letterUnit) ? 'لوحة الحروف' : '—';
-  const shown = section === 'لوحة الحروف' || /الكلمات نسخاً وإملاءً/.test(parentSrc);
-  ok(shown && p.isWordSkill(wordUnit) === true,
-    `[${kind}] يقرؤه وليُّ الأمر — حرفاً في ${section}، وكلمةً في قسم «الكلمات نسخاً وإملاءً»`);
+  p.recordAttempt(LETTER, 'معزول', kind, true);
+  p.recordAttempt(WORD, p.WORD_FORM, kind, true);
 }
-ok(/progress\.skills\(\)\.filter\(progress\.isWordSkill\)/.test(parentSrc),
+
+const board = p.letterStats();
+const units = parent.wordUnits();
+const places = parent.kindPlaces();
+
+for (const kind of Object.values(p.KINDS)) {
+  const asLetter = p.isLetterSkill({ kind, unit: LETTER, form: 'معزول' })
+    && board.some((s) => s.letter === LETTER);
+  const asWord = units.some((u) => u.unit === WORD && u.kinds.some((k) => k.kind === kind));
+  const named = places.find((s) => s.kind === kind);
+  ok(asLetter && asWord && named?.measured === 2,
+    `[${kind}] يقرؤه وليُّ الأمر — حرفاً في لوحة الحروف، وكلمةً في «الكلمات نسخاً`
+    + ` وإملاءً»، وباسمه «${named?.name || '—'}» في صفّ الأنواع`);
+}
+
+ok(/الكلمات نسخاً وإملاءً/.test(parentSrc) && /لكلِّ نوع تمرينٍ موضعُه/.test(parentSrc),
+  'والقسمان معنونان في اللوحة بحرفهما — يجدهما الوالدُ بعينه لا بالبحث');
+ok(units.every((u) => u.kinds.length && u.kinds.every((k) => p.isWordSkill(k))),
   'وقسمُ الكلمات يُبنى من سجلّ ليتنر نفسِه — لا من عدٍّ ثانٍ يفترق عنه');
+ok(!board.some((s) => s.letter === WORD),
+  'ولا يظهر «حرفٌ» اسمُه كلمة في لوحة الحروف — القسمةُ قسمةُ `isWordSkill`');
 
 console.log(fails ? `\n${fails} فشل` : '\nكل اختبارات «لا تدريسَ بلا قياس» ناجحة');
 process.exit(fails ? 1 : 0);

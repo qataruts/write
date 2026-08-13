@@ -6,15 +6,17 @@
 // الرحلة والمعاينة — **وأقسامُ مادّة اقرأ لم تُنقَل** (العلاماتُ والجذورُ وتسجيلاتُ
 // الصوت و«نحو القراءة الحرة»)، ولكلٍّ سببُه مكتوباً في موضعه أدناه.
 //
-// **والقسمُ الذي تنتظره هذه اللوحة** هو **عدّادُ أخطاء الاتجاه المميَّز**
-// (`METHOD.md §٦`: «الذهبُ القياسيّ لهذا التطبيق») — أن تقول اللوحةُ **«يبدأ الميمَ
-// من أسفل»** لا «أخطأ في الميم». **وتملكه الجلسة ١٠**، ولا يُكتب هنا حرفٌ منه قبل
-// أن يكتب `pen.js` موضعَ الخطأ الحركيّ (الجلسة ١) وتقيسه شاشةُ الدرس (الجلسة ٥).
+// **وقلبُ هذه اللوحة** هو **عدّادُ أخطاء الاتجاه المميَّز** (`METHOD.md §٦`: «الذهبُ
+// القياسيّ لهذا التطبيق») — أن تقول اللوحةُ **«يبدأ الميمَ من أسفل»** لا «أخطأ في
+// الميم». **وقد مُلئ في الجلسة ١٠** بعد أن كتب `pen.js` موضعَ الخطأ الحركيّ (الجلسة
+// ١) وقاسته الشاشاتُ كلُّها (٥ فما بعدها) — **وجملتُه تُبنى ولا تُكتب**: شقُّها
+// الثابتُ `FAULT_TEXT` من المحرّك نفسِه، وتُتمّه الوحدةُ من الرحلة نفسِها.
 //
 // الشاشة لا تنطق شيئاً (لا صوت فيها أصلاً)، وتُبنى من نفس مفردات التنسيق القائمة
 // (pill · vchip · note · chip) وتُلوَّن بمتغيّر --accent، فلا تحتاج تنسيقاً جديداً.
 
 import * as progress from './progress.js';
+import { FAULTS, FAULT_TEXT } from './pen.js';
 import {
   h, go, toast, arNum, arCount, topbar, letterTitle, nodeTitle, nodeWhere, shake,
 } from './ui.js';
@@ -37,16 +39,9 @@ export function minutesText(seconds) {
 /** «مهارة واحدة» · «مهارتين» · «٥ مهارات» · «١٢ مهارة» — مفعولاً به في سياق التثبيت. */
 export const skillsText = (n) => arCount(n, ['مهارة واحدة', 'مهارتين', 'مهارات', 'مهارة']);
 
-/** ثوانٍ ← نصّ عربي بدقّة الثانية: مدد القراءة الجهرية أقصر من أن تُقاس بالدقائق. */
-export function secondsText(seconds) {
-  const total = Math.max(0, Math.round(seconds || 0));
-  if (!total) return 'أقل من ثانية';
-  const rest = total % 60;
-  const restText = arCount(rest, ['ثانية واحدة', 'ثانيتان', 'ثوانٍ', 'ثانية']);
-  if (total < 60) return restText;
-  const minutes = arCount(Math.floor(total / 60), ['دقيقة واحدة', 'دقيقتان', 'دقائق', 'دقيقة']);
-  return rest ? `${minutes} و${restText}` : minutes;
-}
+// **و`secondsText` لم تبقَ** (الجلسة ١٠): كانت في اقرأ تكتب **مدد القراءة الجهرية**
+// بدقّة الثانية — ولا قراءةَ جهرية هنا ولا تسجيلَ صوت، فما نادى أحدٌ الدالّةَ منذ
+// نُسخت البذرة. حذفُ ما لا موضوعَ له كحذف `markStats` أدناه، لا تعليقٌ يُنتظَر.
 
 /** لحظة التسجيل كما يقرؤها وليّ الأمر: «أحد ٣/٨ · ٦:٤٠». */
 export function whenText(at) {
@@ -165,6 +160,197 @@ function letterChip(stat, color) {
     h('small', {}, `${arNum(stat.right)} ✓ · ${arNum(stat.wrong)} ✗`));
 }
 
+// ————— خرائطُ أخطاء الاتجاه — الذهبُ القياسيّ لهذا التطبيق (`METHOD.md §٦`) —————
+//
+// **«يبدأ الميمَ من أسفل» لا «أخطأ في الميم»**. وهذا القسمُ **لا يكتب جملةً بيد**:
+//   · **شقُّها الثابت** `FAULT_TEXT` من `pen.js` — لغةُ المحرّك الذي حكم بالخطأ
+//     نفسِه، فلا قائمةَ ثانيةٌ هنا تشيخ يومَ يُضاف رمزٌ أو يتبدّل وصفُه.
+//   · **وتُتمّه الوحدةُ** من الرحلة نفسِها (`unitTitle`): الحرفُ «حرف ميم»، ومحطةُ
+//     التهيئة عنوانُها المشكول، والكلمةُ والجملةُ نصُّهما كما كُتبتا.
+//   · **والمعدودُ عدّادُ `progress.faults()`** — رمزُ الخطأ ومرّاتُه، لا أثرُ يد:
+//     مسارُ قلم الطفل لم يُخزَّن أصلاً (`METHOD.md §٣.٧`)، وموضعُ الخطأ محفوظٌ في
+//     **اسمه** (`start-end` = «يبدأ من الطرف الآخر») لا في إحداثيّ.
+//
+// **وهو غيرُ لوحة الحروف**: تلك تقول **كم** أصاب وأخطأ، وهذه تقول **كيف** أخطأ —
+// وبها وحدَها يعرف وليُّ الأمر ما يُصحَّح بإصبعه على الطاولة.
+
+/** كم وحدةً تُعرض خريطتُها — **والمحجوبُ يُقال عدداً** لا يُبتلع صامتاً. */
+export const FAULT_UNITS = 8;
+
+/** ترتيبُ الرموز عند تساوي العدد: ترتيبُ إعلان المحرّك لا ترتيبُ الأبجدية. */
+const FAULT_ORDER = Object.values(FAULTS);
+
+const timesText = (n) => arCount(n, ['مرة واحدة', 'مرتان', 'مرات', 'مرة']);
+
+// عناوينُ الوحدات تُقرأ من الرحلة مرّةً: بنيةُ المنهج ثابتةٌ وقت التشغيل (كما في
+// `progress.js`)، والوحدةُ التي لا عقدةَ لها — كلمةٌ أو جملة — **نصُّها عنوانُها**.
+let titleCache = null;
+function titles() {
+  if (titleCache) return titleCache;
+  titleCache = new Map();
+  for (const node of progress.allNodes()) {
+    if (node.type === 'warmup') titleCache.set(node.part, nodeTitle(node));
+    else if (node.type === 'letter') titleCache.set(node.letter, letterTitle(node.letter));
+  }
+  return titleCache;
+}
+
+/** عنوانُ وحدةٍ كما يقرؤه وليّ الأمر — من الرحلة، ولا اسمَ يُكتب بيد. */
+export const unitTitle = (unit) => titles().get(unit) || String(unit ?? '');
+
+/**
+ * **جملةُ الخطأ الحركيّ مبنيّةً**: عنوانُ الوحدة ثم شقُّ المحرّك الثابت.
+ * ورمزٌ لا يعرفه `FAULT_TEXT` **لا يُخترع له نصّ** — يسقط من العرض ويُمسِكه الفاحص.
+ */
+export function faultLine(fault) {
+  const clause = FAULT_TEXT[fault?.code];
+  return clause ? `${unitTitle(fault.unit)} — ${clause}` : '';
+}
+
+/**
+ * خريطةُ الأخطاء مرتَّبةً: الوحدةُ الأكثرُ تعثّراً أولاً، وداخلَها الخطأُ الأكثرُ
+ * تكراراً أولاً — فأوّلُ ما تقع عليه عينُ وليّ الأمر أولى ما يُصحَّح.
+ */
+export function faultMap(list = progress.faults()) {
+  const byUnit = new Map();
+  for (const fault of list) {
+    const text = faultLine(fault);
+    if (!text) continue;
+    const entry = byUnit.get(fault.unit)
+      || { unit: fault.unit, title: unitTitle(fault.unit), total: 0, lines: [] };
+    entry.total += fault.n;
+    entry.lines.push({ code: fault.code, n: fault.n, text });
+    byUnit.set(fault.unit, entry);
+  }
+  for (const entry of byUnit.values()) {
+    entry.lines.sort((a, b) => b.n - a.n
+      || FAULT_ORDER.indexOf(a.code) - FAULT_ORDER.indexOf(b.code));
+  }
+  return [...byUnit.values()]
+    .sort((a, b) => b.total - a.total || a.title.localeCompare(b.title, 'ar'));
+}
+
+function faultsSection() {
+  const map = faultMap();
+  const shown = map.slice(0, FAULT_UNITS);
+  const hidden = map.length - shown.length;
+  const total = map.reduce((sum, unit) => sum + unit.total, 0);
+
+  if (!map.length) {
+    return h('div', {},
+      h('p', { class: 'hint' },
+        'لم تُسجَّل حركةٌ خاطئة بعدُ — لا لأنه معصوم، بل لأنّ يده لم تمشِ بعدُ ما يكفي.'
+        + ' وحين تمشي سترى هنا **كيف** يخطئ لا كم أخطأ.'.replace(/\*\*/g, '')),
+    );
+  }
+
+  return h('div', {},
+    h('div', { class: 'audit-row' },
+      pill('حركاتٌ خاطئة', arNum(total)),
+      pill('في وحدات', arNum(map.length)),
+    ),
+    h('ul', { class: 'faults' }, shown.flatMap((unit) => unit.lines.map((line) =>
+      h('li', { class: 'fault' }, line.text, ' · ', h('b', {}, timesText(line.n)))))),
+    hidden > 0 && h('p', { class: 'hint' },
+      `وأخفينا ${arCount(hidden, ['وحدةً واحدة', 'وحدتين', 'وحدات', 'وحدة'])} أقلَّ تعثّراً`
+      + ` — تُعرض هنا ${arNum(FAULT_UNITS)} وحداتٍ لا أكثر كي يُقرأ الأهمّ.`),
+    h('p', { class: 'hint' },
+      'هذه ليست أخطاءَ إجابة بل **عاداتُ يد**: الحرفُ الصحيحُ شكلاً قد يُرسم بحركةٍ'
+      .replace(/\*\*/g, '')
+      + ' خاطئة، وتصحيحُها اليومَ أسهلُ من نقضها بعد رسوخها. واكتبها معه بإصبعك على'
+      + ' الطاولة وهو ينظر — يرى البداية والاتجاه قبل أن يمسك القلم.'),
+    h('p', { class: 'note' },
+      'والمعدودُ هنا **اسمُ الخطأ ومرّاتُه** لا أثرُ يده: مسارُ قلمه لا يُخزَّن أصلاً'
+      .replace(/\*\*/g, '')
+      + ' ولا يغادر جهازه.'),
+  );
+}
+
+// ————— لكلِّ نوع تمرينٍ موضعُه (`METHOD.md §٦`) —————
+//
+// «كلُّ محطةٍ تدرّس مهارةً لها قياسٌ في ليتنر وتمرينُ مراجعةٍ **وموضعٌ في اللوحة**».
+// ولوحةُ الحروف تجمع تمارينَ الحرف كلَّها في بطاقةٍ واحدة، فلا يُرى فيها الفرقُ بين
+// تتبّعٍ وكتابةٍ حرّة — وهذا الصفُّ يقوله: **أربعةٌ تُقرأ من `KINDS` نفسِها**، فنوعٌ
+// يُضاف غداً يظهر هنا بلا سطرٍ يُكتب.
+
+/** حصيلةُ كل نوع تمرين من سجلّ ليتنر — دالّةٌ خالصة يقرؤها الفاحصُ كما تقرؤها اللوحة. */
+export function kindPlaces(list = progress.skills(), today = progress.dayNumber()) {
+  return Object.values(progress.KINDS).map((kind) => {
+    const mine = list.filter((skill) => skill.kind === kind);
+    return {
+      kind,
+      name: progress.KIND_NAMES[kind] || kind,
+      measured: mine.length,
+      mastered: mine.filter((skill) => skill.box >= progress.MASTERED_BOX).length,
+      due: mine.filter((skill) => skill.due <= today).length,
+    };
+  });
+}
+
+function kindsSection() {
+  const places = kindPlaces();
+  return h('div', {},
+    h('div', { class: 'audit-row' }, places.map((place) => pill(place.name,
+      place.measured
+        ? `${arNum(place.measured)} مقيسة · ${arNum(place.mastered)} متقنة`
+        : 'لم يبلغه بعد'))),
+    h('p', { class: 'hint' },
+      'التتبّعُ والكتابةُ الحرّة وحدتُهما حرف، والنسخُ والإملاءُ وحدتُهما كلمةٌ أو جملة'
+      + ' — فلكلٍّ صندوقُ مراجعةٍ مستقل، وحرفٌ يتقنه تتبّعاً قد يتعثّر فيه وحدَه.'),
+  );
+}
+
+// ————— الكلماتُ والجملُ نسخاً وإملاءً —————
+//
+// **الكلمةُ ليست حرفاً** فلا تدخل لوحةَ الحروف (وإلا ظهر «حرفٌ» اسمُه «بابا»)، وهي
+// مقيسةٌ في ليتنر بنوعين فتُقرأ هنا. **والوحدةُ صفٌّ واحد لا صفّان**: لو عُرضت كلُّ
+// مهارةٍ ببطاقتها لَظهرت «بابا» مرّتين بنصٍّ واحد، لا يفرّق الوالدُ نسخَها من إملائها.
+//
+// **والجملُ صفُّها** (حكمُ الجلسة ٩): محورُها في ليتنر `SENTENCE_FORM` لا محورُ
+// الكلمة، فلا يقرأ وليُّ الأمر سطراً كاملاً في صفّ «الكلمات».
+
+/** وحداتُ الكلمة والجملة مجموعةً بوحدتها، ولكلِّ وحدةٍ نسخُها وإملاؤها. */
+export function wordUnits(list = progress.skills()) {
+  const byUnit = new Map();
+  for (const skill of list) {
+    if (!progress.isWordSkill(skill)) continue;
+    const entry = byUnit.get(skill.unit) || {
+      unit: skill.unit,
+      sentence: progress.isSentenceSkill(skill),
+      kinds: [],
+      right: 0,
+      wrong: 0,
+      box: progress.MAX_BOX,
+    };
+    entry.kinds.push(skill);
+    entry.right += skill.right;
+    entry.wrong += skill.wrong;
+    entry.box = Math.min(entry.box, skill.box);
+    byUnit.set(skill.unit, entry);
+  }
+  const order = Object.values(progress.KINDS);
+  for (const entry of byUnit.values()) {
+    entry.kinds.sort((a, b) => order.indexOf(a.kind) - order.indexOf(b.kind));
+  }
+  return [...byUnit.values()];
+}
+
+function wordChip(entry) {
+  const color = entry.box >= progress.MASTERED_BOX ? GOOD : entry.wrong >= 2 ? BAD : ACCENT;
+  // الصفرُ لا يُكتب: «إملاء ١✗» أوضحُ من «إملاء ٠✓ ١✗» في سطرٍ صغير تحت الكلمة
+  const parts = entry.kinds.map((skill) =>
+    (progress.KIND_NAMES[skill.kind] || skill.kind)
+    + (skill.right ? ` ${arNum(skill.right)}✓` : '')
+    + (skill.wrong ? ` ${arNum(skill.wrong)}✗` : ''));
+  return h('span', {
+    class: 'vchip vchip--tag',
+    css: { '--chip': color },
+    title: `${entry.unit} — ${parts.join(' · ')}`,
+  },
+    entry.unit,
+    h('small', {}, parts.join(' · ')));
+}
+
 // **`markStats` لم تُنقَل**: في اقرأ تجمع مفتاحَي درسِ العلامة (قراءةً وسماعاً) في
 // بطاقةٍ واحدة. وعلاماتُ «اُكْتُبْ» — الشدّةُ والتنوينُ والهمزات — **ليست دروساً
 // مستقلّة أصلاً**: أقرّ المالك (ق٣) أن تُكتب **في مواضعها ضمن الكلمات** لا محطاتٍ
@@ -172,10 +358,13 @@ function letterChip(stat, color) {
 
 // ————— قسمان من البذرة لم يُنقَلا، ولكلٍّ سببُه —————
 //
-// **١) «نحو القراءة الحرة»** (`fadingSection`): يعرض في اقرأ كلماتٍ خفت تشكيلُها.
-// و«اُكْتُبْ» له خفوتُه (`METHOD.md §٤` مرحلة ١٣) — لكنّ ما يخفت فيه **نموذجُ
-// الكلمة المكتوبة** لا شكلُها، والعدّادُ قائمٌ في `progress.js` من اليوم. فالقسمُ
-// **مُعلَّقٌ حتى الجلسة ٩** (خفوت النموذج والإملاء): لا تُعرض درجاتٌ لا يكتبها أحد.
+// **١) «نحو القراءة الحرة»** (`fadingSection`): يعرض في اقرأ كلماتٍ خفت تشكيلُها،
+// **ولا نظيرَ له هنا صفّاً مستقلاً** — وقد كان معلَّقاً حتى الجلسة ٩، فلمّا كُتب
+// الخفوتُ سقط التعليقُ بحكمه (الجلسة ١٠): ما يخفت عندنا **نموذجُ الكلمة المكتوبة**،
+// و**درجتُه لا تُخزَّن أصلاً** بل حاصلُ قسمةٍ يُعاد حسابُه من عدّاد الإصابات
+// المتباعدة كلَّ مرة (حكمُ الجلسة ٩). فعرضُ الدرجة نسخةٌ ثانية تفترق عن الشاشة يوماً
+// — وثمرتُها مقيسةٌ في ليتنر بعينها: كلمةٌ خفت نموذجُها كلُّه تُقاس **إملاءً** لا
+// نسخاً. فصفُّ «الكلمات نسخاً وإملاءً» أدناه هو الخفوتُ مقروءاً في أثره لا في رقمه.
 //
 // **٢) «تسجيلات طفلي»** (`recordingsSection` ومنحنى الطلاقة): يُسمِع وليَّ الأمر
 // صوتَ طفله وهو يقرأ. و«اُكْتُبْ» **لا يلتقط صوتاً ألبتّة** — فحذفٌ لِما لا موضوعَ
@@ -220,7 +409,8 @@ function saveBackupFile() {
 /** ما في النسخة بعبارة وليّ الأمر — يُقرأ قبل التأكيد لا بعده. */
 function summaryText(sum) {
   return `★ ${arNum(sum.stars)} في ${nodesText(sum.nodes)} · ${skillsText(sum.skills)} مقيسة`
-    + (sum.reads ? ` · ${arCount(sum.reads, ['كلمة واحدة', 'كلمتان', 'كلمات', 'كلمة'])} لها تاريخ قراءة` : '')
+    + (sum.reads ? ` · ${arCount(sum.reads, ['كلمة واحدة', 'كلمتان', 'كلمات', 'كلمة'])} لها تاريخُ خفوت` : '')
+    + (sum.faults ? ` · ${arCount(sum.faults, ['حركةٌ خاطئة واحدة', 'حركتان خاطئتان', 'حركاتٍ خاطئة', 'حركةً خاطئة'])} مسمّاة` : '')
     + (sum.savedAt ? ` · حُفظت ${whenText(sum.savedAt)}` : '');
 }
 
@@ -368,8 +558,9 @@ function backupSection(rerender) {
     storage,
     dlRow,
     h('p', { class: 'note' },
-      'في النسخة: النجوم وصناديق المراجعة ودقائق التعلّم ومدد قراءاته الجهرية'
-      + ' وتاريخ خفوت كلماته. وليس فيها مسارُ قلمٍ واحد — تلك لا تغادر جهازه أبداً.'),
+      'في النسخة: النجوم وصناديق المراجعة ودقائق التعلّم وتاريخ خفوت كلماته'
+      + ' وعدّادُ حركاته الخاطئة بأسمائها. وليس فيها مسارُ قلمٍ واحد ولا إحداثيُّ'
+      + ' لمسة — تلك لا تغادر جهازه أبداً، ولا تُخزَّن عنده أصلاً.'),
   );
 }
 
@@ -456,8 +647,10 @@ function dashboard(rerender = () => {}) {
   const letters = progress.studiedLetters();
   const stats = progress.letterStats();
   // **الكلماتُ صفٌّ إلى جوار الحروف**: النسخُ والإملاء وحدتُهما كلمة لا حرف
-  // (`METHOD.md §٦`) — فلا تدخل لوحةَ الحروف، ولها قسمُها أدناه.
-  const words = progress.skills().filter(progress.isWordSkill);
+  // (`METHOD.md §٦`) — فلا تدخل لوحةَ الحروف، ولها قسمُها أدناه. **والجملُ صفُّها**.
+  const units = wordUnits(progress.skills());
+  const words = units.filter((u) => !u.sentence);
+  const lines = units.filter((u) => u.sentence);
   const mastered = stats.filter((s) => s.mastered);
   const weak = stats.filter((s) => s.struggling);
   const learning = stats.filter((s) => !s.mastered && !s.struggling);
@@ -516,15 +709,21 @@ function dashboard(rerender = () => {}) {
     // ظهر «حرفٌ» اسمُه «بابا») — ولكنها مقيسةٌ في ليتنر نسخاً وإملاءً فتُقرأ هنا.
     ...section(`الكلمات نسخاً وإملاءً (${arNum(words.length)})`,
       words.length
-        ? [h('div', { class: 'audit-row' }, words.map((s) => h('span', {
-          class: 'vchip vchip--tag',
-          css: { '--chip': s.box >= progress.MASTERED_BOX ? GOOD : s.wrong >= 2 ? BAD : ACCENT },
-          title: `${s.unit} — ${arNum(s.right)} صواب، ${arNum(s.wrong)} خطأ`,
-        }, s.unit))),
-          h('p', { class: 'hint' },
-            'النسخُ أن يكتبها وهو يراها، والإملاءُ أن يكتبها وقد سمعها فقط '
-            + '— ولكلٍّ صندوقُ مراجعته.')]
-        : emptyNote('لم يبلغ محطةَ نسخٍ بعدُ — تبدأ بعد أشكال المواقع.')),
+        ? h('div', { class: 'audit-row' }, words.map(wordChip))
+        : emptyNote('لم يبلغ محطةَ نسخٍ بعدُ — تبدأ بعد أشكال المواقع.'),
+      lines.length
+        ? [h('p', { class: 'hint' },
+          `والجملُ سطرٌ لا كلمة، فلها صفُّها (${arNum(lines.length)}):`),
+          h('div', { class: 'audit-row' }, lines.map(wordChip))]
+        : null,
+      (words.length || lines.length) && h('p', { class: 'hint' },
+        'النسخُ أن يكتبها وهو يراها، والإملاءُ أن يكتبها وقد سمعها فقط '
+        + '— ولكلٍّ صندوقُ مراجعته.')),
+
+    // **قلبُ اللوحة** (`METHOD.md §٦`): كيف يخطئ لا كم أخطأ.
+    ...section('أخطاء الاتجاه — أين تتعثّر يده بالضبط', faultsSection()),
+
+    ...section('لكلِّ نوع تمرينٍ موضعُه', kindsSection()),
 
     ...section('دقائق آخر سبعة أيام',
       h('div', { class: 'audit-row' }, week.map((day) => {
