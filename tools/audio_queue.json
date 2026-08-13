@@ -218,7 +218,14 @@
     "priority": 100,
     "status": "done",
     "doneAt": "2026-08-13",
-    "model": "gemini-3.1-flash-tts-preview"
+    "model": "gemini-3.1-flash-tts-preview",
+    "retired": true,
+    "fixHistory": [
+      {
+        "reason": "تقاعد: لم تعد بيانات التطبيق تطلبه",
+        "at": "2026-08-13"
+      }
+    ]
   },
   {
     "text": "انْسُخْهَا وَهْيَ خَافِتَةْ",
@@ -227,7 +234,14 @@
     "priority": 100,
     "status": "done",
     "doneAt": "2026-08-13",
-    "model": "gemini-3.1-flash-tts-preview"
+    "model": "gemini-3.1-flash-tts-preview",
+    "retired": true,
+    "fixHistory": [
+      {
+        "reason": "تقاعد: لم تعد بيانات التطبيق تطلبه",
+        "at": "2026-08-13"
+      }
+    ]
   },
   {
     "text": "انْظُرِ الْعَلَامَةَ ثُمَّ اكْتُبْ",
@@ -281,10 +295,44 @@
     "priority": 100,
     "status": "done",
     "doneAt": "2026-08-13",
-    "model": "gemini-3.1-flash-tts-preview"
+    "model": "gemini-3.1-flash-tts-preview",
+    "retired": true,
+    "fixHistory": [
+      {
+        "reason": "تقاعد: لم تعد بيانات التطبيق تطلبه",
+        "at": "2026-08-13"
+      }
+    ]
   },
   {
     "text": "اسْتَمِعْ ثُمَّ اكْتُبِ الْجُمْلَةْ",
+    "category": "ui",
+    "requestedBy": "session-5",
+    "priority": 100,
+    "status": "done",
+    "doneAt": "2026-08-13",
+    "model": "gemini-3.1-flash-tts-preview"
+  },
+  {
+    "text": "انْسَخْهَا عَلَى الْمَسَارْ",
+    "category": "ui",
+    "requestedBy": "session-5",
+    "priority": 100,
+    "status": "done",
+    "doneAt": "2026-08-13",
+    "model": "gemini-3.1-flash-tts-preview"
+  },
+  {
+    "text": "انْسَخْهَا وَهْيَ خَافِتَةْ",
+    "category": "ui",
+    "requestedBy": "session-5",
+    "priority": 100,
+    "status": "done",
+    "doneAt": "2026-08-13",
+    "model": "gemini-3.1-flash-tts-preview"
+  },
+  {
+    "text": "انْسَخِ الْجُمْلَةَ عَلَى السَّطْرْ",
     "category": "ui",
     "requestedBy": "session-5",
     "priority": 100,

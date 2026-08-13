@@ -145,7 +145,7 @@ function wordExercise(item, api, mode) {
   // (وألفُ الوصل عاريةٌ هنا أيضاً — توأمُ التعليمة المنطوقة كما أعلاه)
   box.append(h('p', { class: 'ask' }, dictation
     ? `اسْتَمِعْ ثُمَّ اكْتُبِ ${sentence ? 'الجملة' : 'الكلمة'}`
-    : `انْسُخِ ${sentence ? 'الجملة' : 'الكلمة'}`), surface.el);
+    : `انْسَخِ ${sentence ? 'الجملة' : 'الكلمة'}`), surface.el);
   surface.play();
   surface.el.addEventListener('pointerdown', () => surface.stop(), { capture: true });
   // **وفي الإملاء الصوتُ هو السؤال كلُّه** — ولا نموذجَ يُرى (`MODES.FREE`)

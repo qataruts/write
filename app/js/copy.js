@@ -47,8 +47,11 @@ export const SAY = {
   // `docs/AUDIO_QUEUE.md`، ويحرسها بابُ `vowelledWasl` في `tools/check_speech.mjs`.
   // **والمفتاحُ من النصّ**، فللصورة الجديدة ملفُّها الجديد والسابقُ يُتقاعَد
   // بسجلّه (`--retire`) فلا يبقى يتيمٌ في البنك.
-  guided: 'انْسُخْهَا عَلَى الْمَسَارْ',
-  faint: 'انْسُخْهَا وَهْيَ خَافِتَةْ',
+  // **ووزنُ «نسخ» مصحَّحٌ بأذن المالك** (١٣ أغسطس ٢٠٢٦): `نَسَخَ` مضارعُه `يَنْسَخُ`
+  // بفتح العين — فأمرُه `انْسَخْ` بفتح السين، لا `انْسُخْ`. ويحرس الصنفَ
+  // `waslHarakaFits` في `tools/check_speech.mjs`.
+  guided: 'انْسَخْهَا عَلَى الْمَسَارْ',
+  faint: 'انْسَخْهَا وَهْيَ خَافِتَةْ',
   space: 'كَلِمَتَانِ بَيْنَهُمَا فَرَاغْ',
   card: 'انْظُرِ الْعَلَامَةَ ثُمَّ اكْتُبْ',
 };
@@ -68,7 +71,7 @@ export const SPOKEN = [...Object.values(SAY), ...SPOKEN_WORDS];
 /** خطواتُ حلقة النسخ — الكاتبتان منهما تكتبان `نسخ` في ليتنر. */
 export const STEPS = [
   { id: 'watch', mode: MODES.GUIDED, title: 'شَاهِدْ', say: SAY.watch, kind: null },
-  { id: 'guided', mode: MODES.GUIDED, title: 'اُنْسُخْ', say: SAY.guided, kind: progress.KINDS.COPY },
+  { id: 'guided', mode: MODES.GUIDED, title: 'اِنْسَخْ', say: SAY.guided, kind: progress.KINDS.COPY },
   { id: 'faint', mode: MODES.FAINT, title: 'خَافِتَة', say: SAY.faint, kind: progress.KINDS.COPY },
 ];
 
@@ -334,7 +337,7 @@ export function renderNode(node) {
         h('button', {
           class: 'btn btn--primary next',
           onclick: () => { audio.stop(); nextStep(); },
-        }, icon('pen'), ' اُنْسُخْ'),
+        }, icon('pen'), ' اِنْسَخْ'),
         // **وزرُّ الأذن يُسمِع الكلمةَ بصوت اقرأ** — يسقط في سطر المسافة (لا صوتَ له)
         unit.say && h('button', {
           class: 'btn next',
