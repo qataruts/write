@@ -92,8 +92,11 @@ function penExercise(item, api, mode) {
     },
   });
   live = surface;
+  // **وسؤالُ اللوح توأمُ التعليمة المنطوقة**، فيتبعها في ألف الوصل: القاعدةُ حكمُها
+  // على المنطوق (`docs/AUDIO_QUEUE.md`)، لكنّ الطفلَ يقرأ هذا السطرَ وأذنُه تسمع
+  // صورتَه في الشاشات الأخرى — فصورتان لأمرٍ واحدٍ تعليمُ ازدواج.
   box.append(
-    h('p', { class: 'ask' }, mode === MODES.FREE ? 'اُكْتُبْهُ وحدَك' : 'تتبّعِ المسار'),
+    h('p', { class: 'ask' }, mode === MODES.FREE ? 'اكْتُبْهُ وحدَك' : 'تتبّعِ المسار'),
     surface.el,
   );
   surface.play();
@@ -139,9 +142,10 @@ function wordExercise(item, api, mode) {
   });
   live = surface;
   const sentence = item.form === progress.SENTENCE_FORM;
+  // (وألفُ الوصل عاريةٌ هنا أيضاً — توأمُ التعليمة المنطوقة كما أعلاه)
   box.append(h('p', { class: 'ask' }, dictation
-    ? `اِسْتَمِعْ ثُمَّ اُكْتُبِ ${sentence ? 'الجملة' : 'الكلمة'}`
-    : `اُنْسُخِ ${sentence ? 'الجملة' : 'الكلمة'}`), surface.el);
+    ? `اسْتَمِعْ ثُمَّ اكْتُبِ ${sentence ? 'الجملة' : 'الكلمة'}`
+    : `انْسُخِ ${sentence ? 'الجملة' : 'الكلمة'}`), surface.el);
   surface.play();
   surface.el.addEventListener('pointerdown', () => surface.stop(), { capture: true });
   // **وفي الإملاء الصوتُ هو السؤال كلُّه** — ولا نموذجَ يُرى (`MODES.FREE`)

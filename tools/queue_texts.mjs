@@ -34,6 +34,8 @@
 // ذلك بابٌ في `check_speech.mjs` (لا مدخلَ لنصٍّ له ملفٌّ منسوخ).
 
 import { readFileSync, readdirSync, writeFileSync, existsSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { resolve } from 'node:path';
 
 const ROOT = new URL('../', import.meta.url);
 const APP = new URL('app/js/', ROOT);
@@ -94,6 +96,27 @@ const loadQueue = () => (existsSync(QUEUE) ? JSON.parse(read(QUEUE)) : []);
 const saveQueue = (rows) => writeFileSync(QUEUE, `${JSON.stringify(rows, null, 1)}\n`, 'utf8');
 const banked = () => new Set(existsSync(BANK) ? Object.values(JSON.parse(read(BANK))) : []);
 
+/**
+ * **أوَلَدت القائمةُ هذا المدخلَ بنفسها؟** — ميزانُ نسبِ ملفٍ في البنك.
+ *
+ * كان البنكُ نسباً واحداً (منسوخاً من اقرأ) فصحّت المعادلة «في البنك ⇒ منسوخ».
+ * ومنذ أوّل تصريف (١٣ أغسطس ٢٠٢٦) صار له نسبان، فصارت تلك المعادلةُ تتّهم
+ * القائمةَ **بثمرتها هي** — خمسةَ عشرَ سطرَ «منسوخٌ من اقرأ» عن ملفاتٍ ولّدتها
+ * القائمةُ نفسُها، وهي تهمةٌ تدفع جلسةً لاحقة إلى حذف ما لا يجوز حذفُه.
+ *
+ * **والمدخلُ نفسُه شهادةُ ميلاده**: `mark_done` يختمه بحالته ونموذجه، و`--requeue`
+ * ينزع النموذجَ كي لا يُوجِّه **ويُبقي نسبَه في `fixHistory.was`** — فتُقرأ منها.
+ * و`--retire` يكتب في السجلّ نفسِه بلا `was`، فلا يمنح نسباً. والمنسوخُ من اقرأ
+ * لا مدخلَ له في القائمة ألبتّة، فلا شهادةَ له — وهو المقصود.
+ *
+ * **وهنا موضعُها لا في الحارس**: `check_speech.mjs` يحكم بها وهذه الأداةُ تُصلِح،
+ * **والاشتقاقُ واحدٌ لهما** (كما `--wanted-json` سواءً بسواء) — ولو نُسخت لصار
+ * لحقيقةٍ واحدةٍ مصدران يفترقان يوماً.
+ */
+export const bornHere = (row) =>
+  ((row.status ?? 'pending') === 'done' && Boolean(row.model))
+  || (row.fixHistory ?? []).some((fix) => Boolean(fix.was));
+
 async function main() {
   const { wanted, errors } = await declaredTexts();
   if (errors.length) {
@@ -118,8 +141,8 @@ async function main() {
   // **المنحرف**: منتظِرٌ فئتُه غير المشتقّة من موضعه
   const drift = queue.filter((row) => (row.status ?? 'pending') !== 'done'
     && wanted.has(row.text) && wanted.get(row.text) !== row.category);
-  // **المنسوخ**: له ملفٌّ من بنك اقرأ فلا يُصَفّ (توليدُه يُسمِعه بصوتين)
-  const copied = queue.filter((row) => bank.has(row.text));
+  // **المنسوخ**: له ملفٌّ في البنك **ولم تلده القائمة** فلا يُصَفّ (توليدُه يُسمِعه بصوتين)
+  const copied = queue.filter((row) => bank.has(row.text) && !bornHere(row));
 
   console.log(`المُعلَن: ${wanted.size} نصّاً · في البنك ${[...wanted].filter(([t]) => bank.has(t)).length}`
     + ` · في القائمة ${queue.length} (منتظِرٌ ${queue.filter((r) => (r.status ?? 'pending') !== 'done').length})`);
@@ -153,4 +176,9 @@ async function main() {
   return 0;
 }
 
-process.exit(await main());
+// **تُشغَّل مباشرةً فتعمل، وتُستورَد فتُعطي دوالَّها ولا تفعل شيئاً**: الحارسُ
+// يستورد منها `bornHere` (اشتقاقٌ واحدٌ لا نسخةٌ ثانية)، ولولا هذا الشرطُ لَجرت
+// الأداةُ كلُّها عند كلِّ استيراد — بل ولَخرجت بالعملية من تحت مستوردِها.
+if (fileURLToPath(import.meta.url) === resolve(process.argv[1] ?? '')) {
+  process.exit(await main());
+}
