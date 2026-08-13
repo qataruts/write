@@ -30,7 +30,7 @@ import { WORDS, SPOKEN_WORDS, markInfo } from './curriculum.js';
 import { WORD_PATHS, MARK_PATHS } from './word_paths.js';
 import { penSurface, refGlyph, MODES } from './pen.js';
 import {
-  h, icon, go, arNum, starsRow, topbar, brandMark, mascot, cheer, faceEl,
+  h, fill, icon, go, arNum, starsRow, topbar, brandMark, mascot, cheer, faceEl,
   nodeTitle, traceFace,
 } from './ui.js';
 
@@ -76,8 +76,9 @@ export const STEPS = [
 ];
 
 /** عقدةُ الرحلة بجزئها — من الرحلة نفسِها، فلا يُكتب معرّفُ محطةٍ بيد. */
-export const nodeOf = (part) => progress.allNodes()
-  .find((node) => node.type === 'join' && node.part === part) || null;
+export const nodeOf = (part, stageId = null) => progress.allNodes()
+  .find((node) => node.type === 'join' && node.part === part
+    && (!stageId || node.stageId === stageId)) || null;
 
 /**
  * **وحداتُ العقدة**: ما ينسخه الطفلُ فيها واحدةً بعد واحدة — ولكلٍّ مسارُها المرجعيّ
@@ -117,7 +118,7 @@ export function releaseCopy() {
 }
 
 /** شاشةُ محطة الوصل والنسخ — بابُ الموجّه. */
-export const renderCopy = (part) => renderNode(nodeOf(part));
+export const renderCopy = (part, stageId = null) => renderNode(nodeOf(part, stageId));
 
 /**
  * **بطاقةُ تعريف العلامة** (ق٣): تُعرَض قبل أوّل كلمةٍ تحملها في هذه العقدة —
@@ -216,7 +217,7 @@ export function renderNode(node) {
       state.cards.add(mark);
       hint.textContent = SAY.card;
       board.replaceChildren(markCard(mark, () => { audio.stop(); mount(); }));
-      foot.replaceChildren();
+      fill(foot);
       paintDots();
       paintStrip();
       // التعليمةُ ثم **كلمتُها الحاملة بصوت اقرأ** — لا اسمُ العلامة (لا ملفَّ له)
@@ -314,7 +315,7 @@ export function renderNode(node) {
       h('p', { class: 'hint' }, `${nodeTitle(node)} — ${
         state.faults ? 'يدُك تتحسّن' : 'بلا خطأٍ واحد'}`),
     ));
-    foot.replaceChildren(
+    fill(foot, 
       h('button', { class: 'btn btn--primary next', onclick: () => go('#/') }, '→ الخريطة'),
       h('button', {
         class: 'btn next',
@@ -333,7 +334,7 @@ export function renderNode(node) {
   /** أفعالُ الشاشة: تُبدَّل بالخطوة — وكلُّها أهدافُ لمسٍ ≥ ٦٤ بكسل (`DESIGN §٤`). */
   function paintFoot(step, unit) {
     if (step.id === 'watch') {
-      foot.replaceChildren(
+      fill(foot, 
         h('button', {
           class: 'btn btn--primary next',
           onclick: () => { audio.stop(); nextStep(); },
@@ -351,7 +352,7 @@ export function renderNode(node) {
       );
       return;
     }
-    foot.replaceChildren(
+    fill(foot, 
       h('button', {
         class: 'btn btn--primary next',
         onclick: () => { live?.reset(); live?.play(); },

@@ -67,6 +67,10 @@ async function declaredTexts() {
   // ١) أسماءُ الحروف — من `LETTERS` بأعيانها (وهي `LETTERS` اقرأ، `SEED.md §٦`)
   const curriculum = await import(new URL('curriculum.js', APP));
   const names = new Set(Object.values(curriculum.LETTERS || {}).map((l) => l.name));
+  // ١أ) **وأسماءُ الأرقام معها** (ت٥): اسمُ العدد كاسم الحرف — يُقال قبل أن يُكتب
+  // رسمُه. **وليس في بنك اقرأ منها شيء** (لا يعلّم الأرقام)، فتُصَفّ لتُصرَّف كما
+  // تُصَرَّف تعليماتُنا — بفئة الاسم لا بفئة التعليمة، فمسحةُ الأداء مسحةُ تسمية.
+  for (const info of Object.values(curriculum.DIGITS || {})) names.add(info.name);
   // ١ب) **ومفاتيحُ أصوات الكلمات** (الجلسة ٨): منسوخةٌ من بنك اقرأ كأسماء الحروف
   // سواءً — فلا تدخل القائمةَ أبداً، وفئتُها تقول من أين جاءت.
   const wordSays = new Set(curriculum.SPOKEN_WORDS || []);

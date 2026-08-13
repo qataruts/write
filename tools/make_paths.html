@@ -2074,15 +2074,18 @@ async function buildWords(spec, canon) {
   for (const [ch, info] of Object.entries(cur.LETTERS)) JOINS_AFTER[ch] = !!info.joins;
   for (const [ch, info] of Object.entries(cur.VARIANTS)) JOINS_AFTER[ch] = !!info.joins;
 
-  const stage = cur.STAGES.find((s) => s.kind === 'join');
-  const joins = (stage?.nodes || []).flatMap((n) => n.joins || []);
+  // **ومحطاتُ النوع الواحد كلُّها لا أُولاها** (جلسةُ التوسعة): صارت للنسخ محطاتٌ
+  // (الوصلُ · البساتينُ · الجذور) وللجمل محطتان (القصيرةُ · السلّم) — و`find` كانت
+  // تأخذ الأولى وحدَها **فتخرج الوحدةُ ناقصةً صامتة**: مادّةٌ في المنهج بلا مسار.
+  const kind = (k) => cur.STAGES.filter((s) => s.kind === k).flatMap((s) => s.nodes || []);
+  const joinNodes = kind('join');
+  const joins = joinNodes.flatMap((n) => n.joins || []);
   const words = Object.keys(cur.WORDS);
-  const pairs = (stage?.nodes || [])
+  const pairs = joinNodes
     .filter((n) => (n.words || []).length >= 2 && !String(n.part).startsWith('sign-'))
     .map((n) => `${n.words[0]} ${n.words[1]}`);
-  // وجملُ المحطة الأخيرة من سلّم اقرأ — تُقرأ من عقدها كما تُقرأ الكلماتُ من جدولها
-  const sentences = (cur.STAGES.find((s) => s.kind === 'sentence')?.nodes || [])
-    .flatMap((n) => n.sentences || []);
+  // وجملُ سلّم اقرأ — تُقرأ من عقدها كما تُقرأ الكلماتُ من جدولها
+  const sentences = kind('sentence').flatMap((n) => n.sentences || []);
 
   // العلاماتُ المطلوبة قانونيّاتُها: كلُّ حركةٍ وردت في المادّة — فعلامةٌ بلا إيماءةٍ
   // مؤلَّفةٍ تُسقط البناءَ باسمها، ولا تدخل كلمةٌ حركتُها نقرةٌ عمياء.
@@ -2539,6 +2542,14 @@ async function runBuild() {
     }
 
     say(true, 'تمّ البناء', {
+      // **وما سقط يُبلَّغ به المنهجَ لا سجلَّ الشاشة وحدَه** (جلسةُ التوسعة): جملةٌ
+      // لا يؤلَّف لها خيالٌ **تبقى في المنهج** فيحمرّ `check_paths` عليها كلَّ مرّة.
+      // فتخرج الساقطاتُ من هنا بأسمائها وعللها، ويقرؤها مولّدُ المنهج فيُسقطها من
+      // مادّته بإعلان — **دورةٌ مغلقة بلا قائمةٍ تُكتب بيد**.
+      dropped: [
+        ...built.failedSentences.map((why) => ({ kind: 'sentence', why })),
+        ...built.failedPairs.map((why) => ({ kind: 'pair', why })),
+      ],
       paths,
       warmups: warm.warmups,
       words: built.words,

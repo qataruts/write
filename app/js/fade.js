@@ -30,7 +30,7 @@ import { WORDS, SPOKEN_WORDS } from './curriculum.js';
 import { WORD_PATHS } from './word_paths.js';
 import { penSurface, partsOf, MODES } from './pen.js';
 import {
-  h, icon, go, arNum, starsRow, topbar, brandMark, mascot, cheer, faceEl,
+  h, fill, icon, go, arNum, starsRow, topbar, brandMark, mascot, cheer, faceEl,
   nodeTitle, traceFace,
 } from './ui.js';
 
@@ -92,8 +92,9 @@ export const sayOf = (level) => (level >= VEIL_STEPS ? SAY.dictate
   : level > 0 ? SAY.fading : SAY.copy);
 
 /** عقدةُ الرحلة بجزئها — من الرحلة نفسِها، فلا يُكتب معرّفُ محطةٍ بيد. */
-export const nodeOf = (part) => progress.allNodes()
-  .find((node) => node.type === 'fade' && node.part === part) || null;
+export const nodeOf = (part, stageId = null) => progress.allNodes()
+  .find((node) => node.type === 'fade' && node.part === part
+    && (!stageId || node.stageId === stageId)) || null;
 
 /**
  * **وحداتُ العقدة**: كلماتُها التي أُلّف مسارُها، ولكلٍّ صوتُها من بنك اقرأ.
@@ -123,7 +124,7 @@ export function releaseFade() {
 }
 
 /** شاشةُ محطة الخفوت — بابُ الموجّه. */
-export const renderFade = (part) => renderNode(nodeOf(part));
+export const renderFade = (part, stageId = null) => renderNode(nodeOf(part, stageId));
 
 /**
  * **الشاشةُ الواحدة**: عقدةٌ بكلماتها، لكلِّ كلمةٍ لوحٌ بدرجة خفوتها.
@@ -277,7 +278,7 @@ export function renderNode(node) {
       h('p', { class: 'hint' }, `${nodeTitle(node)} — ${
         state.faults ? 'يدُك تتحسّن' : 'بلا خطأٍ واحد'}`),
     ));
-    foot.replaceChildren(
+    fill(foot, 
       h('button', { class: 'btn btn--primary next', onclick: () => go('#/') }, '→ الخريطة'),
       h('button', {
         class: 'btn next',
@@ -295,7 +296,7 @@ export function renderNode(node) {
   /** أفعالُ الشاشة — وكلُّها أهدافُ لمسٍ ≥ ٦٤ بكسل (`DESIGN §٤`). */
   function paintFoot(unit) {
     const level = levelOf(unit.text);
-    foot.replaceChildren(
+    fill(foot, 
       // **زرُّ الأذن يُسمِع الكلمةَ بصوت اقرأ** — وهو في درجة الإملاء بابُ الطفل الوحيد
       unit.say && h('button', {
         class: 'btn btn--primary next',

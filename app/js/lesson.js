@@ -35,8 +35,8 @@
 import * as progress from './progress.js';
 import { starsForReview } from './progress.js';
 import * as audio from './audio.js';
-import { pathOf, PATHS, LETTERS, FORMS } from './curriculum.js';
-import { penSurface, refGlyph, MODES } from './pen.js';
+import { pathOf, PATHS, LETTERS, DIGITS, VARIANTS, FORMS, shapeOf } from './curriculum.js';
+import { penSurface, refGlyph, MODES, SIZE_TEXT } from './pen.js';
 import {
   h, icon, go, arNum, starsRow, topbar, brandMark, mascot, cheer, faceEl,
   nodeTitle, traceFace, letterName, formTitle,
@@ -70,7 +70,15 @@ export const SAY = {
  */
 export const LETTER_NAMES = Object.keys(PATHS).map((ch) => LETTERS[ch]?.name).filter(Boolean);
 
-export const SPOKEN = [...Object.values(SAY), ...LETTER_NAMES];
+/**
+ * **وأسماءُ الأرقام معها** (ت٥): الرقمُ يُشاهَد كما يُشاهَد الحرف، ويُسمّى باسم عدده
+ * **كما يسمّيه احسب** (`DIGITS` من مستودعه) — فيسمع الطفلُ الاسمَ الذي تعلّمه عادّاً.
+ * **ولا صوتَ يُولَّد في جلسة تطوير**: يمرّ من `tools/audio_queue.json` كسائر نصوصنا،
+ * وليس في بنك اقرأ منها شيء (لا يعلّم الأرقام).
+ */
+export const DIGIT_NAMES = Object.keys(PATHS).map((ch) => DIGITS[ch]?.name).filter(Boolean);
+
+export const SPOKEN = [...Object.values(SAY), ...LETTER_NAMES, ...DIGIT_NAMES];
 
 /**
  * خطواتُ الحلقة (`METHOD.md §٥`) — والكاتبةُ منها ثلاثٌ، لكلٍّ مفتاحُ قياسها.
@@ -123,9 +131,27 @@ function weakest(letters, form) {
  */
 export function unitsOf(node) {
   if (!node) return [];
-  if (node.type === 'letter') {
+  // **والرقمُ حرفٌ معزولٌ في الحركة**: شكلٌ واحد لا يتصل ولا يتشكّل، فحلقتُه حلقةُ
+  // الحرف بخطواتها الأربع ومفتاحُ قياسه مفتاحُه (`رقم|معزول|تتبّع`).
+  if (node.type === 'letter' || node.type === 'digit') {
     const ref = node.letter && pathOf(node.letter, FORMS.ISOLATED);
     return ref ? [{ letter: node.letter, form: FORMS.ISOLATED, ref }] : [];
+  }
+  // ————— ت٣: اسمُ الطفل بيده —————
+  //
+  // **مادّتُها على الجهاز لا في المنهج**: الاسمُ يكتبه وليُّ الأمر مرّةً في لوحته،
+  // فتُقرأ منه **أشكالُ مواقع حروفه** بقاعدة الوصل نفسِها (`shapeOf` في المنهج،
+  // مصدرٌ واحد لا مصدران)، ويُكتب كلُّ حرفٍ بمساره القانونيّ في موقعه — **وهو عينُ ما
+  // تعلّمه في محطة الشكل**، فلا يُطلب منه شكلٌ لم يُدرَّس.
+  //
+  // **وحدُّها معلَن**: خيالُ الكلمة الموصولة يؤلّفه مولّدُ المسارات في عدّة البناء
+  // لا على جهاز الطفل — فالاسمُ يُكتب **حرفاً حرفاً بأشكال مواقعه** لا مساراً واحداً
+  // موصولاً، ونموذجُه كاملاً معروضٌ فوق اللوح يقرؤه بعينه.
+  if (node.type === 'name') {
+    return shapeOf(nameOf()).map(([ch, form]) => {
+      const ref = pathOf(ch, form);
+      return ref && { letter: ch, form, ref };
+    }).filter(Boolean);
   }
   if (node.type !== 'form') return [];
   if (node.compare) {
@@ -152,12 +178,40 @@ export function unitsOf(node) {
  * البياناتُ نفسُها** لا قائمةٌ تشيخ: يومَ يُؤلَّف مسارُ شكلٍ تُفتَح محطتُه بلا سطرٍ
  * يُعدَّل هنا ولا هناك.
  */
+/** اسمُ الطفل من حاله على الجهاز — 🔒 لا يعرفه غيرُ هذا الجهاز. */
+export const nameOf = () => progress.childName();
+
+/**
+ * **حرفٌ في الاسم لا يُكتب بعدُ** — أوّلُه بعينه، أو `null` إن كان الاسمُ كلُّه مكتوباً.
+ * والعلّةُ صنفان: حرفٌ لم يُؤلَّف له مسارٌ مفرد (الهمزاتُ والتاءُ المربوطة تُكتب في
+ * الكلمات وعلى حروفها، ولا شكلَ مفردٌ لها في `PATHS`)، أو محرفٌ ليس من حروف العربية.
+ */
+export function nameGap(text = nameOf()) {
+  for (const ch of String(text ?? '')) {
+    if (ch === ' ' || /[\u064B-\u0652]/.test(ch)) continue;      // الحركاتُ تُرسَم مع حرفها
+    if (!LETTERS[ch] && !VARIANTS[ch]) return { ch, why: 'ليس من حروف العربية' };
+  }
+  const shaped = shapeOf(text);
+  for (const [ch, form] of shaped) {
+    if (!pathOf(ch, form)) {
+      return {
+        ch,
+        why: VARIANTS[ch]
+          ? `«${ch}» تُكتب في الكلمات على حرفها ولم يُؤلَّف لها شكلٌ مفرد بعد`
+          : `«${ch}» لم يُؤلَّف مسارُه بعد`,
+      };
+    }
+  }
+  return shaped.length ? null : { ch: '', why: 'لم يُكتب الاسمُ بعد' };
+}
+
 export const nodeReady = (node) => {
   if (!node) return false;
-  const wanted = node.type === 'letter' ? [node.letter].filter(Boolean)
+  if (node.type === 'name') return Boolean(nameOf()) && !nameGap();
+  const wanted = node.type === 'letter' || node.type === 'digit' ? [node.letter].filter(Boolean)
     : node.type === 'form' ? (node.compare ? node.compare.flat() : node.letters || [])
       : [];
-  const form = node.type === 'letter' ? FORMS.ISOLATED : node.form;
+  const form = node.type === 'form' ? node.form : FORMS.ISOLATED;
   // **كلُّ ما تعرضه العقدةُ لا ما تكتبه وحدَه**: أخواتُ التمييز تُعرَض شاراتُها،
   // فشكلٌ منهنّ بلا مسارٍ يترك صفّاً أعورَ — والسؤالُ يقوم على الأخوات مجتمعات.
   return wanted.length > 0 && wanted.every((ch) => pathOf(ch, form));
@@ -176,6 +230,12 @@ export function releaseLesson() {
 
 /** شاشةُ درسِ حرفٍ معزول — بابُ الموجّه للحرف. */
 export const renderLesson = (part) => renderNode(nodeOf('letter', null, part));
+
+/** وشاشةُ درسِ رقمٍ — الحلقةُ نفسُها بمادّةٍ لا تتصل ولا تتشكّل (ت٥). */
+export const renderDigit = (part) => renderNode(nodeOf('digit', null, part));
+
+/** وشاشةُ اسم الطفل — الحلقةُ نفسُها بمادّةٍ من جهازه (ت٣). */
+export const renderName = (part) => renderNode(nodeOf('name', null, part));
 
 /** شاشةُ محطة شكل الموقع (أو التمييز) — بابُ الموجّه للأشكال. */
 export const renderForms = (stageId, part) => renderNode(nodeOf('form', stageId, part));
@@ -277,6 +337,18 @@ export function renderNode(node) {
         state.stepFaults++;
         progress.recordFault(unit.letter, fault.code);
       },
+      /**
+       * **حجمٌ معقولٌ يُرشَد إليه بجملته لا يُردّ صامتاً** (`METHOD.md §٥ب`): يقيسه
+       * المحرّكُ من صندوق المادّة (`sizeOf`) ويعطي جملتَه، وتضعها الشاشةُ في سطر
+       * الإرشاد نفسِه — ثم تعود إلى تعليمة الخطوة إذا استقام حجمُه. **ولا لومَ**:
+       * «اكْتُبْهُ أَكْبَرْ» طلبٌ لا حكم.
+       */
+      onTry: ({ size }) => { hint.textContent = (size && SIZE_TEXT[size]) || step.say; },
+      /**
+       * 🚪 **ولا انسدادَ أبداً** (`METHOD.md §٥ب` — بلاغُ الميدان ٢: تركت الطفلةُ
+       * الجهاز): بعد تعثّرٍ متكرر يُفتَح المخرجُ الكريم.
+       */
+      onStuck: () => wayOut(step, unit),
       onDone: () => finishStep(step, unit),
     });
     live = surface;
@@ -315,6 +387,34 @@ export function renderNode(node) {
     } else if (step.kind === progress.KINDS.TRACE) {
       progress.recordAttempt(unit.letter, unit.form, progress.KINDS.TRACE, clean);
     }
+  }
+
+  /**
+   * 🚪 **المخرجُ الكريم** (`METHOD.md §٥ب` — بلاغُ الميدان ٢، ١٣ أغسطس ٢٠٢٦):
+   * «إعادةٌ بلا حدّ» ليست عهداً بأن يبقى الطفلُ محبوساً. فبعد تعثّرٍ متكرر
+   * (`FREE.stumbles` في المحرّك) يفتح البابَ **بيده هو**: يعود إلى التتبّع الموجَّه
+   * حيث النموذجُ مرئيّ، أو يمضي إلى ما بعدها.
+   *
+   * **ولا رسوبَ ولا لومَ ولا حرمانَ نجمة**: النجومُ من عدّاد أخطائه كما هي لكلّ طفل،
+   * ولا عقوبةَ على الخروج. **وليتنر يعيدها إليه**: المضيُّ يكتب محاولةً غيرَ تامّة
+   * في سجلّه (`score(..., false)`) فتنزل مهارتُه إلى الصندوق الأول وتعود غداً —
+   * **فالمتروكُ مؤجَّلٌ لا مسقَط**. والزرُّ الثالث «أعِدْ» باقٍ: من أراد المحاولةَ
+   * فله ذلك بلا حدّ كما كان.
+   */
+  function wayOut(step, unit) {
+    const back = stepsOf(unit).findIndex((s) => s.mode === MODES.GUIDED && s.kind);
+    hint.textContent = 'خُذْ نَفَساً — تَتَبَّعْهُ مَرَّةً، أَوْ تَابِعْ';
+    foot.replaceChildren(
+      ...(back >= 0 ? [h('button', {
+        class: 'btn btn--primary next',
+        onclick: () => { state.index = back; mount(); },
+      }, icon('pen'), ' تَتَبَّعْ مَرَّةً')] : []),
+      h('button', {
+        class: `btn${back >= 0 ? '' : ' btn--primary'} next`,
+        onclick: () => { score(step, unit, false); nextStep(); },
+      }, 'تَابِعْ →'),
+      h('button', { class: 'btn next', onclick: () => live?.reset() }, '↻ أعِدْ'),
+    );
   }
 
   /** خطوةٌ استُوفيت: تُقاس ثم تُسلّم إلى ما بعدها — **بعد تمام الكلام لا بمهلة**. */

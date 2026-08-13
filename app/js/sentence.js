@@ -27,7 +27,7 @@ import { SENTENCES, SPOKEN_SENTENCES } from './curriculum.js';
 import { WORD_PATHS } from './word_paths.js';
 import { penSurface, MODES } from './pen.js';
 import {
-  h, icon, go, arNum, starsRow, topbar, brandMark, mascot, cheer, faceEl,
+  h, fill, icon, go, arNum, starsRow, topbar, brandMark, mascot, cheer, faceEl,
   nodeTitle, traceFace,
 } from './ui.js';
 
@@ -56,8 +56,9 @@ export const STEPS = [
 ];
 
 /** عقدةُ الرحلة بجزئها — من الرحلة نفسِها، فلا يُكتب معرّفُ محطةٍ بيد. */
-export const nodeOf = (part) => progress.allNodes()
-  .find((node) => node.type === 'sentence' && node.part === part) || null;
+export const nodeOf = (part, stageId = null) => progress.allNodes()
+  .find((node) => node.type === 'sentence' && node.part === part
+    && (!stageId || node.stageId === stageId)) || null;
 
 /**
  * **وحداتُ العقدة**: جملُها التي أُلّف مسارُها، ولكلٍّ صوتُها من سلّم اقرأ.
@@ -87,7 +88,7 @@ export function releaseSentence() {
 }
 
 /** شاشةُ محطة الجمل — بابُ الموجّه. */
-export const renderSentence = (part) => renderNode(nodeOf(part));
+export const renderSentence = (part, stageId = null) => renderNode(nodeOf(part, stageId));
 
 /**
  * **الشاشةُ الواحدة**: عقدةٌ بجملها، لكلِّ جملةٍ نسخٌ ثم إملاء.
@@ -241,7 +242,7 @@ export function renderNode(node) {
       h('p', { class: 'hint' }, `${nodeTitle(node)} — ${
         state.faults ? 'يدُك تتحسّن' : 'بلا خطأٍ واحد'}`),
     ));
-    foot.replaceChildren(
+    fill(foot, 
       h('button', { class: 'btn btn--primary next', onclick: () => go('#/') }, '→ الخريطة'),
       h('button', {
         class: 'btn next',
@@ -258,7 +259,7 @@ export function renderNode(node) {
 
   /** أفعالُ الشاشة: تُبدَّل بالخطوة — وكلُّها أهدافُ لمسٍ ≥ ٦٤ بكسل (`DESIGN §٤`). */
   function paintFoot(step, unit) {
-    foot.replaceChildren(
+    fill(foot, 
       // **وزرُّ الأذن يُسمِع الجملةَ بصوت اقرأ** — وهو في الإملاء بابُ الطفل الوحيد
       unit.say && h('button', {
         class: `btn next${step.id === 'dictate' ? ' btn--primary' : ''}`,

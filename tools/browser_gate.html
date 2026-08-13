@@ -95,10 +95,18 @@ function watchNetwork(win) {
     ok(!gate.passed(0, 0), 'وجلسةٌ بلا محاولةٍ واحدة لا تفتح بوابة');
 
     // ————— البوابةُ عقدةٌ في الرحلة تقف قبل أشكال المواقع —————
+    // **وموضعُها يُقرأ من الرحلة لا يُكتب هنا**: كان مكتوباً «تقف قبل `initial`»،
+    // فلمّا دخلت محطةُ الأرقام بين البوابة وأشكالِ المواقع (حزمة ت٥، `EXPANSION §٧`)
+    // احمرّ الحارسُ على **الصواب**. والمقيسُ الحقيقيّ: أنها عقدةٌ في الرحلة، وأنّ
+    // ما قبلها حروفٌ معزولة وما بعدها ليس منها — أيْ أنها **مفصلُ تمام الحروف**.
     const one = GATES[0];
     const node = progress.findNode(`gate:${one.id}`);
-    ok(Boolean(node) && one.before === 'initial',
-      `وبوابةُ «${one.title}» عقدةٌ في الرحلة تقف قبل «${one.before}»`);
+    const all = progress.allNodes();
+    const at = all.findIndex((n) => n.id === node?.id);
+    const beforeIt = all.slice(0, at).some((n) => n.type === 'letter');
+    const afterIt = all.slice(at + 1).every((n) => n.type !== 'letter');
+    ok(Boolean(node) && beforeIt && afterIt,
+      `وبوابةُ «${one.title}» عقدةٌ في الرحلة تقف عند تمام الحروف (قبل «${one.before}»)`);
     ok(!progress.isNodeUnlockedById(node.id),
       'وهي **مقفلةٌ** قبل تمام الحروف — قفلُ الرحلة لا زينةَ خريطة');
 

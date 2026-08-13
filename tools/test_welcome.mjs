@@ -52,7 +52,7 @@ globalThis.localStorage = {
 const JS = new URL('js/', APP);
 const progress = await import(new URL('progress.js', JS));
 const {
-  STAGES, GATES, MARKS, WORDS, SENTENCES, LETTERS, PATHS, Q3_RULING,
+  STAGES, GATES, MARKS, WORDS, SENTENCES, LETTERS, DIGITS, PATHS, Q3_RULING,
 } = await import(new URL('curriculum.js', JS));
 const { FAULT_TEXT } = await import(new URL('pen.js', JS));
 
@@ -192,6 +192,9 @@ const STATS = {
   faults: Object.keys(FAULT_TEXT).length,
   warmupNodes: nodesOfKind('warmup'),
   letterNodes: nodesOfKind('letter'),
+  digitNodes: nodesOfKind('digit'),
+  digits: Object.keys(DIGITS).length,
+  nameNodes: nodesOfKind('name'),
   gateNodes: nodesOfKind('gate'),
   formNodes: nodesOfKind('form'),
   joinNodes: nodesOfKind('join'),

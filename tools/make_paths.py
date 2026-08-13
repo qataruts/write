@@ -51,6 +51,7 @@ TOOL_PAGE = TOOLS / "make_paths.html"
 OUT = ROOT / "app" / "js" / "paths.js"
 WARM_OUT = ROOT / "app" / "js" / "warmups.js"
 WORD_OUT = ROOT / "app" / "js" / "word_paths.js"
+DROPPED = TOOLS / "paths_dropped.json"
 CURRICULUM = ROOT / "app" / "js" / "curriculum.js"
 FORMS = ["isolated", "initial", "medial", "final"]
 
@@ -525,6 +526,34 @@ def build(port: int, timeout: int) -> int:
         }), encoding="utf-8")
         shapes = sum(len(v["shapes"]) for v in warmups.values())
         print(f"وكُتب {WARM_OUT.relative_to(ROOT)}: {len(warmups)} محطةَ تهيئةٍ في {shapes} شكلاً")
+
+    # **وما سقط من الجمل والأسطر يُكتب جرداً يقرؤه مولّدُ المنهج** (جلسةُ التوسعة):
+    # مادّةٌ في المنهج بلا مسارٍ تُحمِر `check_paths` أبداً — فتُسقَط من المنهج بإعلانٍ
+    # وعلّةٍ منقولةٍ بنصّها من شكوى العدّة، ولا تُكتب قائمةٌ بيد.
+    # **والجردُ يتراكم ولا يُمحى** (وإلّا دارت الحلقةُ أبداً): الجملةُ التي سقطت
+    # خرجت من المنهج، فلا يعود البناءُ التالي يذكرها — فلو كُتب الجردُ من الجديد
+    # وحدَه لعادت إلى المنهج، فسقطت، فعادت. **فما دخل لا يخرج إلا بيدٍ تمحوه**
+    # يومَ يقدر المولّدُ عليه، ثم يُعاد البناءُ فيثبت أنّه قدر.
+    dropped = payload.get("dropped") or []
+    fresh = [{"text": str(row.get("why", "")).split(": «")[0],
+              "why": row.get("why", ""), "kind": row.get("kind", "")}
+             for row in dropped]
+    prior = []
+    if DROPPED.exists():
+        try:
+            prior = json.loads(DROPPED.read_text(encoding="utf-8")).get("items", [])
+        except json.JSONDecodeError:
+            prior = []
+    seen = {row["text"] for row in prior}
+    items = prior + [row for row in fresh if row["text"] not in seen]
+    DROPPED.write_text(json.dumps({
+        "tool": "tools/make_paths.py --build",
+        "note": "ما لم يؤلَّف له خيالٌ فسقط بإعلان — يقرؤه tools/make_curriculum.mjs. "
+                "ويتراكم ولا يُمحى: امحُ سطراً يدوياً يومَ يقدر المولّدُ عليه، ثم أعِد البناء.",
+        "items": items,
+    }, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    print(f"وجردُ الساقط في {DROPPED.relative_to(ROOT)}: {len(items)} "
+          f"(جديدٌ في هذا البناء {len([r for r in fresh if r['text'] not in seen])})")
 
     words = payload.get("words")
     if words:

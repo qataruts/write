@@ -5,7 +5,7 @@
 // نصُّ العلامة ومصيّرُها، ومفرداتُ العقد (`nodeTitle`/`nodeWhere`/`nodeFace`)
 // على أنواع محطات اكتب لا محطات اقرأ.
 
-import { FORM_NAMES, LETTERS, stageById } from './curriculum.js';
+import { FORM_NAMES, LETTERS, DIGITS, stageById } from './curriculum.js';
 
 export const DEV = typeof location !== 'undefined'
   && new URLSearchParams(location.search).get('dev') === '1';
@@ -34,6 +34,10 @@ export const accentFor = () => ACCENTS[0];
 /** لون المحطة بنوعها — مصدرٌ واحد تقرؤه الخريطةُ وبطاقةُ «تابع من هنا». */
 export function accentForKind(kind) {
   if (kind === 'warmup') return WARMUP_ACCENT;
+  // **ولا لونَ يُزاد للأرقام**: حركتُها حركةُ حرفٍ معزول — شكلٌ واحد يقف وحدَه ولا
+  // يتصل ولا يتشكّل — فلونُها لونُ الحروف الغالب، ولا تُشقّ لوحةُ الهوية لنوعٍ جديد.
+  // **واسمُ الطفل من أهل النسخ** فلونُه لونُهم.
+  if (kind === 'name') return JOIN_ACCENT;
   if (kind === 'form') return FORM_ACCENT;
   if (kind === 'join') return JOIN_ACCENT;
   if (kind === 'fade' || kind === 'sentence') return DICTATION_ACCENT;
@@ -63,10 +67,13 @@ export function arCount(n, [one, two, few, many]) {
  * (وكان هذا الموضعُ مُعلَّقاً حتى الجلسة ٥ بنصّه: «تُنسخ الأصواتُ ببصماتها حين تُبنى
  * شاشةُ الدرس» — وقد نُسخت اليوم فسقط التعليق.)
  */
-export const letterName = (ch) => LETTERS[ch]?.name ?? ch;
+// **وأسماءُ الأرقام تتبعها** (ت٥): اسمُ الرقم اسمُ عدده **كما يسمّيه احسب**
+// (`DIGITS` مقروءٌ من مستودعه)، فيلتقي المقروءُ على الشاشة والمسموعُ في الأذن على
+// مصدرٍ واحد كما التقيا في الحرف — ولا اسمَ يُكتب بيد هنا ولا هناك.
+export const letterName = (ch) => LETTERS[ch]?.name ?? DIGITS[ch]?.name ?? ch;
 
-/** اسم الحرف كما يُقرأ في العناوين: «حرف باء». */
-export const letterTitle = (ch) => `حرف ${letterName(ch)}`;
+/** اسم الحرف كما يُقرأ في العناوين: «حرف باء» · «رقم ثَلَاثَةْ». */
+export const letterTitle = (ch) => `${DIGITS[ch] ? 'رقم' : 'حرف'} ${letterName(ch)}`;
 
 /** اسمُ شكل الموقع كما يُقرأ: «معزول» · «ابتدائي» · «وسطي» · «نهائي». */
 export const formTitle = (form) => FORM_NAMES[form] ?? '';
@@ -80,6 +87,8 @@ export const formTitle = (form) => FORM_NAMES[form] ?? '';
 export function nodeTitle(node) {
   if (node.type === 'warmup') return node.title ?? '';
   if (node.type === 'letter') return letterTitle(node.letter);
+  // **وعنوانُ عقدة الرقم اسمُ عدده عند احسب** (`DIGITS`) لا اسمٌ نؤلّفه
+  if (node.type === 'digit') return letterTitle(node.letter);
   // **وعقدةُ شكل الموقع مجموعةٌ لا حرفاً** (الجلسة ٣): محطةُ الشكل الواحد تمشي على
   // مجموعات اقرأ السبع، فعنوانُ عقدتها عنوانُ مجموعتها ووجهُها شكلُ أوّل حروفها —
   // ويبقى السطرُ الثاني لحرفٍ مفردٍ إن جاء يوماً.
@@ -103,9 +112,12 @@ export function nodeTitle(node) {
  */
 export function stageTitle(stage) {
   if (!stage) return '';
-  if (stage.kind !== 'letter') return stage.title;
+  // **والأرقامُ كالحروف**: عنوانُ محطتها أرقامُها بأعيانها لا رقمٌ يُكتب — ومحطةٌ
+  // تقول «الأَرْقَام» وتحتها سطرٌ يعدّها تُخفي ما فيها كما كانت تُخفيه محطةُ الحروف.
+  if (stage.kind !== 'letter' && stage.kind !== 'digit') return stage.title;
   const letters = (stage.nodes || []).map((node) => node.letter).filter(Boolean);
-  return letters.length ? `حُرُوفُ ${letters.join(' ')}` : stage.title;
+  if (!letters.length) return stage.title;
+  return stage.kind === 'digit' ? `أَرْقَامُ ${letters.join(' ')}` : `حُرُوفُ ${letters.join(' ')}`;
 }
 
 /** موضع العقدة في الرحلة: عنوانُ محطتها. */
@@ -125,7 +137,8 @@ export function nodeWhere(node) {
  * ولا يحتاج `app/emoji/` الذي لا وجودَ له هنا. والبوابةُ أيقونتُها الخطية.
  */
 export function nodeFace(node) {
-  if (node.type === 'letter') return node.letter;
+  if (node.type === 'letter' || node.type === 'digit') return node.letter;
+  if (node.type === 'name') return node.face ?? icon('pen');
   if (node.type === 'form') return node.face ?? node.letter;
   if (node.type === 'gate') return node.gate.face ?? icon('gate');
   if (node.type === 'warmup') return node.face ?? icon('pen');
@@ -135,6 +148,22 @@ export function nodeFace(node) {
 }
 
 // ————— بناء DOM —————
+
+/**
+ * **ملءُ عنصرٍ قائمٍ بأبنائه** — نظيرُ `h` في تصفية ما ليس ابناً.
+ *
+ * 🔴 **وعلّتُه عيبٌ رآه مُصيِّرُ اللقطات (جلسةُ التوسعة)**: `replaceChildren` من
+ * المتصفّح **يقبل `null` فيكتبه نصّاً**، فظهرت كلمةُ «null» بين زرَّي شاشة النسخ
+ * حيث كان الزرُّ مشروطاً (`unit.say && h(...)` في سطر المسافة الذي لا صوتَ له).
+ * فما كان يقرؤه الطفلُ سطراً إنجليزياً في شاشةٍ عربية. **والقاعدةُ**: ما بُني
+ * بشرطٍ يُملأ بهذه لا بتلك.
+ */
+export const fill = (el, ...children) => {
+  el.replaceChildren(...children.flat(2)
+    .filter((child) => child != null && child !== false)
+    .map((child) => (child.nodeType ? child : document.createTextNode(String(child)))));
+  return el;
+};
 
 export function h(tag, props = {}, ...children) {
   const el = document.createElement(tag);

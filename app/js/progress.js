@@ -112,6 +112,10 @@ function blank() {
     // **وسمُ بنية الرحلة** (الجلسة ١٠): بصمةُ عقدها ساعةَ رآها هذا الجهاز آخرَ مرّة —
     // بها وحدَها يُعرَف أنّ البنية تحرّكت فيلزم الترحيلُ الرحيم (`migrateJourney`).
     journey: '',
+    // **اسمُ الطفل** (ت٣، `EXPANSION.md §٤`): يكتبه وليُّ الأمر مرّةً في لوحته
+    // فتُولَّد محطتُه. 🔒 **ولا يغادر الجهاز أبداً** — يقع حيث تقع نجومُ الطفل
+    // وأخطاؤه، في `localStorage` وحدَه، ولا يُنطَق ولا يدخل نسخةً تُرفَع إلى شبكة.
+    name: '',
     days: {},         // «YYYY-MM-DD» ← ثوانٍ من الاستعمال الفعلي
     reviews: {},      // «YYYY-MM-DD» ← {items, right, at}
     // **عدّادُ الخفوت** (`METHOD.md §٤` مرحلة ١٣): «كلمة» ← {n, day} — ثلاثُ
@@ -355,12 +359,34 @@ export function stageStars(stage) {
   };
 }
 
+/** اسمُ الطفل كما أدخله وليُّ الأمر — فارغٌ ما لم يُدخَل. */
+export const childName = () => String(state.name || '');
+
+/** تعيينُ اسم الطفل (لوحةُ وليّ الأمر وحدَها) — والفراغُ يمحوه. */
+export function setChildName(text) {
+  const clean = String(text ?? '').trim().replace(/\s+/g, ' ');
+  if (clean === state.name) return false;
+  state.name = clean;
+  frontierCache = null;         // محطةُ الاسم تدخل الرحلةَ أو تخرج منها بهذا وحدَه
+  save();
+  return true;
+}
+
+/**
+ * **عقدةٌ لا مادّةَ لها اليوم** — محطةُ الاسم قبل أن يُدخله وليُّ الأمر.
+ *
+ * **ولا تحبس الرحلة**: «مسارٌ واحد متصل» عهدٌ، ومادّةُ هذه المحطة **بيدِ بالغٍ لا
+ * بيدِ الطفل** — فلو حبستْه لانتظر طفلٌ أباه ليكمل رحلته. فتتخطّاها الجبهةُ وتبقى
+ * مفتوحةً: يومَ يُكتب الاسمُ تصير محطةً كاملة بنجومها في موضعها من الرحلة.
+ */
+export const isOptional = (node) => node?.type === 'name' && !childName();
+
 export function totalStars() {
   return allNodes().reduce((sum, n) => sum + getStars(n.id), 0);
 }
 
 export function maxTotalStars() {
-  return allNodes().length * MAX_STARS;
+  return allNodes().filter((n) => !isOptional(n)).length * MAX_STARS;
 }
 
 // ————— القفل التسلسلي —————
@@ -381,7 +407,7 @@ export function unlockFrontier() {
   if (frontierCache === null) {
     const nodes = allNodes();
     let i = 0;
-    while (i < nodes.length && isDone(nodes[i].id)) i++;
+    while (i < nodes.length && (isDone(nodes[i].id) || isOptional(nodes[i]))) i++;
     frontierCache = i;
   }
   return frontierCache;

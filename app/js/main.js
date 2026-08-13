@@ -18,7 +18,7 @@ import { renderGate } from './gate.js';
 import { renderParent, skillsText } from './parent.js';
 import { renderPenDev, releasePen } from './pendev.js';
 import { renderWarmup, releaseWarmup } from './warmup.js';
-import { renderLesson, renderForms, releaseLesson, nodeReady } from './lesson.js';
+import { renderNode, releaseLesson, nodeReady, nameGap } from './lesson.js';
 import { renderCopy, releaseCopy, nodeReady as copyReady } from './copy.js';
 import { renderFade, releaseFade, nodeReady as fadeReady } from './fade.js';
 import { renderSentence, releaseSentence, nodeReady as sentenceReady } from './sentence.js';
@@ -348,10 +348,13 @@ function nodeButton(node, next) {
  * و`part` من `progress.stageNodes`) لا يُركَّبان هنا.
  */
 function openNode(node) {
-  const where = node.type === 'form'
-    ? `${encodeURIComponent(node.stageId)}/${encodeURIComponent(node.part)}`
-    : encodeURIComponent(node.part);
-  go(`#/${node.type}/${where}`);
+  // **وصار معرّفُ المحطة في كلِّ عنوان** (جلسةُ التوسعة): كان يكفي الجزءُ في غير
+  // الأشكال، ثم صار **للنوع الواحد محطاتٌ** (نسخٌ في الوصل والبساتين والجذور ·
+  // إملاءٌ في الخفوت والبساتين · جملٌ في القصيرة والسلّم) — و«prep-1» تقع في
+  // محطتين معاً. فالعنوانُ يعيّن المحطةَ والجزءَ جميعاً، ولا يُفتَح إلا ما قُصد.
+  // **والبوابةُ خارجَ القاعدة**: ليست عقدةَ محطةٍ فلا `stageId` لها — وعنوانُها معرّفُها.
+  if (node.type === 'gate') { go(`#/gate/${encodeURIComponent(node.part)}`); return; }
+  go(`#/${node.type}/${encodeURIComponent(node.stageId)}/${encodeURIComponent(node.part)}`);
 }
 
 function fillAll(stars) {
@@ -406,7 +409,8 @@ const SOON_WHY = {};
 
 /** أمحطةٌ مفتوحةٌ لم تُبنَ شاشتُها (أو لم تُؤلَّف مادّتُها) بعد؟ */
 const awaitingScreen = (node) => Boolean(SCREENS[node?.type])
-  || ((node?.type === 'letter' || node?.type === 'form') && !nodeReady(node))
+  || ((node?.type === 'letter' || node?.type === 'digit' || node?.type === 'form'
+    || node?.type === 'name') && !nodeReady(node))
   || (node?.type === 'join' && !copyReady(node))
   || (node?.type === 'fade' && !fadeReady(node))
   || (node?.type === 'sentence' && !sentenceReady(node));
@@ -417,6 +421,16 @@ const awaitingScreen = (node) => Boolean(SCREENS[node?.type])
  */
 function comingSoon(type, el) {
   if (el) shake(el);
+  // **ومحطةُ الاسم تُخاطِب وليَّ الأمر بعينه** (ت٣): مادّتُها بيده لا بيد الطفل،
+  // فرسالةُ «قريباً» فيها كذبٌ صغير — تُقال العلّةُ بنصّها: اسمٌ لم يُكتب بعد، أو
+  // حرفٌ فيه لا يُكتب اليوم. **ولا صوتَ لها** — سطرٌ يُقرأ (`METHOD §١٠`).
+  if (type === 'name') {
+    const gap = nameGap();
+    toast(gap && gap.ch
+      ? `هذه المحطةُ لاسم طفلك — ${gap.why}`
+      : 'هذه المحطةُ لاسم طفلك — اكتبه مرّةً في لوحة وليّ الأمر', 'smile');
+    return;
+  }
   const why = SCREENS[type] ?? SOON_WHY[type];
   toast(DEV && why ? `${SOON} — ${why}` : SOON, 'smile');
 }
@@ -446,6 +460,17 @@ async function render() {
     return false;
   };
 
+  /**
+   * **جزءا العنوان**: `#/نوع/محطة/جزء` — و**رحمةً بعنوانٍ قديم** محفوظٍ في تبويبة أو
+   * إشارةٍ مرجعية، عنوانٌ بجزءٍ واحد يُقرأ جزءاً بلا محطة (فيُفتح أوّلُ ما يوافقه).
+   */
+  const split = (a, b) => (b === undefined || b === ''
+    ? [null, decodeURIComponent(a)]
+    : [decodeURIComponent(a), decodeURIComponent(b)]);
+
+  const pick = (type, stageId, part) => progress.allNodes().find((n) => n.type === type
+    && n.part === part && (!stageId || n.stageId === stageId)) || null;
+
   let screen;
   if (name === 'gate' && arg1) {
     if (!guard(`gate:${decodeURIComponent(arg1)}`)) return;
@@ -464,72 +489,71 @@ async function render() {
     // ومحطةٌ لا أشكالَ لها تردّ `null` فيعود الطفلُ إلى خريطته بلا شاشةٍ بيضاء.
     // **ومعرّفُ العقدة يُقرأ من الرحلة لا يُركَّب هنا**: الموجّهُ يفتح بالنوع والجزء،
     // ومعرّفُها من صنع `progress.nodeId` وحدَه — فلا سابقةُ محطةٍ تُكتب في موضعين.
-    const part = decodeURIComponent(arg1);
-    const node = progress.allNodes().find((n) => n.type === 'warmup' && n.part === part);
+    const [stageId, part] = split(arg1, arg2);
+    const node = pick('warmup', stageId, part);
     if (node && !guard(node.id)) return;
     screen = (node && renderWarmup(part)) || renderMap();
-  } else if (name === 'letter' && arg1) {
+  } else if ((name === 'letter' || name === 'digit' || name === 'name') && arg1) {
     // **درسُ الحرف** (`METHOD.md §٥`، الجلسة ٥): القفلُ يُحرَس هنا كما في أزرار
     // الخريطة، **وحرفٌ لم يُؤلَّف مسارُه يُجيب ولا يصمت** (بلاغُ الميدان ١) —
     // فيعرف الطفلُ أنّ محطتَه تُعَدّ له، ولا يقع على شاشةٍ بيضاء.
-    const part = decodeURIComponent(arg1);
-    const node = progress.allNodes().find((n) => n.type === 'letter' && n.part === part);
+    const [stageId, part] = split(arg1, arg2);
+    const node = pick(name, stageId, part);
     if (node && !guard(node.id)) return;
     if (node && !nodeReady(node)) {
-      comingSoon('letter', null);
+      comingSoon(name, null);
       screen = renderMap();
     } else {
-      screen = (node && renderLesson(part)) || renderMap();
+      screen = (node && renderNode(node)) || renderMap();
     }
   } else if (name === 'form' && arg1) {
     // **محطةُ شكل الموقع** (`METHOD.md §٤` المراحل ٩–١١، الجلسة ٧): عنوانُها محطتُها
     // وجزؤها معاً (`openNode` أعلاه)، والقفلُ يُحرَس هنا كما في أزرار الخريطة،
     // **وشكلٌ لم يُؤلَّف مسارُه يُجيب ولا يصمت** (بلاغُ الميدان ١).
-    const [stageId, part] = [decodeURIComponent(arg1), decodeURIComponent(arg2 || '')];
-    const node = progress.allNodes()
-      .find((n) => n.type === 'form' && n.stageId === stageId && n.part === part);
+    const [stageId, part] = split(arg1, arg2);
+    const node = pick('form', stageId, part);
     if (node && !guard(node.id)) return;
     if (node && !nodeReady(node)) {
       comingSoon('form', null);
       screen = renderMap();
     } else {
-      screen = (node && renderForms(stageId, part)) || renderMap();
+      screen = (node && renderNode(node)) || renderMap();
     }
   } else if (name === 'join' && arg1) {
     // **محطةُ الوصل والنسخ** (`METHOD.md §٤` المرحلة ١٢، الجلسة ٨): القفلُ يُحرَس هنا
     // كما في أزرار الخريطة، **وكلمةٌ لم يُؤلَّف مسارُها تُجيب ولا تصمت** (بلاغُ الميدان ١).
-    const part = decodeURIComponent(arg1);
-    const node = progress.allNodes().find((n) => n.type === 'join' && n.part === part);
+    const [stageId, part] = split(arg1, arg2);
+    const node = pick('join', stageId, part);
     if (node && !guard(node.id)) return;
     if (node && !copyReady(node)) {
       comingSoon('join', null);
       screen = renderMap();
     } else {
-      screen = (node && renderCopy(part)) || renderMap();
+      screen = (node && renderCopy(part, node.stageId)) || renderMap();
     }
   } else if (name === 'fade' && arg1) {
     // **محطةُ خفوت النموذج والإملاء** (`METHOD.md §٤` المرحلة ١٣، الجلسة ٩): القفلُ
     // يُحرَس هنا كما في أزرار الخريطة، **وكلمةٌ لم يُؤلَّف مسارُها تُجيب ولا تصمت**.
-    const part = decodeURIComponent(arg1);
-    const node = progress.allNodes().find((n) => n.type === 'fade' && n.part === part);
+    const [stageId, part] = split(arg1, arg2);
+    const node = pick('fade', stageId, part);
     if (node && !guard(node.id)) return;
     if (node && !fadeReady(node)) {
       comingSoon('fade', null);
       screen = renderMap();
     } else {
-      screen = (node && renderFade(part)) || renderMap();
+      screen = (node && renderFade(part, node.stageId)) || renderMap();
     }
   } else if (name === 'sentence' && arg1) {
     // **محطةُ الجمل القصيرة** (`METHOD.md §٤` المرحلة ١٤، الجلسة ٩): كسابقتها في
     // حراسة القفل وفي جواب الجبهة — **ولا شاشةَ بيضاء** ولو سقط مسارُ جملة.
-    const part = decodeURIComponent(arg1);
-    const node = progress.allNodes().find((n) => n.type === 'sentence' && n.part === part);
+    const [stageId, part] = split(arg1, arg2);
+    const node = pick('sentence', stageId, part);
     if (node && !guard(node.id)) return;
     if (node && !sentenceReady(node)) {
       comingSoon('sentence', null);
       screen = renderMap();
     } else {
-      screen = (node && renderSentence(part)) || renderMap();
+      screen = (node && renderSentence(part, node.stageId)) || renderMap();
     }
   } else if (name === 'pen') {
     // صفحةُ تجربة محرّك القلم (الجلسة ١) — خلف `?dev=1` وحدها، و`renderPenDev`

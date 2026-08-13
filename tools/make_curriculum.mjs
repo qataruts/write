@@ -31,6 +31,7 @@
 // الحقيقة الوحيد للشاشات.
 
 import { readFileSync, existsSync, writeFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 
@@ -65,6 +66,82 @@ const SOURCES = {
 
 const rel = (url) => decodeURIComponent(url.href.slice(READ.href.length));
 const sha12 = (buf) => createHash('sha256').update(buf).digest('hex').slice(0, 12);
+
+// ————— وأين «اِحْسِبْ»؟ — الأرقامُ صورةً وترتيباً (ت٥) —————
+//
+// **الاتساقُ العائليّ شرطُ المالك** (`EXPANSION.md §٤`): «الأرقامُ المشرقية صورةً
+// وترتيباً **كما يعرضها احسب** — تُقرأ من مستودعه عند التزامٍ مسمّى لا تُكتب بيد».
+// فلا نسخةَ عندنا من `٠١٢٣٤٥٦٧٨٩` ولا ترتيبَ نؤلّفه: يُقرأ الثلاثةُ من ملفاته
+// **عند التزامٍ بعينه** بـ`git show` — لا من شجرة عمله الحيّة، فتلك تتحرّك تحت أيدينا.
+const CALC_COMMIT = 'ab7d67e2cecb4088e0826eaacd6f399d62d687ec';   // ١٣ أغسطس ٢٠٢٦ — «ص٦: قيدُ حكم الأذن»
+const calcArg = process.argv.indexOf('--calc');
+const CALC = calcArg > 0 && process.argv[calcArg + 1]
+  ? process.argv[calcArg + 1]
+  : fileURLToPath(new URL('../calc/', ROOT));
+
+/** ملفُّ احسب عند الالتزام المسمّى — نصّاً وبصمة. ولا يُتجاوَز غيابُه بتأليف. */
+function calcBlob(path) {
+  try {
+    const text = execFileSync('git', ['-C', CALC, 'show', `${CALC_COMMIT}:${path}`],
+      { encoding: 'utf8', maxBuffer: 32 << 20 });
+    return { text, sha: sha12(text) };
+  } catch {
+    console.error(`لم يُقرأ ${path} من «اِحْسِبْ» عند ${CALC_COMMIT.slice(0, 7)} في ${CALC}\n`
+      + 'صورةُ الأرقام وترتيبُها من احسب ولا تُكتب بيد — ومرِّر موضعَه بـ‎--calc <path>‎.');
+    process.exit(2);
+  }
+}
+
+const CALC_SOURCES = {
+  'app/js/ui.js': calcBlob('app/js/ui.js'),
+  'app/js/station.js': calcBlob('app/js/station.js'),
+  'app/js/curriculum.js': calcBlob('app/js/curriculum.js'),
+};
+
+/** **صورةُ الأرقام**: سلسلةُ `AR_DIGITS` في مصيِّر احسب — «ولا يُكتب رقمٌ لاتينيّ على شاشةِ طفل». */
+const AR_DIGITS = (() => {
+  const hit = /const AR_DIGITS = '([٠-٩]{10})'/.exec(CALC_SOURCES['app/js/ui.js'].text);
+  if (!hit) { console.error('لم تُقرأ `AR_DIGITS` من مصيِّر احسب'); process.exit(2); }
+  return hit[1];
+})();
+
+/** **أسماءُ الأعداد** كما ينطقها احسب (`NUMBER_NAME`) — اسمُ الرقم اسمُه عندهم. */
+const NUMBER_NAME = (() => {
+  const block = /export const NUMBER_NAME = \{([\s\S]*?)\n\};/.exec(CALC_SOURCES['app/js/station.js'].text);
+  if (!block) { console.error('لم تُقرأ `NUMBER_NAME` من احسب'); process.exit(2); }
+  const out = {};
+  for (const [, n, name] of block[1].matchAll(/^\s*(\d+):\s*'([^']+)'/gm)) out[+n] = name;
+  return out;
+})();
+
+/**
+ * **ترتيبُ الأرقام**: ترتيبُ لقاء طفلِ احسب برموزها — يُقرأ من محطات مرحلة `numeral`
+ * عنده بمهاراتها (`numeral|N|match`) أوّلاً فأوّلاً. **والصفرُ آخِراً بحكمهم لا بحكمنا**
+ * (`calc/METHOD.md §٢.٦`: «كميةُ لا شيء أصعبُ إدراكاً»)، ولو بدّلوا ترتيبَهم غداً
+ * تبدّل ترتيبُنا بلا سطرٍ يُعدَّل هنا.
+ */
+const DIGIT_ORDER = (() => {
+  const src = CALC_SOURCES['app/js/curriculum.js'].text;
+  const stage = /kind: 'numeral',\s*\n\s*mark: '[^']*',\s*\n\s*stations: \[([\s\S]*?)\n    \],/.exec(src);
+  if (!stage) { console.error('لم تُقرأ محطاتُ الرموز من منهج احسب'); process.exit(2); }
+  const out = [];
+  for (const [, n] of stage[1].matchAll(/'numeral\|(\d+)\|match'/g)) {
+    const value = +n;
+    if (value <= 9 && !out.includes(value)) out.push(value);   // العشرةُ رقمان لا رسمٌ جديد
+  }
+  if (out.length !== 10) {
+    console.error(`ترتيبُ احسب أعطى ${out.length} رقماً لا عشرة — أُعيدت قراءتُه فلْيُراجَع`);
+    process.exit(2);
+  }
+  return out;
+})();
+
+/** جدولُ الأرقام: الرسمُ ← اسمُه وقيمتُه، بترتيب احسب. */
+const DIGITS = Object.fromEntries(DIGIT_ORDER.map((value) => {
+  const glyph = AR_DIGITS[value];
+  if (!NUMBER_NAME[value]) { console.error(`لا اسمَ للعدد ${value} عند احسب`); process.exit(2); }
+  return [glyph, { name: NUMBER_NAME[value], value }];
+}));
 
 const rc = await import(SOURCES.curriculum);
 const rs = await import(SOURCES.sentences);
@@ -194,10 +271,25 @@ const SUPPORT = new Set(lexicon.support || []);
  * الإعراب (`sentences.js: dressOf`) والبنكُ يعرفها عاريةً. فيُجرَّب المكتوبُ كما هو،
  * ثم جذعُه (بلا «الْ» وبلا حركةِ آخره)، ثم جذعُه بسكونه — **أوّلُ ما يعرفه البنك**.
  */
+const AL = /^اْ?لْ?(.+)$/;
+const SHADDA = 'ّ';
+
+/** «الْ» التعريف وحدها منزوعةً بشمسيّتها — بلا مساسٍ بآخر الكلمة. */
+function bare(surface) {
+  const rest = AL.exec(surface);
+  if (!rest) return null;
+  const out = rest[1];
+  return out[0] + out.slice(1, 3).replace(SHADDA, '') + out.slice(3);
+}
+
 function bankKey(surface) {
   const stem = rs.stemOf(surface);
-  for (const candidate of [surface, stem, `${stem}ْ`]) {
-    if (bank.has(candidate) || SUPPORT.has(candidate)) return candidate;
+  // **ومرشَّحٌ رابع زِيد في جلسة التوسعة**: `stemOf` يقشر ألفَ تنوين النصب في الوقف
+  // (`زَيْدَا` ← `زَيْد`)، فتضيع عليه كلمةٌ آخرُها ألفٌ أصليّة — «الْبَطَاطَا» و«اللَّامَا»
+  // و«الْمُوسِيقَا» في بنكه بأعيانها ولا يبلغها جذعُه. فيُجرَّب **الاسمُ عارياً من
+  // «الْ» وحدها** قبل الجذع: كلمةٌ في البنك حرفاً بحرف لا تُهجَر لقاعدة قشرٍ عامّة.
+  for (const candidate of [surface, bare(surface), stem, `${stem}ْ`]) {
+    if (candidate && (bank.has(candidate) || SUPPORT.has(candidate))) return candidate;
   }
   return null;
 }
@@ -235,6 +327,101 @@ for (const s of sentences) {
 }
 const targets = sentenceWords.filter((key) => bank.has(key));
 const supports = sentenceWords.filter((key) => !bank.has(key));
+
+// ————— ٣ب. مادّةُ التوسعة: البساتينُ وسلّمُ الجمل والجذور (`EXPANSION.md`) —————
+//
+// **المبدأ الجامع «ما قرأه يكتبه»**: لا كلمةَ ولا جملةَ تُؤلَّف هنا — تُقرأ بساتينُ
+// معجم اقرأ العشرة بكلماتها الخمسمائة، وسلّمُه المتدرّج بجمله المئةِ واثنتين وستين،
+// وعائلاتُ جذوره الثلاثَ عشرة. **والترتيبُ ترتيبُه**، والمؤلَّفُ عندنا موضعُها من
+// الرحلة (`EXPANSION.md §٧`) لا مادّتُها.
+
+/**
+ * **وما لا يؤلّف له مولّدُ الخيال مساراً يسقط بإعلانٍ وسببِه** — قاعدةُ العائلة
+ * نفسُها في العلامات الساقطة (§٥ب): لا يُخترع مسارٌ ولا تُطلب كتابةُ ما لا نموذجَ
+ * له. **والسببُ مقروءٌ من شكوى العدّة بنصّها** لا من ظنّ، ويُطبع في ذيل الجرد
+ * ليُعلَن في صفحة الأسس. ويومَ يقدر المولّدُ عليها تُرفَع من هنا فتدخل من نفسها.
+ */
+const UNCOMPOSABLE = {
+  'مُتَنَزَّهْ': 'هاؤها في الكلمة يرسمها المُشكِّل رمزاً سياقياً يخالف قانونيَّها '
+    + '(فرقُ المقياسين ٥٦٪) — فلا يُنزَّل عليها مسارُ الهاء المدروس',
+};
+
+/**
+ * **وجردُ ما سقط في التأليف يُقرأ من العدّة لا يُكتب هنا** (`tools/paths_dropped.json`،
+ * تكتبه `make_paths.py --build`): جملةٌ لا يؤلَّف لها خيالٌ تبقى في المنهج فيحمرّ
+ * `check_paths` عليها أبداً — فتُقرأ شكوى العدّة **بنصّها** وتُسقَط المادّةُ بها.
+ * **ودورتُه مغلقة**: يُبنى الخيالُ فيُكتب الجرد، ثم يُبنى المنهجُ فيُسقِطها، ثم
+ * يُبنى الخيالُ نظيفاً — ولا قائمةَ بيدٍ في الحلقة.
+ */
+const DROPPED_FILE = new URL('paths_dropped.json', import.meta.url);
+const dropped = existsSync(DROPPED_FILE)
+  ? JSON.parse(readFileSync(DROPPED_FILE, 'utf8')).items || [] : [];
+const noImage = new Map(dropped.map((row) => [row.text, row.why]));
+
+const composable = (text) => !Object.hasOwn(UNCOMPOSABLE, text) && !noImage.has(text);
+
+/** بساتينُ المعجم: موضوعٌ وعنوانُه وكلماتُه بترتيب اقرأ — `lexicon.json` بأعيانه. */
+const GARDENS = (lexicon.themes || []).map((theme) => ({
+  id: theme.id,
+  title: theme.title,
+  words: lexicon.words.filter((w) => w.theme === theme.id).map((w) => w.word).filter(composable),
+}));
+
+/**
+ * **الجملُ المتدرّجة** (٣–٥ كلمات): مادّةُ `lexicon.sentences` بعينها، مأخوذةً **من
+ * سلّم اقرأ بترتيبه** لا من ملفّ البيانات خاماً — فترتيبُ السلّم مرتَّبٌ بالحصيلة
+ * («الجملة تظهر في أوّل موضعٍ تكون فيه كلماتها كلها مدروسة»)، وهو عينُ التدرّج الذي
+ * تكمله هذه الحزمة: «من ٣ كلماتٍ إلى ٥ يكمل حيث انتهى» (`EXPANSION.md §٧`).
+ */
+const GRADED_TEXTS = new Set((lexicon.sentences || []).map((s) => s.text));
+const gradedAll = rs.SENTENCES.filter((s) => GRADED_TEXTS.has(s.text));
+
+/**
+ * **وما لا يعرف بنكُ اقرأ كلمةً من كلماته يسقط بإعلان** — قاعدةُ الحامل نفسُها
+ * (§٥ب): لا كلمةَ تُخترع لتُكتب، فجملةٌ فيها كلمةٌ ليست في بنك الكلمات ولا في
+ * المساندات لا تُطلب كتابةً. وتُطبع الساقطاتُ بأسمائها في ذيل الجرد.
+ */
+const ladderDropped = [];
+const ladder = [];
+for (const s of gradedAll) {
+  const words = s.words.map((surface) => [surface, bankKey(surface)]);
+  const missing = words.filter(([, key]) => !key || !composable(key)).map(([w]) => w);
+  if (missing.length) { ladderDropped.push({ text: s.text, missing }); continue; }
+  // **وجملةٌ لم يؤلَّف لها خيالٌ تسقط بعلّتها** — تُقرأ من جرد العدّة لا تُحكَم هنا
+  if (noImage.has(s.text)) { ladderDropped.push({ text: s.text, missing: ['خيالُها لم يؤلَّف'] }); continue; }
+  ladder.push({
+    text: s.text,
+    from: s.rung.id,
+    garden: s.rung.garden,
+    words: words.map(([, key]) => key),
+  });
+}
+
+/** كلماتُ سلّم الجمل المساندة — ما ليس كلمةَ بنكٍ قائمة، فيُنسَخ قبل أن يُطلب في سطر. */
+const ladderSupports = [];
+for (const s of ladder) {
+  for (const key of s.words) {
+    if (!bank.has(key) && !supports.includes(key) && !ladderSupports.includes(key)) {
+      ladderSupports.push(key);
+    }
+  }
+}
+
+/**
+ * **عائلاتُ الجذور** (`ROOTS` في اقرأ، ١٣ أسرة): أعضاؤها مُعلَنون عنده واحداً واحداً
+ * («العائلةُ عائلةُ معنى لا عائلةُ حروف»)، ونأخذهم كما هم. **وما لا يعرفه بنكُ
+ * الكلمات لا يُكتب** — فيسقط العضوُ وحدَه بإعلان، وتسقط الأسرةُ إن نزلت عن ثلاثة
+ * (وهو حدُّ اقرأ نفسِه: «ما نزل عن ثلاثة أعضاء لا شجرةَ له»).
+ */
+const rootDropped = [];
+const roots = [];
+for (const family of rc.ROOTS) {
+  const members = family.members.filter((text) => bank.has(text) && composable(text));
+  const lost = family.members.filter((text) => !bank.has(text) || !composable(text));
+  if (lost.length) rootDropped.push({ root: family.root, lost });
+  if (members.length >= 3) roots.push({ id: family.id, root: family.root, title: family.title, members });
+  else rootDropped.push({ root: family.root, lost: ['**سقطت الأسرةُ كلُّها**'] });
+}
 
 // ————— ٤. الوصلات: من كلمات اقرأ نفسِها —————
 //
@@ -397,6 +584,24 @@ for (const { group } of groupWords) {
   });
 }
 
+// ——— ت٥: الأرقام ٠–٩ — **بعد بوابة الحروف** (`EXPANSION.md §٧`) ———
+//
+// **علّةُ الموضع منهجٌ لا ميدان**: «الرقمُ لا يتصل ولا يتشكّل، فحركتُه أخفُّ من
+// الحرف — فترةُ راحةٍ ومكسبٍ قبل أشكال المواقع، وحروفُ التطبيق أولاً فهو اُكْتُبْ».
+//
+// **وعقدةٌ لكلِّ رقم** كما لكلِّ حرفٍ عقدتُه: الرسمُ حركةٌ مستقلّة تُدرَّس وتُقاس
+// وحدَها في ليتنر — والترتيبُ ترتيبُ احسب (والصفرُ آخِراً بحكمهم). **وعنوانُ العقدة
+// اسمُ العدد عندهم** لا اسمٌ نؤلّفه.
+stages.push({
+  id: 'digits',
+  kind: 'digit',
+  title: 'الأَرْقَام',
+  sub: 'رقمٌ رقمٌ: من أين يبدأ وإلى أين يتّجه — ولا يتصل ولا يتشكّل',
+  nodes: Object.entries(DIGITS).map(([glyph, info]) => ({
+    part: glyph, letter: glyph, title: info.name,
+  })),
+});
+
 // ——— المراحل ٩–١١: أشكالُ المواقع — شكلٌ لكل محطة، ومجموعةٌ لكل عقدة ———
 //
 // **ولا تدخل العقدةَ إلا حروفٌ شكلُها جديد**: الحرفُ الذي لا يصل بما بعده (ا ر د و ز
@@ -473,6 +678,65 @@ stages.push({
   nodes: joinNodes,
 });
 
+// ——— ت١أ + ت٣: بساتينُ النسخ واسمُ الطفل — **بعد بوابة النسخ مباشرةً** ———
+//
+// **علّةُ الموضع** (`EXPANSION.md §٧`): «البوابةُ أثبتت أنه ينسخ — فتُصَبّ الأميالُ
+// حيث ثبتت المهارة، قبل أن تُطلَب منه بلا نموذج». **والأميالُ هي الحزمة**: «الخطُّ
+// لا يُتقَن بأنواع تمارين بل بأميال كتابة» — فحجمٌ لا أنواع، وشاشةُ النسخ نفسُها.
+//
+// **وعقدةٌ لكلِّ بستان بكلماته كلِّها** (حكمُ الإدارة في `EXPANSION.md §٦`: «عندنا
+// العقدةُ تحمل كلماتِ بستانٍ كاملة») — ولا تُعاد فيها كلمةٌ نُسخت قبلها في الرحلة:
+// البستانُ **ما جدّ منه**، فالمكرَّرُ مقيسٌ سلفاً وميلٌ يُصَبّ مرّتين ليس ميلين.
+const copied = new Set(stages.flatMap((s) => s.nodes).flatMap((n) => n.words || []));
+const orchardNodes = [];
+for (const garden of GARDENS) {
+  const fresh = garden.words.filter((text) => !copied.has(text));
+  if (!fresh.length) continue;
+  for (const text of fresh) copied.add(text);
+  // **وحِمْلُ العقدة باقةُ اقرأ نفسُها** (`lexicon.json: bundleSize`) لا البستانُ كلُّه:
+  // 🔴 **قاسته محاكاةُ الرحلة** (جلسةُ التوسعة): عقدةٌ بخمسين كلمةً **سدّت الطريق** —
+  // نفد صبرُ المحاكي قبل تمامها، ورحلتُنا **مسارٌ واحد متصل** لا يُفتح ما بعد عقدةٍ
+  // حتى تتمّ. وما لا يُتِمُّه محاكٍ في جلسةٍ لا يُتِمُّه طفلُ ستٍّ في جلسة — والعقدةُ
+  // التي لا تُتَمّ **تحبس الرحلة** لا تُطيلها وحسب. فالباقةُ عقدةٌ كما هي عنده،
+  // وعددُ العقد ثمرةُ البيانات كما كان (`METHOD §٤`).
+  for (const [i, words] of batches(fresh, BUNDLE).entries()) {
+    orchardNodes.push({
+      part: `${garden.id}-${i + 1}`,
+      title: `بُسْتَانُ ${garden.title} ${arNum(i + 1)}`,
+      words,
+      garden: garden.id,
+    });
+  }
+}
+// **وكلماتُ سلّم الجمل المساندة معها**: لا يُطلب سطرٌ فيه كلمةٌ لم تُنسَخ (الحارس
+// القائم)، وموضعُ نسخها ما دامت الأميالُ تُصَبّ — لا محطةٌ مستقلّة تُطيل الرحلة.
+const gardenNodeCount = orchardNodes.length;
+for (const [i, words] of batches(ladderSupports.filter((w) => !copied.has(w))).entries()) {
+  for (const text of words) copied.add(text);
+  orchardNodes.push({ part: `prep-${i + 1}`, title: `كَلِمَاتٌ لِلْجُمَل ${arNum(i + 1)}`, words });
+}
+stages.push({
+  id: 'orchard',
+  kind: 'join',
+  title: 'بَسَاتِينُ النَّسْخ',
+  sub: 'كلماتُ «اِقْرَأْ» بستاناً بستاناً — يراها ويكتبها',
+  nodes: orchardNodes,
+});
+
+// ——— ت٣: اسمُ الطفل بيده — محطةٌ بلا مادّةٍ في المنهج ———
+//
+// **أولُ ما يريد كلُّ طفلٍ كتابتَه اسمُه**، وعدّتُنا تقدر عليه: مولّدُ خيال الكلمة
+// يؤلّف مسارَ أيّ نصٍّ عربيّ من الأشكال المؤلَّفة. **ولا اسمَ في هذا الملفّ ولا في
+// الوحدة**: يُدخله وليُّ الأمر في لوحته فيبقى على الجهاز كسائر بيانات الطفل، ويُولَّد
+// مسارُه في المتصفّح ساعةَ العرض. **ولا صوتَ له** — يُنسَخ بالعين لا يُملى.
+stages.push({
+  id: 'name',
+  kind: 'name',
+  title: 'اسْمُكَ بِيَدِكْ',
+  sub: 'يكتبه وليُّ الأمر مرّةً في لوحته، فيكتبه الطفلُ بيده',
+  nodes: [{ part: 'own', title: 'اُكْتُبِ اسْمَكْ' }],
+});
+
 // ——— المرحلة ١٣: خفوتُ النموذج ← الإملاء ———
 //
 // **مادّتُها ما يُملى**: كلماتُ الجمل التي لها صوتٌ في بنك اقرأ — فالخفوتُ ينتهي إلى
@@ -491,6 +755,26 @@ stages.push({
   })),
 });
 
+// ——— ت١ب: بساتينُ الإملاء — **البساتينُ العشرُ نفسُها بالأذن** ———
+//
+// «تُزار مرّتين: بالعين نسخاً، ثم بالأذن إملاءً — وهو أرخصُ مضاعفةٍ للأميال في
+// المنهج كلِّه» (`EXPANSION.md §٧`). **ولا إملاءَ بلا صوتٍ في البنك** (الحارسُ
+// القائم)، فما لا صوتَ له من كلمات البستان يُنسَخ ولا يُملى — يسقط من هذه العقدة
+// وحدَها ويبقى في نسختها.
+stages.push({
+  id: 'orchard-say',
+  kind: 'fade',
+  title: 'بَسَاتِينُ الإِمْلَاء',
+  sub: 'البساتينُ نفسُها بالأذن — يخفت النموذجُ حتى يكتبها سماعاً',
+  nodes: orchardNodes.slice(0, gardenNodeCount)
+    .map((node) => ({
+      part: node.part,
+      title: node.title,
+      words: node.words.filter((text) => SPOKEN.has(bank.get(text)?.say ?? text)),
+    }))
+    .filter((node) => node.words.length),
+});
+
 // ——— المرحلة ١٤: الجمل القصيرة ———
 stages.push({
   id: 'sent',
@@ -501,14 +785,55 @@ stages.push({
     .map((texts, i) => ({ part: `s-${i + 1}`, title: `جُمَلٌ ${arNum(i + 1)}`, sentences: texts })),
 });
 
+// ——— ت٢: سلّمُ الجمل — **بعد الجمل القصيرة**، «والتدرّجُ يكمل حيث انتهى» ———
+//
+// درجاتُ السلّم عند اقرأ **موزَّعةٌ على بساتينه**، وترتيبُها داخلَ كلِّ سلّمٍ ترتيبُ
+// حصيلةٍ متدرّج (٣ كلماتٍ ← ٥). فعقدةٌ لكلِّ سلّمِ بستان — نظيرةُ عقدة البستان
+// كلماتٍ — والجملُ فيها بترتيب اقرأ لا بترتيبٍ نؤلّفه.
+stages.push({
+  id: 'ladder',
+  kind: 'sentence',
+  title: 'سُلَّمُ الجُمَل',
+  sub: 'جملُ «اِقْرَأْ» المتدرّجة — من ثلاث كلماتٍ إلى خمس، نسخاً ثم سماعاً',
+  nodes: GARDENS.flatMap((garden) => batches(
+    ladder.filter((s) => s.garden.id === garden.id).map((s) => s.text), BUNDLE)
+    .map((texts, i) => ({
+      part: `${garden.id}-${i + 1}`,
+      title: `سُلَّمُ ${garden.title} ${arNum(i + 1)}`,
+      sentences: texts,
+    }))),
+});
+
+// ——— ت٤: الجذرُ يُرى في اليد — **قبل بوابة الختام** ———
+//
+// «يحتاج رصيدَ البساتين ليرى الهيكلَ المشترك في كلماتٍ يعرفها» (`EXPANSION.md §٧`).
+// يكتب الطفلُ أعضاءَ الأسرة الواحدة متتابعين **فيخرج الهيكلُ المشترك من قلمه** — وهو
+// ما لا تريه القراءةُ بمثل هذا الوضوح. والأسرُ أسرُ اقرأ بأعضائها المُعلَنين.
+stages.push({
+  id: 'roots',
+  kind: 'join',
+  title: 'الجَذْرُ فِي اليَد',
+  sub: 'ثلاثةٌ من أسرةٍ واحدة — والهيكلُ المشترك يخرج من قلمه',
+  nodes: roots.map((family) => ({
+    part: family.id,
+    title: `أُسْرَةُ ${family.title}`,
+    root: family.root,
+    words: family.members,
+  })),
+});
+
 // ————— ٧. البوابات الثلاث —————
 //
 // مواضعُها من `METHOD.md §٤`: بعد الحرف المعزول (قبل أوّل شكل موقع)، وبعد النسخ
 // (قبل الخفوت والإملاء)، وختامُ التأسيس. و`before` معرّفُ المحطة التي تقف قبلها —
 // فالبوابةُ بيانٌ معلَن: إن سقطت من هنا سقطت من الرحلة ولا يبقى لها أثرٌ في القفل.
+// **وموضعاهما لم يتبدّلا بالتوسعة وإن تبدّلت المحطةُ التي بعدهما**: بوابةُ الحروف
+// تقف حيث تمّت الحروفُ المعزولة (وبعدها الأرقامُ فأشكالُ المواقع)، وبوابةُ النسخ حيث
+// تمّ النسخُ المنهجيّ (وبعدها البساتينُ فالخفوت) — `EXPANSION.md §٧`: «لا تدخل حزمةٌ
+// من الأميال قبل بوابتها».
 const GATES = [
-  { id: 'letters', before: FORMS.INITIAL, title: 'بَوَّابَةُ الحُرُوف', hint: 'أرِني حروفَك قبل أن تصلَها' },
-  { id: 'copy', before: 'fade', title: 'بَوَّابَةُ النَّسْخ', hint: 'أرِني كلماتِك قبل أن تكتبها سماعاً' },
+  { id: 'letters', before: 'digits', title: 'بَوَّابَةُ الحُرُوف', hint: 'أرِني حروفَك قبل أن تصلَها' },
+  { id: 'copy', before: 'orchard', title: 'بَوَّابَةُ النَّسْخ', hint: 'أرِني كلماتِك قبل أن تكتبها سماعاً' },
   { id: 'end', before: 'end', title: 'بَوَّابَةُ الخِتَام', hint: 'أرِني ما تعلّمتَه — ثم بابُ «أَتْقِنْ»' },
 ];
 
@@ -568,17 +893,27 @@ const WORDS = Object.fromEntries(usedWords.map((text) => {
   }];
 }));
 
-const SENTENCES = Object.fromEntries(sentences.map((s) => [s.text, {
-  say: SPOKEN.has(s.text) ? s.text : null,
+const SENTENCES = Object.fromEntries([
+  ...sentences.map((s) => [s.text, { from: s.from, words: s.words.map(([, key]) => key) }]),
+  ...ladder.map((s) => [s.text, { from: s.from, words: s.words }]),
+].map(([text, s]) => [text, {
+  say: SPOKEN.has(text) ? text : null,
   from: s.from,
-  words: s.words.map(([, key]) => key),
-  letters: shape(s.text),
+  words: s.words,
+  letters: shape(text),
 }]));
 
 const SOURCE = {
   tool: 'tools/make_curriculum.mjs',
   read: 'qataruts/read — المرجعُ الحيّ: يُقرأ ولا يُمَسّ',
   files: Object.fromEntries(Object.values(SOURCES).map((url) => [rel(url), sha12(readFileSync(url))])),
+};
+
+/** نسبُ الأرقام: مستودعُ احسب والتزامُه وبصماتُ ملفاته الثلاثة — لا صورةَ ولا ترتيبَ بيد. */
+const DIGITS_SOURCE = {
+  calc: 'qataruts/calc — تطبيق «اِحْسِبْ»: صورةُ الأرقام وترتيبُها',
+  commit: CALC_COMMIT,
+  files: Object.fromEntries(Object.entries(CALC_SOURCES).map(([path, blob]) => [path, blob.sha])),
 };
 
 /**
@@ -702,6 +1037,21 @@ ${table(LETTERS)}
 };
 
 /**
+ * **الأرقامُ المشرقية ٠–٩** — توسيعُ نطاقٍ معلَن أقرّه المالك (\`METHOD.md §١\` و\`§١٠\`،
+ * و\`EXPANSION.md §٤\`): «الطفلُ الذي يتعلّم الكتابة يكتب الأرقام، ولا يعلّم رسمَها
+ * اقرأ ولا احسب — فجوةٌ عائلية لا يملؤها إلا اكتب».
+ *
+ * **وصورتُها وترتيبُها من «اِحْسِبْ» لا من تأليفنا**: الرسمُ سلسلةُ \`AR_DIGITS\` عنده،
+ * والاسمُ \`NUMBER_NAME\`، والترتيبُ ترتيبُ محطات رموزه (والصفرُ آخِراً بحكمهم) —
+ * كلُّها مقروءةٌ من مستودعه **عند التزامٍ مسمّى** (\`DIGITS_SOURCE\` أدناه).
+ *
+ * **ولا وصلَ لها ولا شكلَ موقع**: الرقمُ يقف وحدَه، فمحطتُه محطةُ حرفٍ معزول.
+ */
+export const DIGITS = {
+${table(DIGITS)}
+};
+
+/**
  * **الحروفُ المتغيّرة**: حرفٌ مدروسٌ وعليه علامة (\`base\` أصلُه) — تطبيقُ ق٣ في
  * الرسم، وما لا أصلَ له (ء) يُرسم وحدَه. ووصلُها وصلُ أصلها إلا ما فرّقه الرسم.
  */
@@ -723,6 +1073,12 @@ ${list(Q3_RULING)}
 
 /** نسبُ الوحدة: من أيّ بياناتِ اقرأ بُنيت وببصماتها — يفحصه \`make_curriculum.mjs --self-test\`. */
 export const CURRICULUM_SOURCE = ${pretty(SOURCE)};
+
+/** ونسبُ الأرقام: مستودعُ «اِحْسِبْ» عند التزامٍ مسمّى، وبصماتُ ملفاته الثلاثة. */
+export const DIGITS_SOURCE = ${pretty(DIGITS_SOURCE)};
+
+/** بيانُ رقمٍ برسمه — \`null\` إن لم يكن في المنهج. */
+export const digitInfo = (glyph) => DIGITS[glyph] || null;
 
 /** بوابةٌ بمعرّفها. */
 export const gateById = (id) => GATES.find((gate) => gate.id === id) || null;
@@ -779,6 +1135,25 @@ export const SPOKEN_WORDS = [...new Set(Object.values(WORDS).map((w) => w.say).f
 export const SPOKEN_SENTENCES = [...new Set(
   Object.values(SENTENCES).map((s) => s.say).filter(Boolean))];
 
+/**
+ * **رسمُ نصٍّ لم يُقرَّر في المنهج** — قاعدةُ الوصل نفسُها التي رسم بها المولّدُ كلَّ
+ * كلمة، **مصدراً واحداً لا مصدرين**: يتصل المحرفُ بما قبله إن وصل ما قبله، وبما بعده
+ * إن وصل هو وكان بعده حرف. ولا يحتاجها من المنهج شيء (رسمُ كلماته مكتوبٌ فيه)، وإنما
+ * **محطةُ اسم الطفل** (ت٣): اسمٌ يُدخله وليُّ الأمر على الجهاز فيُرسَم بها.
+ */
+export function shapeOf(text) {
+  const chars = [...String(text ?? '')].filter((ch) => LETTERS[ch] || VARIANTS[ch]);
+  const joins = (ch) => Boolean(LETTERS[ch]?.joins ?? VARIANTS[ch]?.joins);
+  return chars.map((ch, i) => {
+    const tied = i > 0 && joins(chars[i - 1]);
+    const open = joins(ch) && i + 1 < chars.length;
+    if (tied && open) return [ch, FORMS.MEDIAL];
+    if (tied) return [ch, FORMS.FINAL];
+    if (open) return [ch, FORMS.INITIAL];
+    return [ch, FORMS.ISOLATED];
+  });
+}
+
 /** بيانُ كلمةٍ من البنك — \`null\` إن لم تكن في المنهج. */
 export const wordInfo = (text) => WORDS[text] || null;
 
@@ -804,9 +1179,9 @@ if (flag('--self-test')) {
   ok(alien.length === 0, `كلُّ كلمةٍ من بنك اقرأ (${words.length} كلمة)`
     + (alien.length ? ` — دخيلة: ${alien.join('، ')}` : ''));
 
-  const ladder = new Set(rs.SENTENCES.map((s) => s.text));
+  const ladderTexts = new Set(rs.SENTENCES.map((s) => s.text));
   const said = stages.flatMap((s) => s.nodes).flatMap((n) => n.sentences || []);
-  const strayer = said.filter((t) => !ladder.has(t));
+  const strayer = said.filter((t) => !ladderTexts.has(t));
   ok(strayer.length === 0, `وكلُّ جملةٍ من سلّم اقرأ (${said.length} جملة)`
     + (strayer.length ? ` — دخيلة: ${strayer.join(' / ')}` : ''));
 
@@ -814,6 +1189,33 @@ if (flag('--self-test')) {
   ok(letters.size === Object.keys(rc.LETTERS).length
     && [...letters].every((ch) => Object.hasOwn(rc.LETTERS, ch)),
     `وحروفُ المنهج حروفُ اقرأ بترتيبها (${letters.size} حرفاً)`);
+
+  // **والأرقامُ من احسب صورةً وترتيباً** — تُقابَل بالمصدر لا بالدعوى
+  const digits = stages.filter((s) => s.kind === 'digit').flatMap((s) => s.nodes).map((n) => n.letter);
+  ok(digits.join('') === DIGIT_ORDER.map((v) => AR_DIGITS[v]).join(''),
+    `والأرقامُ صورةً وترتيباً من احسب (${digits.join(' ')})`);
+  ok(digits.every((g) => DIGITS[g].name === NUMBER_NAME[DIGITS[g].value]),
+    'وأسماؤها أسماءُ الأعداد عندهم');
+
+  // **وبساتينُ الكتابة بساتينُ معجمه** — لا كلمةَ خارجها ولا بستانَ يُؤلَّف
+  const orchards = stages.find((s) => s.id === 'orchard')?.nodes || [];
+  // **والبستانُ محطاتٌ لا عقدةٌ واحدة** (حِمْلُ العقدة باقةُ اقرأ): فيُقاس أنّ لكلِّ
+  // بستانٍ عقدةً فأكثر، وأنّ كلماتِه كلَّها في عقده — لا أنّ العقدَ عشر.
+  const gardenIds = new Set(GARDENS.map((g) => g.id));
+  const covered = new Map(GARDENS.map((g) => [g.id, []]));
+  for (const node of orchards) {
+    const at = node.garden;
+    if (at && covered.has(at)) covered.get(at).push(...node.words);
+  }
+  ok([...covered.values()].every((words) => words.length > 0)
+    && GARDENS.every((g) => g.words.every((w) => covered.get(g.id).includes(w)
+      || stages.flatMap((s) => s.nodes).some((n) => (n.words || []).includes(w)))),
+    `وبساتينُ النسخ بساتينُ معجمه العشرة بكلماتها (${orchards.filter((n) => gardenIds.has(n.garden)).length} عقدة)`);
+  const sayNodes = stages.find((s) => s.id === 'orchard-say')?.nodes || [];
+  ok(sayNodes.every((node) => {
+    const twin = orchards.find((n) => n.part === node.part);
+    return twin && node.words.every((w) => twin.words.includes(w));
+  }), `وبساتينُ الإملاء عينُ بساتين النسخ بالأذن (${sayNodes.length} بستاناً)`);
 
   const glyphs = new Set(stages.flatMap((s) => s.nodes).flatMap(material).flatMap((t) => [...t]));
   const nameless = [...glyphs].filter((ch) => ch !== ' ' && !isLetter(ch) && !MARK_NAMES[ch]);
@@ -826,11 +1228,12 @@ if (flag('--self-test')) {
       if (node.letter) {
         taught.add(`${node.letter}|${FORMS.ISOLATED}`);
         // غيرُ الواصل: ابتدائيُّه عينُ معزوله (أثبتته عدّةُ الجلسة ٢ بمقابلة البصمتين)
-        if (!LETTERS[node.letter].joins) taught.add(`${node.letter}|${FORMS.INITIAL}`);
+        // — **والرقمُ منه**: لا يتصل بما بعده فلا شكلَ موقعٍ له (`DIGITS`).
+        if (!LETTERS[node.letter]?.joins) taught.add(`${node.letter}|${FORMS.INITIAL}`);
       }
       for (const ch of node.letters || []) {
         taught.add(`${ch}|${node.form}`);
-        if (node.form === FORMS.FINAL && !LETTERS[ch].joins) taught.add(`${ch}|${FORMS.MEDIAL}`);
+        if (node.form === FORMS.FINAL && !LETTERS[ch]?.joins) taught.add(`${ch}|${FORMS.MEDIAL}`);
       }
     }
   }
@@ -892,7 +1295,20 @@ for (const stage of stages.filter((s) => s.kind === 'form')) {
 const nodeCount = stages.reduce((sum, s) => sum + s.nodes.length, 0) + GATES.length;
 console.log(`\n  المجموع: ${nodeCount} محطة — محسوبةً من بيانات اقرأ لا مكتوبة`);
 console.log(`  الكلمات: ${usedWords.length} (منطوقةٌ منها ${usedWords.filter((w) => WORDS[w].say).length})`
-  + ` · الجمل: ${sentences.length} · العلامات: ${marks.length}`);
+  + ` · الجمل: ${Object.keys(SENTENCES).length} (قصيرةٌ ${sentences.length} + سلّمٌ ${ladder.length})`
+  + ` · الأرقام: ${Object.keys(DIGITS).length} · العلامات: ${marks.length}`);
+if (ladderDropped.length) {
+  console.log(`  ⚠ من سلّم الجمل سقطت ${ladderDropped.length} جملة — كلمةٌ فيها لا يعرفها بنكُ اقرأ:`);
+  for (const row of ladderDropped) console.log(`      «${row.text}» — ${[...new Set(row.missing)].join('، ')}`);
+}
+for (const row of rootDropped) console.log(`  ⚠ أسرةُ «${row.root}»: ${row.lost.join('، ')} — ليست في بنك الكلمات`);
+for (const [text, why] of Object.entries(UNCOMPOSABLE)) {
+  console.log(`  ⚠ «${text}» سقطت من الكتابة: ${why}`);
+}
+if (noImage.size) {
+  console.log(`  ⚠ وسقط بجرد العدّة ${noImage.size} نصّاً لم يُؤلَّف له خيال `
+    + '(`tools/paths_dropped.json`) — والعلّةُ عند كلٍّ بنصّها.');
+}
 console.log(`  المصادر: ${Object.entries(SOURCE.files).map(([f, sha]) => `${f} ${sha}`).join(' · ')}`);
 // **وحكمُ كلِّ علامةٍ من ق٣ يُطبع** (شرطُ حكم المدير): أين وُجد حاملُها، أو سقوطُها
 console.log('\n— حكمُ علامات ق٣: البحثُ في سطوح اقرأ كلِّها —');

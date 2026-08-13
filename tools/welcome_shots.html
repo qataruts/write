@@ -53,7 +53,7 @@ Object.defineProperty(navigator, 'serviceWorker', {
  */
 import * as progress from './js/progress.js';
 import { renderWarmup } from './js/warmup.js';
-import { renderLesson, renderForms } from './js/lesson.js';
+import { renderLesson, renderDigit, renderName, renderForms } from './js/lesson.js';
 import { renderCopy } from './js/copy.js';
 import { renderFade } from './js/fade.js';
 import { renderSentence } from './js/sentence.js';
@@ -140,6 +140,12 @@ const SCREENS = {
   map,
   warmup: () => renderWarmup(firstNode('warmup').part),
   lesson: () => renderLesson(sectionOf('letter').nodes[1].part),
+  // **ت٥ الأرقام**: الحلقةُ نفسُها بمادّةٍ لا تتصل ولا تتشكّل — وأوّلُ عقدها ترتيبُ احسب
+  digit: () => renderDigit(firstNode('digit').part),
+  // **ت٣ اسمُ الطفل**: مادّتُها على الجهاز — فتُكتب هنا للّقطة وحدَها، ثم تُمحى
+  // في ذيل الصفحة. 🔒 ولا تخرج من هذا المتصفّح كما لا تخرج من جهاز طفل.
+  // **واسمُ اللقطة كلُّ حروفه مؤلَّفةُ الشكل** — فلا تُري الصفحةُ محطةً ناقصةَ الوحدات.
+  name: () => { progress.setChildName('مَرْيَم'); return renderName(firstNode('name').part); },
   forms: () => renderForms(sectionOf('form').id, firstNode('form').part),
   copy: () => renderCopy(firstNode('join').part),
   fade: () => renderFade(firstNode('fade').part),

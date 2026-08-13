@@ -228,9 +228,14 @@ function hurryAudio(win) {
       } catch { return 0; }
     };
 
-    const route = (node) => (node.type === 'form'
-      ? `#/form/${encodeURIComponent(node.stageId)}/${encodeURIComponent(node.part)}`
-      : `#/${node.type}/${encodeURIComponent(node.part)}`);
+    // **والعنوانُ يحمل المحطةَ والجزءَ جميعاً** — كما يبنيه `openNode` في التطبيق:
+    // صار للنوع الواحد محطاتٌ (نسخٌ في الوصل والبساتين والجذور، وجملٌ في القصيرة
+    // والسلّم)، و«prep-1» تقع في محطتين. **وأمسك هذا المحاكي العيبَ حين وقع**:
+    // مشى بجزءٍ وحدَه فانفتحت عقدةُ محطةٍ أخرى، فبقيت عقدتُه بلا نجوم وانسدّ الطريق.
+    // **والبوابةُ عنوانُها معرّفُها وحدَه**: ليست عقدةَ محطةٍ فلا `stageId` لها.
+    const route = (node) => (node.type === 'gate'
+      ? `#/gate/${encodeURIComponent(node.part)}`
+      : `#/${node.type}/${encodeURIComponent(node.stageId)}/${encodeURIComponent(node.part)}`);
 
     /**
      * **مشيُ عقدةٍ واحدة بيدٍ عمياء**: ينظر إلى الشاشة ويفعل ما يفعله الطفل، حتى
@@ -288,7 +293,17 @@ function hurryAudio(win) {
     let writes = 0;
     // **والقفلُ يُقاس بالمشي لا بالدعوى**: العقدةُ تُفتَح لأنّ ما قبلها تَمّ فعلاً،
     // ولا نجمةَ تُزرَع — فانسدادٌ في أيّها يقف الرحلةَ عنده ويُقال باسمه.
+    let passedOver = 0;
     for (const node of nodes) {
+      // **والعقدةُ التي لا مادّةَ لها تُتخطّى ولا تُعَدّ انسداداً** (ت٣، عهدُ
+      // `progress.isOptional`): محطةُ اسم الطفل مادّتُها **بيدِ بالغٍ** يكتبها في
+      // لوحته — فلو حبستْ لانتظر طفلٌ أباه ليكمل رحلته. والمقيسُ هنا أنّ الرحلةَ
+      // **تمضي بعدها فعلاً** لا أنّ العقدةَ تعمل، وذاك ما تثبته العقدُ بعدها.
+      if (progress.isOptional(node)) {
+        passedOver++;
+        note(`○ ${node.id}: لا مادّةَ لها اليومَ — تُتخطّى ولا تحبس (عهدُ محطة الاسم)`);
+        continue;
+      }
       const res = await walk(node);
       writes += res.writes;
       byKind[node.type] = (byKind[node.type] || 0) + (res.done ? 1 : 0);
@@ -302,7 +317,8 @@ function hurryAudio(win) {
 
     ok(blocked.length === 0,
       blocked.length ? `**انسدادٌ في الرحلة**: ${blocked.join(' · ')}`
-        : `الرحلةُ عُبرت كاملةً — ${nodes.length} عقدةً بلا انسداد (${writes} كتابةً على اللوح)`);
+        : `الرحلةُ عُبرت كاملةً — ${nodes.length} عقدةً بلا انسداد (${writes} كتابةً على اللوح`
+          + `${passedOver ? `، ومنها ${passedOver} لا مادّةَ لها فتُخطّيت` : ''})`);
     note(`المنجَزُ بنوعه: ${Object.entries(byKind).map(([k, n]) => `${k} ${n}`).join(' · ')}`);
 
     // ————— §٢ الختام: بوابةُ الختام عُبرت والرحلةُ تمّت —————
@@ -323,9 +339,12 @@ function hurryAudio(win) {
     ok(keys.length > 0 && Object.values(skills).every((s) => s.box > 0),
       `وكلُّ مهارةٍ قِيست ارتفع صندوقُها (${keys.length} مهارة) — فالمراجعةُ تجدولها`);
 
+    // **وما لا مادّةَ له لا يُعَدّ ناقصاً**: محطةُ الاسم تُتخطّى بعهدها، فالتمامُ
+    // **ما مُشِي وما تُخطّي** — ولو عُدَّت نقصاً لقال التقدّمُ كذباً إنّ الرحلة لم تتمّ
+    // في جهازٍ لم يكتب فيه وليُّ الأمر اسماً.
     const doneNodes = nodes.filter((n) => starsOf(n.id) > 0).length;
-    ok(doneNodes === nodes.length,
-      `وتقدّمُ الطفل يقول إنّ الرحلةَ تمّت (${doneNodes}/${nodes.length} عقدة)`);
+    ok(doneNodes + passedOver === nodes.length,
+      `وتقدّمُ الطفل يقول إنّ الرحلةَ تمّت (${doneNodes}+${passedOver}/${nodes.length} عقدة)`);
 
     // ————— §٣ الخفوتُ والإملاء: عدّادُ الأداء المتباعد يعمل —————
     head('§٣ الخفوتُ ثم الإملاء — بالعدّاد المتباعد لا بالجلسة');

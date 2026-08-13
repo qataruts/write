@@ -17,8 +17,9 @@
 
 import * as progress from './progress.js';
 import { FAULTS, FAULT_TEXT } from './pen.js';
+import { nameGap } from './lesson.js';
 import {
-  h, go, toast, arNum, arCount, topbar, letterTitle, nodeTitle, nodeWhere, shake,
+  h, fill, go, toast, arNum, arCount, topbar, letterTitle, nodeTitle, nodeWhere, shake,
 } from './ui.js';
 
 const ACCENT = 'var(--accent-skills)';
@@ -384,7 +385,7 @@ function wordChip(entry) {
  */
 function askThen(box, { question, body, yes, onYes }) {
   const close = () => box.replaceChildren();
-  box.replaceChildren(h('div', { class: 'note confirm' },
+  fill(box, h('div', { class: 'note confirm' },
     h('b', {}, question),
     body && h('p', { class: 'hint', css: { margin: '.35rem 0 0' } }, body),
     h('div', { class: 'row', css: { 'justify-content': 'flex-start', 'margin-top': '.6rem' } },
@@ -681,6 +682,41 @@ function journeySection(rerender) {
   );
 }
 
+/**
+ * **حقلُ اسم الطفل** — يُكتب مرّةً فتُولَّد محطتُه. ويقول للوليّ **ما يقع بالضبط**:
+ * أفُتحت المحطةُ أم بقي فيها حرفٌ لا يُكتب اليوم (`nameGap` تقرأه من المسارات نفسِها،
+ * فلا قائمةَ حروفٍ تشيخ هنا).
+ */
+function nameSection(rerender) {
+  const value = progress.childName();
+  const gap = value ? nameGap(value) : null;
+  const input = h('input', {
+    type: 'text',
+    class: 'field',
+    value,
+    maxlength: '40',
+    dir: 'rtl',
+    'aria-label': 'اسم الطفل كما يُكتب',
+    placeholder: 'مثال: مُحَمَّد',
+  });
+  const save = () => {
+    progress.setChildName(input.value);
+    rerender();
+  };
+  return [
+    h('h3', {}, 'اسمُ الطفل بيده'),
+    h('div', { class: 'row', css: { 'justify-content': 'flex-start', gap: '.5rem', 'flex-wrap': 'wrap' } },
+      input,
+      h('button', { class: 'btn btn--primary', onclick: save }, 'احْفَظْ')),
+    h('p', { class: 'hint' },
+      !value ? 'اكتب اسمه كما تريده أن يكتبه — بحركاته إن شئت — فتُفتح له محطةُ اسمه في موضعها من الرحلة.'
+        : gap ? `المحطةُ لم تُفتح بعد: ${gap.why}. جرّب صورةً أخرى للاسم، أو اتركه حتى يُؤلَّف شكلُه.`
+          : 'محطتُه مفتوحة — يكتب اسمه حرفاً حرفاً بأشكال مواقعه، والنموذجُ كاملاً أمامه.'),
+    h('p', { class: 'hint' },
+      '🔒 الاسمُ يبقى على هذا الجهاز وحدَه: لا يُرفَع، ولا يُنطَق، ولا يدخل نسخةً احتياطية تُشارَك.'),
+  ];
+}
+
 function dashboard(rerender = () => {}) {
   const letters = progress.studiedLetters();
   const stats = progress.letterStats();
@@ -719,6 +755,14 @@ function dashboard(rerender = () => {}) {
       pill('حروف كتبها', arNum(letters.length)),
       pill('مراجعات متتابعة', arNum(streak)),
     ),
+
+    // ————— ت٣: اسمُ الطفل — أوّلُ ما يريد كلُّ طفلٍ كتابتَه —————
+    //
+    // 🔒 **محلّيٌّ لا يغادر الجهاز**: يقع حيث تقع نجومُه في `localStorage` وحدَه، ولا
+    // يُنطَق ولا يُرفَع ولا يُولَّد له صوت — يُنسَخ بالعين لا يُملى (`EXPANSION.md §٤`).
+    // **ومحطتُه تنفتح بكتابته**، وتتخطّاها الرحلةُ ما دام فارغاً فلا يُحبَس طفلٌ
+    // في انتظار بالغ.
+    ...nameSection(rerender),
 
     ...section('توصية اليوم',
       h('div', { class: 'note', css: { 'text-align': 'start' } },
