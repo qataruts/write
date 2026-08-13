@@ -5,5 +5,8 @@ __pycache__/
 *.pyc
 scratch/
 shots/
+# ولقطاتُ الصفحة التعريفية تُستثنى: أصولٌ منشورة يقرؤها المعلّم، لا سقطُ عدّة.
+!app/welcome/shots/
+!app/welcome/shots/**
 ref/
 tools/.cache/

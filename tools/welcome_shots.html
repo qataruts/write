@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>لقطات الصفحة التعريفية — شاشات التطبيق نفسها</title>
+  <link rel="stylesheet" href="css/app.css">
+  <style>
+    /* لا زينةَ ولا إطار: اللقطة شاشةُ التطبيق كما يراها الطفل، وإلا كانت دعايةً لا صدقاً */
+    html, body { margin: 0; }
+    .dev { display: none; }        /* أدوات التجربة تقود ولا تدخل اللقطة */
+  </style>
+</head>
+<body>
+<div id="app" class="app" aria-live="polite"></div>
+<div id="toast" class="toast" hidden></div>
+
+<script>
+// عطبٌ يُكتب في الصفحة نفسِها — فاللقطة البيضاء الصامتة تحيّر
+const shout = (what) => {
+  const box = document.createElement('pre');
+  box.style.cssText = 'color:#b00;font:14px/1.6 monospace;white-space:pre-wrap';
+  box.textContent = 'عطب: ' + what;
+  document.body.prepend(box);
+};
+window.addEventListener('error', (e) => shout(e.message));
+window.addEventListener('unhandledrejection', (e) => shout(e.reason?.stack || e.reason));
+
+// صفحةُ لقطاتٍ لا تُسجّل عامل خدمة: `main.js` يسجّله عند استيراده (لقطةُ الرحلة)،
+// ولا شأن للقطة بخزنِ شيء على القرص.
+Object.defineProperty(navigator, 'serviceWorker', {
+  configurable: true,
+  value: { register: () => Promise.resolve(), addEventListener() {}, controller: null },
+});
+</script>
+
+<script type="module">
+/**
+ * لقطات صفحات `app/welcome/` — **من التطبيق نفسِه**.
+ *
+ * لماذا صفحةٌ لا يدُ مصمّم: الصفحة التعريفية تَعِد المعلمَ بما في التطبيق، فصورتُها
+ * يجب أن تكون التطبيقَ لا رسماً له. فهذه الصفحة تستورد وحدات التطبيق وتبني الشاشة
+ * كما تُبنى للطفل، ويلتقطها `tools/make_welcome_shots.py` بمقاس آيباد حقيقيّ.
+ * وأيُّ تغيّرٍ في الشاشات يظهر في اللقطة بإعادة التوليد — لا بتحرير صورة.
+ *
+ * **والمعرّفاتُ كلُّها مشتقّةٌ من الرحلة لا مكتوبةً بيد**: محطةٌ تُعاد تسميتُها لا
+ * تُسقِط اللقطةَ صامتةً بمعرّفٍ ميت — تُبنى من `journey()` وقتَ التشغيل.
+ *
+ * **والطفلُ المزروع واحدٌ في كل اللقطات**: أتمّ الرحلةَ إلى بابِ الخفوت، وحروفُ
+ * المجموعة السابعة ما زالت تتعثّر في سجلّ ليتنر بأخطاءِ اتجاهٍ مسجَّلةٍ بأعيانها،
+ * وله دقائقُ أسبوع — فتصدُق لوحةُ وليّ الأمر والرحلةُ معاً، ولا تتناقض لقطتان
+ * أمام معلّمٍ يقرؤهما جميعاً.
+ */
+import * as progress from './js/progress.js';
+import { renderWarmup } from './js/warmup.js';
+import { renderLesson, renderForms } from './js/lesson.js';
+import { renderCopy } from './js/copy.js';
+import { renderFade } from './js/fade.js';
+import { renderSentence } from './js/sentence.js';
+import { renderGate } from './js/gate.js';
+import { renderParent } from './js/parent.js';
+import { FORMS } from './js/curriculum.js';
+import { FAULTS } from './js/pen.js';
+
+// صوتٌ لا ينتهي: الحالةُ المعروضة تتجمّد فلا تنتقل الخطوة تلقائياً قبل اللقطة
+window.Audio = class { play() { return new Promise(() => {}); } pause() {} };
+Element.prototype.scrollIntoView = () => {};
+
+// ————— أوّلُ عقدةٍ من كل نوعٍ في الرحلة — مشتقّةً لا مكتوبة —————
+
+const sections = progress.journey();
+const sectionOf = (kind) => sections.find((s) => s.kind === kind);
+const firstNode = (kind) => sectionOf(kind)?.nodes[0] || null;
+
+// ————— تقدُّم طفلٍ في منتصف الرحلة —————
+// الجبهةُ عند أوّل محطةِ خفوت: ما قبلها متَمٌّ، وهي وما بعدها لم يُبلغا بعد.
+
+const all = progress.allNodes();
+const front = all.findIndex((n) => n.type === 'fade');
+for (const node of all.slice(0, front)) {
+  progress.setStars(node.id, node.type === 'gate' ? 2 : 3);
+}
+
+// سجلُّ ليتنر: متقَنٌ ومتعثّرٌ وما بينهما — **من حروفه هو** ومن أنواع تمارينه هي
+// (`KINDS` من `progress.js` لا سلاسلُ تُكتب هنا). واللوحةُ تقرؤه لا تخترعه.
+const day = progress.dayNumber();
+const drill = (unit, form, kind, right, wrong) => {
+  for (let i = 0; i < right; i++) progress.recordAttempt(unit, form, kind, true, day - (right - i));
+  for (let i = 0; i < wrong; i++) progress.recordAttempt(unit, form, kind, false, day);
+};
+const studied = progress.studiedLetters();
+const early = studied.slice(0, 12);
+const late = studied.slice(-3);                       // أحدثُ حروفه — تتعثّر
+for (const ch of early) drill(ch, FORMS.ISOLATED, progress.KINDS.TRACE, 5, 0);
+for (const ch of early.slice(0, 8)) drill(ch, FORMS.ISOLATED, progress.KINDS.FREE, 4, 0);
+for (const ch of late) {
+  drill(ch, FORMS.ISOLATED, progress.KINDS.FREE, 1, 3);
+  drill(ch, FORMS.INITIAL, progress.KINDS.TRACE, 2, 1);
+}
+for (const word of progress.studiedWords().slice(0, 9)) {
+  drill(word, progress.WORD_FORM, progress.KINDS.COPY, 3, 0);
+}
+
+// **أخطاءُ الاتجاه بأعيانها** — ذهبُ هذا التطبيق القياسيّ: اللوحة تقول «يبدأ الميمَ
+// من أسفل» لا «أخطأ في الميم». والرموزُ من `pen.js` نفسِه لا سلاسلُ تُكتب هنا.
+const faulty = late[0] || studied[0];
+for (let i = 0; i < 3; i++) progress.recordFault(faulty, FAULTS.START_FAR, day - i);
+for (let i = 0; i < 2; i++) progress.recordFault(faulty, FAULTS.REVERSE, day - i);
+if (late[1]) progress.recordFault(late[1], FAULTS.DOTS_FIRST, day);
+
+const minutes = [11, 8, 14, 0, 9, 12, 7];
+for (const [i, m] of minutes.entries()) {
+  progress.addSeconds(m * 60, progress.dayKey(new Date(Date.now() - i * 86400000)));
+}
+
+// ————— الشاشات —————
+
+const app = document.getElementById('app');
+
+/** لوحة وليّ الأمر خلف بوابتها: تُحلّ مسألةُ الضرب كما يحلّها الوالد. */
+function parentDashboard() {
+  const box = document.createElement('div');
+  const draw = () => box.replaceChildren(renderParent(draw));
+  draw();
+  const digits = box.querySelector('.gate .giant').textContent
+    .split('×').map((s) => Number(s.replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d))));
+  box.querySelector('.gate input').value = String(digits[0] * digits[1]);
+  box.querySelector('.gate-go').click();
+  return box;
+}
+
+/** الرحلة: يبنيها `main.js` وحدَه (لا تُصدَّر) — كما في `browser_journey.html`. */
+async function map() {
+  app.id = 'app';
+  await import('./js/main.js');
+  return null;                                   // main.js يكتب في #app بنفسه
+}
+
+const SCREENS = {
+  map,
+  warmup: () => renderWarmup(firstNode('warmup').part),
+  lesson: () => renderLesson(sectionOf('letter').nodes[1].part),
+  forms: () => renderForms(sectionOf('form').id, firstNode('form').part),
+  copy: () => renderCopy(firstNode('join').part),
+  fade: () => renderFade(firstNode('fade').part),
+  sentence: () => renderSentence(firstNode('sentence').part),
+  gate: () => renderGate(sectionOf('gate').gate.id),
+  parent: parentDashboard,
+};
+
+const params = new URLSearchParams(location.search);
+const wanted = params.get('screen') || 'map';
+const build = SCREENS[wanted];
+if (!build) shout('لا شاشة بهذا الاسم: ' + wanted);
+else {
+  // الخطوط قبل الرسم: لقطةٌ بخطٍّ احتياطيّ تكذب على العين (فخُّ font-display: swap).
+  // **وأسماؤها تُقرأ من اللوح لا تُكتب هنا** (عهدُ «لا اسمَ خطٍّ مكتوبٌ بيدٍ خارج
+  // `app.css`»، ويشهده جردُ `identity_doors.py`): يومَ يُبدَّل وجهٌ في اللوح تُنتظَر
+  // نسختُه الجديدة، ولا يبقى في هذه الصفحة وجهٌ منزوعٌ يُنتظَر أبداً.
+  const board = getComputedStyle(document.documentElement);
+  const face = (token) => board.getPropertyValue(token).split(',')[0].trim().replace(/^['"]|['"]$/g, '');
+  await Promise.all([
+    document.fonts.load(`144px "${face('--font-letter')}"`, 'اب'),
+    document.fonts.load(`700 24px "${face('--font-ui')}"`, 'اب'),
+    document.fonts.load(`700 40px "${face('--font-brand')}"`, 'اُكْتُبْ'),
+  ]);
+  const node = await build();
+  if (node) {
+    if (!node.nodeType) throw new Error('لم تُبنَ الشاشة (معرّف مجهول؟)');
+    app.replaceChildren(node);
+  }
+  document.querySelectorAll('.dev').forEach((d) => d.remove());
+  await document.fonts.ready;
+  await Promise.all([...document.images].map((img) => img.decode().catch(() => {})));
+  // طولُ المحتوى يُقاس ولا يُكتب: الملتقِط يشدّ النافذة إليه فلا يبقى في اللقطة
+  // ورقٌ خاوٍ تحت الشاشة (ولا يُقصّ منها شيء) — والقياس في نافذةٍ طويلة عمداً.
+  // (والمقيس أسفلُ صندوق التطبيق لا `scrollHeight`: الورقةُ تمتدّ ١٠٠dvh بحكم
+  //  `body { min-height }` فتقيس النافذةَ نفسَها لا ما فيها.)
+  if (params.get('measure')) {
+    fetch('/result', {
+      method: 'POST',
+      body: JSON.stringify([{
+        screen: wanted,
+        height: Math.ceil(app.getBoundingClientRect().bottom + scrollY),
+      }]),
+    });
+  }
+  document.documentElement.dataset.ready = '1';   // علامةُ الجاهزية للملتقِط
+}
+</script>
+</body>
+</html>

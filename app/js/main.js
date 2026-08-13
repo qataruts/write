@@ -549,6 +549,8 @@ async function render() {
   app.replaceChildren(screen);
   if (!name) revealNext();
   else window.scrollTo(0, 0);
+  // إشعارُ قشرةٍ أُجّل لأنّ الطفل كان يكتب — يُقال الآن وقد عاد إلى خريطته
+  if (!name && shellNoticePending) shellUpdated();
 }
 
 /** إبقاء العقدة التالية في مجال النظر عند العودة للخريطة. */
@@ -586,8 +588,43 @@ function startClock() {
 // عامل الخدمة يخزن الهيكل والأصوات كلها (app/sw.js)، فبعد أول فتح يعمل التطبيق
 // بلا شبكة. لا يُسجَّل من file:// (لا يقبله المتصفّح) ولا يُسقِط التطبيق إن رُفض.
 
+/**
+ * **إشعارُ القشرة الجديدة** — على نموذج «احسب» المنفَّذ (بلاغ إطلاقه)، وبقيديه:
+ * **لا يقطع تمريناً ولا يحجب**.
+ *
+ * العلّة: عاملُ الخدمة عندنا يستولي على الصفحة فور تفعيله (`clients.claim`)، فقد
+ * تتبدّل القشرةُ تحت طفلٍ يكتب — فيرى شاشةً تعمل بشيفرةٍ غيرِ التي فتح بها،
+ * ولا يعلم وليُّ أمره لِمَ اختلف شيءٌ. فيُقال له إنّ تحديثاً وصل.
+ *
+ * وثلاثةُ قيودٍ تحكم ظهورَه، وكلُّها مقصودة:
+ *   · **لا يظهر في أوّل تسجيل**: `controllerchange` يقع كذلك حين لم يكن للصفحة
+ *     متولٍّ أصلاً (أوّلُ فتحة) — وذاك تثبيتٌ لا تحديث، فيُشترط متولٍّ سابق.
+ *   · **لا يقطع تمريناً**: إن كان الطفل في محطةٍ (للمسار وسمٌ غيرُ الخريطة) يُؤجَّل
+ *     الإشعارُ حتى يعود إلى الخريطة — لا تُقطَع يدٌ تكتب برسالة.
+ *   · **لا يحجب**: رسالةٌ عابرة في شريط `toast` نفسِه — بلا زرٍّ يُنقَر، وبلا
+ *     طبقةٍ فوق الشاشة، ولا إعادةَ تحميلٍ تُفرض. القشرةُ الجديدة تعمل من الآن،
+ *     والإغلاقُ والفتحُ يُتِمّان ما بقي.
+ */
+let shellNoticePending = false;
+
+function shellUpdated() {
+  if (isLessonRoute()) { shellNoticePending = true; return; }
+  shellNoticePending = false;
+  toast('وصل تحديث — أغلق التطبيق وافتحه', 'gift');
+}
+
+/** أفي محطةٍ هو الآن؟ — الخريطةُ وحدَها بلا وجهة، وما عداها شاشةُ عملٍ لا تُقطَع. */
+function isLessonRoute() {
+  return Boolean(location.hash.replace(/^#\/?/, '').split('/')[0]);
+}
+
 function registerServiceWorker() {
   if (!('serviceWorker' in navigator) || !location.protocol.startsWith('http')) return;
+  // متولٍّ سابق؟ يُقرأ **قبل** التسجيل: بعده قد يكون قد تبدّل فيُقرأ حالٌ غيرُ الحال.
+  const hadController = Boolean(navigator.serviceWorker.controller);
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (hadController) shellUpdated();
+  });
   navigator.serviceWorker
     .register(new URL('../sw.js', import.meta.url), { scope: './' })
     .catch((e) => console.warn('[sw] لم يُسجَّل عامل الخدمة:', e));

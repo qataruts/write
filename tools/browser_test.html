@@ -268,8 +268,59 @@ const send = () => fetch('/result', {
       + `، و${myRows} في قياس القناة)`
       + (clashes ? ` — **تراكب: ${overlaps(0).slice(0, 3).join('، ')}**` : ''));
 
-    // ————— ٨) وأخيراً: لا خطأ جافاسكربت واحد —————
-    win.location.hash = '#/';
+    // ————— ٨) إشعارُ القشرة الجديدة: لا يقطع تمريناً ولا يحجب —————
+    //
+    // **ويُقاس حيّاً لا نصّاً**: تُنتظَر ولايةُ عامل الخدمة، ثم **تُعاد الصفحة**
+    // كي يكون لها متولٍّ سابق (فأوّلُ تسجيلٍ تثبيتٌ لا تحديث ولا يُشعَر به)، ثم
+    // يُطلَق `controllerchange` كما يُطلقه المتصفّح يومَ تتبدّل القشرةُ تحت الطفل.
+    let swWin = win;
+    let swDoc = doc;
+    const controlled = async () => {
+      for (let i = 0; i < 30 && !swWin.navigator.serviceWorker?.controller; i++) await wait(200);
+      return Boolean(swWin.navigator.serviceWorker?.controller);
+    };
+    if (!(await controlled())) {
+      ok(false, 'لم يستولِ عاملُ الخدمة على الصفحة — لا يُقاس الإشعارُ بلا قشرةٍ متولّية');
+    } else {
+      swWin.location.reload();
+      await new Promise((r) => frame.addEventListener('load', r, { once: true }));
+      swWin = frame.contentWindow;
+      swDoc = frame.contentDocument;
+      hookAudio(swWin, APP_DOC);
+      swWin.addEventListener('error', (e) => errors.push(String(e.message)));
+      swWin.addEventListener('unhandledrejection', (e) => errors.push(String(e.reason)));
+      await wait(1200);
+
+      const toastEl = () => swDoc.getElementById('toast');
+      const shown = () => (toastEl() && !toastEl().hidden ? toastEl().textContent : '');
+      const fireChange = () =>
+        swWin.navigator.serviceWorker.dispatchEvent(new swWin.Event('controllerchange'));
+
+      // (أ) **وهو في محطةٍ يكتب**: الإشعارُ يُؤجَّل ولا يقطع
+      const node = swDoc.querySelector('main.map .station a[href^="#/"], main.map .station button');
+      swWin.location.hash = '#/warmup/lines-h';
+      await wait(700);
+      ok(!swDoc.querySelector('main.map'), 'الطفلُ في محطةٍ لا في الخريطة (تهيئةُ اليد)');
+      fireChange();
+      await wait(300);
+      ok(!shown().includes('وصل تحديث'),
+        'وقشرةٌ جديدة تصل وهو يكتب: **لا تقطع تمرينَه** — الإشعارُ يُؤجَّل');
+
+      // (ب) **وحين يعود إلى خريطته**: يُقال له، بلا حجب
+      swWin.location.hash = '#/';
+      await wait(700);
+      ok(shown().includes('وصل تحديث'),
+        `ثم يُقال له عند عودته إلى الخريطة («${shown().trim()}»)`);
+      const blockers = swDoc.querySelectorAll('dialog[open], .overlay, .modal').length;
+      ok(blockers === 0 && toastEl().querySelectorAll('button').length === 0,
+        'وهو شريطٌ عابر: لا طبقةَ تحجب الشاشة، ولا زرَّ يُنقَر، ولا إعادةَ تحميلٍ تُفرض');
+      ok(Boolean(swDoc.querySelector('main.map')),
+        'والخريطةُ تحته تعمل كما هي — الشاشةُ لم تُقطَع ولم تُستبدَل');
+      if (node) { /* عقدةُ الخريطة قُرئت للتوثيق لا للنقر */ }
+    }
+
+    // ————— ٩) وأخيراً: لا خطأ جافاسكربت واحد —————
+    swWin.location.hash = '#/';
     await wait(500);
     ok(errors.length === 0,
       errors.length ? `أخطاءُ جافاسكربت: ${errors.join(' · ')}` : 'لا أخطاء جافاسكربت');

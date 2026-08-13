@@ -3,24 +3,17 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="description" content="منهج «اُكْتُبْ» محطةً محطة: التهيئة الحركية، ثم الحرف المعزول، فأشكال المواقع، فالوصل والنسخ، فخفوت النموذج والإملاء، فالجمل — وثلاث بوابات." />
+    <meta name="description" content="منهج «اُكْتُبْ» محطةً محطة: تهيئةُ اليد، ثم الحروف الثمانية والعشرون، ثم أشكالُ المواقع، ثم الوصلُ والنسخ، ثم الخفوتُ والإملاء والجمل — وثلاثُ بوّابات." />
     <meta name="theme-color" content="#FCF4E2" />
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#2C2418" />
-    <title>منهج «اُكْتُبْ» — محطةً محطة</title>
+    <title>اُكْتُبْ — المنهج محطةً محطة</title>
     <link rel="icon" href="../icons/icon-192.png" />
     <!--
-    **بنيةٌ من بذرة اقرأ، ومحتواها للجلسة ١١** (`FAMILY.md §٥`: «بنيةُ `welcome/`
-    الأربع»، و`SESSIONS.md` الجلسة ١١: «الصفحات الأربع بقشرة اقرأ ولغته القريبة»).
-    فما هنا اليومَ **القشرةُ وشريطُ التنقّل والعنوان** — ولا حقيقةَ تُدَّعى عن
-    التطبيق قبل أن تُبنى: صفحةُ عرضٍ تصف ما ليس قائماً كذبٌ على معلّم.
-
-    وقوانينُ `welcome/` كلُّها قائمة من اليوم:
-      · **صفرُ جافاسكربت** — ولا تسجّل عاملَ خدمة ولا تصل بيان التطبيق.
-      · **خارج قشرة عامل الخدمة** (`WELCOME` في `sw.js`، ولا في `SHELL`) —
-        فلا تُخزَّن ولا يبتلعها ردُّ التنقّل، ولولا ذلك لفُتح التطبيقُ مكانَها.
-      · **صفرُ مَوردٍ شبكيّ خارجيّ يُجلَب** — لوحُها من `app/css/app.css` نفسِه
-        (لا لون منسوخ)، وخطوطُها في `welcome/fonts/`.
-      · **أرقامُها يحسبها الحارس** لا تُكتب بيد، ولكل صورةٍ أبعادُها و`loading="lazy"`.
+    **المنهجُ محطةً محطة** — لمعلّمٍ يريد أن يعرف ما الذي سيمرّ به الطفل، وبأيّ ترتيب.
+    وقانونُ هذه الصفحة: **نمطُ بطاقةٍ واحد** لأنواع المحطات كلِّها (ماذا يتعلّم الطفل ·
+    كيف يعمل التمرين · دورُك أنت)، **ولا نوعَ يُترك**: الحارسُ يمشي في `journey()`
+    فيطالب كلَّ نوعٍ ببطاقته وعددِ عقدها، فنوعٌ جديد يُسقِط الفحصَ يومَ يُضاف.
+    وأسماءُ الأقسام السبعةَ عشرَ تُقرأ من `curriculum.js` وتُقابَل بما هنا.
   -->
     <link rel="stylesheet" href="../css/app.css" />
     <link rel="stylesheet" href="welcome.css" />
@@ -48,24 +41,509 @@
       <div class="w-print-head">
         <img loading="lazy" src="../icons/icon-192.png" alt="" width="44" height="44" />
         <span class="w-print-brand brand"><span class="brand-word">اُكْتُبْ</span></span>
+        <span class="w-print-title">المنهج محطةً محطة</span>
         <span class="w-print-url">write.mishkat.qa</span>
       </div>
 
       <main>
-        <h1>المنهج</h1>
-        <p class="w-lead">المنهج محطةً محطة بنمط البطاقة الواحد: ماذا يتعلّم الطفل · كيف يعمل التمرين · دورُك أنت.</p>
+        <div class="w-head">
+          <h1>المنهج محطةً محطة</h1>
+          <p class="w-lede">
+            طريقٌ واحد متصل: <b data-stat="sections">١٧</b> قسماً و<b
+              data-stat="nodes"
+              >٨٥</b
+            >
+            محطة، تبدأ بخطوطٍ ومنحنياتٍ قبل أوّل حرف، وتنتهي بكتابة جملةٍ سماعاً.
+            ولا محطةَ تُفتَح قبل ما قبلها، ولا يُطلب من الطفل أن يكتب عنصراً لم
+            يتعلّم كتابتَه — يحرس ذلك فاحصٌ آليّ لا اجتهادُ مؤلّف.
+          </p>
+        </div>
 
-        <p class="note">
-          هذه الصفحة قيد الإنشاء — تُكتب في الجلسة ١١ مع بقية صفحات المرجع
-          التعريفي، بعد أن يكتمل المنهج والشاشات. والبنيةُ هنا من اليوم كي لا
-          يُبنى المحتوى على قشرةٍ لم تُختبَر.
-        </p>
+        <!-- ————— جدولُ الرحلة ————— -->
+        <section class="w-section" style="--accent: var(--accent-letters)">
+          <h2>الرحلة بترتيبها</h2>
+          <div class="w-scroll">
+            <table class="w-table">
+              <caption>
+                الأقسامُ بترتيب مرورها، وعددُ محطات كلِّ قسم. والبوّاباتُ الثلاث
+                تقف حيث تقف: قبل أشكال المواقع، وقبل الإملاء، وفي الختام.
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">#</th>
+                  <th scope="col">القسم</th>
+                  <th scope="col">محطات</th>
+                  <th scope="col">مادّته</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="w-num-cell">١</td>
+                  <td class="w-stage">تَهْيِئَةُ اليَد</td>
+                  <td class="w-num-cell">٦</td>
+                  <td>خطوطٌ أفقية ورأسية ومائلة · منحنياتٌ ودوائر · موجاتٌ وحلقات · تحكّمٌ داخل حدود</td>
+                </tr>
+                <tr>
+                  <td class="w-num-cell">٢</td>
+                  <td class="w-stage">المجموعة الأولى</td>
+                  <td class="w-num-cell">٤</td>
+                  <td class="w-letters">ا ب م ل</td>
+                </tr>
+                <tr>
+                  <td class="w-num-cell">٣</td>
+                  <td class="w-stage">المجموعة الثانية</td>
+                  <td class="w-num-cell">٤</td>
+                  <td class="w-letters">ن ر د س</td>
+                </tr>
+                <tr>
+                  <td class="w-num-cell">٤</td>
+                  <td class="w-stage">المجموعة الثالثة</td>
+                  <td class="w-num-cell">٤</td>
+                  <td class="w-letters">ت و ي ه</td>
+                </tr>
+                <tr>
+                  <td class="w-num-cell">٥</td>
+                  <td class="w-stage">المجموعة الرابعة</td>
+                  <td class="w-num-cell">٤</td>
+                  <td class="w-letters">ع ف ك ق</td>
+                </tr>
+                <tr>
+                  <td class="w-num-cell">٦</td>
+                  <td class="w-stage">المجموعة الخامسة</td>
+                  <td class="w-num-cell">٣</td>
+                  <td class="w-letters">ح ج خ</td>
+                </tr>
+                <tr>
+                  <td class="w-num-cell">٧</td>
+                  <td class="w-stage">المجموعة السادسة</td>
+                  <td class="w-num-cell">٤</td>
+                  <td class="w-letters">ش ص ز ط</td>
+                </tr>
+                <tr>
+                  <td class="w-num-cell">٨</td>
+                  <td class="w-stage">المجموعة السابعة</td>
+                  <td class="w-num-cell">٥</td>
+                  <td class="w-letters">ث ذ ض ظ غ</td>
+                </tr>
+                <tr>
+                  <td class="w-num-cell">٩</td>
+                  <td class="w-stage">بَوَّابَةُ الحُرُوف</td>
+                  <td class="w-num-cell">١</td>
+                  <td>أرِني حروفَك قبل أن تصلَها — الأضعفُ أوّلاً، وإعادةٌ بلا حدّ</td>
+                </tr>
+                <tr>
+                  <td class="w-num-cell">١٠</td>
+                  <td class="w-stage">الحَرْفُ أَوَّلَ الكَلِمَة</td>
+                  <td class="w-num-cell">٨</td>
+                  <td>المجموعات السبع بشكلها الابتدائي، ثم محطةُ تمييز المتشابهات</td>
+                </tr>
+                <tr>
+                  <td class="w-num-cell">١١</td>
+                  <td class="w-stage">الحَرْفُ وَسَطَ الكَلِمَة</td>
+                  <td class="w-num-cell">٨</td>
+                  <td>المجموعات السبع بشكلها الوسطيّ، ثم محطةُ التمييز</td>
+                </tr>
+                <tr>
+                  <td class="w-num-cell">١٢</td>
+                  <td class="w-stage">الحَرْفُ آخِرَ الكَلِمَة</td>
+                  <td class="w-num-cell">٨</td>
+                  <td>المجموعات السبع بشكلها النهائيّ، ثم محطةُ التمييز</td>
+                </tr>
+                <tr>
+                  <td class="w-num-cell">١٣</td>
+                  <td class="w-stage">الوَصْلُ وَالنَّسْخ</td>
+                  <td class="w-num-cell">١٦</td>
+                  <td>وصلُ حرفين وثلاثة · كلماتُ المجموعات السبع · علاماتُ الشدّة والتنوين ولام التعريف والهمزات · وتمهيدُ الإملاء</td>
+                </tr>
+                <tr>
+                  <td class="w-num-cell">١٤</td>
+                  <td class="w-stage">بَوَّابَةُ النَّسْخ</td>
+                  <td class="w-num-cell">١</td>
+                  <td>أرِني كلماتِك قبل أن تكتبها سماعاً</td>
+                </tr>
+                <tr>
+                  <td class="w-num-cell">١٥</td>
+                  <td class="w-stage">خُفُوتُ النَّمُوذَج</td>
+                  <td class="w-num-cell">٤</td>
+                  <td>الكلمةُ كاملةً ثم تخفت بأدائه المتباعد حتى يكتبها سماعاً</td>
+                </tr>
+                <tr>
+                  <td class="w-num-cell">١٦</td>
+                  <td class="w-stage">جُمَلٌ قَصِيرَة</td>
+                  <td class="w-num-cell">٤</td>
+                  <td>ينسخ جملةً من سلّم «اِقْرَأْ» ثم يكتبها سماعاً</td>
+                </tr>
+                <tr>
+                  <td class="w-num-cell">١٧</td>
+                  <td class="w-stage">بَوَّابَةُ الخِتَام</td>
+                  <td class="w-num-cell">١</td>
+                  <td>أرِني ما تعلّمتَه — ثم بابُ «أَتْقِنْ»</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ————— أنواع المحطات — نمطُ بطاقةٍ واحد —————
+             (ماذا يتعلّم الطفل · كيف يعمل التمرين · دورُك أنت) -->
+        <section class="w-section" style="--accent: var(--accent-skills)">
+          <h2>أنواع المحطات</h2>
+          <p class="w-lede">
+            سبعةُ أنواع، ولكلٍّ بطاقتُه بالنمط نفسِه ولقطتُه من شاشة التطبيق.
+            و«دورُك أنت» ليس زينةً: هذا التطبيق يُدرّب يداً، واليدُ تحتاج من يجلس
+            بجوارها في أوّل أسبوع.
+          </p>
+
+          <div class="w-pair">
+            <div class="w-stations">
+              <article class="w-station" data-covers="warmup" data-count="٦" style="--accent: var(--accent-skills)">
+                <div class="w-station-head">
+                  <div>
+                    <span class="w-kicker">نوع محطة · تهيئة</span>
+                    <h3>تهيئةُ اليد</h3>
+                  </div>
+                  <span class="w-station-n"><b data-stat="warmupNodes">٦</b>محطات</span>
+                </div>
+                <dl class="w-what">
+                  <div>
+                    <dt>ماذا يتعلّم الطفل</dt>
+                    <dd>
+                      التحكّمَ في القلم قبل أوّل حرف: خطٌّ يمشي أفقياً ورأسياً
+                      ومائلاً، ومنحنىً يدور، وموجةٌ تتكرّر، ويدٌ تبقى داخل حدّ.
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>كيف يعمل التمرين</dt>
+                    <dd>
+                      الشكلُ يُرسم أمامه من مساره، ثم يتتبّعه بإصبعه أو بقلمه —
+                      والحكمُ بالشروط نفسِها التي ستحكم على حروفه بعد قليل.
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>دورُك أنت</dt>
+                    <dd>
+                      اجلس معه هنا خاصّةً. وإن كان أعسر فهذه المحطاتُ موضعُ
+                      الملاحظة الأولى — لا نفترض يداً، ونُوصي بالتجربة مبكراً.
+                    </dd>
+                  </div>
+                </dl>
+              </article>
+            </div>
+            <figure>
+              <img loading="lazy" src="shots/warmup.png" width="820" height="821"
+                alt="محطة تهيئة اليد: شكلٌ يُتتبَّع على لوح الكتابة" />
+              <figcaption>تهيئةُ اليد — قبل أوّل حرف</figcaption>
+            </figure>
+          </div>
+
+          <div class="w-pair">
+            <div class="w-stations">
+              <article class="w-station" data-covers="letter" data-count="٢٨" style="--accent: var(--accent-letters)">
+                <div class="w-station-head">
+                  <div>
+                    <span class="w-kicker">نوع محطة · درسُ حرف</span>
+                    <h3>الحرف المعزول</h3>
+                  </div>
+                  <span class="w-station-n"><b data-stat="letterNodes">٢٨</b>محطة</span>
+                </div>
+                <dl class="w-what">
+                  <div>
+                    <dt>ماذا يتعلّم الطفل</dt>
+                    <dd>
+                      كتابةَ الحرف مفرداً: من أين يبدأ، وإلى أين يتّجه، وبأيّ
+                      ترتيبٍ تُكتب أجزاؤه — <b>والنقاطُ بعد الجسم</b> لا قبله.
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>كيف يعمل التمرين</dt>
+                    <dd>
+                      أربعُ خطوات: <b>شاهِد</b> الرسمَ المتحرّك، ثم <b>تتبّع
+                      موجَّهاً</b> والمسارُ ظاهرٌ ونقطةُ البداية تومض، ثم <b>تتبّع
+                      خافتاً</b>، ثم <b>اكتبه وحدك</b> في صندوقٍ فارغ بسطر ارتكاز.
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>دورُك أنت</dt>
+                    <dd>
+                      لا تُملِ عليه الشكل — دَعه يخطئ ويعيد. وإن تكرّر خطأٌ بعينه
+                      فاقرأه في لوحة وليّ الأمر: تقول لك أيَّ خطأٍ يقع فيه.
+                    </dd>
+                  </div>
+                </dl>
+              </article>
+            </div>
+            <figure>
+              <img loading="lazy" src="shots/lesson.png" width="820" height="821"
+                alt="درس الحرف: خطوةُ «شاهِد» والحرف يُرسم من مساره المرجعي" />
+              <figcaption>درسُ الحرف — خطوةُ «شاهِد»</figcaption>
+            </figure>
+          </div>
+
+          <div class="w-pair">
+            <div class="w-stations">
+              <article class="w-station" data-covers="gate" data-count="٣" style="--accent: var(--accent-skills)">
+                <div class="w-station-head">
+                  <div>
+                    <span class="w-kicker">نوع محطة · بوّابة</span>
+                    <h3>البوّابات</h3>
+                  </div>
+                  <span class="w-station-n"><b data-stat="gateNodes">٣</b>بوّابات</span>
+                </div>
+                <dl class="w-what">
+                  <div>
+                    <dt>ماذا يتعلّم الطفل</dt>
+                    <dd>
+                      أن يُري ما تعلّمه قبل أن ينتقل: بوّابةُ الحروف قبل الوصل،
+                      وبوّابةُ النسخ قبل الإملاء، وبوّابةُ الختام قبل باب «أَتْقِنْ».
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>كيف يعمل التمرين</dt>
+                    <dd>
+                      تختار البوّابةُ <b>أضعفَ ما عنده</b> من سجلّ ليتنر لا عيّنةً
+                      عشوائية. <b>ولا رسوبَ فيها</b>: ما أخطأ فيه يعود إليه،
+                      والإعادةُ بلا حدّ حتى يعبر.
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>دورُك أنت</dt>
+                    <dd>
+                      لا تجعلها امتحاناً. إن تعثّر مرّتين فأغلق التطبيق وعُد
+                      غداً — البوّابةُ تنتظر، والتعبُ لا يُعلّم يداً.
+                    </dd>
+                  </div>
+                </dl>
+              </article>
+            </div>
+            <figure>
+              <img loading="lazy" src="shots/gate.png" width="820" height="828"
+                alt="شاشة البوّابة: تُطلب كتابةُ أضعف ما عند الطفل" />
+              <figcaption>البوّابة — الأضعفُ أوّلاً، وبلا رسوب</figcaption>
+            </figure>
+          </div>
+
+          <div class="w-pair">
+            <div class="w-stations">
+              <article class="w-station" data-covers="form" data-count="٢٤" style="--accent: var(--accent-garden)">
+                <div class="w-station-head">
+                  <div>
+                    <span class="w-kicker">نوع محطة · شكلُ موقع</span>
+                    <h3>أشكال المواقع</h3>
+                  </div>
+                  <span class="w-station-n"><b data-stat="formNodes">٢٤</b>محطة</span>
+                </div>
+                <dl class="w-what">
+                  <div>
+                    <dt>ماذا يتعلّم الطفل</dt>
+                    <dd>
+                      أنّ الحرف يتبدّل رسمُه بموضعه: أوّلَ الكلمة، ووسطَها،
+                      وآخرَها — وأنّ الشكل الجديد <b>حرفٌ يعرفه بمسارٍ جديد</b>
+                      لا حرفٌ غريب.
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>كيف يعمل التمرين</dt>
+                    <dd>
+                      حلقةُ الدرس نفسُها لكلّ شكل، وفي آخر كلِّ موقعٍ
+                      <b>محطةُ تمييزٍ للمتشابهات</b> — الأسرُ التي لا يفرّقها إلا
+                      نقطةٌ أو ضلع.
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>دورُك أنت</dt>
+                    <dd>
+                      أرِه الشكلَ في كتابٍ بين يديه بعد المحطة: «هذه الباءُ نفسُها
+                      — انظر أين وقعت». الانتقالُ إلى الورق هنا يثبّت.
+                    </dd>
+                  </div>
+                </dl>
+              </article>
+            </div>
+            <figure>
+              <img loading="lazy" src="shots/forms.png" width="820" height="833"
+                alt="محطة شكل الموقع: الحرف بشكله الابتدائي وأسرتُه بجواره" />
+              <figcaption>شكلُ الموقع — الحرفُ أوّلَ الكلمة</figcaption>
+            </figure>
+          </div>
+
+          <div class="w-pair">
+            <div class="w-stations">
+              <article class="w-station" data-covers="join" data-count="١٦" style="--accent: var(--accent-stories)">
+                <div class="w-station-head">
+                  <div>
+                    <span class="w-kicker">نوع محطة · وصلٌ ونسخ</span>
+                    <h3>الوصل والنسخ</h3>
+                  </div>
+                  <span class="w-station-n"><b data-stat="joinNodes">١٦</b>محطة</span>
+                </div>
+                <dl class="w-what">
+                  <div>
+                    <dt>ماذا يتعلّم الطفل</dt>
+                    <dd>
+                      أن يصل حرفين ثم ثلاثة، ثم ينسخ كلمةً كاملة كما يراها —
+                      والمسافةَ بين الكلمات، والجلوسَ على السطر. وفي مواضعها من
+                      الكلمات تدخل <b data-stat="marks">١٠</b> علامات: الشدّةُ
+                      والتنوينُ ولامُ التعريف والهمزات.
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>كيف يعمل التمرين</dt>
+                    <dd>
+                      الكلمةُ أمامه، ويكتبها تحتها. وأوّلَ ما تقع علامةٌ في
+                      مادّته تُفتح لها <b>بطاقةُ تعريف</b> — العلامةُ من مسارها
+                      المؤلَّف واسمُها وكلمتُها — ثم يكتب.
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>دورُك أنت</dt>
+                    <dd>
+                      اقرأ الكلمةَ معه بصوتٍ عالٍ قبل أن ينسخها. النسخُ بلا قراءةٍ
+                      رسمٌ، والنسخُ مع القراءة كتابة.
+                    </dd>
+                  </div>
+                </dl>
+              </article>
+            </div>
+            <figure>
+              <img loading="lazy" src="shots/copy.png" width="820" height="821"
+                alt="محطة الوصل والنسخ: وصلُ حرفين على لوح الكتابة" />
+              <figcaption>الوصلُ والنسخ — من حرفين إلى كلمة</figcaption>
+            </figure>
+          </div>
+
+          <div class="w-pair">
+            <div class="w-stations">
+              <article class="w-station" data-covers="fade" data-count="٤" style="--accent: var(--accent-quran)">
+                <div class="w-station-head">
+                  <div>
+                    <span class="w-kicker">نوع محطة · خفوتٌ وإملاء</span>
+                    <h3>خفوت النموذج</h3>
+                  </div>
+                  <span class="w-station-n"><b data-stat="fadeNodes">٤</b>محطات</span>
+                </div>
+                <dl class="w-what">
+                  <div>
+                    <dt>ماذا يتعلّم الطفل</dt>
+                    <dd>
+                      أن يكتب من ذاكرته لا من عينه: الكلمةُ تُعرض كاملةً أوّلاً،
+                      ثم تخفت بأدائه المتباعد، حتى يكتبها <b>سماعاً وحدَه</b>.
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>كيف يعمل التمرين</dt>
+                    <dd>
+                      الخفوتُ <b>بأدائه هو</b> لا بعدّادٍ زمنيّ: من كتبها صحيحةً
+                      متباعدةً خفت نموذجُه، ومن تعثّر عاد إليه النموذجُ كاملاً.
+                      والصوتُ من بنك «اِقْرَأْ» نفسِه الذي تعلّم به الكلمة قراءةً.
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>دورُك أنت</dt>
+                    <dd>
+                      لا تنطق الكلمةَ عنه ولا تُهجّها. اتركه يسمعها من التطبيق
+                      ويعيد سماعَها بقدر ما يشاء — الإملاءُ سمعٌ ويدٌ معاً.
+                    </dd>
+                  </div>
+                </dl>
+              </article>
+            </div>
+            <figure>
+              <img loading="lazy" src="shots/fade.png" width="820" height="836"
+                alt="محطة خفوت النموذج: الكلمة تخفت والطفل يكتبها" />
+              <figcaption>الخفوت — من النسخ إلى الإملاء</figcaption>
+            </figure>
+          </div>
+
+          <div class="w-pair">
+            <div class="w-stations">
+              <article class="w-station" data-covers="sentence" data-count="٤" style="--accent: var(--accent-quran)">
+                <div class="w-station-head">
+                  <div>
+                    <span class="w-kicker">نوع محطة · جملة</span>
+                    <h3>الجمل القصيرة</h3>
+                  </div>
+                  <span class="w-station-n"><b data-stat="sentenceNodes">٤</b>محطات</span>
+                </div>
+                <dl class="w-what">
+                  <div>
+                    <dt>ماذا يتعلّم الطفل</dt>
+                    <dd>
+                      أن ينتقل من الكلمة إلى السطر: <b data-stat="sentences">٢٠</b>
+                      جملةً من سلّم «اِقْرَأْ» — ينسخها أوّلاً، ثم يكتبها سماعاً.
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>كيف يعمل التمرين</dt>
+                    <dd>
+                      الجملةُ وحدةُ قياسٍ مستقلّة في ليتنر — لها محورُها لا محورُ
+                      الكلمة، فلا تختلط جملةٌ بكلمةٍ يتشابه نصّاهما في سجلّه.
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>دورُك أنت</dt>
+                    <dd>
+                      هنا يبدأ الدفتر. اطلب منه أن يكتب الجملةَ نفسَها على ورقٍ
+                      بعد المحطة — هذا هو الجسر الذي جاء التطبيقُ لأجله.
+                    </dd>
+                  </div>
+                </dl>
+              </article>
+            </div>
+            <figure>
+              <img loading="lazy" src="shots/sentence.png" width="820" height="821"
+                alt="محطة الجمل القصيرة: جملةٌ تُنسخ على لوح الكتابة" />
+              <figcaption>الجمل القصيرة — من الكلمة إلى السطر</figcaption>
+            </figure>
+          </div>
+        </section>
+
+        <!-- ————— القياس ————— -->
+        <section class="w-section" style="--accent: var(--accent-quran)">
+          <h2>وأنواعُ التمرين أربعة، وكلُّها مقيسة</h2>
+          <p class="w-lede">
+            كلُّ تمرينٍ يدخل سجلّ ليتنر بمفتاحه: <b>(الوحدة × شكل الموقع × نوع
+            التمرين)</b> — والتباعدُ ١ ← ٢ ← ٤ ← ٨ ← ١٦ يوماً. فلا تدريسَ بلا
+            قياس، ولا محطةَ تُدرّس مهارةً بلا موضعٍ لها في لوحة وليّ الأمر.
+          </p>
+          <div class="w-cards w-cards--four">
+            <article class="w-card">
+              <h3>تتبّع</h3>
+              <p>المسارُ ظاهرٌ ويمشي عليه — موجَّهاً ثم خافتاً.</p>
+            </article>
+            <article class="w-card">
+              <h3>كتابةٌ حرّة</h3>
+              <p>صندوقٌ فارغ بسطر ارتكاز، والحكمُ بالشروط الأربعة نفسِها.</p>
+            </article>
+            <article class="w-card">
+              <h3>نسخ</h3>
+              <p>كلمةٌ أو جملةٌ يراها ويكتبها تحتها.</p>
+            </article>
+            <article class="w-card">
+              <h3>إملاء</h3>
+              <p>يسمعها ولا يراها — بصوت «اِقْرَأْ» الذي تعلّمها به.</p>
+            </article>
+          </div>
+        </section>
       </main>
+
+      <div class="w-end">
+        <h2 style="margin-top: 0">وللأسس التي بُني عليها هذا الترتيب</h2>
+        <p class="w-lede" style="margin-inline: auto">
+          لماذا تتبّعُ المسار لا التمييزُ البصريّ، وما حدودُ ما يَعِد به هذا
+          التطبيق — وما لا يَعِد به.
+        </p>
+        <a class="btn btn--primary w-start" href="method.html">الأسس والمسوّغات ←</a>
+      </div>
 
       <footer class="w-foot">
         <p>
-          <span class="brand"><span class="brand-word">اُكْتُبْ</span></span>
-          — ثالثُ عائلة التأسيس: اِقْرَأْ ← اُكْتُبْ ← أَتْقِنْ ← رَتِّلْ.
+          «اُكْتُبْ» واحدٌ من
+          <a href="https://learn.mishkat.qa/">عائلة التعليم الأولي للطفل العربي</a>
+          — <span dir="ltr">learn.mishkat.qa</span>
+        </p>
+        <p class="w-contact">
+          للتواصل والملاحظات:
+          <a href="mailto:info@mishkat.qa">info@mishkat.qa</a>
         </p>
       </footer>
     </div>

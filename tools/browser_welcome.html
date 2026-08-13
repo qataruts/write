@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>فحصُ المرجع التعريفيّ — متصفّح حقيقي</title>
+<!--
+  **الصفحاتُ الأربع على مقاسات الجهاز** (الجلسة ١١) — نظيرُ `browser_test.html`
+  في بابه: صفحةُ قيادةٍ تفتح كلَّ صفحةٍ من `app/welcome/` في إطارٍ بمقاس جهازٍ
+  حقيقيّ وتقيسها، ثم ترسل حصيلتَها إلى `POST /result`.
+
+  والمقيسُ هنا ما **لا يُقاس على القرص**، فحارسُ النصّ (`tools/test_welcome.mjs`)
+  يقرأ الشجرة ولا يفتح متصفّحاً:
+    · **صفرُ فائضٍ أفقيّ** على المقاسات الخمسة — والصفحةُ التي تُسحَب عرضياً على
+      آيباد صفحةُ عرضٍ مكسورة أمام معلّم.
+    · **صفرُ موردٍ خارجيّ فعلاً**: يُسأل `performance.getEntriesByType('resource')`
+      عمّا جُلب **حقّاً** لا عمّا كُتب في الوسم — «نصٌّ يشبه الجواب ولا يجيب يسقط».
+    · **وصفرُ جافاسكربت يعمل**: `document.scripts` فارغةٌ في كلِّ صفحة.
+    · وأهدافُ اللمس في زرّ البدء — الصفحةُ يفتحها وليُّ أمرٍ بإصبعه لا بفأرة.
+    · والخطوطُ المضمَّنة وصلت فعلاً (`document.fonts.check`) — لا خطُّ نظامٍ
+      احتياطيّ يكذب على العين.
+-->
+<style>
+  body { font: 15px/1.7 system-ui, sans-serif; margin: 0; background: #111; color: #eee; }
+  #log { padding: 1rem; white-space: pre-wrap; }
+  iframe { position: fixed; inset-inline-end: 0; top: 0; border: 0; visibility: hidden; }
+  .ok { color: #7ec97e; } .bad { color: #e08a80; }
+</style>
+</head>
+<body>
+<div id="log"></div>
+<script>
+const results = [];
+const log = document.getElementById('log');
+
+function ok(cond, msg) {
+  results.push({ ok: !!cond, msg });
+  const line = document.createElement('div');
+  line.className = cond ? 'ok' : 'bad';
+  line.textContent = (cond ? '✓ ' : '✗ ') + msg;
+  log.append(line);
+}
+
+const errors = [];
+window.addEventListener('error', (e) => errors.push(String(e.message)));
+window.addEventListener('unhandledrejection', (e) => errors.push(String(e.reason)));
+
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const send = () => fetch('/result', {
+  method: 'POST', body: JSON.stringify({ from: 'write', rows: results }),
+});
+
+// مقاساتُ `DEVICE_SIZES` في `browser_test.py` بأعيانها — أجهزةُ الميدان لا نوافذُ مكتب
+const DEVICES = [
+  ['آيباد ٩٫٧ طولي', 768, 1024],
+  ['آيباد ١٠٫٩ طولي', 820, 1180],
+  ['آيباد ٩٫٧ عرضي', 1024, 768],
+  ['آيباد ١٠٫٩ عرضي', 1180, 820],
+  ['آيباد ميني عرضي', 1133, 744],
+];
+const PAGES = [
+  ['الرئيسة', 'welcome/'],
+  ['المنهج', 'welcome/curriculum.html'],
+  ['الأسس', 'welcome/method.html'],
+  ['الدليل', 'welcome/guide.html'],
+];
+
+/** يفتح صفحةً في إطارٍ بمقاسٍ معلوم ويردّ نافذتَها بعد اكتمال خطوطها وصورها. */
+async function open(url, w, h) {
+  const frame = document.createElement('iframe');
+  frame.style.width = `${w}px`;
+  frame.style.height = `${h}px`;
+  frame.src = `/${url}`;
+  document.body.append(frame);
+  await new Promise((r) => frame.addEventListener('load', r, { once: true }));
+  const win = frame.contentWindow;
+  // **ولا يُنتظَر فكُّ الصور**: لقطاتُ الصفحة `loading="lazy"` وأكثرُها خارج المنظور،
+  // فوعدُ `decode()` عليها **لا يستقرّ أبداً** — انتظارُه يعلّق الفحصَ بلا عطبٍ في
+  // الصفحة. والمقيسُ هنا التصفيفُ والمواردُ لا فكُّ صورةٍ مؤجَّلة.
+  await Promise.race([win.document.fonts.ready, wait(4000)]);
+  await wait(120);
+  return { frame, win, doc: win.document };
+}
+
+(async () => {
+  try {
+    // ————— ١) صفرُ فائضٍ أفقيّ على المقاسات الخمسة —————
+    for (const [pname, url] of PAGES) {
+      for (const [dname, w, h] of DEVICES) {
+        const { frame, doc } = await open(url, w, h);
+        const wide = doc.documentElement.scrollWidth;
+        ok(wide <= w + 1, `${pname} · ${dname}: لا فائضَ أفقيّ (${wide} ≤ ${w})`);
+        frame.remove();
+      }
+    }
+
+    // ————— ٢) وما جُلب فعلاً: من أصلنا وحدَه، وبلا جافاسكربت —————
+    for (const [pname, url] of PAGES) {
+      const { frame, win, doc } = await open(url, 820, 1180);
+      const got = win.performance.getEntriesByType('resource').map((e) => e.name);
+      const foreign = got.filter((u) => new URL(u).origin !== win.location.origin);
+      ok(foreign.length === 0,
+        `${pname}: كلُّ ما جُلب من أصلنا (${got.length} مَورداً)`
+        + (foreign.length ? ` — أجنبيّ: ${foreign.slice(0, 3).join('، ')}` : ''));
+
+      ok(doc.scripts.length === 0, `${pname}: ولا سطرَ جافاسكربت يعمل فيها`);
+      ok(!win.navigator.serviceWorker?.controller,
+        `${pname}: ولا عاملَ خدمةٍ يتولّاها — خارج قشرة التطبيق`);
+
+      // الخطوطُ المضمَّنة وصلت — لا وجهَ احتياطيّ يكذب على العين
+      const head = win.getComputedStyle(doc.querySelector('h1')).fontFamily
+        .split(',')[0].replace(/^['"]|['"]$/g, '');
+      ok(win.document.fonts.check(`700 2rem "${head}"`),
+        `${pname}: وخطُّ عناوينها «${head}» محمَّلٌ لا احتياطيّ`);
+
+      // زرُّ البدء هدفُ لمسٍ مقبول لوليّ أمرٍ يفتحها بإصبعه
+      const cta = doc.querySelector('.w-topnav a.btn');
+      const box = cta ? cta.getBoundingClientRect() : { width: 0, height: 0 };
+      ok(box.height >= 44 && box.width >= 44,
+        `${pname}: وزرُّ «ابدأ الآن» هدفُ لمسٍ مقبول (${Math.round(box.width)}×${Math.round(box.height)})`);
+
+      frame.remove();
+    }
+
+    // ————— ٣) القشرةُ واحدةٌ فعلاً: الشريطُ نفسُه محسوباً على الشاشة —————
+    const navs = [];
+    for (const [, url] of PAGES) {
+      const { frame, doc } = await open(url, 820, 1180);
+      navs.push([...doc.querySelectorAll('.w-topnav a')].map((a) => a.textContent.trim()).join('|'));
+      frame.remove();
+    }
+    ok(new Set(navs).size === 1, `شريطُ التنقّل واحدٌ في الأربع («${navs[0]}»)`);
+
+    ok(errors.length === 0,
+      errors.length ? `أخطاءُ جافاسكربت: ${errors.join(' · ')}` : 'لا أخطاء جافاسكربت');
+  } catch (e) {
+    ok(false, `استثناء: ${e && e.message}`);
+    ok(false, 'أخطاءُ جافاسكربت: استثناءٌ في صفحة القيادة');
+  }
+  await send();
+})();
+</script>
+</body>
+</html>
