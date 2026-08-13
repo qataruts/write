@@ -124,21 +124,37 @@ function hand(doc, win) {
   if (CANDIDATE !== 'now' && !found) throw new Error(`مرشَّحٌ لا وجود له: ${CANDIDATE}`);
   const grounds = { warm: {}, tuned: found ? found.ground : {} };
   if (palettes.shift && palettes.shift.for === CANDIDATE) grounds.shift = palettes.shift.ground;
+  // أرضياتُ بابِ اللوح المعاد فتحه (§٧) — مشتقّةٌ في `identity_panel.py §٣د`، تصل هنا
+  // في جواب `/__palettes.json` كما تصل المزاحة: لا قيمةَ لونٍ نامت في ملفّ.
+  if (palettes.papers && palettes.papers.for === CANDIDATE)
+    for (const [id, ground] of Object.entries(palettes.papers.grounds || {})) grounds[id] = ground;
   if (!grounds[GROUND]) throw new Error(`أرضيةٌ لا وجود لها لهذا المرشَّح: ${GROUND}`);
   // **البذرةُ أوّلاً**: لوحُ التطبيق مصبوغٌ بهويته اليوم، فلو حُقن المرشَّحُ فوقه
   // لورث أرضيتَنا حيث لا يعلن أرضيةً — فتُحقن أرضيةُ العائلة تحتَه أولاً.
   const tokens = CANDIDATE === 'now' ? {}
     : { ...(palettes.seed || {}), ...found.tokens, ...grounds[GROUND] };
 
-  await seed(SCENE === 'map' ? 'g1' : 'warm');
-  frame.src = SCENE === 'map' ? '/' : `/#/warmup/${encodeURIComponent(BOARD_PART)}`;
+  // **والصفحةُ التعريفية شاشةٌ رابعة** (أمرُ المالك ١٣ أغسطس): لوحُها لوحُ التطبيق
+  // نفسِه (`welcome.css` لا يُعرّف لوناً)، فحقنُ `:root` يصبغها كما يصبغ اللوحَ —
+  // ولا تقدّمَ يُبذَر لها ولا إصبعَ يكتب عليها.
+  if (SCENE !== 'welcome') await seed(SCENE === 'map' ? 'g1' : 'warm');
+  frame.src = SCENE === 'welcome' ? '/welcome/'
+    : (SCENE === 'map' ? '/' : `/#/warmup/${encodeURIComponent(BOARD_PART)}`);
   await new Promise((r) => frame.addEventListener('load', r, { once: true }));
   const doc = frame.contentDocument;
   const win = frame.contentWindow;
   paint(doc, tokens);
   await wait(500);
 
-  if (SCENE === 'map') {
+  if (SCENE === 'welcome') {
+    if (!doc.querySelector('.w-hero')) throw new Error('لا صدرَ في الصفحة التعريفية');
+    win.scrollTo(0, 0);
+    // لقطةُ الصدر: صورتُه `loading="lazy"` وهي في المنظور، فيُنتظَر فكُّها كي لا
+    // تُصوَّر رقعةٌ فارغة مكانَ لقطة التطبيق.
+    const hero = doc.querySelector('.w-hero-shot img');
+    if (hero && hero.decode) await hero.decode().catch(() => {});
+    await wait(300);
+  } else if (SCENE === 'map') {
     if (!doc.querySelector('.station')) throw new Error('لا خريطةَ على الشاشة');
     // **رأسُ الخريطة لا موضعُ الجبهة**: الخريطةُ تنزل من نفسها إلى المحطة التالية،
     // ولقطةُ الهوية تريد ما يراه الطفلُ أوّلَ ما يفتح — العلامةُ وعدّادُ النجوم

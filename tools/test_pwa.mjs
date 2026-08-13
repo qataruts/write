@@ -54,6 +54,10 @@ const wanted = onDisk.filter((p) => !p.startsWith('audio/')
     || p === 'audio/manifest.json' || p === 'audio/versions.json')
   .filter((p) => !p.startsWith('emoji/') || p === 'emoji/index.json')
   .filter((p) => !p.startsWith('welcome/'))
+  // **و`CNAME` توجيهُ نشرٍ لا موردَ تطبيق**: يقرؤه GitHub Pages من جذر النشر ليعرف
+  // النطاقَ المخصَّص، ولا يطلبه متصفّحُ الطفل أبداً — فتخزينُه في القشرة تخزينُ ما
+  // لا يُطلَب. (دخل الشجرةَ في `754bc2f` مع النطاق، وأمسكه هذا الحارسُ يومَها.)
+  .filter((p) => p !== 'CNAME')
   .filter((p) => p !== 'sw.js');
 
 const forgotten = wanted.filter((p) => !shell.includes(p));

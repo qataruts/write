@@ -85,11 +85,11 @@
    **وألوانُ الحكم لم تُمَسّ**: الذهبُ إرشادٌ (`.pen-start`/`.pen-arrow`) والأخضرُ صواب. */
 
 :root {
-  --paper: #FCF4E2;             /* خلفية الصفحات (ورقٌ دافئ مُزاح) */
-  --paper-deep: #F6EAD0;
+  --paper: #DAD8FF;             /* خلفية الصفحات (ورقُ الكرّاسة الأزرق — §٧) */
+  --paper-deep: #CFCEFF;
   --card: #FFFDF6;              /* البطاقات */
-  --ink: #403322;               /* النص الأساسي (بني داكن، لا #000) */
-  --ink-soft: #7C694B;          /* نص ثانوي (يبلغ AA ≥ 4.5 على الورق) */
+  --ink: #2E2212;               /* النص الأساسي (بنيٌّ دَكِن مع الورق، لا #000) */
+  --ink-soft: #495195;          /* نص ثانوي (يبلغ AA ≥ 4.5 على الورق) */
   --accent-letters: #3F4C8F;    /* الحرفُ المعزول — **اللونُ الغالب** (حِبرٌ نِيليّ) */
   --accent-skills: #5F70B0;     /* التهيئةُ الحركية والبوابات (خُزاميّ) */
   --accent-stories: #7FA0E4;    /* الوصلُ والنسخ (أزرقُ نِيليٍّ فاتح) */
@@ -104,8 +104,8 @@
   --ok-text: #3E7242;
   --err-text: #9E463F;
 
-  --line: #F1E3CA;
-  --locked: #CFC1A8;
+  --line: #C9C7FE;
+  --locked: #A7A6DD;
   --mix: #fff;                  /* قاعدة مزج التفتيح — الليلي يقلبها إلى البطاقة */
   --on-accent: #fff;            /* نص فوق لون المرحلة (المراحل الفاتحة تقلبه حبراً) */
 
@@ -137,11 +137,11 @@
    **ولم تُمَسّ ألوانُ الحكم**: الذهبُ والأخضرُ والأحمرُ قيمُ البذرة الليلية بأعيانها. */
 @media (prefers-color-scheme: dark) {
   :root {
-    --paper: #2C2418;
-    --paper-deep: #261F15;
+    --paper: #21233F;
+    --paper-deep: #1D1E36;
     --card: #372E1F;
     --ink: #F3E8D3;
-    --ink-soft: #C4AF98;
+    --ink-soft: #AEADE7;
     --accent-letters: #8C92DC;
     --accent-skills: #A0AAE2;
     --accent-stories: #BBD2FF;
@@ -153,10 +153,10 @@
     --star-text: #E5BC5F;
     --ok-text: #A8D2AA;
     --err-text: #EBAFA5;
-    --line: #4D4031;
-    --locked: #6F5F4D;
+    --line: #3D3F65;
+    --locked: #5D5E8B;
     --mix: var(--card);
-    --on-accent: #2C2418;         /* ورقُ الليل نفسُه — يتبعه لا يُكتب مستقلاً */
+    --on-accent: #21233F;         /* ورقُ الليل نفسُه — يتبعه لا يُكتب مستقلاً */
     --shadow: 0 2px 8px rgba(0, 0, 0, .4);
     /* حبر العلامة على الورق الداكن: البرتقاليّ العميق يغرق فيه، فيُفتح إلى ذهبيّه */
     --brand-word: var(--brand-1);
@@ -166,7 +166,7 @@
 /* المراحل الفاتحة: نصّها فوق لونها حبرٌ داكن (يبقى داكناً في الليلي عمداً —
    الألوان الليلية كلها فاتحة). اللون لا يحمل المعنى وحده في الحالتين. */
 .station--join, .node--join, .station--form, .node--form {
-  --on-accent: #403322;         /* حبرُ النهار بقيمته — لا `var(--ink)`: الليليُّ فاتح */
+  --on-accent: #2E2212;         /* حبرُ النهار بقيمته — لا `var(--ink)`: الليليُّ فاتح */
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -267,7 +267,7 @@ button {
 .btn--primary {
   background: var(--star);
   border-color: transparent;
-  color: #403322;              /* حبرُ النهار بقيمته: الذهبُ لا يتبدّل ليلاً فلا يتبدّل نصُّه */
+  color: #2E2212;              /* حبرُ النهار بقيمته: الذهبُ لا يتبدّل ليلاً فلا يتبدّل نصُّه */
   font-weight: 700;
 }
 
@@ -297,7 +297,7 @@ button {
   padding: .9rem 1.1rem;
   border-radius: var(--radius);
   background: var(--star);
-  color: #403322;
+  color: #2E2212;
   box-shadow: var(--shadow);
   text-align: start;
   transition: transform .15s ease;

@@ -53,6 +53,11 @@ SCENES = [
     ("board", "لوحُ الكتابة — محاولةٌ وإرشادُها"),
     ("celebrate", "الاحتفال"),
 ]
+# **ورابعٌ لبابِ اللوح وحدَه** (أمرُ المالك ١٣ أغسطس: «وهذا ينطبق على الصفحات
+# التعريفية»): أرضيةُ `welcome` من لوح التطبيق نفسِه — فما لم يُرَ في الحكم لا يُحكَم
+# فيه. وهو مقصورٌ على أرضيات §٧ فلا تُعاد به لوحةُ هـ١ كلُّها بلا سبب.
+WELCOME = ("welcome", "الصفحةُ التعريفية — أوّلُ ما يرى المعلّم")
+PAPER_SCENES = SCENES + [WELCOME]
 # رموزُ المراحل الخمس في «اُكْتُبْ» (`DESIGN §٢`)، والمرحلتان الفاتحتان نصُّهما حبرٌ
 # داكن لا أبيض — تقرؤه القاعدةُ `.station--join, .station--form { --on-accent }` في
 # `app.css`، ولذلك يُقاس تباينُهما على الحبر لا على الأبيض.
@@ -315,6 +320,300 @@ def derive_shift(read_tokens: dict, calc_tokens: dict, names: list) -> dict:
     }
 
 
+# ————— ٣د) بابُ اللوح يُعاد فتحه (١٣ أغسطس ٢٠٢٦) — أرضياتٌ تُميّز «اُكْتُبْ» —————
+#
+# **أمرُ المالك**: «الأرضيةُ ما زالت تشبه اقرأ — نريد تمييزَ اكتب كما تميّز احسب، وهذا
+# ينطبق على الصفحات التعريفية». والتشخيصُ رقمٌ: الأوراقُ الثلاثة كريمٌ دافئ متقارب،
+# وإزاحتُنا (§٦) **2.33 ΔE₀₀** — أدنى ما يُرضي الميثاق، فلا تُرى وحدَها. **واللونُ
+# الغالبُ مُقَرٌّ لا يُمَسّ**: المطلوبُ الأرضيةُ وحدَها.
+#
+# **وعتبتا المسافة من المالك لا من الأداة**: بُعدُ ورقنا عن ورق اقرأ ≥ **٦** وعن ورق
+# احسب ≥ **٤** (في `palettes.json`، لا رقمَ يُخترع هنا). وأمرُه الثاني: **«اقتبس من
+# لون الأيقونة»** — فالصبغةُ تُقرأ من بكسلات `icon-192.png` نفسِها لا من رمزٍ يمثّلها.
+#
+# **وثلاثةُ أبوابٍ أُغلقت بالرقم قبل أن يُشتقّ شيء** — وهي علّةُ كون المرشّحات ثلاثَ
+# درجاتٍ من صبغةٍ واحدة لا ثلاثةَ ألوان:
+#   ١) **الحبرُ والبطاقةُ لا يتحرّكان** (إلا حيث يفرض القيدُ خلافَه، انظر `steep`):
+#      النموذجُ الذي يتتبّعه الطفل **حبرٌ بشفافيته على البطاقة**، فمن أدار الحبرَ أدار
+#      النموذجَ معه — وقياسُه: إدارةُ الحبر إلى صبغة الأيقونة تُنزل فصلَ حبر الطفل من
+#      **28.3** إلى **21.7**، وهو أوّلُ ما تراه عينُه على اللوح. فوقفا.
+#   ٢) **الإضاءةُ لا تنزل بلا ثمن**: ورقٌ أدكنُ بحبرٍ ثابت يُنزل التباينَ دون تباين
+#      اليوم (ورقٌ عند `L*` 92.7 ⇐ **10.18:١**). فمن أراد زُرقةً تُرى دفع دُكنةَ حبرٍ
+#      معها — وهو بابُ `steep` وحدَه، بقياسه.
+#   ٣) **والإضاءةُ لا تصعد كذلك**: ورقٌ يعلو بطاقتَه يبتلعها، فتصير البطاقةُ رقعةً
+#      أدكنَ من ورقها. فبقي للورق بابان: **الصبغةُ والإشباع**.
+#
+# **وحَفُّ التدوير لا يُقبَل هبوطاً**: قيمةُ اللون تُكتب ثماني بتّات، فقد ينزل تباينُ
+# ورقٍ لم تُمَسّ إضاءتُه بـ**0.04** لا غير — ومع ذلك يُرفَع أصغرَ رفعةٍ تردّه إلى تباين
+# اليوم فأعلى. **فالمقيسُ ما كُتب لا ما أُريد**، والقيدُ قيدٌ ولو كان الفرقُ حَفّاً.
+
+PAPER_GRID = 0.01            # دقّةُ المسح: في وحدات `L*` وفي الإشباع سواء
+PAPER_MULT_GRID = 0.01       # ودقّةُ مضاعف الإشباع في `steep`
+PAPER_MULT_SPAN = 300
+
+
+def icon_color(path: Path) -> str:
+    """**لونُ الأيقونة مقروءاً من بكسلاتها** — لا من رمزٍ يُقال إنه يمثّلها.
+
+    فأمرُ المالك «اقتبس من لون الأيقونة»، والأيقونةُ ملفٌّ على القرص لا فكرة: تُفَكّ
+    صفوفُها بمرشّحاتها ويُؤخذ **متوسّطُ ما ليس شفافاً**. ولو أُعيدت الأيقونةُ يوماً
+    بلوحٍ آخر تحرّكت الصبغةُ معها بلا رقمٍ يُعدَّل هنا.
+    """
+    data = path.read_bytes()
+    head, idat, i = None, b"", 8
+    while i < len(data):
+        length = struct.unpack(">I", data[i:i + 4])[0]
+        kind = data[i + 4:i + 8]
+        if kind == b"IHDR":
+            head = struct.unpack(">IIBBBBB", data[i + 8:i + 8 + 13])
+        elif kind == b"IDAT":
+            idat += data[i + 8:i + 8 + length]
+        i += 12 + length
+    width, height, depth, colour = head[0], head[1], head[2], head[3]
+    if depth != 8 or colour not in (2, 6):
+        raise SystemExit(f"أيقونةٌ بصيغةٍ لا تُقرأ هنا: عمق {depth} نوع {colour}")
+    step = 4 if colour == 6 else 3
+    raw = zlib.decompress(idat)
+    stride, pos = width * step, 0
+    prior, total, count = bytearray(stride), [0, 0, 0], 0
+    for _ in range(height):
+        kind, pos = raw[pos], pos + 1
+        line = bytearray(raw[pos:pos + stride])
+        pos += stride
+        for x in range(stride):
+            left = line[x - step] if x >= step else 0
+            up = prior[x]
+            corner = prior[x - step] if x >= step else 0
+            if kind == 1:
+                line[x] = (line[x] + left) & 255
+            elif kind == 2:
+                line[x] = (line[x] + up) & 255
+            elif kind == 3:
+                line[x] = (line[x] + (left + up) // 2) & 255
+            elif kind == 4:
+                guess = left + up - corner
+                dl, du, dc = abs(guess - left), abs(guess - up), abs(guess - corner)
+                near = left if (dl <= du and dl <= dc) else (up if du <= dc else corner)
+                line[x] = (line[x] + near) & 255
+        for p in range(0, stride, step):
+            if step == 4 and line[p + 3] < 128:
+                continue
+            for c in range(3):
+                total[c] += line[p + c]
+            count += 1
+        prior = line
+    return "#%02X%02X%02X" % tuple(round(v / count) for v in total)
+
+
+def tinted(value: str, hue: float, mult: float, lift: float = 0.0) -> tuple:
+    """اللونُ نفسُه، صبغتُه صبغةُ الأيقونة، وإشباعُه مضروبٌ، وإضاءتُه مرفوعةٌ بمقدار."""
+    light, chroma, _ = lch(value)
+    chroma *= mult
+    return lab_hex(max(0.0, min(100.0, light + lift)),
+                   chroma * math.cos(math.radians(hue)),
+                   chroma * math.sin(math.radians(hue)))
+
+
+def paper_ground(base: dict, names: list, hue: float, mult: float, lift: float = 0.0) -> tuple:
+    ground, clipped = {}, []
+    for name in names:
+        value, clip = tinted(base[name], hue, mult, lift)
+        ground[name] = value
+        if clip:
+            clipped.append(name)
+    return ground, clipped
+
+
+def gamut_chroma(value: str, hue: float) -> float:
+    """أقصى إشباعٍ يسعه المجالُ عند إضاءة هذا اللون وصبغةِ الأيقونة."""
+    light = lch(value)[0]
+    chroma = 0.0
+    while chroma < 60:
+        _, clip = lab_hex(light, (chroma + PAPER_GRID) * math.cos(math.radians(hue)),
+                          (chroma + PAPER_GRID) * math.sin(math.radians(hue)))
+        if clip:
+            return chroma
+        chroma += PAPER_GRID
+    return chroma
+
+
+def gamut_light(chroma: float, hue: float) -> float:
+    """وأعلى إضاءةٍ يسعها المجالُ عند هذا الإشباع — سقفُ الورق حين يُطلَب حبرٌ يُرى."""
+    light = 100.0
+    while light > 0:
+        _, clip = lab_hex(light, chroma * math.cos(math.radians(hue)),
+                          chroma * math.sin(math.radians(hue)))
+        if not clip:
+            return light
+        light -= PAPER_GRID
+    return 0.0
+
+
+def paper_lift(base: dict, names: list, hue: float, mult: float, want: float) -> tuple:
+    """أصغرُ رفعةٍ تردّ تباينَ اليوم بعد حَفّ التدوير (وصفرٌ إن لم يُحفّ شيء)."""
+    lift = 0.0
+    while lift <= 1.5:
+        ground, clipped = paper_ground(base, names, hue, mult, lift)
+        if contrast(base["ink"], ground["paper"]) >= want:
+            return lift, ground, clipped
+        lift += PAPER_GRID
+    return None, None, None
+
+
+def papers_for(data: dict) -> str:
+    return data.get("papers", {}).get("for", "")
+
+
+def paper_ids(data: dict) -> list:
+    return [c["id"] for c in data.get("papers", {}).get("candidates", [])]
+
+
+def derive_papers(data: dict, shift: dict, hue: float, siblings: dict, base_palette: dict,
+                  opacity: float) -> dict:
+    """الأرضياتُ الثلاث كاملةً — كلُّ واحدةٍ بقاعدتها المنشورة، ومعها أرقامُها.
+
+    **والأساسُ أرضيةُ §٦ المشتقّة لا ما في `app.css`**: فلو قِيست على اللوح المصبوغ
+    لتحرّك الاشتقاقُ يومَ يُصبَغ اللوحُ بأحدها — فيصير المرشَّحُ يقيس نفسَه.
+    """
+    spec = data["papers"]
+    base, names = shift["ground"], spec["tokens"]
+    floor_read, floor_calc = spec["floors"]["read"], spec["floors"]["calc"]
+    read_paper = siblings["read"]["tokens"]["paper"]
+    calc_paper = siblings["calc"]["tokens"]["paper"]
+    want_contrast = contrast(base["ink"], base["paper"])
+    base_chroma = lch(base["paper"])[1]
+
+    def rate(ground: dict) -> dict:
+        palette = dict(base_palette)
+        palette.update(ground)
+        m = measure(palette, siblings, siblings, opacity)
+        m["palette"] = palette
+        m["floor_read"] = de00(ground["paper"], read_paper)
+        m["floor_calc"] = de00(ground["paper"], calc_paper)
+        m["ink_sep"] = min(s["ink_sep"] for s in m["stages"].values())
+        return m
+
+    want_sep = rate(base)["ink_sep"]
+    out = {}
+    for cand in spec["candidates"]:
+        note = {}
+        if cand["id"] in ("wash", "quire"):
+            def settle(chroma: float) -> tuple:
+                """اللوحُ **كما يُكتب**: إشباعٌ مطلوب، ثم رفعةُ حَفّ التدوير، ثم القياس."""
+                lift, ground, clipped = paper_lift(base, names, hue, chroma / base_chroma,
+                                                   want_contrast)
+                if lift is None:
+                    raise SystemExit(f"«{cand['name']}»: لم تردّ الرفعةُ تباينَ اليوم")
+                return lift, ground, clipped, (de00(ground["paper"], read_paper),
+                                               de00(ground["paper"], calc_paper))
+
+            if cand["id"] == "wash":
+                # أدنى إشباعٍ يبلغ العتبتين — **والعتبتان تُقاسان على القيمة المكتوبة
+                # بعد الرفعة** لا على المطلوبة قبلها، فحَفُّ التدوير يزحزح المسافةَ أيضاً.
+                chroma, below = 0.0, None
+                while chroma <= base_chroma:
+                    lift, ground, clipped, (gap_read, gap_calc) = settle(chroma)
+                    if gap_read >= floor_read and gap_calc >= floor_calc:
+                        break
+                    below = (chroma, ground["paper"], gap_read, gap_calc)
+                    chroma += PAPER_GRID
+                else:
+                    raise SystemExit(f"«{cand['name']}»: لم يبلغ الإشباعُ العتبتين")
+                note["below"] = below
+            else:
+                chroma = gamut_chroma(base["paper"], hue)
+                note["wall"] = chroma
+                lift, ground, clipped, _ = settle(chroma)
+            note.update(mult=chroma / base_chroma, chroma=chroma, lift=lift, drop=0.0)
+        else:
+            # **أوّلُ عمقٍ تجتمع عنده قيودُ المالك كلُّها** — ولا يُنفَق عمقٌ أكثر.
+            # والحبرُ يَدكَن مع الورق أصغرَ دُكنةٍ تردّ تباينَ اليوم: وهو ثمنُ زُرقةٍ
+            # تُرى من بعيد. **وعلّةُ كون الأقلِّ ممنوعاً والأكثرِ مباحاً تُقال**: كلّما
+            # دكَن الحبرُ ابتعد النموذجُ المرسومُ عن ألوان المراحل الفاتحة — ففصلُ حبر
+            # الطفل يعلو بالعمق لا ينزل، وأوّلُ عمقٍ يردّه إلى فصل اليوم هو الحدّ.
+            kept, first, refused = None, None, []
+            for i in range(0, PAPER_MULT_SPAN + 1):
+                mult = 1.0 + i * PAPER_MULT_GRID
+                chroma = base_chroma * mult
+                drop = gamut_light(chroma, hue) - lch(base["paper"])[0]
+                ground, clipped = paper_ground(base, names, hue, mult, drop)
+                light, ink_chroma, ink_hue = lch(base["ink"])
+                ink, ink_drop = base["ink"], 0.0
+                while light > 0 and contrast(ink, ground["paper"]) < want_contrast:
+                    light -= PAPER_GRID
+                    ink_drop -= PAPER_GRID
+                    ink, _ = lab_hex(light, ink_chroma * math.cos(math.radians(ink_hue)),
+                                     ink_chroma * math.sin(math.radians(ink_hue)))
+                ground["ink"] = ink
+                m = rate(ground)
+                sane = (m["ink_sep"] >= want_sep and m["ink_paper"] >= want_contrast
+                        and m["soft_paper"] >= AA
+                        and m["floor_read"] >= floor_read and m["floor_calc"] >= floor_calc)
+                if sane:
+                    kept = (mult, chroma, drop, ground, clipped, ink_drop)
+                    break
+                refused.append((mult, ground["paper"], m["ink_sep"]))
+                first = (mult, ground["paper"], m["ink_sep"], m["ink_paper"])
+            if kept is None:
+                raise SystemExit(f"«{cand['name']}»: لم يجُز عمقٌ واحد")
+            mult, chroma, drop, ground, clipped, ink_drop = kept
+            note.update(mult=mult, chroma=chroma, lift=0.0, drop=drop,
+                        ink_drop=ink_drop, first=first, refused=len(refused))
+        m = rate(ground)
+        m["complaints"] = complaints(m, floors(siblings["read"]["tokens"], opacity))
+        out[cand["id"]] = {"ground": ground, "clipped": clipped, "note": note, "m": m,
+                           "hue": hue, "want_sep": want_sep, "want_contrast": want_contrast}
+    return out
+
+
+def paper_base(data: dict, app_tokens: dict, siblings: dict, shift: dict) -> dict:
+    """اللوحُ الذي تُقاس عليه أرضياتُ §٧: المرشَّحُ المحكومُ له على أرضيته المزاحة —
+    **مشتقّاً لا مقروءاً من `app.css`**، فلا يتحرّك القياسُ يومَ يُصبَغ اللوح.
+    """
+    chosen = next(c for c in data["candidates"] if c["id"] == papers_for(data))
+    return candidate_palette(seed_tokens(app_tokens, siblings), chosen, SHIFT, shift)
+
+
+def closed_doors(data: dict, shift: dict, hue: float, siblings: dict, base_palette: dict,
+                 opacity: float) -> dict:
+    """الأبوابُ الثلاثةُ المغلقة — **بشواهدها محسوبةً**، فلا يُقال «تعذّر» بلا رقم."""
+    spec = data["papers"]
+    base = shift["ground"]
+    every = list(spec["tokens"]) + list(spec["frozen"])
+    turned, _ = paper_ground(base, every, hue, 1.0)
+    palette = dict(base_palette)
+    palette.update(turned)
+    turned_sep = min(s["ink_sep"] for s in
+                     measure(palette, siblings, siblings, opacity)["stages"].values())
+
+    # ورقٌ أدكنُ بحبرٍ ثابت: كم يبلغ تباينُه؟ (والدُّكنةُ دُكنةُ ضِعف الإشباع)
+    chroma = lch(base["paper"])[1] * 2
+    drop = gamut_light(chroma, hue) - lch(base["paper"])[0]
+    dark, _ = paper_ground(base, spec["tokens"], hue, 2.0, drop)
+    dark_contrast = contrast(base["ink"], dark["paper"])
+
+    # وورقٌ يصعد بلا صبغة: أيّ إضاءةٍ يبلغ العتبةَ، وأين بطاقتُه؟
+    lift, light = 0.0, None
+    while lift <= 6:
+        pale, _ = paper_ground(base, spec["tokens"], hue, 0.0, lift)
+        if de00(pale["paper"], siblings["read"]["tokens"]["paper"]) >= spec["floors"]["read"]:
+            light = lch(pale["paper"])[0]
+            break
+        lift += PAPER_GRID
+    return {"turned": turned["ink"], "turned_sep": turned_sep,
+            "dark": dark["paper"], "dark_contrast": dark_contrast,
+            "pale_light": light, "card_light": lch(base["card"])[0],
+            "base_light": lch(base["paper"])[0]}
+
+
+def paper_night(base_night: dict, names: list, hue: float, mult: float) -> tuple:
+    """ليلُ الأرضية — **إسقاطٌ بقاعدةٍ منشورة**: يأخذ من نهاره ما هو هوية (الصبغةُ
+    والإشباع) ولا يأخذ إضاءتَه — فإضاءةُ الليل ليلٌ، وهي في لوح اقرأ الليليّ محسوبةٌ
+    لتباينها. فيبقى كلُّ تباينٍ ليليّ محفوظاً بعينه كما في §٣ب.
+    """
+    return paper_ground(base_night, names, hue, mult, 0.0)
+
+
 def read_night(text: str) -> dict:
     """كتلةُ اقرأ الليلية — تُقرأ من ملفّه لا تُكتب هنا (نظيرُ `root_tokens` للنهار)."""
     block = re.search(r"@media \(prefers-color-scheme: dark\)\s*\{\s*:root\s*\{(.*?)\n  \}",
@@ -514,7 +813,7 @@ HOLD_PNG = bytes.fromhex(
     "0557bfabd40000000049454e44ae426082")
 
 
-def served_palettes(data: dict, shift: dict, seed: dict) -> bytes:
+def served_palettes(data: dict, shift: dict, seed: dict, papers: dict = None) -> bytes:
     """بيانُ المرشّحات كما يُقدَّم للصفحة — **ومعه الأرضيةُ المزاحة مشتقّةً**.
 
     فالقيمُ لا تُكتب في `palettes.json` (نصُّ البيان نفسِه)، والصفحةُ لا تعرف حساب
@@ -523,6 +822,13 @@ def served_palettes(data: dict, shift: dict, seed: dict) -> bytes:
     """
     served = json.loads(json.dumps(data))
     served["shift"] = {**data["shift"], "ground": shift["ground"], "k": shift["k"]}
+    if papers:
+        # **وأرضيةُ §٧ تُخدَم فوق المزاحة لا فوق البذرة**: هي إزاحةٌ للورق وما هو منه،
+        # وما لم تمسّه (البطاقةُ خاصّةً) يبقى على أرضية §٦ — كما يقابلها حارسُ الحكم
+        # حرفاً. ولولا ذلك لورثت البطاقةُ بطاقةَ اقرأ، فتفترق الصورةُ عن اللوح المصبوغ.
+        served["papers"] = {**data["papers"],
+                            "grounds": {name: {**shift["ground"], **got["ground"]}
+                                        for name, got in papers.items()}}
     # **وقاعدةُ البذرة تُخدَم معها**: الصفحةُ تحقن المرشَّحَ فوق لوحٍ مصبوغٍ اليوم،
     # فلولا حقنُ أرضية العائلة تحتَه لظهر عمودُ «الدافئة» بأرضيتنا نحن.
     served["seed"] = {name: value for name, value in seed.items()
@@ -658,27 +964,39 @@ def capture(base: str, profile: Path, state: dict, candidate: str, ground: str,
     return out, None
 
 
-def capture_all(cands: list, port: int, timeout: int, data: dict, shift: dict, seed: dict) -> int:
+def shot_jobs(data: dict, cands: list) -> list:
+    """كلُّ لقطةٍ تعرضها اللوحة، بابَ هـ١ وبابَ §٧ — **مصدرٌ واحد** يقرؤه السَّوقُ والحارس."""
+    jobs = [("now", "warm", scene) for scene, _ in SCENES]
+    jobs += [(c["id"], ground, scene) for c in cands
+             for ground in grounds_of(data, c["id"]) for scene, _ in SCENES]
+    who = papers_for(data)
+    if who and any(c["id"] == who for c in cands):
+        jobs.append(("now", "warm", WELCOME[0]))
+        jobs += [(who, paper, scene) for paper in paper_ids(data) for scene, _ in PAPER_SCENES]
+    return jobs
+
+
+def capture_all(cands: list, port: int, timeout: int, data: dict, shift: dict, seed: dict,
+                papers: dict) -> int:
     OUT.mkdir(parents=True, exist_ok=True)
     state = {"ready": threading.Event(), "failed": False, "timeout": timeout}
-    server = make_server(port, state, served_palettes(data, shift, seed))
+    server = make_server(port, state, served_palettes(data, shift, seed, papers))
     threading.Thread(target=server.serve_forever, daemon=True).start()
     base = f"http://127.0.0.1:{port}"
+    titles = dict(PAPER_SCENES)
     fails = 0
     try:
-        jobs = [("now", "warm")] + [(c["id"], g) for c in cands for g in grounds_of(data, c["id"])]
-        for candidate, ground in jobs:
-            for scene, title in SCENES:
-                profile = Path(tempfile.mkdtemp(prefix="uktub-identity-"))
-                try:
-                    out, err = capture(base, profile, state, candidate, ground, scene, timeout)
-                finally:
-                    shutil.rmtree(profile, ignore_errors=True)
-                if err:
-                    fails += 1
-                    print(f"  ✗ {out.name} — {err}")
-                else:
-                    print(f"  ✓ {out.name} — {title}")
+        for candidate, ground, scene in shot_jobs(data, cands):
+            profile = Path(tempfile.mkdtemp(prefix="uktub-identity-"))
+            try:
+                out, err = capture(base, profile, state, candidate, ground, scene, timeout)
+            finally:
+                shutil.rmtree(profile, ignore_errors=True)
+            if err:
+                fails += 1
+                print(f"  ✗ {out.name} — {err}")
+            else:
+                print(f"  ✓ {out.name} — {titles[scene]}")
     finally:
         server.shutdown()
     return fails
@@ -768,8 +1086,199 @@ def swatch(value: str) -> str:
     return f'<code>{value}</code>'
 
 
+def paper_door(data: dict, siblings: dict, papers: dict, closed: dict, icon: str,
+               shift: dict, opacity: float) -> list:
+    """§٧ — بابُ اللوح يُعاد فتحه: أرضياتٌ تُميّز «اُكْتُبْ»، بأرقامها ولقطاتها."""
+    if not papers:
+        return []
+    spec = data["papers"]
+    lines = []
+    add = lines.append
+    read_tokens, calc_tokens = siblings["read"]["tokens"], siblings["calc"]["tokens"]
+    today = shift["ground"]
+    who = next(c for c in data["candidates"] if c["id"] == papers_for(data))
+    first = papers[spec["candidates"][0]["id"]]
+
+    add(f"## ٧. بابُ اللوح يُعاد فتحه — الأرضيةُ تُميّز «اُكْتُبْ» ({spec['opened']})")
+    add("")
+    add("> **أمرُ المالك**: «الأرضيةُ ما زالت تشبه اقرأ — نريد تمييزَ اكتب كما تميّز")
+    add("> احسب. وهذا ينطبق على الصفحات التعريفية». **واللونُ الغالبُ مُقَرٌّ لا يُمَسّ**")
+    add(f"> («{who['name']}» {swatch(who['tokens']['accent-letters'])}) — المطلوبُ الأرضيةُ وحدَها.")
+    add("")
+    add("**والتشخيصُ رقمٌ لا انطباع** — الأوراقُ الثلاثة كريمٌ دافئ متقارب:")
+    add("")
+    add("| الورق | القيمة | عن ورق اقرأ | عن ورق احسب |")
+    add("|---|---|---|---|")
+    add(f"| اقرأ | {swatch(read_tokens['paper'])} | — |"
+        f" {de00(read_tokens['paper'], calc_tokens['paper']):.2f} |")
+    add(f"| احسب | {swatch(calc_tokens['paper'])} |"
+        f" {de00(calc_tokens['paper'], read_tokens['paper']):.2f} | — |")
+    add(f"| **نحن اليوم** (§٦ المزاحة) | {swatch(today['paper'])} |"
+        f" **{de00(today['paper'], read_tokens['paper']):.2f}** |"
+        f" {de00(today['paper'], calc_tokens['paper']):.2f} |")
+    add("")
+    add(f"فإزاحتُنا **{de00(today['paper'], read_tokens['paper']):.2f}** — أدنى ما يُرضي الميثاق"
+        " (خطوةُ أخٍ، §٦)، وهي تُرى إن صُفَّ الورقان ولا تُرى وحدَها. **وعتباتُ اليوم من")
+    add(f"المالك لا من الأداة**: بُعدُ ورقنا عن ورق اقرأ ≥ **{spec['floors']['read']:g}**"
+        f" وعن ورق احسب ≥ **{spec['floors']['calc']:g}**.")
+    add("")
+    add("### ٧.١ — الصبغةُ تُقتبس من الأيقونة، مقروءةً من بكسلاتها")
+    add("")
+    add("**أمرُ المالك الثاني**: «اقتبس من لون الأيقونة فهو الأنسب للون التطبيق». ولم")
+    add(f"يُؤخَذ رمزٌ يُقال إنه يمثّلها، بل فُكَّت `app/icons/icon-192.png` نفسُها وأُخذ")
+    add(f"**متوسّطُ ما ليس شفافاً**: {swatch(icon)} عند صبغة **{lch(icon)[2]:.2f}°**"
+        f" — وهي صبغةُ `--brand-2` {swatch(who['tokens']['brand-2'])}"
+        f" ({lch(who['tokens']['brand-2'])[2]:.1f}°) بفارق"
+        f" {abs(lch(icon)[2] - lch(who['tokens']['brand-2'])[2]):.1f}° لا غير.")
+    add("فلو أُعيدت الأيقونةُ يوماً بلوحٍ آخر تحرّكت صبغةُ الورق معها بلا رقمٍ يُعدَّل.")
+    add("")
+    add("### ٧.٢ — ثلاثةُ أبوابٍ أُغلقت بالرقم قبل أن يُشتقّ لون")
+    add("")
+    add("وهي علّةُ كون المرشّحات **ثلاثَ درجاتٍ من صبغةٍ واحدة** لا ثلاثةَ ألوان:")
+    add("")
+    add(f"1. **الحبرُ والبطاقةُ لا يتحرّكان**: النموذجُ الذي يتتبّعه الطفل حبرٌ بشفافيته"
+        f" `{opacity:g}` على البطاقة — فمن أدار الحبرَ أدار النموذجَ معه. والقياس: إدارةُ"
+        f" الحبر إلى صبغة الأيقونة ({swatch(closed['turned'])}) تُنزل فصلَ حبر الطفل من"
+        f" **{first['want_sep']:.1f}** إلى **{closed['turned_sep']:.1f}**، وهو أوّلُ ما"
+        " تراه عينُه على اللوح. فوقفا. (**وباب `steep` وحدَه يُدكِن الحبرَ** — بثمنٍ"
+        " مقيسٍ في بابه.)")
+    add(f"2. **والإضاءةُ لا تنزل بلا ثمن**: ورقٌ أدكن بحبرٍ ثابت ({swatch(closed['dark'])})"
+        f" يُنزل التباينَ إلى **{closed['dark_contrast']:.2f}:١** دون تباين اليوم"
+        f" **{first['want_contrast']:.2f}:١**.")
+    add(f"3. **ولا تصعد كذلك**: ورقٌ بلا صبغةٍ يبلغ العتبةَ عند `L*` "
+        f"**{closed['pale_light']:.1f}** — وبطاقتُه عند **{closed['card_light']:.1f}**،"
+        " فيبتلع الورقُ بطاقتَه وتصير الرقعةُ البيضاء أدكنَ من أرضها.")
+    add("")
+    add("فبقي للورق بابان: **الصبغةُ والإشباع** — وثلاثةُ المرشّحين ثلاثةُ حدودٍ فيهما،")
+    add("لكلٍّ قاعدةٌ منشورة لا ذوق.")
+    add("")
+
+    add("### ٧.٣ — المرشّحاتُ الثلاثة بقواعدها وأرقامها")
+    add("")
+    for cand in spec["candidates"]:
+        got = papers[cand["id"]]
+        m, note = got["m"], got["note"]
+        add(f"#### «{cand['name']}» (`{cand['id']}`)")
+        add("")
+        add(f"**الاستعارة**: {cand['metaphor']}")
+        add("")
+        add(f"**القاعدة**: {cand['rule']}.")
+        if cand["id"] == "wash" and note.get("below"):
+            below = note["below"]
+            add(f" والمقيسُ يشهد أنه **أصغرُ ما يبلغ**: ما دونه ({swatch(below[1])}) على"
+                f" {below[2]:.2f} من ورق اقرأ و{below[3]:.2f} من ورق احسب.")
+        if cand["id"] == "quire" and note.get("wall"):
+            add(f" وسقفُ المجال عند إضاءة ورقنا (`L*` {closed['base_light']:.1f}) إشباعُه"
+                f" **{note['wall']:.2f}** — وما فوقه يُقَصّ فلا يُكتب.")
+        if cand["id"] == "steep" and note.get("first"):
+            broke = note["first"]
+            add(f" والحدُّ **×{note['mult']:.2f}** من إشباع ورق اليوم: هبطت الإضاءةُ"
+                f" **{note['drop']:.2f}** ومعها الحبرُ **{note['ink_drop']:.2f}**"
+                f" ({swatch(today['ink'])} ⇐ {swatch(got['ground']['ink'])}). وما دونه"
+                f" مردودٌ بالرقم — **{arnum(note['refused'])}** عمقاً أقلَّ رُفضت، آخرُها"
+                f" ×{broke[0]:.2f} ({swatch(broke[1])}) بفصلِ حبرٍ **{broke[2]:.2f}** دون"
+                f" **{got['want_sep']:.2f}**.")
+            add("")
+            add("**وعلّةُ أنّ الأقلَّ ممنوعٌ والأكثرَ مباح تُقال ولا تُخبّأ**: الحبرُ يَدكَن")
+            add("مع الورق، وكلّما دكَن ابتعد **النموذجُ المرسوم** (حبرٌ بشفافيته على")
+            add("البطاقة) عن ألوان المراحل الفاتحة. ففصلُ حبر الطفل **يعلو بالعمق**، وأوّلُ")
+            add("عمقٍ يردّه إلى فصل اليوم هو الحدُّ — لا أعمقُ ما يُستطاع.")
+        add("")
+        add(f"**لماذا**: {cand['why']}")
+        add("")
+        add(f"**وما يُخشى منه**: {cand['risk']}")
+        add("")
+        add("| الرمز | اليوم | المرشَّح | ΔE₀₀ |")
+        add("|---|---|---|---|")
+        for name, value in got["ground"].items():
+            add(f"| `--{name}` | {swatch(today[name])} | {swatch(value)} |"
+                f" {de00(value, today[name]):.2f} |")
+        add("")
+        add(f"الورق {swatch(got['ground']['paper'])} — عن ورق اقرأ **{m['floor_read']:.2f}**"
+            f" وعن ورق احسب **{m['floor_calc']:.2f}** · حبرٌ على ورق **{m['ink_paper']:.2f}:١**"
+            f" · ثانويٌّ **{m['soft_paper']:.2f}:١** · **فصلُ حبر الطفل عن النموذج المرسوم"
+            f" {m['ink_sep']:.2f}**"
+            + (f" · وقُصّ إلى حدّ المجال: "
+               + " و".join(f"`--{n}`" for n in got["clipped"]) if got["clipped"] else ""))
+        add("")
+        add("<table><tr>")
+        for scene, title in PAPER_SCENES:
+            name = shot_name(papers_for(data), cand["id"], scene)
+            add(f'<td align="center" width="25%"><a href="identity/{name}">'
+                f'<img src="identity/{name}" width="200" alt="{title}"></a>'
+                f'<br><sub>{title}</sub></td>')
+        add("</tr></table>")
+        add("")
+        bad = m["complaints"]
+        add("**ما نزل عن أرضيةٍ**:" + ("" if bad else " لا شيء."))
+        if bad:
+            add("")
+            for line in bad:
+                add(f"- ⚠ {line}")
+        add("")
+
+    add("### ٧.٤ — القيودُ الأربعة مقيسةً في صفٍّ واحد")
+    add("")
+    add("| | عن ورق اقرأ ≥ "
+        f"{spec['floors']['read']:g} | عن ورق احسب ≥ {spec['floors']['calc']:g} |"
+        f" حبرٌ على ورق ≥ {first['want_contrast']:.2f} | ثانويٌّ ≥ {AA:g} |"
+        f" فصلُ حبر الطفل ≥ {first['want_sep']:.2f} |")
+    add("|---|---|---|---|---|---|")
+    base_m = measure(paper_base_palette(data, siblings, shift), siblings, siblings, opacity)
+    add(f"| **اليوم** {swatch(today['paper'])} |"
+        f" {de00(today['paper'], read_tokens['paper']):.2f} |"
+        f" {de00(today['paper'], calc_tokens['paper']):.2f} |"
+        f" {base_m['ink_paper']:.2f} | {base_m['soft_paper']:.2f} |"
+        f" {min(s['ink_sep'] for s in base_m['stages'].values()):.2f} |")
+    for cand in spec["candidates"]:
+        m = papers[cand["id"]]["m"]
+        mark = lambda ok: " ✓" if ok else " ✗"
+        add(f"| «{cand['name']}» {swatch(papers[cand['id']]['ground']['paper'])} |"
+            f" {m['floor_read']:.2f}{mark(m['floor_read'] >= spec['floors']['read'])} |"
+            f" {m['floor_calc']:.2f}{mark(m['floor_calc'] >= spec['floors']['calc'])} |"
+            f" {m['ink_paper']:.2f}{mark(m['ink_paper'] >= first['want_contrast'])} |"
+            f" {m['soft_paper']:.2f}{mark(m['soft_paper'] >= AA)} |"
+            f" {m['ink_sep']:.2f}{mark(m['ink_sep'] >= first['want_sep'])} |")
+    add("")
+    add("**وألوانُ الحكم لم تُمَسّ**: `--star` (الإرشادُ ونقطةُ البداية) و`--ok` و`--err`")
+    add("قيمُها قيمُها، ولا يبدّل مرشَّحُ أرضيةٍ إلا الورقَ وما هو منه.")
+    add("")
+
+    add("### ٧.٥ — المقابلة: اليومُ والثلاثةُ على أربع شاشات")
+    add("")
+    add("**وأوّلُ عمودٍ لوحُ التطبيق كما هو الآن** — وهو المرشَّحُ الرابعُ ضمناً: من رضيه")
+    add("لم يُبدَّل حرف. **والشاشةُ الرابعةُ الصفحةُ التعريفية**، فلوحُها لوحُ التطبيق")
+    add("نفسُه (`welcome.css` لا يُعرّف لوناً) — تُصبَغ بصبغه بلا سطرٍ يُكتب فيها.")
+    add("")
+    for scene, title in PAPER_SCENES:
+        add(f"**{title}**")
+        add("")
+        add("<table><tr>")
+        columns = [("now", "warm", "اليوم")] + [
+            (papers_for(data), c["id"], c["name"]) for c in spec["candidates"]]
+        for candidate, ground, label in columns:
+            name = shot_name(candidate, ground, scene)
+            add(f'<td align="center" width="25%"><a href="identity/{name}">'
+                f'<img src="identity/{name}" width="200" alt="{label} — {title}"></a>'
+                f'<br><sub>{label}</sub></td>')
+        add("</tr></table>")
+        add("")
+    add("**والمطلوبُ سطرٌ واحد**: يُكتب الحكمُ في §٨ أدناه —")
+    add("`" + "` أو `".join(f"{papers_for(data)} / {c['id']}" for c in spec["candidates"])
+        + f"`، أو يبقى `{papers_for(data)} / {SHIFT}` كما هو اليوم.")
+    add("**ولا يُصبَغ اللوحُ حتى يُكتب** — والحارسُ على الطرفين.")
+    add("")
+    return lines
+
+
+def paper_base_palette(data: dict, siblings: dict, shift: dict) -> dict:
+    """لوحُ اليوم مشتقّاً — للمقابلة في §٧.٤ (وهو عينُ أساس الاشتقاق)."""
+    chosen = next(c for c in data["candidates"] if c["id"] == papers_for(data))
+    return candidate_palette(dict(siblings["read"]["tokens"]), chosen, SHIFT, shift)
+
+
 def panel_text(data: dict, app_tokens: dict, siblings: dict, floor: dict, report: dict,
-               opacity: float, shift: dict) -> str:
+               opacity: float, shift: dict, papers: dict, closed: dict, icon: str) -> str:
     read_tokens = siblings["read"]["tokens"]
     calc_tokens = siblings["calc"]["tokens"]
     lines = []
@@ -1102,16 +1611,22 @@ def panel_text(data: dict, app_tokens: dict, siblings: dict, floor: dict, report
             add("</tr></table>")
             add("")
         add(f"**والمطلوبُ من هذه اللوحة سطرٌ واحد**: إن رضيت عينُك الأرضيةَ المزاحة فالحكمُ")
-        add(f"`{chosen['id']} / {SHIFT}` يُكتب في §٧ أدناه؛ وإن آثرتَ سواها فـ`{chosen['id']} / warm`")
+        add(f"`{chosen['id']} / {SHIFT}` يُكتب في §٨ أدناه؛ وإن آثرتَ سواها فـ`{chosen['id']} / warm`")
         add(f"أو `{chosen['id']} / tuned`. **ولا يُصبَغ اللوحُ حتى يُكتب** — والحارسُ على الطرفين.")
         add("")
 
-    add("## ٧. حكمُ المالك")
+    lines += paper_door(data, siblings, papers, closed, icon, shift, opacity)
+
+    add("## ٨. حكمُ المالك")
     add("")
     add("يُكتب هنا بمعرّف المرشَّح والأرضية — مثلاً `mulberry / tuned` أو `indigo / warm`،")
     add("والأرضياتُ: `warm` (الدافئةُ كما هي) · `tuned` (المعدَّلة) · "
         f"`{SHIFT}` (**الدافئةُ المزاحة**، §٦ — ولها وحدَها من المرشّحين "
-        + (f"`{shift_for(data)}`" if shift_for(data) else "—") + ")،")
+        + (f"`{shift_for(data)}`" if shift_for(data) else "—") + ")"
+        + (" · **وأرضياتُ بابِ اللوح المعاد فتحه** (§٧، ولها كذلك من المرشّحين "
+           f"`{papers_for(data)}`): "
+           + " · ".join(f"`{c['id']}` ({c['name']})" for c in data["papers"]["candidates"])
+           if papers else "") + "،")
     add("والمعرّفاتُ: " + " · ".join(f"`{c['id']}` ({c['name']})" for c in data["candidates"]) + ".")
     add("")
     add(KEPT_OPEN)
@@ -1238,6 +1753,54 @@ def self_test() -> int:
        "ولا يُقَصّ إلى حدّ المجال إلا ما هو على حدّه أصلاً"
        + (f" — قُصّ: {shift['clipped']}" if shift["clipped"] else " (ولا شيء)"))
 
+    print("\n— بابُ اللوح المعاد فتحه (§٧): أرضياتٌ مشتقّةٌ بقواعدها —")
+    opacity = model_opacity(CSS.read_text(encoding="utf-8"))
+    floor = floors(read_tokens, opacity)
+    spec = data.get("papers", {})
+    icon = icon_color(APP / "icons" / "icon-192.png")
+    hue = lch(icon)[2]
+    written = [c["id"] for c in spec.get("candidates", [])
+               if any(re.fullmatch(r"#[0-9A-Fa-f]{3,8}", str(v)) for v in c.values())]
+    ok(not written, "لا لونَ مكتوبٌ في بيان الأرضيات" + (f" — مكتوب: {written}" if written else ""))
+    base_palette = paper_base(data, app_tokens, siblings, shift)
+    papers = derive_papers(data, shift, hue, siblings, base_palette, opacity)
+    again = derive_papers(data, shift, hue, siblings, base_palette, opacity)
+    ok(all(papers[i]["ground"] == again[i]["ground"] for i in papers),
+       "الاشتقاقُ يعيد نفسَه حرفاً")
+    ok(papers_for(data) in {c["id"] for c in cands},
+       f"أرضياتُها لمرشَّحٍ معروف: «{papers_for(data)}»")
+    ok(lch(icon)[1] > 0, f"صبغةُ الأيقونة مقروءةٌ من بكسلاتها: {icon} عند {hue:.2f}°")
+    # **والشاهدُ على «مقروءة» أن تتحرّك بحركة الملفّ**: بايتٌ يُبدَّل في الأيقونة يبدّل
+    # المتوسّط. فيُكتفى هنا بأنها ليست قيمةً من اللوح: لو كانت لطابقت رمزاً بحرفه.
+    ok(icon not in set(app_tokens.values()),
+       "وليست رمزاً من اللوح نُسخ باسم الأيقونة")
+    floors_read = spec["floors"]["read"]
+    floors_calc = spec["floors"]["calc"]
+    want_contrast = list(papers.values())[0]["want_contrast"]
+    want_sep = list(papers.values())[0]["want_sep"]
+    for name, got in papers.items():
+        m = got["m"]
+        ok(m["floor_read"] >= floors_read and m["floor_calc"] >= floors_calc,
+           f"«{name}»: يبلغ عتبتَي المالك — عن اقرأ {m['floor_read']:.2f} ≥ {floors_read:g}"
+           f" وعن احسب {m['floor_calc']:.2f} ≥ {floors_calc:g}")
+        ok(m["ink_paper"] >= want_contrast and m["soft_paper"] >= AA,
+           f"«{name}»: تباينُ الحبر {m['ink_paper']:.2f}:١ ≥ تباين اليوم {want_contrast:.2f}"
+           f" وثانويُّه {m['soft_paper']:.2f}:١ ≥ AA")
+        ok(m["ink_sep"] >= want_sep,
+           f"«{name}»: فصلُ حبر الطفل عن النموذج {m['ink_sep']:.2f} ≥ {want_sep:.2f}")
+        moved = set(got["ground"])
+        ok(moved <= set(spec["tokens"]) | {"ink"},
+           f"«{name}»: لا يبدّل إلا رموزَ الأرضية" + (f" — دخيل: {moved - set(spec['tokens']) - {'ink'}}"
+                                                     if not moved <= set(spec["tokens"]) | {"ink"} else ""))
+        ok(not [t for t in moved if t in held], f"«{name}»: لا يمسّ لونَ حكمٍ وظيفياً")
+        ok(all(re.fullmatch(r"#[0-9A-Fa-f]{6}", v) for v in got["ground"].values())
+           and all(t in app_tokens for t in moved),
+           f"«{name}»: قيمُه ألوانٌ سليمةٌ ورموزُه معروفةٌ في لوح التطبيق")
+        ok(got["ground"].get("card") is None,
+           f"«{name}»: البطاقةُ لم تُمَسّ — فالنموذجُ المرسوم منها")
+    ok(len({got["ground"]["paper"] for got in papers.values()}) == len(papers),
+       "ولا ورقان متطابقان — ثلاثةُ حدودٍ لا ثلاثةُ أسماء")
+
     print("\n— لوحُ احسب عند التزامه المسمّى —")
     calc = siblings["calc"]
     if calc["matches"] is None:
@@ -1253,11 +1816,10 @@ def self_test() -> int:
     ok(panel_now.count(KEPT_OPEN) == 1 and panel_now.count(KEPT_SHUT) == 1,
        "ولا علامةَ مكرّرة تشقّ البابَ بابين")
     # وأصدقُ شهادةٍ: أن يُعاد توليدُ اللوحة نصّاً فيخرج المحفوظُ كما هو
-    opacity = model_opacity(CSS.read_text(encoding="utf-8"))
-    floor = floors(read_tokens, opacity)
     remade = panel_text(data, app_tokens, siblings, floor,
                         build_report(data, app_tokens, siblings, floor, opacity, shift, cands),
-                        opacity, shift)
+                        opacity, shift, papers,
+                        closed_doors(data, shift, hue, siblings, base_palette, opacity), icon)
     ok(kept in remade, "وإعادةُ التوليد تردّه بحرفه")
     # وشقُّه الآخر: ما عدا البابَ **مولَّدٌ لا يُحرَّر بيد** — فاللوحةُ على القرص يجب أن
     # تكون عينَ ما يخرج من المولّد اليوم. فمن حرّر فقرةً مولَّدة أو بدّل المولّدَ ولم
@@ -1279,15 +1841,22 @@ def self_test() -> int:
             print("  · مجلدُ اقرأ غيرُ متاح — تعذّرت مقابلةُ اللوح بالبذرة")
     else:
         chosen = next((c for c in cands if c["id"] == verdict[0]), None)
+        wears = grounds_of(data, verdict[0]) + (
+            paper_ids(data) if verdict[0] == papers_for(data) else [])
         ok(chosen is not None, f"الحكمُ «{verdict[0]}» مرشَّحٌ معروف")
-        ok(chosen is not None and verdict[1] in grounds_of(data, verdict[0]),
+        ok(chosen is not None and verdict[1] in wears,
            f"والأرضيةُ «{verdict[1]}» أرضيةٌ يلبسها هذا المرشَّح")
-        if chosen and verdict[1] in grounds_of(data, verdict[0]):
+        if chosen and verdict[1] in wears:
             want = dict(chosen["tokens"])
             if verdict[1] == "tuned":
                 want.update(chosen["ground"])
             elif verdict[1] == SHIFT:
                 want.update(shift["ground"])
+            elif verdict[1] in paper_ids(data):
+                # **وأرضيةُ §٧ تلبس المزاحةَ تحتَها**: هي إزاحةٌ للورق وما هو منه، وما
+                # لم يمسّه المرشَّحُ (الحبرُ والبطاقة) يبقى على أرضية §٦ بعينها.
+                want.update(shift["ground"])
+                want.update(papers[verdict[1]]["ground"])
             off = [k for k, v in want.items() if app_tokens.get(k) != v]
             ok(not off, f"لوحُ التطبيق مصبوغٌ بـ«{chosen['name']}» ({verdict[1]}) حرفاً"
                         + (f" — يخالف: {off}" if off else ""))
@@ -1299,6 +1868,12 @@ def self_test() -> int:
                 night = derive_night(read_tokens, read_night(read_css.read_text(encoding="utf-8")),
                                      chosen["tokens"], shift["ground"], shift["k"], STAGE_TOKENS)
                 mine = read_night(CSS.read_text(encoding="utf-8"))
+                if verdict[1] in paper_ids(data):
+                    # ليلُ أرضية §٧: **الصبغةُ والإشباعُ يُنقلان، وإضاءةُ الليل ليلٌ**
+                    # (`paper_night` — القاعدةُ منشورةٌ في §٣د، ولا لونَ يُختار هنا).
+                    tinted_night, _ = paper_night(night["ground"], spec["tokens"], hue,
+                                                  papers[verdict[1]]["note"]["mult"])
+                    night["ground"].update(tinted_night)
                 want_night = {**night["ground"], **night["accents"],
                               "on-accent": night["ground"]["paper"]}
                 dark_off = [k for k, v in want_night.items() if mine.get(k) != v]
@@ -1368,11 +1943,7 @@ def self_test() -> int:
        f"وبيانُ التطبيق كذلك ({manifest['theme_color']} · {manifest['background_color']})")
 
     print("\n— اللقطاتُ المصيَّرة —")
-    wanted = {shot_name("now", "warm", s) for s, _ in SCENES}
-    for cand in cands:
-        for ground in grounds_of(data, cand["id"]):
-            for scene, _ in SCENES:
-                wanted.add(shot_name(cand["id"], ground, scene))
+    wanted = {shot_name(*job) for job in shot_jobs(data, cands)}
     if not OUT.exists():
         ok(False, "مجلدُ اللقطات `docs/identity/` مفقود")
     else:
@@ -1415,6 +1986,11 @@ def main() -> int:
 
     shift = derive_shift(siblings["read"]["tokens"], siblings["calc"]["tokens"],
                          data["shift"]["tokens"])
+    icon = icon_color(APP / "icons" / "icon-192.png")
+    papers = derive_papers(data, shift, lch(icon)[2], siblings,
+                           paper_base(data, app_tokens, siblings, shift), opacity)
+    closed = closed_doors(data, shift, lch(icon)[2], siblings,
+                          paper_base(data, app_tokens, siblings, shift), opacity)
 
     print("— أرضياتُ اقرأ المحسوبة —")
     print(f"  فصلُ الحبر {floor['ink_sep']:.1f} · تمايزُ المراحل {floor['pairwise']:.1f}"
@@ -1424,6 +2000,16 @@ def main() -> int:
           f" · ورقٌ {shift['paper']} على {shift['paper_read']:.2f} من اقرأ"
           f" و{shift['paper_calc']:.2f} من احسب"
           + (f" · قُصّ إلى المجال: {shift['clipped']}" if shift["clipped"] else ""))
+
+    print(f"\n— بابُ اللوح (§٧): صبغةُ الأيقونة {icon} عند {lch(icon)[2]:.2f}° —")
+    for name, got in papers.items():
+        m = got["m"]
+        print(f"  · {name}: ورقٌ {got['ground']['paper']} · عن اقرأ {m['floor_read']:.2f}"
+              f" · عن احسب {m['floor_calc']:.2f} · حبرٌ على ورق {m['ink_paper']:.2f}:١"
+              f" · ثانويٌّ {m['soft_paper']:.2f}:١ · فصلُ حبر الطفل {m['ink_sep']:.2f}"
+              + (f" · قُصّ: {got['clipped']}" if got["clipped"] else ""))
+        for line in m["complaints"]:
+            print(f"    ⚠ {line}")
 
     report = build_report(data, app_tokens, siblings, floor, opacity, shift, cands)
     for cand in cands:
@@ -1440,9 +2026,10 @@ def main() -> int:
 
     print("\n— اللقطات —")
     fails = capture_all(cands, args.port, args.timeout, data, shift,
-                        seed_tokens(app_tokens, siblings))
+                        seed_tokens(app_tokens, siblings), papers)
     if not args.only:
-        PANEL.write_text(panel_text(data, app_tokens, siblings, floor, report, opacity, shift),
+        PANEL.write_text(panel_text(data, app_tokens, siblings, floor, report, opacity, shift,
+                                    papers, closed, icon),
                          encoding="utf-8")
         print(f"\nاللوحة: {PANEL.relative_to(ROOT)}")
     return 1 if fails else 0
