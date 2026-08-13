@@ -762,6 +762,152 @@ export const boxOf = (ref) => {
 };
 
 /**
+ * ————— **الحكمُ الثاني: «الشكلُ لا الأثر» في الخطوة الحرّة** (`METHOD.md §٥ب`) —————
+ *
+ * 🔴 **بلاغُ الميدان ٢ (المالك وطفلة، ١٣ أغسطس ٢٠٢٦)**: كتبت الطفلةُ **نوناً صحيحة**
+ * في «اكْتُبْهُ وَحْدَكْ» — بدأت من دائرة البداية، ودارت دورتَها، وأغلقت كأسَها —
+ * **فرُدّت**، لأنّ كأسها أضيقُ من كأس النموذج الخفيّ بأكثر من سماحة الانحراف.
+ * **والشاهدُ الأثقل: تركت الجهاز.**
+ *
+ * **والحكمُ** (مالكٌ ومدير): في الخطوة الحرّة **وفيها وحدَها** يسقط الانطباقُ على
+ * **موضع** المسار ويبقى الحكمُ على **الحركة** — يُقاس صندوقُ حبر الطفل، ويُوفَّق
+ * النموذجُ عليه **إزاحةً وتحجيماً منتظماً** (لا تشويهَ نِسَب)، ثم تُطبَّق الشروطُ
+ * الأربعةُ نفسُها على الموفَّق **بسماحةٍ كريمة**. فالمقيسُ تشابهُ الشكل والحجمُ
+ * المعقول، لا مطابقةُ الخطّ الأول.
+ *
+ * **والخطوتان ٢ و٣ (الموجَّهةُ والخافتة) لا تُمَسّان**: النموذجُ فيهما مرئيّ
+ * والتتبّعُ هو المقصود، فالانطباقُ فيهما على موضعه. **ولا يناقض هذا ق١**: ق١ اختار
+ * تتبّعَ المسار ليقيس **البداية والاتجاه والترتيب** لا ليقيس الإحداثيات.
+ *
+ * **وتوفيقُ النموذج على الحبر وتوفيقُ الحبر على النموذج تشابهٌ واحد** — والتنفيذُ
+ * هنا على **الحبر** (`toModel`) لأنّ بيانات المسار (طيّاتُه ونقاطُه ومقياسُه) تبقى
+ * في إطارها فلا يُعاد بناؤها، **والسماحةُ تُقاس بمقياس المادّة الموفَّقة**: تُترك في
+ * إطار النموذج فتصير نسبةً واحدةً من الحرف مهما كتبه الطفلُ كبيراً أو صغيراً. ولو
+ * تُركت مطلقةً على الشبكة لَكانت الكتابةُ الصغيرة مسيَّبةً والكبيرةُ مضيَّقة.
+ */
+export const FREE = {
+  /**
+   * **كرمُ السماحة**: عاملٌ على سماحة المحطة كلِّها في الحكم الثاني — فالتوفيقُ
+   * المنتظم يترك بقيّةً لا يبتلعها (كأسٌ أضيقُ نسبةً لا حجماً)، وهي المرادةُ
+   * بـ«السماحة الكريمة». **ومُعايَرٌ بحالات الميدان المجمَّدة**: نونُ البلاغ بأوجهها
+   * الأربعة تُقبَل، **والمعكوسةُ تُرَدّ ولو ضوعف الكرمُ ثلاثاً** — فما رُدّ فيه
+   * الاتجاهُ لا تفتحه سماحة.
+   */
+  ease: 1.6,
+  /**
+   * **تعثّراتٌ متتالية يُفتَح بعدها المخرجُ الكريم** — ثلاثٌ: مرّةٌ حادثة، ومرّتان
+   * صدفة، وثلاثٌ حال. **ولا انسدادَ أبداً** (`METHOD.md §٥ب`): «إعادةٌ بلا حدّ»
+   * ليست عهداً بأن يبقى الطفلُ محبوساً — والطفلُ يخرج من الشاشة بيده لا بيأسه.
+   */
+  stumbles: 3,
+};
+
+/** **حجمٌ معقولٌ يُرشَد إليه بجملته** — لا يُردّ صامتاً (`METHOD.md §٥ب`). */
+export const SIZE = { SMALL: 'size-small', BIG: 'size-big' };
+
+/** وجملتاه — سطرا شاشةٍ تُقرآن كما تُقرأ `FAULT_TEXT`، ولا منطوقَ في هذا الملفّ. */
+export const SIZE_TEXT = {
+  [SIZE.SMALL]: 'اكْتُبْهُ أَكْبَرْ',
+  [SIZE.BIG]: 'اكْتُبْهُ أَصْغَرْ',
+};
+
+/** أضيقُ مستطيلٍ يسع نقاطَ ضرباتٍ — صندوقُ حبرٍ أو صندوقُ نموذج. */
+export function inkBox(strokes) {
+  let x0 = Infinity; let y0 = Infinity; let x1 = -Infinity; let y1 = -Infinity;
+  for (const stroke of strokes || []) {
+    for (const p of stroke || []) {
+      if (p[0] < x0) x0 = p[0];
+      if (p[0] > x1) x1 = p[0];
+      if (p[1] < y0) y0 = p[1];
+      if (p[1] > y1) y1 = p[1];
+    }
+  }
+  return x1 >= x0 ? {
+    x0, y0, x1, y1, w: x1 - x0, h: y1 - y0, cx: (x0 + x1) / 2, cy: (y0 + y1) / 2,
+  } : null;
+}
+
+/** نقاطُ النموذج كلُّها — **أجزاءَ المحرّك نفسَها** (أجساماً ونقاطاً)، فلا صورتان لشكل. */
+export const refPoints = (ref) => partsOf(ref)
+  .flatMap((part) => (part.kind === 'stroke' ? part.poly.pts : [part.at]));
+
+/**
+ * **التوفيق**: إزاحةٌ تُطابق مركزَي الصندوقين، وتحجيمٌ **منتظم** واحد للمحورين.
+ *
+ * **والمقياسُ وسطٌ هندسيّ لنسبتَي الضلعين** — فلا ينحاز إلى عرضٍ ولا إلى ارتفاع،
+ * ونِسَبُ الشكل لا تُشوَّه: كأسٌ أضيقُ يبقى فيها فارقٌ يحتمله كرمُ السماحة، ولا
+ * يُمطّ النموذجُ عليها فيصير كلُّ شكلٍ مقبولاً. **وضلعٌ أرقُّ من سماحة الانحراف لا
+ * يحمل قياساً** (خطٌّ أفقيّ ارتفاعُه صفر)، فيُقرأ المقياسُ من أخيه وحدَه.
+ */
+export function fitFree(ref, strokes, tol = TOLERANCE) {
+  const child = inkBox(strokes);
+  const model = inkBox([refPoints(ref)]);
+  if (!child || !model) return null;
+  const rx = model.w > tol.lateral ? child.w / model.w : 0;
+  const ry = model.h > tol.lateral ? child.h / model.h : 0;
+  const s = rx && ry ? Math.sqrt(rx * ry) : (rx || ry || 1);
+  return { s: s > 0 ? s : 1, child, model };
+}
+
+/** نقلُ نقطةٍ من إطار الطفل إلى إطار النموذج — عكسُ التوفيق، وهو هو. */
+const toModel = (fit, p) => [
+  fit.model.cx + (p[0] - fit.child.cx) / fit.s,
+  fit.model.cy + (p[1] - fit.child.cy) / fit.s,
+];
+
+/**
+ * **الحجمُ المعقول — وحدُّه محسوبٌ من الصندوق لا مكتوبٌ بيد**:
+ *   · **أصغرُ ما يُقبَل** أن يزيد قطرُ حبره على **ممرّ السماحة** (`lateral × ٢`):
+ *     شكلٌ يغرق في ممرّ سماحته لا يُقاس أصلاً — أيُّ خربشةٍ فيه تُقرأ حرفاً.
+ *   · **وأكبرُ ما يُقبَل** أن يسعه **صندوقُ المادّة** وممرُّ سماحته من كلّ جهة.
+ * وكلاهما جملةٌ تُقال («اكْتُبْهُ أَكْبَرْ») لا ردٌّ صامت.
+ */
+export function sizeOf(ref, strokes, tol = TOLERANCE) {
+  const child = inkBox(strokes);
+  if (!child) return null;
+  const corridor = tol.lateral * 2;
+  if (Math.hypot(child.w, child.h) < corridor) return SIZE.SMALL;
+  const [bw, bh] = boxOf(ref);
+  return child.w > bw + corridor || child.h > bh + corridor ? SIZE.BIG : null;
+}
+
+/** سماحةُ المحطة مكرَّمةً — الأبعادُ كلُّها بعاملٍ واحد، والتغطيةُ نسبةٌ فلا تُمَسّ. */
+export const easeTolerance = (tol, factor = FREE.ease) => ({
+  start: tol.start * factor,
+  lateral: tol.lateral * factor,
+  back: tol.back * factor,
+  dot: tol.dot * factor,
+  coverage: tol.coverage,
+});
+
+/**
+ * **الحَكَمُ الثاني** — نظيرُ `judge` للخطوة الحرّة: يقيس الحجمَ أوّلاً (فيُرشِد إن
+ * شذّ)، ثم يوفّق النموذجَ على صندوق الحبر، ثم **يستدعي الشروطَ الأربعة بأعيانها**
+ * على الموفَّق. فلا حَكَمان ولا شرطٌ خامس: هو هو، والمتبدّلُ **إطارُ القياس**.
+ */
+export function judgeFree(ref, strokes, options = {}) {
+  const tol = resolveTolerance(options.tolerance);
+  const size = sizeOf(ref, strokes, tol);
+  if (size) {
+    return {
+      done: false,
+      accepted: false,
+      size,
+      attempts: strokes.length,
+      parts: partsOf(ref).length,
+      faults: [],
+      codes: [],
+      primary: null,
+      metrics: { maxLateral: 0, maxBack: 0, coverage: 0, startDist: 0 },
+    };
+  }
+  const fit = fitFree(ref, strokes, tol);
+  const mapped = fit ? strokes.map((stroke) => stroke.map((p) => toModel(fit, p))) : strokes;
+  const verdict = judge(ref, mapped, { ...options, tolerance: easeTolerance(tol) });
+  return { ...verdict, size: null, scale: fit ? fit.s : 1 };
+}
+
+/**
  * **شارةُ الشكل: المسارُ المرجعيّ مرسوماً ساكناً** — بلا لوحٍ ولا حَكَمٍ ولا حبرِ طفل.
  *
  * تحتاجها الشاشاتُ حيث يُذكَر شكلٌ ولا يُكتب: شريطُ حروف محطة الأشكال، وصفُّ
@@ -773,14 +919,55 @@ export const boxOf = (ref) => {
  * **وأجزاؤها أجزاءُ المحرّك** (`partsOf`): الأجسامُ ثم النقاطُ بعددها كما يعرضها
  * اللوحُ نفسُه، فلا صورتان لشكلٍ واحد.
  */
+/**
+ * ————— مقاييسُ الإرشاد والعلامات: **تُشتقّ من المادّة لا تُكتب** —————
+ *
+ * 🔴 **بلاغُ عين المالك (١٣ أغسطس ٢٠٢٦)**: نقطةُ الحرف ونقطةُ البداية ورأسُ القلم
+ * والسهمُ كانت أرقاماً ثابتة في شبكة الألف، سُنّت لحرفٍ **يملأ الشبكة**. وفي الكلمة
+ * والجملة يصير الحرفُ جزءاً من حجمه **والنقطةُ لا تصغر** — فتطفو كُرَةً فوق الحرف
+ * فيُقرأ «ف» واواً و«ة» هاءً. **وهو عيبُ صدقٍ لا زينة**: الطفلُ يقرأ نموذجَه خطأً.
+ *
+ * **والمقياسُ الآن مقياسُ حبر المادّة**: مؤلِّفُ خيال الكلمة يقيس **كم يبلغ حرفُ
+ * المادّة من الحرف القانونيّ** (`fitTransform(...).s` في `tools/make_paths.html §٧ج`)
+ * ويكتبه في المسار (`tolerance`) — وهو النسبةُ التي تُصغَّر بها الأشكالُ نفسُها،
+ * فتصغر معها علاماتُها. **والحرفُ المفرد يملأ شبكتَه فنسبتُه واحد**.
+ *
+ * **والأرقامُ هنا نسبٌ إلى الحرف القانونيّ لا مقاساتُ شاشة**: تُضرَب في مقياس
+ * المادّة فتخرج بوحدات مسارها. ويحرسها `tools/test_pen.mjs` **قياساً لا وصفاً**:
+ * يقابل علامةَ حرفٍ مفردٍ بعلامة الحرف نفسِه في كلمة، فيلزم أن تصغر بنسبتها.
+ */
+export const GUIDE = {
+  dot: 34,        // نقطةُ الحرف المرسومة في النموذج (نقاطُ ب ت ث …)
+  start: 40,      // حلقةُ نقطة البداية الوامضة
+  head: 26,       // رأسُ القلم الذي يسبق يدَ الطفل
+  arrowTip: 46,   // طرفُ السهم أمام موضعه على المسار
+  arrowBack: 12,  // وقاعدتُه خلفه
+  arrowHalf: 26,  // ونصفُ عرضها
+  arrowAt: 140,   // وأقصى ما يبعده السهمُ عن بداية الجزء
+};
+
+/**
+ * **مقياسُ المادّة**: كم يبلغ حرفُها من الحرف القانونيّ — يكتبه مؤلِّفُ الخيال في
+ * المسار نفسِه (`tolerance`)، فما لا مقياسَ له حرفٌ يملأ شبكتَه ونسبتُه واحد.
+ */
+export const scaleOf = (ref) => (typeof ref?.tolerance === 'number' && ref.tolerance > 0
+  ? ref.tolerance : 1);
+
+/** مقاييسُ الإرشاد لمادّةٍ بعينها — نسبُ `GUIDE` مضروبةً في مقياسها. */
+export const guideOf = (ref) => {
+  const s = scaleOf(ref);
+  return Object.fromEntries(Object.entries(GUIDE).map(([k, v]) => [k, v * s]));
+};
+
 export function refGlyph(ref, className = 'ref-glyph') {
   const [bw, bh] = boxOf(ref);
+  const g = guideOf(ref);
   const svg = sv('svg', {
     class: className, viewBox: `0 0 ${bw} ${bh}`, 'aria-hidden': 'true',
   });
   for (const part of partsOf(ref)) {
     if (part.kind === 'stroke') svg.append(sv('path', { class: 'ref-stroke', d: pathD(part.poly.pts) }));
-    else svg.append(sv('circle', { class: 'ref-dot', cx: part.at[0], cy: part.at[1], r: 34 }));
+    else svg.append(sv('circle', { class: 'ref-dot', cx: part.at[0], cy: part.at[1], r: g.dot }));
   }
   return svg;
 }
@@ -798,14 +985,19 @@ export function refGlyph(ref, className = 'ref-glyph') {
  * @param {Function} [config.onFault] خطأٌ وقع — للقياس ولإرشاد الشاشة
  * @param {Function} [config.onPart] جزءٌ استُوفي
  * @param {Function} [config.onDone] اكتملت الأجزاء — ومعها حصيلةُ المحاولة
+ * @param {Function} [config.onTry] **محاولةٌ حرّةٌ حُكم عليها** — ومعها جملةُ الحجم إن شذّ
+ * @param {Function} [config.onStuck] **تعثّرٌ متكرر** — تفتح الشاشةُ به مخرجاً كريماً
  */
 export function penSurface(config) {
   const {
     ref, mode = MODES.GUIDED, tolerance, bounds = false, baseline = null, veil = 0,
-    onFault, onPart, onDone, label = 'لوحُ الكتابة',
+    onFault, onPart, onDone, onTry, onStuck, label = 'لوحُ الكتابة',
   } = config;
 
   const [bw, bh] = boxOf(ref);
+  // **ومقاييسُ الإرشاد بمقياس المادّة** (بلاغُ عين المالك، ١٣ أغسطس): تُقرأ من
+  // المسار نفسِه فتصغر النقطةُ والحلقةُ والسهمُ حيث يصغر الحرف — انظر `GUIDE` أعلاه.
+  const g = guideOf(ref);
   const box = document.createElement('div');
   // **واللوحُ يتبع صندوقَ مادّته**: مربّعٌ للحرف والكلمة، **وسطرٌ للجملة** — يُعلَن
   // صنفاً ونسبةَ أبعادٍ معاً، فيرسم المتصفّحُ سطراً حيث المادّةُ سطر.
@@ -851,6 +1043,26 @@ export function penSurface(config) {
   });
   const parts = trial.parts;
 
+  /**
+   * ————— **الخطوةُ الحرّة: حكمُها الثاني** (`METHOD.md §٥ب`) —————
+   *
+   * **ولِمَ يُؤجَّل الحكمُ إلى رفع القلم؟** لأنّ الموفَّقَ عليه — صندوقُ حبر الطفل —
+   * لا يُعرَف قبل أن يُكتب. فالخطوةُ الحرّة تُحكَم **بالشكل تامّاً** لا لحظةً بلحظة،
+   * وهو عينُ حكمها: «المهمُّ الشكلُ لا متابعةُ الخطّ المرسوم قبلاً». **والخطوتان
+   * الموجَّهةُ والخافتة على حالهما**: النموذجُ فيهما مرئيّ فالحكمُ في لحظته كما كان.
+   *
+   * **ويُحكَم كلَّما تمّت لمساتُ جزء** لا عند آخر جزءٍ وحدَه: فمَن كتب جسمَ النون
+   * يُقبَل جسمُه ويثبت حبرُه، ثم تُقاس نقطتُه **موفَّقةً مع جسمه** — فيبقى موضعُ
+   * النقطة من الجسم مقيساً (وهو من الشكل)، ولا يُترك الطفلُ بلا جوابٍ حتى يتمّ.
+   */
+  const free = mode === MODES.FREE;
+  /** كم لمسةً ينتظرها كلُّ جزء: الجسمُ واحدة، والنقطةُ بعددها. */
+  const touchesOf = (part) => (part.kind === 'dot' ? part.count : 1);
+  const reached = parts.reduce((run, part) => [...run, (run[run.length - 1] || 0) + touchesOf(part)], []);
+  let touches = [];        // ضرباتُ المحاولة الحرّة الجارية — تُقرأ ولا تُخزَّن
+  let settled = 0;         // كم جزءاً قبله الحكمُ الثاني من هذه المحاولة
+  let stumbles = 0;        // تعثّراتٌ متتالية — وبها يُفتَح المخرجُ الكريم
+
   // النموذجُ ورفيقُه المتلوّن: مسارٌ واحد يُرسم مرّتين — الثانيةُ مقصوصةٌ بالتقدّم،
   // وهو **مؤشّرُ التقدّم الحركيّ** (مخالفةُ اكتب المعلَنة لاقرأ، `METHOD.md §٥`).
   const modelPaths = [];
@@ -879,7 +1091,7 @@ export function penSurface(config) {
       modelPaths.push(shape);
       trailPaths.push(trail);
     } else {
-      const mark = sv('circle', { class: 'pen-dot', cx: part.at[0], cy: part.at[1], r: 34 });
+      const mark = sv('circle', { class: 'pen-dot', cx: part.at[0], cy: part.at[1], r: g.dot });
       if (veiled(order)) mark.classList.add('pen-veiled');
       model.append(mark);
       modelPaths.push(mark);
@@ -888,16 +1100,18 @@ export function penSurface(config) {
   }
 
   // نقطةُ البداية وسهمُ الاتجاه — وهما لسانُ الإرشاد كلُّه (`METHOD.md §٣.٤`)
-  const startMark = sv('circle', { class: 'pen-start', r: 40 });
+  const startMark = sv('circle', { class: 'pen-start', r: g.start });
   const arrow = sv('path', { class: 'pen-arrow' });
   // **رأسُ القلم يُخفى بالصنف لا بسمة `hidden`**: أمسكته لقطةُ اللوح — السمةُ لا
   // تُخفي عنصرَ SVG على كل متصفّح، فظهرت نقطةٌ في زاوية اللوح عند (٠،٠). وإخفاؤه
   // في CSS مع سائر ما يُبدَّل بالخطوة أصدق: الحالُ في لوحٍ واحد لا في موضعين.
-  const head = sv('circle', { class: 'pen-head', r: 26, cx: 0, cy: 0 });
+  const head = sv('circle', { class: 'pen-head', r: g.head, cx: 0, cy: 0 });
   guide.append(startMark, arrow, head);
 
   function paintGuide() {
-    const part = trial.expected;
+    // **والمنتظَرُ في الخطوة الحرّة من حكمها الثاني** لا من الحَكَم اللحظيّ: هي
+    // تُحكَم عند رفع القلم، فالجزءُ الذي تومض نقطتُه هو أوّلُ ما لم يستوفِه بعدُ.
+    const part = free ? (parts[settled] || null) : trial.expected;
     // تمّت الأجزاء: يسقط الإرشادُ كلُّه — لا نقطةَ بدايةٍ لجزءٍ لم يبقَ (وبالصنف
     // لا بسمة `hidden`، للعلّة المكتوبة عند `head` أدناه).
     box.classList.toggle('pen-box--complete', !part);
@@ -905,14 +1119,16 @@ export function penSurface(config) {
     startMark.setAttribute('cx', part.start[0]);
     startMark.setAttribute('cy', part.start[1]);
     if (part.kind !== 'stroke') { arrow.setAttribute('d', ''); return; }
-    const { at, dir } = pointAt(part.poly, Math.min(part.poly.len * 0.16, 140));
+    const { at, dir } = pointAt(part.poly, Math.min(part.poly.len * 0.16, g.arrowAt));
     const norm = Math.hypot(dir[0], dir[1]) || 1;
     const [ux, uy] = [dir[0] / norm, dir[1] / norm];
     const [px, py] = [-uy, ux];
-    const tip = [at[0] + ux * 46, at[1] + uy * 46];
+    const tip = [at[0] + ux * g.arrowTip, at[1] + uy * g.arrowTip];
     arrow.setAttribute('d', `M${tip[0].toFixed(1)} ${tip[1].toFixed(1)}`
-      + ` L${(at[0] - ux * 12 + px * 26).toFixed(1)} ${(at[1] - uy * 12 + py * 26).toFixed(1)}`
-      + ` L${(at[0] - ux * 12 - px * 26).toFixed(1)} ${(at[1] - uy * 12 - py * 26).toFixed(1)} Z`);
+      + ` L${(at[0] - ux * g.arrowBack + px * g.arrowHalf).toFixed(1)} `
+      + `${(at[1] - uy * g.arrowBack + py * g.arrowHalf).toFixed(1)}`
+      + ` L${(at[0] - ux * g.arrowBack - px * g.arrowHalf).toFixed(1)} `
+      + `${(at[1] - uy * g.arrowBack - py * g.arrowHalf).toFixed(1)} Z`);
   }
 
   function paintProgress(part, progress) {
@@ -930,6 +1146,56 @@ export function penSurface(config) {
     box.classList.remove('pen-box--hint');
     void box.offsetWidth;
     box.classList.add('pen-box--hint');
+  }
+
+  /** حبرُ المحاولة التي لم تُقبَل: **يخفت ويذهب** — لا يُمحى تحت اليد ولا يلتبس بالصواب. */
+  function fadeInk(path) {
+    if (!path) return;
+    path.classList.add('pen-line--fade');
+    setTimeout(() => path.remove(), 520);
+  }
+
+  /** النموذجُ إلى أوّل `k` جزءاً — فيُوفَّق ما كُتب على ما يقابله وحدَه لا على ما بعده. */
+  const subsetRef = (k) => (k >= parts.length ? ref : {
+    ...ref,
+    strokes: (ref.strokes || []).slice(0, k),
+    dots: (ref.dots || []).slice(0, Math.max(0, k - (ref.strokes || []).length)),
+  });
+
+  /**
+   * **حكمُ المحاولة الحرّة عند رفع القلم** (`METHOD.md §٥ب`، `judgeFree` أعلاه).
+   *
+   * والمقبولُ يثبت حبرُه ويُسلَّم إلى ما بعده، **والمردودُ يخفت وحدَه ويُعاد جزؤه**:
+   * ما ثبت لا يُطلَب مرّتين — فمن أصاب جسمَ النون وأخطأ موضعَ نقطتها يُعيد النقطة،
+   * ولا تُمحى تحت يده كلمةٌ لأجل شولةٍ في آخرها. **والقياسُ يبقى على الشكل تامّاً**:
+   * الموفَّقُ في كل مرّةٍ **ما ثبت وما جُرّب معاً** — فموضعُ النقطة من الجسم مقيسٌ.
+   * **ولا لومَ ولا رسوب**: إرشادٌ، ثم بعد تعثّرٍ متكرر **مخرجٌ كريم** (`onStuck`).
+   */
+  function settleFree(drawn) {
+    const whole = reached[reached.length - 1] || 0;
+    const covered = reached.indexOf(touches.length) + 1;
+    if (!covered && touches.length < whole) return;      // في وسط جزءٍ بعددِ لمساته
+    const verdict = judgeFree(covered ? subsetRef(covered) : ref, touches, { tolerance });
+    if (verdict.accepted) {
+      settled = covered;
+      stumbles = 0;
+      drawn?.classList.add('pen-line--kept');
+      onTry?.({ ok: true, size: null, text: null, verdict });
+      onPart?.({ ok: true, progress: 1 });
+      paintGuide();
+      if (settled >= parts.length) { touches = []; onDone?.(verdict); }
+      return;
+    }
+    stumbles++;
+    touches.pop();
+    fadeInk(drawn);
+    hint();
+    // **الخطأُ الأوّل هو الخطأ** (`verdict()` أعلاه): يُرفَع وحدَه إلى القياس، فلا
+    // تُحصى على محاولةٍ واحدة شكاوى يتلو بعضُها بعضاً.
+    if (verdict.faults[0]) onFault?.(verdict.faults[0]);
+    onTry?.({ ok: false, size: verdict.size, text: SIZE_TEXT[verdict.size] || null, verdict });
+    paintGuide();
+    if (stumbles >= FREE.stumbles) onStuck?.(stumbles);
   }
 
   // ————— الالتقاط: Pointer Events، والإصبعُ والقلمُ سواء (ق٤) —————
@@ -967,7 +1233,9 @@ export function penSurface(config) {
     for (const p of batch) {
       if (dist(inkPoints[inkPoints.length - 1], p) < MIN_STEP) continue;
       inkPoints.push(p);
-      trial.move(p[0], p[1]);
+      // **والخطوةُ الحرّة لا تُحكَم لحظةً بلحظة** (`settleFree`): حبرُها يُجمَع ثم
+      // يُوفَّق النموذجُ عليه عند الرفع — فالحَكَمُ اللحظيّ لا يُطعَم فيها شيئاً.
+      if (!free) trial.move(p[0], p[1]);
     }
     if (inkPath) inkPath.setAttribute('d', pathD(inkPoints));
   }
@@ -985,7 +1253,7 @@ export function penSurface(config) {
     inkPoints = [p];
     inkPath = sv('path', { class: 'pen-line', d: pathD(inkPoints) });
     inkLayer.append(inkPath);
-    trial.down(p[0], p[1]);
+    if (!free) trial.down(p[0], p[1]);
     listen(true);
   }
 
@@ -1027,8 +1295,16 @@ export function penSurface(config) {
     const tip = inkPoints[inkPoints.length - 1];
     if (tip && dist(tip, end) > 0) {
       inkPoints.push(end);
-      trial.move(end[0], end[1]);
+      if (!free) trial.move(end[0], end[1]);
       if (inkPath) inkPath.setAttribute('d', pathD(inkPoints));
+    }
+    // **الخطوةُ الحرّة تُحكَم هنا** بحكمها الثاني: الشكلُ تامّاً موفَّقاً على صندوق حبره.
+    if (free) {
+      const drawn = inkPath;
+      touches.push(inkPoints);
+      inkPath = null;
+      settleFree(drawn);
+      return;
     }
     const result = trial.up();
     if (result?.ok) {
@@ -1100,6 +1376,10 @@ export function penSurface(config) {
   function reset() {
     stop();
     trial.reset();
+    // **والتعثّراتُ لا تُصفَّر بزرّ «أعِدْ»**: هي عدَدُ ما لقيه الطفلُ لا عددُ ما
+    // ضغطه — فمن أعاد مرّتين وتعثّر يجد المخرجَ الكريم مفتوحاً كما يجده مَن لم يُعِد.
+    touches = [];
+    settled = 0;
     inkLayer.replaceChildren();
     inkPoints = [];
     inkPath = null;

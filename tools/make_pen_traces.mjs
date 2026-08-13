@@ -17,7 +17,7 @@
 // وموجباً، ولا تدّعي أنها عايرت السماحةَ بأطفالٍ حقيقيين.
 
 import { readFileSync, writeFileSync } from 'node:fs';
-import { prepare, pointAt, TOLERANCE } from '../app/js/pen.js';
+import { prepare, pointAt, TOLERANCE, inkBox, refPoints } from '../app/js/pen.js';
 import { PATHS } from '../app/js/paths.js';
 import { WORD_PATHS } from '../app/js/word_paths.js';
 
@@ -425,6 +425,89 @@ function build() {
     [walk(prepare(BA_FINAL.strokes[0].points), { from: 1, to: 0, jitter: 4, rand }),
       ...dotsOf(BA_FINAL, rand)], 'ba-final');
 
+  // ————— نونُ بلاغ الميدان ٢: «الشكلُ لا الأثر» (الجلسة م٣) —————
+  //
+  // 🔴 **الحالاتُ الأربعُ الأُوَل هي بلاغُ الميدان بعينه** (المالك وطفلة، ١٣ أغسطس
+  // ٢٠٢٦، وبصورةٍ شاهدة): كتبت الطفلةُ **نوناً صحيحة** — بدأت من دائرة البداية
+  // ودارت دورتَها وأغلقت كأسَها — **فرُدّت**، لأنّ كأسها أضيقُ من كأس النموذج
+  // الخفيّ بأكثر من سماحة الانحراف. **فتركت الجهاز.**
+  //
+  // **وهي مصنوعةٌ لا مسجَّلة** (`origin: synthetic` كسائر العدّة): تشويهاتٌ **موصوفة**
+  // لمسار النون الحقيقيّ — كأسٌ تُضيَّق، وأخرى تُوسَّع، وحرفٌ يصغر، وآخرُ يُزاح —
+  // لا إحداثياتٌ تُكتب بيد ولا يدُ طفلٍ تُدَّعى. **وشهادتُها في شقّين**: يردّها
+  // الحكمُ الأول (`judge`) ويقبلها الثاني (`judgeFree`) — فلو سقط الحكمُ الثاني يوماً
+  // لَقُرئ الإخفاقُ هنا **ببلاغه**.
+  //
+  // **ولا تنقلب الرحمةُ تسييباً**: معكوسةُ الاتجاه، ومرآةُ الشكل (وهي ليست نوناً وإن
+  // ملأت صندوقَها)، والنقطةُ قبل الجسم — **تُرَدّ ثلاثتُها بالحكم الثاني نفسِه**،
+  // فالبدايةُ والاتجاهُ والترتيبُ هي المادّةُ المدرَّسة ولا تتبدّل بتبدّل الموضع.
+  const NOON = PATHS['ن'].isolated;
+  const NOON_BOX = inkBox([refPoints(NOON)]);
+  const NOON_POLY = prepare(NOON.strokes[0].points);
+  /** يدٌ تكتب النونَ كما هي: جسمٌ ثم نقطة. */
+  const noon = (rand) => [walk(NOON_POLY, { jitter: 4, rand }), ...dotsOf(NOON, rand)];
+  /** تشويهٌ **موصوف** يُطبَّق على ما كُتب: تحجيمٌ حول مركز صندوق النون، أو إزاحة. */
+  const warp = (strokes, at) => strokes.map((s) => s.map((p) => at(p).map(round)));
+  const about = (kx, ky) => (p) => [NOON_BOX.cx + (p[0] - NOON_BOX.cx) * kx,
+    NOON_BOX.cy + (p[1] - NOON_BOX.cy) * ky];
+  const nudge = (dx, dy) => (p) => [p[0] + dx, p[1] + dy];
+  const field = (id, expect, note, strokes) => cases.push({
+    id, expect, note, origin: 'synthetic', ref: 'noon', strokes,
+  });
+
+  rand = rng(4141);
+  field('noon-narrow', { accept: true, free: true, strict: false },
+    '🏅 **نونُ الصورة**: كأسٌ أضيقُ من كأس النموذج (٦٠٪ عرضاً) — الشكلُ صحيحٌ '
+    + 'والبدايةُ والاتجاهُ صحيحان، وكانت تُردّ `wander` فتركت الطفلةُ الجهاز',
+    warp(noon(rand), about(0.6, 1)));
+
+  rand = rng(4242);
+  field('noon-wide', { accept: true, free: true, strict: false },
+    'ونونٌ كأسُها **أوسعُ** من النموذج (١٤٠٪ عرضاً) — الوجهُ الآخر للبلاغ نفسِه',
+    warp(noon(rand), about(1.4, 1)));
+
+  rand = rng(4343);
+  field('noon-small', { accept: true, free: true, strict: false },
+    'ونونٌ **أصغرُ حجماً** (٥٥٪ بنِسَبها) — حجمٌ معقولٌ في صندوقه، والنِّسَبُ سليمة',
+    warp(noon(rand), about(0.55, 0.55)));
+
+  rand = rng(4444);
+  field('noon-shifted', { accept: true, free: true, strict: false },
+    `ونونٌ **مُزاحةٌ في الصندوق** (${Math.round(TOLERANCE.start * 1.2)} أفقياً — خارجَ `
+    + 'دائرة البداية) — والموضعُ ليس مادّةً مدرَّسة',
+    warp(noon(rand), nudge(TOLERANCE.start * 1.2, TOLERANCE.start * 0.8)));
+
+  rand = rng(4545);
+  field('noon-reversed', { accept: false, free: true, fault: 'start-end' },
+    '**ونونٌ معكوسةُ الحركة** — تُرَدّ بالحكم الثاني كما تُرَدّ بالأول: الاتجاهُ '
+    + 'مادّةٌ مدرَّسة لا يبدّلها توفيقُ النموذج',
+    [walk(NOON_POLY, { from: 1, to: 0, jitter: 4, rand }), ...dotsOf(NOON, rand)]);
+
+  rand = rng(4646);
+  field('noon-mirrored', { accept: false, free: true },
+    '**ومرآةُ النون** — تملأ صندوقَها بحجمٍ معقول، **وليست نوناً**: التوفيقُ إزاحةٌ '
+    + 'وتحجيمٌ منتظم لا انعكاس',
+    warp(noon(rand), about(-1, 1)));
+
+  rand = rng(4747);
+  field('noon-dots-first', { accept: false, free: true, fault: 'dots-first' },
+    '**والنقطةُ قبل الجسم** — بدايةٌ مقلوبةُ الترتيب: العادةُ الخاطئة التي يفرض الخطُّ '
+    + 'المدرسيّ عكسَها، ولا يفتحها كرمُ السماحة',
+    (() => { const w = noon(rand); return [w[1], w[0]]; })());
+
+  // **وحدُّ الحجم محسوبٌ من الصندوق**: أصغرُ ما يُقبَل أن يزيد قطرُ الحبر على ممرّ
+  // السماحة (`lateral × ٢`)، وأكبرُه أن يسعه صندوقُ المادّة وممرُّه من كل جهة —
+  // وكلاهما **جملةٌ تُقال** لا ردٌّ صامت.
+  rand = rng(4848);
+  field('noon-tiny', { accept: false, free: true, size: 'size-small' },
+    'ونونٌ **ضئيلة** (١٥٪) تغرق في ممرّ سماحتها — تُقال لها «اكْتُبْهُ أَكْبَرْ»',
+    warp(noon(rand), about(0.15, 0.15)));
+
+  rand = rng(4949);
+  field('noon-huge', { accept: false, free: true, size: 'size-big' },
+    'ونونٌ **تفيض عن صندوقها** (٢٤٠٪) — تُقال لها «اكْتُبْهُ أَصْغَرْ»',
+    warp(noon(rand), about(2.4, 2.4)));
+
   // ————— كلماتُ النسخ الثلاث: أمينةً ومرتجفةً ومعكوسة (الجلسة ٨) —————
   //
   // **والرجفةُ بعهد أرضيتها**: `child-drift` نصفُ السماحة — وسماحةُ الكلمة سماحتُها
@@ -468,7 +551,10 @@ function build() {
       + 'بأحكام المالك في مرجعية الكرّاسة** (١٢ أغسطس ٢٠٢٦، docs/REVIEW_HANDWRITING.md): '
       + 'ل/وسطي بحكم العمود (§١) فسقطت طيّتُه، وب/وسطي وب/نهائي بحكم المدخل (§٤) فصار '
       + 'مبدؤهما مقعدَهما على السطر — فأُعيدت العدّةُ عليها وأحكامُ حالاتها كما كانت. '
-      + 'وحكمُ المحرّك على مسارات الحروف كلِّها في tools/test_paths.mjs.',
+      + '**ومعها نونُ بلاغ الميدان ٢** (noon، الجلسة م٣): عليها تُحرَس «الشكلُ لا '
+      + 'الأثر» في الخطوة الحرّة — كأسٌ أضيقُ وأوسعُ وحرفٌ أصغرُ ومُزاح تُقبَل بالحكم '
+      + 'الثاني (judgeFree) وتُرَدّ بالأول، والمعكوسةُ والمرآةُ والنقطةُ قبل الجسم '
+      + 'تُرَدّ بالحكمين. وحكمُ المحرّك على مسارات الحروف كلِّها في tools/test_paths.mjs.',
     generator: 'tools/make_pen_traces.mjs',
     warning: 'مساراتٌ مصنوعة لا مساراتُ أطفال — ميدانُ الطفل ومساراتُه الحقيقية في الجلسة ١٢',
     refs: {
@@ -478,6 +564,7 @@ function build() {
       'lam-medial': LAM_MEDIAL,
       'ba-medial': BA_MEDIAL,
       'ba-final': BA_FINAL,
+      noon: NOON,
       ...Object.fromEntries(WORD_CASES.map((text, i) => [`word-${i + 1}`, WORD_PATHS[text]])),
     },
     cases,

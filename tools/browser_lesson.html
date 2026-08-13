@@ -130,15 +130,22 @@ function watchRobot(win) {
       await wait(60);
     }
     const tap = async (at) => writeStroke([at, at, at]);
-    /** يدُ طفلٍ مصنوعة: تمشي على المسار المرجعيّ نفسِه (وتعكسه إن طُلب)، ثم تنقط. */
-    async function writeShape(back) {
+    /**
+     * يدُ طفلٍ مصنوعة: تمشي على المسار المرجعيّ نفسِه (وتعكسه إن طُلب)، ثم تنقط.
+     * **و`at` تشويهٌ موصوف** يُطبَّق على ما تكتبه — به تُمتحن الخطوةُ الحرّة: حرفٌ
+     * صحيحُ الشكل في **حجمٍ وموضعٍ** يخالفان النموذجَ الخفيّ (`METHOD.md §٥ب`).
+     */
+    async function writeShape(back, at = (p) => p) {
       for (const stroke of ref.strokes) {
-        await writeStroke(back ? [...stroke.points].reverse() : stroke.points);
+        const pts = (back ? [...stroke.points].reverse() : stroke.points).map(at);
+        await writeStroke(pts);
       }
       for (const dot of ref.dots) {
-        for (let i = 0; i < (dot.count || 1); i++) await tap(dot.at);
+        for (let i = 0; i < (dot.count || 1); i++) await tap(at(dot.at));
       }
     }
+    /** تصغيرٌ حول مركز الصندوق مع إزاحة — يدُ طفلٍ تكتب حرفَها أصغرَ وفي غير موضعه. */
+    const smallerAside = (p) => [500 + (p[0] - 500) * 0.7 + 90, 500 + (p[1] - 500) * 0.7 + 60];
 
     const stored = () => {
       try { return JSON.parse(win.localStorage.getItem('uktub.progress.v1') || '{}'); }
@@ -207,11 +214,48 @@ function watchRobot(win) {
     await wait(STEP_WAIT);
     await writeShape(false);             // ٣) تتبّعٌ خافت — صحيحاً
     await wait(STEP_WAIT);
-    // ٤) «اكتُبْهُ وحدَك»: معكوسٌ أوّلاً ثم صحيح — **فيبقى في صندوقه الأول**
-    //    ويستحقّ المراجعةَ اليومَ نفسَه (ليتنر: الخطأُ يعيد الصندوق إلى الصفر).
+    // ————— ٤) «اكتُبْهُ وحدَك»: 🚪 **لا انسدادَ أبداً** ثم «الشكلُ لا الأثر» —————
+    //
+    // 🔴 **بلاغُ الميدان ٢ (١٣ أغسطس ٢٠٢٦)**: رُدّت نونٌ صحيحةُ الشكل لأنّ كأسها
+    // أضيقُ من كأس النموذج الخفيّ، **فتركت الطفلةُ الجهاز**. فهنا يُقاس الشقّان في
+    // متصفّحٍ حقيقيّ: أنّ التعثّرَ المتكرر **يفتح باباً** لا يسدّه، وأنّ الحرفَ
+    // الصحيحَ في حجمٍ وموضعٍ آخرين **يُقبَل**.
+    ok(Boolean(doc.querySelector('.pen-box--free')), 'والخطوةُ الرابعة صندوقٌ فارغ — «اكتُبْهُ وحدَك»');
+    await writeShape(true);                              // معكوسٌ — تعثّرٌ أوّل
+    await wait(200);
+    await writeStroke([[200, 500], [500, 500], [800, 500]]);   // خطٌّ عارض — وثانٍ
+    await wait(200);
+    await writeStroke([[300, 300], [700, 700], [300, 700], [700, 300]]);   // خربشة — وثالث
+    await wait(400);
+
+    const way = [...doc.querySelectorAll('main.lesson-letter .foot .btn')];
+    const wayText = way.map((b) => b.textContent.trim());
+    ok(way.length >= 2 && wayText.some((t) => t.includes('تَتَبَّعْ')) && wayText.some((t) => t.includes('تَابِعْ')),
+      `وبعد تعثّرٍ متكرر **يُفتَح مخرجٌ كريم**: ${wayText.join(' · ') || 'لا زرّ'}`);
+    ok(way.every((b) => b.getBoundingClientRect().height >= 64),
+      'وأزرارُه هدفُ لمسٍ ≥ ٦٤ بكسل — يبلغها إصبعُ طفلٍ متعثّر');
+    const stuckText = doc.querySelector('main.lesson-letter').textContent;
+    ok(!/رسوب|فشل|أخطأت|حاول مرّة أخرى/.test(stuckText),
+      'ولا لومَ ولا رسوبَ فيما يقرؤه — الطفلُ يخرج من الشاشة بيده لا بيأسه');
+    const starsKept = Object.keys(stored().stars || {}).length;
+
+    way.find((b) => b.textContent.includes('تَتَبَّعْ')).click();     // يخرج **بيده** إلى التتبّع
+    await wait(600);
+    ok(Boolean(doc.querySelector('.pen-box--guided'))
+      && Object.keys(stored().stars || {}).length === starsKept,
+      'فيعود إلى التتبّع الموجَّه — **بلا رسوبٍ ولا حرمانِ نجمة** (نجومُ ما قبله كما هي)');
+
+    await writeShape(false);             // تتبّعٌ موجَّه مرّةً أخرى
+    await wait(STEP_WAIT);
+    await writeShape(false);             // فخافت
+    await wait(STEP_WAIT);
+    // **ثم الحرّةُ: معكوسٌ أوّلاً** — فيبقى في صندوقه الأول ويستحقّ المراجعةَ اليومَ
+    // نفسَه (ليتنر: الخطأُ يعيد الصندوق إلى الصفر) — **ثم حرفٌ صحيحُ الشكل في حجمٍ
+    // وموضعٍ آخرين**: كان يُردّ `start-far` قبل الحكم الثاني (`judgeFree`)، وهو عينُ
+    // ما أخرج الطفلةَ من الجهاز.
     await writeShape(true);
     await wait(300);
-    await writeShape(false);
+    await writeShape(false, smallerAside);
     await wait(STEP_WAIT);
 
     const state = stored();
