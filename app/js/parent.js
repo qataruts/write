@@ -395,6 +395,9 @@ function askThen(box, { question, body, yes, onYes }) {
 
 const nodesText = (n) => arCount(n, ['عقدة واحدة', 'عقدتين', 'عقد', 'عقدة']);
 
+/** سطرُ نسخة القشرة قبل أن يصل جوابُها — يُعرَف به أنّ السؤال ما زال معلَّقاً. */
+const WAITING = 'نسخة القشرة: …';
+
 /** تنزيل ملف النسخة — نصٌّ في `Blob`، بلا شبكةٍ ولا خادم (كل شيء في الجهاز). */
 function saveBackupFile() {
   const url = URL.createObjectURL(
@@ -442,6 +445,17 @@ function previewSection() {
 function backupSection(rerender) {
   const slot = h('div', { class: 'confirm-slot' });
   const storage = h('p', { class: 'hint' }, 'التخزين على هذا الجهاز: جارٍ الفحص…');
+
+  /* **نسخةُ القشرة تُرى** (أمر المالك، ١٣ أغسطس ٢٠٢٦ — بلاغُ العائلة
+     `version-visibility`): «رؤيةُ النسخة الحالية في مكانٍ ما — ولو مخفيّ — تسهّل
+     التأكد من وصول النسخة الأخيرة». وثمنُها دُفع مرّتين في احسب: بلاغُ ميدانٍ يقع
+     على قشرةٍ مخزونة **شهادةُ زورٍ بريئة**.
+
+     **والسطرُ يُملأ من جواب القشرة الحيّة** لا من ثابتٍ في هذا الملف: تُسأل بـ
+     `postMessage` فتردّ `VERSION` من عندها — فالمعروضُ نسخةُ ما **يعمل** على هذا
+     الجهاز، لا نسخةُ ما نُشر. وموضعُه هنا مع حال الجهاز (تخزينُه وأصواتُه المخزونة)
+     لا مع الرحلة: كلُّها أخبارُ الجهاز الذي بين يدَي وليّ الأمر. */
+  const swVersion = h('p', { class: 'hint', 'data-sw-version': '' }, WAITING);
   // سطرُ الأصوات المخزونة (حزمة «خفّة التخزين»): كان إخفاقُ الخزن يُبتلَع صامتاً —
   // ومنه تجاوزُ حصة التخزين على الأجهزة الأقدم — فتنقص ملفاتٌ ولا يعلم أحد، ثم يصمت
   // الصوت في الطائرة أو في السيارة. فالعدد معروضٌ لوليّ الأمر: يرى النقص قبل أن يفاجئه.
@@ -484,7 +498,30 @@ function backupSection(rerender) {
   // بلاغاتُ العامل بعد كل دفعة — فالشريطُ يتحرّك بما يجري لا بتقديرٍ منّا
   navigator.serviceWorker?.addEventListener?.('message', (e) => {
     if (e.data?.type === 'audio-progress') paint(e.data.stored, e.data.total, e.data.busy);
+    if (e.data?.type === 'version' && swVersion.isConnected) {
+      swVersion.textContent = `نسخة القشرة: ${e.data.version}`;
+    }
   });
+
+  // **والسؤالُ يُطرح على المتولّي وحدَه** — وهو الذي يخدم هذه الصفحة فعلاً. وحيث لا
+  // متولٍّ (أوّلُ زيارةٍ قبل أن تُثبَّت القشرة، أو `file://`) **يُقال ذلك ولا يُترَك
+  // شَرطةً مبهمة**: غيابُ الجواب خبرٌ صحيح، وسكوتُه عنه يُقرأ عطباً.
+  //
+  // **وصمتٌ بعد السؤال يُقال كذلك** (أمسكه فحصُ المتصفّح ساعةَ جُرِّب سالباً): إن
+  // كان متولٍّ ولم يُجب — وذلك يقع لحظةَ تبديل قشرةٍ بأخرى — بقي السطرُ شَرطةً
+  // مبهمة أبداً، **وهي عينُ الالتباس الذي جاء البلاغُ ليرفعه**. فبعد مهلةٍ قصيرة
+  // يُقال حالُه بصدق، ولا يُدَّعى رقمٌ لم يصل.
+  const controller = navigator.serviceWorker?.controller;
+  if (!controller) {
+    swVersion.textContent = 'نسخة القشرة: — (لم تتولَّ القشرةُ هذه الصفحة بعد)';
+  } else {
+    controller.postMessage({ type: 'version' });
+    setTimeout(() => {
+      if (swVersion.isConnected && swVersion.textContent === WAITING) {
+        swVersion.textContent = 'نسخة القشرة: — (لم تُجب القشرةُ؛ قد تكون قيد التبديل)';
+      }
+    }, 3000);
+  }
 
   progress.audioStored().then((count) => {
     if (count) paint(count.stored, count.total, false);
@@ -556,6 +593,7 @@ function backupSection(rerender) {
     ),
     slot,
     storage,
+    swVersion,
     dlRow,
     h('p', { class: 'note' },
       'في النسخة: النجوم وصناديق المراجعة ودقائق التعلّم وتاريخ خفوت كلماته'

@@ -136,7 +136,16 @@ const fromAr = (text) => Number(String(text).replace(/[٠-٩]/g,
       win.addEventListener('unhandledrejection', (e) => errors.push(String(e.reason)));
       watchWindow(win);
     }
+    /**
+     * **وإقلاعٌ أوّلُ تُثبَّت فيه القشرة**: أوّلُ زيارةٍ لا متولّيَ فيها (تُسجَّل
+     * القشرةُ أثناءها ثم تتولّى) — وذلك حالُ الجهاز الحقيقيّ أوّلَ مرّة. فيُنتظَر
+     * تولّيها ثم يُفتح اللوحُ من جديد، **ليُقاس ما يراه وليُّ الأمر في جهازٍ مثبَّت**.
+     */
     await openApp();
+    await frame.contentWindow.navigator.serviceWorker.ready;
+    await openApp();
+    ok(Boolean(frame.contentWindow.navigator.serviceWorker.controller),
+      'وقشرةُ الخدمة تتولّى الصفحة بعد تثبيتها — فسؤالُ النسخة يجد مَن يجيبه');
 
     // ————— ١) البوابةُ الحسابية تقف فعلاً —————
 
@@ -207,6 +216,21 @@ const fromAr = (text) => Number(String(text).replace(/[٠-٩]/g,
       `وفيها نوعاها معاً: «${wordTags[0].textContent.replace(/\s+/g, ' ').trim()}»`);
     ok(tags.some((el) => el.textContent.includes(line)),
       'والجملةُ في صفّها هي — لا في صفّ الكلمات');
+
+    // ————— نسخةُ القشرة تُرى (بلاغُ العائلة `version-visibility`) —————
+    //
+    // **الطرفان معاً في جهازٍ حقيقيّ**: اللوحةُ سألت القشرةَ الحيّة وعرضت جوابَها.
+    // **والرقمُ المنتظَر يُقرأ من `sw.js` نفسِه** لا يُكتب هنا — فيومَ تُرفَع النسخةُ
+    // يمشي هذا الفحصُ على ما صار، ولا يُخضِره رقمٌ شاخ في صفحة اختبار.
+    const swSrc = await (await fetch('/sw.js')).text();
+    const wantVersion = (swSrc.match(/const VERSION = '([^']+)'/) || [])[1];
+    const versionLine = doc.querySelector('[data-sw-version]');
+    ok(Boolean(versionLine), 'وفي اللوحة سطرُ نسخة القشرة');
+    // الجوابُ يعبر رسالةً بين نافذةٍ وعامل، فيُنتظَر امتلاءُ السطر لا تُقرأ اللحظةُ
+    // الأولى — والانتظارُ محدود، فسطرٌ لا يمتلئ يبقى شكوى لا تعليقاً.
+    for (let i = 0; i < 40 && versionLine.textContent.includes('…'); i++) await wait(50);
+    ok(versionLine.textContent === `نسخة القشرة: ${wantVersion}`,
+      `وفيه نسخةُ ما **يعمل** على الجهاز: «${versionLine.textContent}» (والقشرةُ ${wantVersion})`);
 
     // ————— ٤) النسخةُ الاحتياطية تدور بزرّها —————
     //

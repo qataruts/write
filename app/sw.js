@@ -306,8 +306,18 @@ async function report(state) {
   for (const client of windows) client.postMessage({ type: 'audio-progress', ...state });
 }
 
-/** طلبٌ صريح من المستعمل: «نزّل الأصوات الآن» — يتجاوز مهلةَ الشفاء ولا ينتظرها. */
+/** طلبٌ صريح من المستعمل: «نزّل الأصوات الآن» — يتجاوز مهلةَ الشفاء ولا ينتظرها.
+ *
+ *  **و«ما نسختُك؟»** (أمر المالك، ١٣ أغسطس ٢٠٢٦ — بلاغُ العائلة `version-visibility`):
+ *  رؤيةُ النسخة تؤكّد وصولَ آخر قشرةٍ إلى الجهاز، **فلا يشهد ميدانٌ على شيفرةٍ لم
+ *  تصله** — وقد دُفع ثمنُ ذلك مرّتين في احسب. **والجوابُ من `VERSION` نفسِه**: هذا
+ *  العاملُ هو الذي يعمل على الجهاز الآن، فما يقوله نسخةُ **ما يعمل** لا ما نُشر —
+ *  ولا رقمَ يُكتب بيد في موضعٍ ثانٍ يشيخ. */
 self.addEventListener('message', (event) => {
+  if (event.data?.type === 'version') {
+    event.source?.postMessage({ type: 'version', version: VERSION });
+    return;
+  }
   if (event.data?.type !== 'audio-sync') return;
   event.waitUntil(syncAudio());
 });

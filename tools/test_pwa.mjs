@@ -155,6 +155,70 @@ ok(read('js/progress.js').includes('export async function audioStored')
   && panelSrc.includes('progress.audioStored()') && panelSrc.includes('الأصوات المخزونة'),
   'وعددُ المخزون معروضٌ في لوحة وليّ الأمر (فلا يفاجئه صمتٌ لا يعرف سببه)');
 
+// ————— نسخةُ القشرة تُرى — **حارسُ الطرفين** —————
+//
+// **الأمر** (المالك، ١٣ أغسطس ٢٠٢٦ — بلاغُ العائلة `version-visibility`): «رؤيةُ
+// النسخة الحالية في مكانٍ ما — ولو مخفيّ — تسهّل التأكد من وصول النسخة الأخيرة».
+// **وعلّتُه دُفع ثمنُها مرّتين في احسب**: بلاغُ ميدانٍ يقع على قشرةٍ مخزونة **شهادةُ
+// زورٍ بريئة** — يشهد المالكُ على شيفرةٍ لم تصل جهازَه.
+//
+// **وطرفان يُقاسان لا طرفٌ واحد**: قشرةٌ تجيب ولا أحدَ يسأل خرساءُ في أثرها، ولوحةٌ
+// تسأل ولا مجيبَ تعرض شرطةً أبداً. فيومَ يُعاد بناءُ أحدهما وحدَه يحمرّ هذا الباب.
+//
+// **والطرفُ الأول يُقاس حيّاً لا بنصّ**: يُركَّب `sw.js` في بيئةٍ مزيَّفة (نظيرُ
+// `test_audio_cache.mjs`) ويُسأل سؤالَ النسخة، فيُقابَل جوابُه بقيمة `VERSION`
+// **المقروءة من مصدره** — فلا رقمَ يُكتب هنا بيد، ونصٌّ يشبه الجواب ولا يجيب يسقط.
+
+console.log('\n— نسخةُ القشرة تُرى: القشرةُ تجيب واللوحةُ تسأل وتعرض —');
+
+const VERSION = (sw.match(/const VERSION = '([^']+)'/) || [])[1] || '';
+{
+  const { default: vm } = await import('node:vm');
+  const listeners = {};
+  const context = vm.createContext({
+    self: {
+      addEventListener: (type, fn) => { listeners[type] = fn; },
+      registration: { scope: 'https://uktub.test/' },
+      location: { origin: 'https://uktub.test' },
+      clients: { claim: async () => {}, matchAll: async () => [] },
+      skipWaiting: async () => {},
+    },
+    caches: { open: async () => ({}), keys: async () => [], delete: async () => false },
+    fetch: async () => ({ ok: false }),
+    URL,
+    Request,
+    Response,
+    console: { log() {}, warn() {} },
+  });
+  vm.runInContext(sw, context);
+
+  const ask = (type) => {
+    const answers = [];
+    listeners.message?.({
+      data: { type },
+      source: { postMessage: (m) => answers.push(m) },
+      waitUntil: () => {},
+    });
+    return answers;
+  };
+
+  const answered = ask('version');
+  ok(VERSION && answered.length === 1 && answered[0].type === 'version'
+    && answered[0].version === VERSION,
+    `القشرةُ تجيب عن سؤال نسختها بقيمة \`VERSION\` نفسِها (${answered[0]?.version || 'لا جواب'}`
+    + ` — والمصدرُ يقول ${VERSION || '؟'})`);
+  ok(ask('audio-sync').length === 0 && ask('لا-شيء').length === 0,
+    'ولا تجيب عن غير سؤالها — رسالةٌ أخرى تمضي إلى بابها ولا تُردّ نسخةً');
+}
+
+ok(panelSrc.includes("postMessage({ type: 'version' })")
+  && /data-sw-version/.test(panelSrc) && /نسخة القشرة: \$\{e\.data\.version\}/.test(panelSrc),
+  'ولوحةُ وليّ الأمر **تسأل** القشرةَ الحيّة **وتعرض** جوابَها سطراً');
+// **ولا رقمَ نسخةٍ مكتوبٌ في اللوحة**: لو كُتب لَعُرض رقمُ ما نُشر لا رقمُ ما يعمل —
+// وهو عينُ الكذب الذي جاء البلاغُ ليمنعه.
+ok(!/['"`]v\d+['"`]/.test(panelSrc),
+  'ولا رقمَ نسخةٍ مكتوبٌ فيها بيد — المعروضُ نسخةُ ما يعمل على الجهاز لا ما نُشر');
+
 // ————— ٣. بيان التطبيق —————
 
 ok(manifest.name && manifest.short_name, `اسم التطبيق: ${manifest.short_name}`);
