@@ -161,6 +161,9 @@ const refOf = (item) => traces.refs[item.ref];
 
 const seen = new Map();
 for (const item of traces.cases) {
+  // **وحالاتُ الطريق تُمشى لا تُحكَم دفعةً** (§٢ج أدناه): لمساتُها محاولاتٌ متعاقبة
+  // على آلة الخطوة الحرّة، لا ضرباتُ محاولةٍ واحدة.
+  if (item.expect.run) continue;
   // **ولكلِّ حالةٍ حَكَمُها المُعلَن**: الخطوةُ الحرّة تُحكَم بحكمها الثاني
   // (`judgeFree`، `METHOD.md §٥ب`) وما سواها بالأول — والحالةُ تقول بأيّهما تُقاس.
   const verdict = item.expect.free
@@ -338,7 +341,7 @@ console.log('\n— ٢ب) الخطوةُ الحرّة: النموذجُ يُوف�
 
   // 🚪 **ولا انسدادَ أبداً**: للمحرّك عدّةُ تعثّرٍ معلَنة، وللشاشة مخرجٌ تفتحه بها.
   const lesson = codeOf(read('js/lesson.js'));
-  ok(pen.FREE.stumbles >= 2 && penCode.includes('onStuck?.(stumbles)'),
+  ok(pen.FREE.stumbles >= 2 && penCode.includes('onStuck?.(run.stumbles)'),
     `والمحرّكُ يفتح المخرجَ الكريم بعد ${pen.FREE.stumbles} تعثّراتٍ متتالية (\`onStuck\`)`);
   ok(/onStuck\s*:/.test(lesson) && /function wayOut/.test(lesson)
     && /score\(step, unit, false\)/.test(lesson),
@@ -349,6 +352,36 @@ console.log('\n— ٢ب) الخطوةُ الحرّة: النموذجُ يُوف�
   // **والخطوتان الموجَّهةُ والخافتة لا تُمَسّان**: الحكمُ الثاني معلَّقٌ بالنمط الحرّ وحدَه.
   ok(/mode === MODES\.FREE/.test(penCode) && /if \(!free\) trial\.down/.test(penCode),
     'والحكمُ الثاني للنمط الحرّ وحدَه — والموجَّهُ والخافتُ على حَكَمهما اللحظيّ كما كانا');
+}
+
+// ————— ٢ج. طريقُ المحاولة الحرّة: **يُمشى لمسةً لمسة** (مراجعةُ المدير للجلسة م٣) —————
+//
+// 🔴 **العلّةُ المقيسة**: الحكمُ الثاني صحيحٌ في نفسه، **والطريقُ إليه كان ينقطع**:
+// في محطة التمييز يُكتب جسمُ الأخت فيُقبَل (الجسمُ واحدٌ في ب ت ث ن ي)، ثم يُعيد
+// الطفلُ الشكلَ كلَّه فتُقاس ضربتُه الأولى على **الجزء الباقي** فتُردّ أبداً — فلا
+// يبلغ `onDone` ولا تُكتب مهارةُ المحطة. **وهو نقضُ «لا تدريسَ بلا قياس» لا دَين.**
+//
+// **والحارسُ يمشي الطريق ولا يقرأ سطراً**: تُدار آلةُ المحاولة (`createFreeRun`) —
+// وهي **عينُ ما يقوده اللوح** لا نسخةٌ ثانية — ويُقاس أنّها تبلغ آخرَها.
+console.log('\n— ٢ج) طريقُ المحاولة الحرّة يبلغ آخرَه —');
+for (const item of traces.cases.filter((c) => c.expect.run)) {
+  const run = pen.createFreeRun(refOf(item), {});
+  const steps = item.strokes.map((points) => run.push(points));
+  const restarts = steps.filter((r) => r?.restarted).length;
+  ok(run.done === item.expect.accept,
+    `${item.id}: ${run.done ? 'يبلغ آخرَ الطريق' : 'لا يبلغه'} — ${item.note}`
+    + `\n      ${item.strokes.length} لمسةً · استُؤنف ${restarts} · تعثّرات ${run.stumbles}`
+    + `${run.done === item.expect.accept ? '' : ' ← الطريقُ خالف المنتظَر'}`);
+}
+// **ومجرَّبٌ سالباً في الآلة نفسِها**: نصفُ الشكل لا يبلغ آخرَه — فلو صار البابُ
+// يخضرّ لكلّ لمسةٍ لَما ميّز جواباً من نصف جواب.
+{
+  const half = traces.cases.find((c) => c.id === 'compare-sister-then-right');
+  const run = pen.createFreeRun(refOf(half), {});
+  run.push(half.strokes[half.strokes.length - 2]);      // الجسمُ وحدَه بلا نقطته
+  ok(!run.done && run.settled === 1,
+    `وجسمٌ بلا نقطته لا يبلغ آخرَ الطريق (استُوفي ${run.settled} من ${run.parts.length}`
+    + ' جزءاً) — فالبابُ يفرّق بين الجواب ونصفِه');
 }
 
 // ————— ٣. الشروطُ الأربعة أربعة: لكلٍّ وجهاه —————
@@ -365,7 +398,7 @@ for (const [name, codes] of CONDITIONS) {
   const hit = codes.filter((code) => allCodes.has(code));
   ok(hit.length > 0, `الشرط ${name}: تُسقِطه العدّةُ فعلاً (${hit.join('، ') || 'لا حالة'})`);
 }
-const accepted = traces.cases.filter((c) => c.expect.accept);
+const accepted = traces.cases.filter((c) => c.expect.accept && !c.expect.run);
 ok(accepted.length >= 3 && accepted.every((c) => seen.get(c.id).accepted),
   `وثلاثُ كتاباتٍ سليمةٍ على الأقل تُقبَل — ومنها الرجفةُ الخفيفة (${accepted.length} حالة)`);
 ok([...allCodes].every((code) => Object.values(pen.FAULTS).includes(code)),

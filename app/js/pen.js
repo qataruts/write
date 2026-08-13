@@ -908,6 +908,97 @@ export function judgeFree(ref, strokes, options = {}) {
 }
 
 /**
+ * **محاولةٌ حرّةٌ تُمشى لمسةً لمسة** — آلةُ الخطوة الحرّة كاملةً، **بلا شاشة**.
+ *
+ * **ولِمَ خارج اللوح؟** لأنّ العهدَ «لا تدريسَ بلا قياس» (`METHOD.md §٦`) يقع على
+ * **الطريق لا على السطر**: أن تكون `score()` مكتوبةً في الشاشة لا يعني أنها تُنادى.
+ * 🔴 وقد وقع ذلك بعينه (مراجعةُ المدير للجلسة م٣): محطةُ التمييز صارت **تدرّس ولا
+ * تكتب مهارتها** لأنّ الطريقَ إلى `onDone` انقطع في الحكم الثاني — وحارسُ القياس
+ * النصيّ أخضرُ لأنه يقرأ السطر. **فصارت الآلةُ تُدار في `node`** ويُقاس أنّ الطريق
+ * يبلغ آخرَه (`tools/test_pen.mjs §٢ج` و`tools/test_measure.mjs`)، **واللوحُ يقودها
+ * هو نفسُه** فلا مصدران: ما يُفحَص في العدّة هو ما يمشي تحت إصبع الطفل.
+ *
+ * **ويُحكَم كلَّما تمّت لمساتُ جزء** لا عند آخر جزءٍ وحدَه: فمَن كتب جسمَ النون يُقبَل
+ * جسمُه ويثبت حبرُه، ثم تُقاس نقطتُه **موفَّقةً مع جسمه** — فيبقى موضعُ النقطة من
+ * الجسم مقيساً (وهو من الشكل)، ولا يُترك الطفلُ بلا جوابٍ حتى يتمّ.
+ *
+ * @param {object} ref المسارُ المرجعيّ
+ * @param {{tolerance?: number|object}} [options]
+ */
+export function createFreeRun(ref, options = {}) {
+  const parts = partsOf(ref);
+  /** كم لمسةً ينتظرها كلُّ جزء: الجسمُ واحدة، والنقطةُ بعددها. */
+  const touchesOf = (part) => (part.kind === 'dot' ? part.count : 1);
+  const reached = parts.reduce((run, part) => [...run, (run[run.length - 1] || 0) + touchesOf(part)], []);
+  const whole = reached[reached.length - 1] || 0;
+  /** النموذجُ إلى أوّل `k` جزءاً — فيُوفَّق ما كُتب على ما يقابله وحدَه لا على ما بعده. */
+  const subsetRef = (k) => (k >= parts.length ? ref : {
+    ...ref,
+    strokes: (ref.strokes || []).slice(0, k),
+    dots: (ref.dots || []).slice(0, Math.max(0, k - (ref.strokes || []).length)),
+  });
+
+  let touches = [];        // لمساتُ المحاولة الجارية — تُقرأ ولا تُخزَّن
+  let settled = 0;         // كم جزءاً قبله الحكمُ الثاني
+  let stumbles = 0;        // تعثّراتٌ متتالية — وبها يُفتَح المخرجُ الكريم
+
+  const judgeAt = (count, ink) => judgeFree(count ? subsetRef(count) : ref, ink, options);
+
+  return {
+    parts,
+    get settled() { return settled; },
+    get stumbles() { return stumbles; },
+    get done() { return settled >= parts.length; },
+    reset() { touches = []; settled = 0; },
+    /**
+     * لمسةٌ رُفعت. تُعيد حكمَها، أو `null` إن كانت **في وسط جزءٍ بعددِ لمساته**
+     * (نقطتان لتاءٍ مثلاً) فلا حكمَ بعدُ.
+     */
+    push(points) {
+      touches.push(points);
+      const covered = reached.indexOf(touches.length) + 1;
+      if (!covered && touches.length < whole) return null;
+      const verdict = judgeAt(covered, touches);
+      if (verdict.accepted) {
+        settled = covered;
+        stumbles = 0;
+        return { ok: true, restarted: false, size: null, text: null, verdict, done: this.done };
+      }
+      /**
+       * **واستئنافُ الشكل من أوّله محاولةٌ جديدة لا خطأٌ في بقيّته** (🔴 مراجعةُ
+       * المدير للجلسة م٣): مَن ثبت له جزءٌ ثم أعاد الشكلَ **كلَّه** — وهو أطبعُ ما
+       * يفعله طفلٌ رُدَّ عليه — كانت ضربتُه الأولى تُقاس على **الجزء الباقي** فتُردّ
+       * أبداً، فلا يبلغ آخرَه ولا تُكتب مهارتُه. (قِيست في محطة التمييز: يُكتب جسمُ
+       * الأخت فيُقبَل — والجسمُ واحدٌ في ب ت ث ن ي — ثم لا يُقبَل بعده شيء.)
+       *
+       * **والفيصلُ أن تُسأل اللمسةُ وحدَها**: أتصلح **أوّلَ جزءٍ** من الشكل؟ فإن صلحت
+       * فهي بدايةٌ جديدة، ويُطوى ما قبلها. ولا تُمنَح بلا استحقاق: تُحكَم بالشروط
+       * الأربعة نفسِها كأيّ بداية.
+       */
+      if (settled > 0 && reached[0] === 1) {
+        const fresh = judgeAt(1, [points]);
+        if (fresh.accepted) {
+          touches = [points];
+          settled = 1;
+          stumbles = 0;
+          return { ok: true, restarted: true, size: null, text: null, verdict: fresh, done: this.done };
+        }
+      }
+      stumbles++;
+      touches.pop();
+      return {
+        ok: false,
+        restarted: false,
+        size: verdict.size,
+        text: SIZE_TEXT[verdict.size] || null,
+        verdict,
+        done: false,
+      };
+    },
+  };
+}
+
+/**
  * **شارةُ الشكل: المسارُ المرجعيّ مرسوماً ساكناً** — بلا لوحٍ ولا حَكَمٍ ولا حبرِ طفل.
  *
  * تحتاجها الشاشاتُ حيث يُذكَر شكلٌ ولا يُكتب: شريطُ حروف محطة الأشكال، وصفُّ
@@ -1051,17 +1142,11 @@ export function penSurface(config) {
    * وهو عينُ حكمها: «المهمُّ الشكلُ لا متابعةُ الخطّ المرسوم قبلاً». **والخطوتان
    * الموجَّهةُ والخافتة على حالهما**: النموذجُ فيهما مرئيّ فالحكمُ في لحظته كما كان.
    *
-   * **ويُحكَم كلَّما تمّت لمساتُ جزء** لا عند آخر جزءٍ وحدَه: فمَن كتب جسمَ النون
-   * يُقبَل جسمُه ويثبت حبرُه، ثم تُقاس نقطتُه **موفَّقةً مع جسمه** — فيبقى موضعُ
-   * النقطة من الجسم مقيساً (وهو من الشكل)، ولا يُترك الطفلُ بلا جوابٍ حتى يتمّ.
+   * **وآلتُها في `createFreeRun` أعلاه** لا هنا: يقودها اللوحُ ويقودها الفاحصُ في
+   * `node` بالسواء — فالطريقُ الذي يبلغ `onDone` **مقيسٌ** لا مدَّعىً (`METHOD.md §٦`).
    */
   const free = mode === MODES.FREE;
-  /** كم لمسةً ينتظرها كلُّ جزء: الجسمُ واحدة، والنقطةُ بعددها. */
-  const touchesOf = (part) => (part.kind === 'dot' ? part.count : 1);
-  const reached = parts.reduce((run, part) => [...run, (run[run.length - 1] || 0) + touchesOf(part)], []);
-  let touches = [];        // ضرباتُ المحاولة الحرّة الجارية — تُقرأ ولا تُخزَّن
-  let settled = 0;         // كم جزءاً قبله الحكمُ الثاني من هذه المحاولة
-  let stumbles = 0;        // تعثّراتٌ متتالية — وبها يُفتَح المخرجُ الكريم
+  const run = free ? createFreeRun(ref, { tolerance }) : null;
 
   // النموذجُ ورفيقُه المتلوّن: مسارٌ واحد يُرسم مرّتين — الثانيةُ مقصوصةٌ بالتقدّم،
   // وهو **مؤشّرُ التقدّم الحركيّ** (مخالفةُ اكتب المعلَنة لاقرأ، `METHOD.md §٥`).
@@ -1111,7 +1196,7 @@ export function penSurface(config) {
   function paintGuide() {
     // **والمنتظَرُ في الخطوة الحرّة من حكمها الثاني** لا من الحَكَم اللحظيّ: هي
     // تُحكَم عند رفع القلم، فالجزءُ الذي تومض نقطتُه هو أوّلُ ما لم يستوفِه بعدُ.
-    const part = free ? (parts[settled] || null) : trial.expected;
+    const part = free ? (parts[run.settled] || null) : trial.expected;
     // تمّت الأجزاء: يسقط الإرشادُ كلُّه — لا نقطةَ بدايةٍ لجزءٍ لم يبقَ (وبالصنف
     // لا بسمة `hidden`، للعلّة المكتوبة عند `head` أدناه).
     box.classList.toggle('pen-box--complete', !part);
@@ -1155,47 +1240,38 @@ export function penSurface(config) {
     setTimeout(() => path.remove(), 520);
   }
 
-  /** النموذجُ إلى أوّل `k` جزءاً — فيُوفَّق ما كُتب على ما يقابله وحدَه لا على ما بعده. */
-  const subsetRef = (k) => (k >= parts.length ? ref : {
-    ...ref,
-    strokes: (ref.strokes || []).slice(0, k),
-    dots: (ref.dots || []).slice(0, Math.max(0, k - (ref.strokes || []).length)),
-  });
-
   /**
-   * **حكمُ المحاولة الحرّة عند رفع القلم** (`METHOD.md §٥ب`، `judgeFree` أعلاه).
+   * **حكمُ المحاولة الحرّة عند رفع القلم** — آلتُه `createFreeRun`، وهذه يدُها على
+   * الشاشة: حبرٌ يثبت أو يخفت، وإرشادٌ يومض، وجملةُ حجمٍ تُقال، ومخرجٌ يُفتَح.
    *
-   * والمقبولُ يثبت حبرُه ويُسلَّم إلى ما بعده، **والمردودُ يخفت وحدَه ويُعاد جزؤه**:
-   * ما ثبت لا يُطلَب مرّتين — فمن أصاب جسمَ النون وأخطأ موضعَ نقطتها يُعيد النقطة،
-   * ولا تُمحى تحت يده كلمةٌ لأجل شولةٍ في آخرها. **والقياسُ يبقى على الشكل تامّاً**:
-   * الموفَّقُ في كل مرّةٍ **ما ثبت وما جُرّب معاً** — فموضعُ النقطة من الجسم مقيسٌ.
-   * **ولا لومَ ولا رسوب**: إرشادٌ، ثم بعد تعثّرٍ متكرر **مخرجٌ كريم** (`onStuck`).
+   * **والمقبولُ يثبت حبرُه، والمردودُ يخفت وحدَه ويُعاد جزؤه** — ما ثبت لا يُطلَب
+   * مرّتين، ولا تُمحى تحت يده كلمةٌ لأجل شولةٍ في آخرها. **ومَن أعاد الشكلَ من أوّله**
+   * طُوي ما قبله وبدأت محاولتُه الجديدة (`restarted`).
    */
   function settleFree(drawn) {
-    const whole = reached[reached.length - 1] || 0;
-    const covered = reached.indexOf(touches.length) + 1;
-    if (!covered && touches.length < whole) return;      // في وسط جزءٍ بعددِ لمساته
-    const verdict = judgeFree(covered ? subsetRef(covered) : ref, touches, { tolerance });
-    if (verdict.accepted) {
-      settled = covered;
-      stumbles = 0;
+    const result = run.push(inkPoints);
+    if (!result) return;                       // في وسط جزءٍ بعددِ لمساته
+    if (result.ok) {
+      // **واستئنافُ الشكل يطوي ما قبله**: حبرُ المحاولة الماضية يخفت ويذهب، فلا
+      // يبقى على اللوح شكلان.
+      if (result.restarted) {
+        for (const path of [...inkLayer.querySelectorAll('path')]) if (path !== drawn) fadeInk(path);
+      }
       drawn?.classList.add('pen-line--kept');
-      onTry?.({ ok: true, size: null, text: null, verdict });
+      onTry?.(result);
       onPart?.({ ok: true, progress: 1 });
       paintGuide();
-      if (settled >= parts.length) { touches = []; onDone?.(verdict); }
+      if (result.done) onDone?.(result.verdict);
       return;
     }
-    stumbles++;
-    touches.pop();
     fadeInk(drawn);
     hint();
     // **الخطأُ الأوّل هو الخطأ** (`verdict()` أعلاه): يُرفَع وحدَه إلى القياس، فلا
     // تُحصى على محاولةٍ واحدة شكاوى يتلو بعضُها بعضاً.
-    if (verdict.faults[0]) onFault?.(verdict.faults[0]);
-    onTry?.({ ok: false, size: verdict.size, text: SIZE_TEXT[verdict.size] || null, verdict });
+    if (result.verdict.faults[0]) onFault?.(result.verdict.faults[0]);
+    onTry?.(result);
     paintGuide();
-    if (stumbles >= FREE.stumbles) onStuck?.(stumbles);
+    if (run.stumbles >= FREE.stumbles) onStuck?.(run.stumbles);
   }
 
   // ————— الالتقاط: Pointer Events، والإصبعُ والقلمُ سواء (ق٤) —————
@@ -1301,7 +1377,6 @@ export function penSurface(config) {
     // **الخطوةُ الحرّة تُحكَم هنا** بحكمها الثاني: الشكلُ تامّاً موفَّقاً على صندوق حبره.
     if (free) {
       const drawn = inkPath;
-      touches.push(inkPoints);
       inkPath = null;
       settleFree(drawn);
       return;
@@ -1378,8 +1453,7 @@ export function penSurface(config) {
     trial.reset();
     // **والتعثّراتُ لا تُصفَّر بزرّ «أعِدْ»**: هي عدَدُ ما لقيه الطفلُ لا عددُ ما
     // ضغطه — فمن أعاد مرّتين وتعثّر يجد المخرجَ الكريم مفتوحاً كما يجده مَن لم يُعِد.
-    touches = [];
-    settled = 0;
+    run?.reset();
     inkLayer.replaceChildren();
     inkPoints = [];
     inkPath = null;

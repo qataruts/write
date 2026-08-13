@@ -151,6 +151,96 @@ for (const [type, station] of declared) {
       ? ` — **غائب: ${station.kinds.filter((k) => !written.includes(k)).join('، ')}**` : ''));
 }
 
+// ————— ٢ب) **المُعلَنُ يُنادى فعلاً**: يُمشى الطريقُ لا يُقرأ السطر —————
+//
+// 🔴 **علّتُه مقيسة** (مراجعةُ المدير للجلسة م٣): محطةُ التمييز صارت **تدرّس ولا
+// تكتب مهارتها**، وهذا الحارسُ أخضرُ — لأنّ البابَ أعلاه يقرأ `recordAttempt`
+// **مكتوبةً** ولا يسأل: أتُنادى؟ فكان الطريقُ إلى `onDone` ينقطع في الحكم الثاني
+// (يُقبَل جسمُ الأخت، ثم يُعيد الطفلُ الشكلَ فتُقاس ضربتُه الأولى على الجزء الباقي
+// فتُردّ أبداً) — **والمهارةُ لا تُكتب، والبوابةُ ولوحةُ وليّ الأمر عمياوان**. وهي
+// عينُ العلّة التي بُني لأجلها هذا الحارس، في وجهٍ لم يكن يراه.
+//
+// **فالبابُ يمشي الطريق**: تُدار **آلةُ الخطوة الحرّة نفسُها** (`createFreeRun` —
+// وهي التي يقودها اللوح، لا نسخةٌ ثانية) على **مادّة الرحلة الحيّة**، ويُقاس أنّها
+// تبلغ آخرَها؛ فبلوغُ آخرِها هو وحدَه ما ينادي `onDone ← finishStep ← score`.
+//
+// **ومجرَّبٌ سالباً**: جوابٌ ناقصٌ (بلا نقطته) لا يبلغ آخرَه — فلو صار البابُ يخضرّ
+// لكلّ لمسةٍ لَما فرّق بين الجواب ونصفِه، ولَعاد أخضرَ على العطب الذي وُلد له.
+console.log('\n— ٢ب) المُعلَنُ يُنادى فعلاً: يُمشى الطريقُ لمسةً لمسة —');
+{
+  const pen = await import(new URL('pen.js', APP));
+  const { pathOf, FORMS } = await import(new URL('curriculum.js', APP));
+  /** لمساتُ جوابٍ صحيح: أجسامُ المسار ثم نقاطُه بعددها — يدُ طفلٍ تكتب ما يُطلَب. */
+  const answerOf = (ref) => [
+    ...ref.strokes.map((st) => st.points),
+    ...(ref.dots || []).flatMap((d) => Array.from({ length: d.count || 1 }, () => [d.at, d.at, d.at])),
+  ];
+  const walkRun = (ref, touches) => {
+    const run = pen.createFreeRun(ref, {});
+    for (const points of touches) run.push(points);
+    return run;
+  };
+
+  // **مادّةُ كلِّ محطةٍ حرّةٍ من الرحلة نفسِها** لا من رقمٍ مكتوب: أوّلُ ما تعرضه.
+  const nodes = p.allNodes();
+  const first = (type) => nodes.find((n) => n.type === type);
+  const compareNode = nodes.find((n) => n.type === 'form' && n.compare);
+  const fadeNode = first('fade');
+  const sentenceNode = first('sentence');
+  const words = await import(new URL('word_paths.js', APP));
+  const ROADS = [
+    ['letter', 'درس الحرف', pathOf(first('letter')?.letter, FORMS.ISOLATED)],
+    ['form', 'أشكال المواقع', pathOf(first('form')?.letters?.[0], first('form')?.form)],
+    // **وللتمييز جوابٌ خاطئٌ بعينه**: أختُها من الأسرة نفسِها — جسمُها جسمُها
+    // والفارقُ نقطتُها، وهي **الجوابُ الذي يقع من طفلٍ حقيقيّ** (وبها انقطع الطريق).
+    compareNode && ['form', 'تمييز المتشابهات',
+      pathOf(compareNode.compare[0][0], compareNode.form),
+      pathOf(compareNode.compare[0][1], compareNode.form)],
+    fadeNode && ['fade', 'خفوتٌ فإملاء', words.WORD_PATHS[fadeNode.words[0]]],
+    sentenceNode && ['sentence', 'الجمل', words.WORD_PATHS[sentenceNode.text || sentenceNode.sentences?.[0]]],
+  ].filter((road) => road && road[2]);
+
+  for (const [type, title, ref, sister] of ROADS) {
+    if (PENDING.has(type)) { skip(`[${type}] ${title}: شاشتُه معلَّقة`); continue; }
+    const answer = answerOf(ref);
+    const run = walkRun(ref, answer);
+    ok(run.done,
+      `[${type}] ${title}: الجوابُ الصحيح **يبلغ آخرَ الطريق** فتُكتب مهارتُه`
+      + ` (${run.settled}/${run.parts.length} جزءاً)`
+      + `${run.done ? '' : ' ← الطريقُ منقطع: المحطةُ تدرّس ولا تقيس'}`);
+    /**
+     * **والجوابُ المردودُ لا يسدّ الطريق** — وهو الوجهُ الذي انقطع: يُكتب جوابٌ
+     * خاطئ **يُقبَل أوّلُ جزءٍ منه** (جسمُ الأخت جسمُها)، ثم تُردّ بقيّتُه، ثم
+     * **يُعيد الطفلُ الشكلَ كلَّه** كما يفعل كلُّ طفلٍ رُدَّ عليه. فإن لم يُستأنَف
+     * من أوّله بقيت أوّلُ ضربةٍ تُقاس على **الجزء الباقي** فتُردّ أبداً —
+     * **فتدرّس المحطةُ ولا تقيس**. (وهو الطريقُ الذي كُشف مقيساً في التمييز.)
+     */
+    const wrong = sister ? answerOf(sister) : [answer[0], [[0, 0], [0, 0]]];
+    const after = walkRun(ref, [...wrong, ...answer]);
+    ok(after.done,
+      `  و**جوابٌ مردودٌ قبله لا يسدّه**: ${sister ? 'جوابُ الأخت' : 'قبولٌ فردّ'}`
+      + ` ثم إعادةُ الشكل من أوّله ⇐ ${after.done ? 'يبلغ آخرَه' : '**ينقطع**'}`
+      + ` (${after.settled}/${after.parts.length})`);
+  }
+  // والسالبُ في الطريق نفسِه: ناقصُ الجواب لا يبلغ آخرَه.
+  const dotted = ROADS.map(([, , ref]) => ref).find((ref) => (ref.dots || []).length);
+  if (dotted) {
+    const short = walkRun(dotted, answerOf(dotted).slice(0, -1));
+    ok(!short.done,
+      `ومجرَّبٌ سالباً: جوابٌ بلا نقطته لا يبلغ آخرَه (${short.settled}/${short.parts.length})`
+      + ' — فالبابُ يفرّق بين الجواب ونصفِه ولا يخضرّ من فراغ');
+  } else {
+    skip('ولا مادّةَ منقوطةً في الرحلة لتجريب السالب — يُطالَب يومَ تدخل');
+  }
+  // **والطريقُ موصولٌ بالقياس نصّاً**: بلوغُ آخرِه ينادي `onDone`، وهي تنادي `score`،
+  // وهي تنادي `recordAttempt` — فلا يبقى بين المقيس والمكتوب فجوةٌ لا يراها أحد.
+  const lesson = read('lesson.js');
+  ok(/onDone:\s*\(\)\s*=>\s*finishStep\(/.test(lesson)
+    && /function finishStep[^}]*score\(/s.test(lesson)
+    && /function score[^}]*recordAttempt\(/s.test(lesson),
+    'وبلوغُ آخرِ الطريق موصولٌ بالقياس: `onDone ← finishStep ← score ← recordAttempt`');
+}
+
 // ولا نوعَ في `KINDS` بلا محطةٍ تكتبه (وإلا فهو قياسٌ لا يقيس شيئاً)
 const owned = new Set(declared.flatMap(([, s]) => s.kinds || []));
 const orphan = Object.values(p.KINDS).filter((kind) => !owned.has(kind));
