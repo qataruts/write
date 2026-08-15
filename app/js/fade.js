@@ -54,8 +54,8 @@ export const SAY = {
  */
 export const SPOKEN = [...Object.values(SAY), ...SPOKEN_WORDS];
 
-/** ثلاثُ إصاباتٍ **متباعدة** تُخفي درجةً — نصُّ `METHOD.md §٤` بعينه. */
-export const HITS_PER_STEP = 3;
+/** إصابةٌ **متباعدة** واحدةٌ تُخفي درجةً — نصُّ `METHOD.md §٤ب` بعينه (حكمُ الميزان بقياس `test_dictation_path`، ١٥ أغسطس ٢٠٢٦). */
+export const HITS_PER_STEP = 1;
 
 /**
  * **درجاتُ الخفوت**: كاملٌ ← ثلثاه ← ثلثه ← لا نموذج. والأخيرةُ هي الإملاء السماعيّ
