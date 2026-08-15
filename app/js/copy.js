@@ -2,11 +2,27 @@
 // من بنك اقرأ **يراها ويكتبها** (نسخ) · المسافةُ بين الكلمات والجلوسُ على السطر ·
 // **علامات ق٣ في مواضعها**».
 //
-// **وحلقتُها ثلاثُ خطوات لا أربع** (خلافاً لحلقة الحرف في `METHOD.md §٥`): النسخُ
-// **أن يرى الكلمةَ ويكتبها** — فلا «اكتُبْهُ وحدَك» هنا، وذاك بابُ الجلسة ٩ (خفوتُ
-// النموذج ثم الإملاء). فالخطواتُ: **شاهِدْ** (الكلمة تُرسم متحركةً من مسارها وتُسمَع
-// بصوت بنك اقرأ) ← **تتبّعْ موجَّهاً** ← **تتبّعْ خافتاً**. والقياسُ `نسخ` في ليتنر
-// **بوحدة الكلمة** (`WORD_FORM`)، فلا يظهر حرفٌ وهميّ في لوحة وليّ الأمر.
+// **وحلقتُها ثلاثُ خطوات لا أربع** (خلافاً لحلقة الحرف في `METHOD.md §٥`): **شاهِدْ**
+// (الكلمة تُرسم متحركةً من مسارها وتُسمَع بصوت بنك اقرأ) ← **تتبّعْ موجَّهاً** ←
+// **اُكْتُبْهَا وحدَك**. والقياسُ `نسخ` في ليتنر **بوحدة الكلمة** (`WORD_FORM`)، فلا
+// يظهر حرفٌ وهميّ في لوحة وليّ الأمر.
+//
+// ━━━ **ودرجةُ النسخ الحرّ** (الجلسة ح — ب١، `REVIEW_METHOD.md`) ━━━
+//
+// **العطبُ الذي وُلد منه**: كانت الخطوةُ الثالثة **تتبّعاً خافتاً** — فالمقيسُ باسم
+// «النسخ» في الرحلة كلِّها تتبّعٌ موضعيّ: يدُ الطفل تمشي على خطٍّ مرسوم تحتها ولو
+// خفَتَ. **ودرجةُ النسخ الحقيقية — نموذجٌ يُرى ولا يُتَّكأ عليه — كانت ساقطةً من سلّم
+// الكلمة كلِّه**، فيقفز الطفلُ من التتبّع إلى الإملاء بلا الدرجة التي بينهما.
+//
+// **والعلاج**: الخطوةُ الثالثة **صندوقٌ فارغ ونموذجٌ فوقه** — يراه ولا يكتب عليه،
+// ويحكم عليها `judgeFree` **بالشكل تامّاً لا بالأثر** (`pen.js`: «المهمُّ الشكلُ لا
+// متابعةُ الخطّ المرسوم قبلاً»). **والجرعةُ كما هي**: خطوتان كاتبتان لكل كلمة، فعشرُ
+// كتاباتٍ لعقدة الباقة — تبدّلت **درجةُ** الميل لا عددُه. **والخافتُ لم يُلغَ**: هو
+// درجاتُ الخفوت في `fade.js` بمواضعها من تاريخ الطفل مع الكلمة.
+//
+// **وإنتاجُ الكلمة الحرّ النظيف غير المكشوف يُنضجها** (`progress.recordRead`): هو
+// إنتاجٌ متباعدٌ حقيقيّ — كتابةٌ بلا نموذجٍ تحت اليد — فيدفع الكلمةَ في سلّمها إلى
+// الإملاء (نظيرُ ما تفعله المراجعةُ في `review.js`، وحارسُ اليوم الواحد قائمٌ فيه).
 //
 // **والمسطرةُ من المسار نفسِه** («النموذجُ هو المقياس»، `METHOD.md §٣.٢`): سطرُ
 // الكلمة (`line`) خرج من خيالها المُشكَّل ساعةَ التأليف، فيُرسَم تحتها خطُّ الكرّاسة
@@ -28,7 +44,9 @@ import { starsForReview } from './progress.js';
 import * as audio from './audio.js';
 import { WORDS, SPOKEN_WORDS, markInfo } from './curriculum.js';
 import { WORD_PATHS, MARK_PATHS } from './word_paths.js';
-import { penSurface, refGlyph, MODES } from './pen.js';
+import { penSurface, refGlyph, MODES, FREE } from './pen.js';
+// **تعليمةُ الدرجة الحرّة من `fade.js` بنصّها المسجَّل** — لا نصَّ يُؤلَّف بلا صوت
+import { SAY as FADE_SAY } from './fade.js';
 import {
   h, fill, icon, go, arNum, starsRow, topbar, brandMark, mascot, cheer, faceEl,
   nodeTitle, traceFace,
@@ -51,6 +69,25 @@ export const SAY = {
   // بفتح العين — فأمرُه `انْسَخْ` بفتح السين، لا `انْسُخْ`. ويحرس الصنفَ
   // `waslHarakaFits` في `tools/check_speech.mjs`.
   guided: 'انْسَخْهَا عَلَى الْمَسَارْ',
+  /**
+   * **درجةُ النسخ الحرّ** (ب١): النموذجُ فوق اللوح والصندوقُ فارغ.
+   *
+   * 🔊 **والنصُّ مستعارٌ بعلّةٍ معلنة** (عقدُ الصوت في جلسة ح: «إن وُجد نصٌّ مسجَّل
+   * مطابق فاستعمله، وإلا فالأقرب المسجَّل مؤقتاً بعلّة معلنة»): المطلوبُ لهذه الخطوة
+   * «اُكْتُبْهَا وَحْدَكْ» — وليس في البنك إلا **مذكّرُها** (`اكْتُبْهُ وَحْدَكْ`،
+   * لحرفٍ لا لكلمة)، ومؤنّثُه دَينٌ مقيَّدٌ في `docs/AUDIO_QUEUE.md`. فالمستعارُ
+   * **تعليمةُ الدرجة صفر في محطة الخفوت** (`fade.js: SAY.copy`) — مسجَّلةٌ مراجَعةٌ
+   * بالأذن، ومعناها هو المعنى بعينه: «اكتُبْها كما تراها» ونموذجُها يُرى فوق اللوح
+   * ولا يُتَّكأ عليه. **ولا نسخةَ ثانية من النصّ هنا**: يُستورَد من مالكه.
+   */
+  free: FADE_SAY.copy,
+  /**
+   * **تعليمةُ الخطوة الخافتة — متقاعدةٌ عملاً، باقيةٌ إعلاناً** (ب١): رفعت الجلسةُ ح
+   * الخطوةَ الخافتة من حلقة النسخ إلى درجاتها في `fade.js`، فلم يبقَ لهذا النصّ
+   * ناطقٌ. **ويبقى في الإعلان حتى تُتقاعَد نسختُه في القائمة** (`queue_texts --retire`
+   * في جلسة صوت): حارسُ «لا مدخلَ في القائمة بلا مستهلك» يقرأ الإعلانَ، ونزعُه اليومَ
+   * يُحمِّر باباً على نصٍّ سليمٍ مسجَّل. والدَّينُ مقيَّدٌ في `docs/AUDIO_QUEUE.md`.
+   */
   faint: 'انْسَخْهَا وَهْيَ خَافِتَةْ',
   space: 'كَلِمَتَانِ بَيْنَهُمَا فَرَاغْ',
   card: 'انْظُرِ الْعَلَامَةَ ثُمَّ اكْتُبْ',
@@ -68,11 +105,16 @@ export const SAY = {
  */
 export const SPOKEN = [...Object.values(SAY), ...SPOKEN_WORDS];
 
-/** خطواتُ حلقة النسخ — الكاتبتان منهما تكتبان `نسخ` في ليتنر. */
+/**
+ * خطواتُ حلقة النسخ — الكاتبتان منهما تكتبان `نسخ` في ليتنر.
+ *
+ * **والثالثةُ حرّةٌ منذ الجلسة ح** (ب١): نوعُها في ليتنر `نسخ` كأختها — فالمهارةُ
+ * واحدةٌ (كلمةٌ × نسخ) وإنما ارتقت درجتُها، **ولا مفتاحَ ثالثٌ يشقّ صندوقَ الكلمة**.
+ */
 export const STEPS = [
   { id: 'watch', mode: MODES.GUIDED, title: 'شَاهِدْ', say: SAY.watch, kind: null },
   { id: 'guided', mode: MODES.GUIDED, title: 'اِنْسَخْ', say: SAY.guided, kind: progress.KINDS.COPY },
-  { id: 'faint', mode: MODES.FAINT, title: 'خَافِتَة', say: SAY.faint, kind: progress.KINDS.COPY },
+  { id: 'free', mode: MODES.FREE, title: 'وَحْدَكْ', say: SAY.free, kind: progress.KINDS.COPY },
 ];
 
 /** عقدةُ الرحلة بجزئها — من الرحلة نفسِها، فلا يُكتب معرّفُ محطةٍ بيد. */
@@ -146,13 +188,23 @@ export function renderNode(node) {
   const units = unitsOf(node);
   if (!units.length) return null;
 
-  const state = { unit: 0, index: 0, faults: 0, stepFaults: 0, done: false, cards: new Set() };
+  // `shown`: أكُشف النموذجُ في الخطوة الحرّة؟ (المخرجُ الكريم يعيده إلى التتبّع) —
+  // فإنتاجٌ كُشف نموذجُه لا يُنضج الكلمةَ في سلّمها إلى الإملاء (ب١).
+  const state = {
+    unit: 0, index: 0, faults: 0, stepFaults: 0, done: false, shown: false, cards: new Set(),
+  };
   /** آخرُ ما نطقته الشاشة — **وبه تنتظر الخطوةُ تمامَ الكلام** (قناة ٤ج) لا مهلةً. */
   let speech = Promise.resolve(false);
   let turn = 0;
 
   const dots = h('ol', { class: 'dots' });
   const strip = h('ol', { class: 'unit-strip unit-strip--words' });
+  /**
+   * **نموذجُ الدرجة الحرّة — يُرى فوق اللوح ولا يُتَّكأ عليه** (ب١): الكلمةُ مرسومةً
+   * **من مسارها المرجعيّ نفسِه** (`refGlyph`) لا بخطّ نصّ — فما يراه هو ما يُحكَم به
+   * (`METHOD.md §٣.٢`). ويسقط في سائر الخطوات: هناك النموذجُ في اللوح.
+   */
+  const model = h('div', { class: 'copy-model' });
   const board = h('div', { class: 'lesson-board' });
   const foot = h('div', { class: 'row foot' });
   const hint = h('p', { class: 'hint' });
@@ -209,6 +261,10 @@ export function renderNode(node) {
     const unit = units[state.unit];
     const step = STEPS[state.index];
     state.stepFaults = 0;
+    // **النموذجُ فوق اللوح في الدرجة الحرّة وحدَها** — وفي غيرها اللوحُ يحمله،
+    // **ويُفرَغ قبل كل شيء** فلا يبقى نموذجُ كلمةٍ سابقة فوق بطاقةِ علامةٍ أو ختام.
+    model.replaceChildren(...(step.mode === MODES.FREE
+      ? [refGlyph(unit.ref, 'ref-glyph copy-model-glyph')] : []));
 
     // بطاقةُ العلامة تسبق الكتابة — تُعرَض مرّةً واحدة ثم تُغلَق بيد الطفل
     const pending = state.index === 0 ? cardsFor(unit) : [];
@@ -240,6 +296,11 @@ export function renderNode(node) {
         // **وخطأُ الكلمة يُسجَّل بوحدتها** — لا بحرفٍ بعينه: الكلمةُ وحدةُ هذه المرحلة
         progress.recordFault(unit.text, fault.code);
       },
+      /**
+       * 🚪 **ولا انسدادَ في الدرجة الحرّة** (`METHOD.md §٥ب` — بلاغُ الميدان ٢):
+       * تعثّرٌ متكرر يفتح المخرجَ الكريم بيد الطفل — كما في درس الحرف سواءً.
+       */
+      onStuck: () => wayOut(step, unit),
       onDone: () => finishStep(step, unit),
     });
     live = surface;
@@ -271,8 +332,40 @@ export function renderNode(node) {
     }
   }
 
+  /**
+   * 🚪 **المخرجُ الكريم في الدرجة الحرّة** (نظيرُ `lesson.js: wayOut` حرفاً): بعد
+   * تعثّرٍ متكرر يفتح البابَ **بيده هو** — يعود إلى النسخ الموجَّه حيث النموذجُ
+   * مرئيّ، أو يمضي. **ولا رسوبَ ولا حرمانَ نجمة**، والمضيُّ يكتب محاولةً غيرَ تامّة
+   * فيعيدها ليتنر غداً — **فالمتروكُ مؤجَّلٌ لا مسقَط**.
+   *
+   * **والرؤيةُ تُعَدّ كشفاً**: من عاد إلى التتبّع لم يكتبها وحدَه، فلا تُنضج كلمتَه.
+   */
+  function wayOut(step, unit) {
+    const back = STEPS.findIndex((s) => s.mode === MODES.GUIDED && s.kind);
+    hint.textContent = 'خُذْ نَفَساً — تَتَبَّعْهَا مَرَّةً، أَوْ تَابِعْ';
+    fill(foot,
+      back >= 0 && h('button', {
+        class: 'btn btn--primary next',
+        onclick: () => { state.shown = true; state.index = back; mount(); },
+      }, icon('pen'), ' تَتَبَّعْ مَرَّةً'),
+      h('button', {
+        class: `btn${back >= 0 ? '' : ' btn--primary'} next`,
+        onclick: () => { score(step, unit, false); nextStep(); },
+      }, 'تَابِعْ →'),
+      h('button', { class: 'btn next', onclick: () => live?.reset() }, '↻ أعِدْ'),
+    );
+  }
+
   function finishStep(step, unit) {
-    score(step, unit, state.stepFaults === 0);
+    const clean = state.stepFaults === 0;
+    score(step, unit, clean);
+    // **وإنتاجٌ حرٌّ نظيفٌ غير مكشوفٍ يُنضج الكلمة** (ب١): كتابةٌ بلا نموذجٍ تحت اليد
+    // إنتاجٌ متباعدٌ حقيقيّ — و`recordRead` يحرس التباعدَ بيومه فلا يزيد إلا مرّة.
+    // **وسطرُ المسافة ليس كلمةً تنضج**: مادّتُه فراغُ المُشكِّل بين كلمتين، ولا صوتَ
+    // له في البنك — فلا يدخل سلّماً غايتُه الإملاء.
+    if (step.mode === MODES.FREE && clean && !state.shown && !unit.space) {
+      progress.recordRead(unit.text);
+    }
     nextStep();
   }
 
@@ -288,6 +381,7 @@ export function renderNode(node) {
     if (state.unit < units.length - 1) {
       state.unit++;
       state.index = 0;
+      state.shown = false;             // كلمةٌ جديدة: كشفُ سابقتها لا يُحاسَب عليها
       mount();
       return;
     }
@@ -301,6 +395,7 @@ export function renderNode(node) {
     const trace = live?.ink() ?? [];
     releaseCopy();
     state.done = true;
+    model.replaceChildren();          // الختامُ احتفالٌ لا لوحَ نسخٍ فوقه نموذج
     const stars = starsForReview(state.faults, writingSteps);
     progress.setStars(node.id, stars);
     paintDots();
@@ -324,6 +419,7 @@ export function renderNode(node) {
           state.index = 0;
           state.faults = 0;
           state.done = false;
+          state.shown = false;
           state.cards = new Set();
           mount();
         },
@@ -352,7 +448,21 @@ export function renderNode(node) {
       );
       return;
     }
-    fill(foot, 
+    // **وفي الدرجة الحرّة لا زرَّ «شاهِدْ» على اللوح**: نموذجُها فوقه ظاهرٌ لا يغيب،
+    // وعرضُ اللوح فيها لا يُري شيئاً (`app.css: .pen-box--free`) — فوعدٌ لا يُوفى.
+    // ويبقى زرُّ الأذن (الكلمةُ بصوت اقرأ) وزرُّ الإعادة، **وبابُ التتبّع يفتحه
+    // المخرجُ الكريم** عند التعثّر لا نقرةً تُبطِل الدرجة.
+    if (step.mode === MODES.FREE) {
+      fill(foot,
+        unit.say && h('button', {
+          class: 'btn btn--primary next',
+          onclick: () => { audio.stop(); speech = audio.play(unit.say); },
+        }, icon('ear'), ' اسْمَعْ'),
+        h('button', { class: 'btn next', onclick: () => live?.reset() }, '↻ أعِدْ'),
+      );
+      return;
+    }
+    fill(foot,
       h('button', {
         class: 'btn btn--primary next',
         onclick: () => { live?.reset(); live?.play(); },
@@ -362,7 +472,7 @@ export function renderNode(node) {
   }
 
   const main = h('main', { class: 'screen lesson-letter lesson-copy' },
-    title, strip, dots, board, hint, foot);
+    title, strip, dots, model, board, hint, foot);
   screen.append(main);
   mount();
   return screen;

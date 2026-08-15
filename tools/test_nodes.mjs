@@ -54,7 +54,10 @@ const flatBefore = [];
 for (const stage of curriculum.STAGES) {
   const gate = curriculum.gateBefore(stage.id);
   if (gate) flatBefore.push(`gate:${gate.id}`);
-  for (const node of stage.nodes) flatBefore.push(`${stage.id}:${node.part}`);
+  // **ومعرّفُ العقدة من أصل الشطر** (`of`، الجلسة ح): محطةٌ تُقحَم بين شطرَي مرحلةٍ
+  // واحدة تُبقي معرّفاتِ عقدها كما هي — و`progress.js: stageNodes` يبنيها هكذا،
+  // فيُقرأ الحقلُ هنا كما يُقرأ هناك لئلا يقيس الحارسُ غيرَ ما يقع.
+  for (const node of stage.nodes) flatBefore.push(`${stage.of ?? stage.id}:${node.part}`);
 }
 const endGate = curriculum.gateBefore('end');
 if (endGate) flatBefore.push(`gate:${endGate.id}`);

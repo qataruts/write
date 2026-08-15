@@ -19,6 +19,9 @@ import * as audio from './audio.js';
 import { pathOf, WORDS, SENTENCES, SPOKEN_WORDS, SPOKEN_SENTENCES } from './curriculum.js';
 import { WORD_PATHS } from './word_paths.js';
 import { penSurface, MODES, FREE } from './pen.js';
+// **درجةُ الخفوت تُستورد من مصدرها بأعيانها** (الجلسة ح — أ١): `fade.js` يملك
+// الدرجةَ ونمطَها وحجابَها ونوعَ قياسها وتعليمتَها، **ولا نسخةَ ثانية هنا تشيخ**.
+import { levelOf, modeOf, veilOf, kindOf, sayOf, VEIL_STEPS, SAY as FADE_SAY } from './fade.js';
 import {
   h, icon, toast, go, arNum, arCount, starsRow, topbar, mascot, cheer, letterName, DEV,
 } from './ui.js';
@@ -50,11 +53,25 @@ import { starsForReview } from './progress.js';
  * أسماءُ الحروف من درس الحرف، **وكلماتُ النسخ من المنهج نفسِه** (`SPOKEN_WORDS`) —
  * تُستورَد من مصدرها ولا تُشتقّ هنا ثانيةً: نصٌّ واحد لا مصدران يفترقان.
  *
+ * **وتعليماتُ درجات الخفوت من `fade.js` بأعيانها** (الجلسة ح — أ١): صارت المراجعةُ
+ * تعرض الكلمةَ بدرجتها، فتقول ما تقوله محطةُ الخفوت في تلك الدرجة نفسِها — بملفّاتها
+ * المسجَّلة، بلا نصٍّ جديد يُؤلَّف.
+ *
  * **ولا نصَّ يُؤلَّف للمراجعة** (قيدُها الأول): تمارينُها من مادّة الدرس بأعيانها.
  */
 import { LETTER_NAMES } from './lesson.js';
 
-export const SPOKEN = [...LETTER_NAMES, ...SPOKEN_WORDS, ...SPOKEN_SENTENCES];
+/**
+ * **ولا تعليمةَ تملكها المراجعةُ وحدَها**: ما تقوله في تمرين الكلمة **تعليماتُ درجات
+ * الخفوت بأعيانها** من مالكها (`fade.js`) — تُصدَّر هنا بالاسم الذي تقرؤه أداةُ
+ * الفئات (`tools/queue_texts.mjs`: قيمةٌ في `SAY` ⇐ فئتُها `ui`)، **رباطاً حيّاً لا
+ * نسخةً**: تتبدّل هناك فتتبدّل هنا، ولا يشيخ نصٌّ في موضعين.
+ */
+export const SAY = FADE_SAY;
+
+export const SPOKEN = [
+  ...LETTER_NAMES, ...Object.values(SAY), ...SPOKEN_WORDS, ...SPOKEN_SENTENCES,
+];
 
 /** لوحُ الطفل المعلَّق في تمرين المراجعة — يُطلَق مع كل رسمةٍ ومع مغادرة الشاشة. */
 let live = null;
@@ -87,6 +104,8 @@ export function releaseReview() {
 function assistFoot({ surface, mode, skip }) {
   const foot = h('div', { class: 'row foot assist' });
   let watching = false;
+  /** **أرأى النموذجَ في هذا التمرين؟** — إنتاجٌ كُشف نموذجُه لا يُنضِج كلمةً (أ١). */
+  let seen = false;
 
   /** عرضُ النموذج: `keep` يُبقيه مرئياً وهو يكتب (المخرجُ الكريم)، وإلا فحتى يلمس. */
   const show = (keep) => {
@@ -95,6 +114,7 @@ function assistFoot({ surface, mode, skip }) {
     surface.setMode(MODES.GUIDED);
     surface.play();
     watching = !keep;
+    seen = true;
   };
 
   // **ولمستُه تردّه إلى تمرينه** — ولا تُبتلَع، فأوّلُ حرفٍ يكتبه لا يضيع
@@ -111,6 +131,8 @@ function assistFoot({ surface, mode, skip }) {
 
   return {
     el: foot,
+    /** أكُشف النموذجُ هنا؟ يقرؤه تمرينُ الكلمة قبل أن يُنضج عدّادَها (أ١). */
+    get shown() { return seen; },
     /** يُفتَح مرّةً واحدة — والتعثّرُ يتكرر فلا تتكرر الأزرار. */
     open() {
       if (foot.classList.contains('assist--open')) return;
@@ -181,6 +203,21 @@ function penExercise(item, api, mode) {
 }
 
 /**
+ * **درجةُ الكلمة في المراجعة** — تُقرأ الآن من عدّادها (لا تُخزَّن)، وبها اللوحُ
+ * والحجابُ والقياسُ والتعليمة.
+ *
+ * **ولا إملاءَ بلا صوت** (`METHOD.md §٧`، وهو عهدُ المادّة في `check_writable.py`):
+ * مادّةُ المراجعة **كلُّ ما نسخه الطفل** — وفيه ما لا صوتَ له في بنك اقرأ (سطرُ
+ * المسافة بين كلمتين، وكلمةٌ تُنسَخ ولا تُملى). فلو بلغت درجةَ العري لَوقف الطفلُ
+ * أمام **صندوقٍ فارغ بلا سؤال**. فتُحبَس دون الدرجة الأخيرة: تخفت ولا تُعرّى.
+ *
+ * **وموضعٌ واحد للحدّ**: يقرؤه اللوحُ ويقرؤه التحميلُ المسبق، فلا يُسمِع الطفلَ
+ * تعليمةَ درجةٍ لا يراها.
+ */
+const wordLevel = (unit, sound) =>
+  Math.min(levelOf(unit), sound ? VEIL_STEPS : VEIL_STEPS - 1);
+
+/**
  * **تمرينُ الكلمة والجملة: نسخاً أو إملاءً** (الجلستان ٨ و٩): المادّةُ تُعرَض من
  * مسارها المرجعيّ **بسماحتها ومسطرتِها**، فيُنسَخ عليها (`GUIDED`) أو تُملى في صندوقٍ
  * فارغ (`FREE`) — وهو عينُ ما تفعله محطتاهما.
@@ -191,12 +228,34 @@ function penExercise(item, api, mode) {
  *
  * **ولا محتوى جديد**: مادّتُه ممّا في سجلّ الطفل، ونصُّه المنطوق **صوتُها من بنك
  * اقرأ** — فلا نصَّ يُؤلَّف للمراجعة (قيدُ `review.js` الأول).
+ *
+ * ━━━ **والمراجعةُ تُنضج الكلمة** (الجلسة ح — علاجُ أ١، `REVIEW_METHOD.md`) ━━━
+ *
+ * **العطبُ الذي وُلد منه**: درجةُ الخفوت تاريخُ الطفل مع الكلمة (`floor(reads/3)`)،
+ * والعدّادُ لا يرتفع إلا في محطة الخفوت، **ولا شيء يعيد الطفلَ إلى محطةٍ أتمّها** —
+ * فتسعُ إصاباتٍ متباعدة لكلمةٍ واحدة **لا تقع أبداً**، ومحطاتُ الإملاء المئة تُختم
+ * نسخاً ولا تولد مهارةُ إملاء كلمةٍ في يد الطفل قطّ (دورٌ مغلق).
+ *
+ * **والعلاج**: المراجعةُ اليومية — وهي وحدَها ما يعيد الكلمةَ متباعدةً — تفعل شيئين:
+ * ١) **تعرض الكلمةَ بدرجة خفوتها الحيّة** لا بنوع مهارتها المخزون: دون الدرجة الأخيرة
+ *    نسخٌ **بحجابه** (`veilOf`)، وعندها **إملاءٌ صرف** يكتب `DICTATE` في ليتنر — فتولد
+ *    مهارةُ الإملاء من المراجعة نفسِها وينفكّ الدور. **والنموذجُ هو المقياس**: ما يُكتب
+ *    في السجلّ هو ما رآه الطفلُ على اللوح، لا ما جاء في مفتاح المهارة.
+ * ٢) **وتُنضج**: إنتاجٌ نظيفٌ لم يُكشف نموذجُه يرفع عدّادَ الكلمة (`recordRead`) —
+ *    وحارسُ اليوم الواحد قائمٌ فيه، فيومٌ واحد لا يزيده إلا مرّة مهما تكرّرت الكلمة.
+ *
+ * **والجملةُ على حالها**: الخفوتُ حكمُ الكلمة (`WORD_FORM`)، وسلّمُ الجملة نسخٌ ثم
+ * إملاءٌ في مجلسها (`sentence.js`) — فمهارتُها تُعرَض بنوعها كما كانت.
  */
 function wordExercise(item, api, mode) {
   const ref = WORD_PATHS[item.unit];
   if (!ref) return h('p', { class: 'hint' }, `لا مسارَ لـ«${item.unit}» بعدُ.`);
-  const dictation = mode === MODES.FREE;
+  const sentence = item.form === progress.SENTENCE_FORM;
   const sound = WORDS[item.unit]?.say || SENTENCES[item.unit]?.say || null;
+  const level = sentence ? 0 : wordLevel(item.unit, sound);
+  const view = sentence ? mode : modeOf(level);
+  const kind = sentence ? item.kind : kindOf(level);
+  const dictation = view === MODES.FREE;
 
   const box = h('div', { class: 'exercise' });
   let faults = 0;
@@ -204,7 +263,9 @@ function wordExercise(item, api, mode) {
   releaseReview();
   const surface = penSurface({
     ref,
-    mode,
+    mode: view,
+    // **والحجابُ من مسار الكلمة نفسِه** (`veilOf`) — أجزاؤها تُحجب من مؤخّرتها
+    veil: sentence ? 0 : veilOf(ref, level),
     tolerance: ref.tolerance,
     baseline: ref.line,
     label: `${dictation ? 'لوحُ إملاء' : 'لوحُ نسخ'}: ${item.unit}`,
@@ -215,9 +276,12 @@ function wordExercise(item, api, mode) {
     },
     onStuck: () => kit?.open(),
     onDone: () => {
+      const clean = faults === 0;
+      // **إنتاجٌ نظيفٌ غير مكشوفٍ يُنضج الكلمة** — والتباعدُ يحرسه `recordRead` بيومه
+      if (!sentence && clean && !kit?.shown) progress.recordRead(item.unit);
       // **ومحورُ المهارة محورُها هي** — لا يُعاد تسميتُه هنا، فيرجع إلى صندوقه بعينه
-      api.score(item, item.unit, item.form || progress.WORD_FORM, faults === 0);
-      if (faults === 0) api.right(surface.el);
+      api.score(item, item.unit, item.form || progress.WORD_FORM, clean, kind);
+      if (clean) api.right(surface.el);
       else api.wrong(surface.el, () => api.next());
     },
   });
@@ -225,26 +289,29 @@ function wordExercise(item, api, mode) {
   if (api.assist) {
     kit = assistFoot({
       surface,
-      mode,
+      mode: view,
       skip: () => {
-        api.score(item, item.unit, item.form || progress.WORD_FORM, false);
+        api.score(item, item.unit, item.form || progress.WORD_FORM, false, kind);
         api.next();
       },
     });
   }
-  const sentence = item.form === progress.SENTENCE_FORM;
+  // **وسؤالُ اللوح توأمُ التعليمة المنطوقة**: للكلمة تعليمةُ درجتها من `fade.js`
+  // بنصّها المسجَّل — صورتان لأمرٍ واحدٍ تعليمُ ازدواج. وللجملة سطرُها كما كان.
+  //
   // **وحدُّ قاعدة همزة الوصل**: العاريةُ للمنطوق وحدَه (بلاغُ العائلة `hamza-rule-scope`)
   // — عُرِّيت هناك لأنّ المولّد يقرأ ما يُكتب فينطق ضمّةَ الوصل حركةً مطوّلة. **وهذا
   // سطرٌ يُقرأ بالعين لا يُنطَق**، ومادّةُ القراءة تُشكَل كاملةً في تطبيقٍ يعلّم
   // العربية: `اِنْسَخِ` بكسر همزة الوصل، و`اِسْتَمِعْ` مثلُها — وألفُ «اكْتُبِ» في
   // وسط الجملة عاريةٌ **رسماً لا استثناءً** (همزةُ الوصل لا تُشكَل في الدَّرْج).
-  box.append(h('p', { class: 'ask' }, dictation
-    ? `اِسْتَمِعْ ثُمَّ اكْتُبِ ${sentence ? 'الجملة' : 'الكلمة'}`
-    : `اِنْسَخِ ${sentence ? 'الجملة' : 'الكلمة'}`), surface.el, kit?.el);
+  box.append(h('p', { class: 'ask' }, sentence
+    ? (dictation ? 'اِسْتَمِعْ ثُمَّ اكْتُبِ الجملة' : 'اِنْسَخِ الجملة')
+    : sayOf(level)), surface.el, kit?.el);
   surface.play();
   surface.el.addEventListener('pointerdown', () => surface.stop(), { capture: true });
-  // **وفي الإملاء الصوتُ هو السؤال كلُّه** — ولا نموذجَ يُرى (`MODES.FREE`)
-  if (sound) api.say(sound);
+  // **وفي الإملاء الصوتُ هو السؤال كلُّه** — ولا نموذجَ يُرى (`MODES.FREE`).
+  // وتعليمةُ الدرجة تسبق الكلمةَ **في القناة الواحدة** (٤ج) فتُسمَعان بترتيبهما.
+  if (sentence) { if (sound) api.say(sound); } else api.say(sayOf(level), sound);
   return box;
 }
 
@@ -258,6 +325,9 @@ export const VIEWS = {
   // أُمليَ في محطة الجمل (سطراً) — وبه تسأل **بوابةُ الختام** عن أضعف الرحلة كلِّها.
   [progress.KINDS.DICTATE]: (item, api) => wordExercise(item, api, MODES.FREE),
 };
+// **والنمطُ هنا للجملة وحدَها منذ الجلسة ح**: مهارةُ الكلمة تُعرَض بدرجة خفوتها
+// الحيّة لا بنوع صندوقها (أ١) — فصندوقُ `نسخ` قد يُملي وصندوقُ `إملاء` قد يُنسَخ
+// بحجابه إن تراجعت درجتُها بكشف. والمكتوبُ في ليتنر ما وقع على اللوح.
 
 /**
  * تمارين جلسةٍ واحدة من مهارات مستحقّة.
@@ -274,11 +344,15 @@ export function buildSession({ due = [], size = SESSION_SIZE } = {}) {
   for (const skill of due) {
     if (out.length >= size) break;
     if (!VIEWS[skill.kind]) continue;      // نوعٌ لا مُصيِّر له بعدُ: لا يُقحَم
-    // ونصُّ التمرين المنطوق للتحميل المسبق: **اسمُ الحرف** للحرف، **وصوتُ الكلمة من
-    // بنك اقرأ** للكلمة — ولا نصَّ يُؤلَّف للمراجعة (قيدُها الأول).
-    const texts = progress.isWordSkill(skill)
-      ? [WORDS[skill.unit]?.say || SENTENCES[skill.unit]?.say].filter(Boolean)
-      : [letterName(skill.unit)];
+    // ونصُّ التمرين المنطوق للتحميل المسبق: **اسمُ الحرف** للحرف، **وتعليمةُ درجتها
+    // ثم صوتُها من بنك اقرأ** للكلمة، **وصوتُها وحدَه** للجملة — ولا نصَّ يُؤلَّف
+    // للمراجعة (قيدُها الأول)، والتعليمةُ من `fade.js` بملفّها المسجَّل.
+    const texts = progress.isSentenceSkill(skill)
+      ? [SENTENCES[skill.unit]?.say].filter(Boolean)
+      : progress.isWordSkill(skill)
+        ? [sayOf(wordLevel(skill.unit, WORDS[skill.unit]?.say)),
+          WORDS[skill.unit]?.say].filter(Boolean)
+        : [letterName(skill.unit)];
     out.push({ ...skill, texts });
   }
   return out;
@@ -348,18 +422,30 @@ export function renderSession({
     }
   }
 
-  /** **المدخلُ الوحيد إلى ليتنر** من الجلسة — بمحاور `METHOD.md §٦` الثلاثة. */
-  const score = (item, unit, form, correct) => {
-    progress.recordAttempt(unit, form, item.kind, correct);
+  /**
+   * **المدخلُ الوحيد إلى ليتنر** من الجلسة — بمحاور `METHOD.md §٦` الثلاثة.
+   *
+   * **والنوعُ ما وقع على اللوح لا ما في مفتاح المهارة** (الجلسة ح — أ١): كلمةٌ بلغت
+   * درجةَ العري تُملى فتُكتب `إملاء` وإن جاءت من صندوق `نسخ` — فتولد مهارةُ الإملاء
+   * من المراجعة. و`kind` يسقط إلى نوع المهارة لمن لا يبدّله (الحرفُ والجملة).
+   */
+  const score = (item, unit, form, correct, kind = item.kind) => {
+    progress.recordAttempt(unit, form, kind, correct);
     if (correct) state.right++;
     else state.errors++;
   };
 
   /**
    * **كلامُ التمرين يمرّ من هنا** (قناةُ ٤ج): يصفّ في القناة كسائر كلام التطبيق،
-   * ويُحفَظ وعدُه — **فينتظره الانتقالُ ولا يدهسه**.
+   * ويُحفَظ وعدُه — **فينتظره الانتقالُ ولا يدهسه**. وما زاد على نصٍّ **طابورٌ**
+   * ينتظر `ended` (`playSequence`) لا مهلةً تُقدَّر.
    */
-  const say = (text) => { spoken = audio.play(text); return spoken; };
+  const say = (...texts) => {
+    const list = texts.filter(Boolean);
+    if (!list.length) return spoken;
+    spoken = list.length > 1 ? audio.playSequence(list) : audio.play(list[0]);
+    return spoken;
+  };
   let spoken = Promise.resolve(false);
 
   /**

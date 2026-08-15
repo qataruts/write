@@ -732,12 +732,24 @@ for (const [i, words] of batches(ladderSupports.filter((w) => !copied.has(w))).e
     title: `كَلِمَاتٌ لِلْجُمَل ${arNum(i + 1)}`, words,
   });
 }
+// **وموضعُ محطة الاسم يشقّ البساتينَ شطرين** (الجلسة ح — ب٢، `REVIEW_METHOD.md`):
+// `EXPANSION §٧` علّل موضعَ ت٣ بأنّ «دافعَه أقوى ما يكون **بعد أول بستان**»، والمنفَّذُ
+// كان يضعه بعد البساتين **العشرة كلِّها** — مئةٌ وإحدى عشرة عقدةً تفصل الطفلَ عن أثمن
+// دافعٍ تربويّ في التوسعة. فيُقسَم البستانُ هنا: **بستانُه الأوّل** ثم **اسمُه بيده**
+// ثم بقيّةُ البساتين. **والنقلُ آمن**: كلُّ أشكال المواقع مدرَّسةٌ قبل أول بستان،
+// وحارسُ `nameGap` (`lesson.js`) يصون ما لا مسارَ له من حروف الاسم.
+//
+// **والشطرُ الثاني يُعلن أصلَه في `of`** فلا يتبدّل معرّفُ عقدةٍ واحدة (`progress.js:
+// stageNodes`): البصمةُ ترحّل الترتيبَ، والنجومُ وليتنر على حالهما.
+const firstGardenId = orchardNodes[0]?.garden ?? null;
+const firstGarden = orchardNodes.filter((node) => node.garden && node.garden === firstGardenId);
+const laterGardens = orchardNodes.slice(firstGarden.length);
 stages.push({
   id: 'orchard',
   kind: 'join',
   title: 'بَسَاتِينُ النَّسْخ',
   sub: 'كلماتُ «اِقْرَأْ» بستاناً بستاناً — يراها ويكتبها',
-  nodes: orchardNodes,
+  nodes: firstGarden.length ? firstGarden : orchardNodes,
 });
 
 // ——— ت٣: اسمُ الطفل بيده — محطةٌ بلا مادّةٍ في المنهج ———
@@ -753,6 +765,18 @@ stages.push({
   sub: 'يكتبه وليُّ الأمر مرّةً في لوحته، فيكتبه الطفلُ بيده',
   nodes: [{ part: 'own', title: 'اُكْتُبِ اسْمَكْ' }],
 });
+
+// **وبقيّةُ البساتين شطرُ المرحلة نفسِها** — معرّفاتُ عقدها من `orchard` بحكم `of`
+if (firstGarden.length && laterGardens.length) {
+  stages.push({
+    id: 'orchard-more',
+    of: 'orchard',
+    kind: 'join',
+    title: 'بَسَاتِينُ النَّسْخ',
+    sub: 'بقيّةُ بساتين «اِقْرَأْ» — يراها ويكتبها',
+    nodes: laterGardens,
+  });
+}
 
 // ——— المرحلة ١٣: خفوتُ النموذج ← الإملاء ———
 //
@@ -796,12 +820,20 @@ stages.push({
 });
 
 // ——— المرحلة ١٤: الجمل القصيرة ———
+//
+// **وحِمْلُ عقدة الجمل ثلاثٌ لا باقةً** (الجلسة ح — ب٤، `REVIEW_METHOD.md`): حلقةُ
+// الجملة **خطوتان كاتبتان** (نسخٌ ثم إملاء) ومادّتُها ٣–٧ كلماتٍ للسطر — فباقةُ خمسٍ
+// تطلب من يد الخامسة **عشرةَ أسطرٍ كاملة في جلوس واحد**، وتعبُ اليد هنا حقيقيٌّ لا
+// نظيرَ له عند الإخوة، ولم تُفرد له الوثائقُ حكماً. **فثلاثٌ سقفاً ⇐ ستةُ أسطرٍ
+// للجلوس** — والشقُّ يقع على المولّد وحدَه، ونجومُ من هو في وسطها تُرحَّل بالبصمة
+// كسنّتها (`progress.js: migrateJourney`).
+const SENT_PER_NODE = 3;
 stages.push({
   id: 'sent',
   kind: 'sentence',
   title: 'جُمَلٌ قَصِيرَة',
   sub: 'ينسخ جملةً من سلّم «اِقْرَأْ» ثم يكتبها سماعاً',
-  nodes: batches(sentences.map((s) => s.text), BUNDLE)
+  nodes: batches(sentences.map((s) => s.text), SENT_PER_NODE)
     .map((texts, i) => ({ part: `s-${i + 1}`, title: `جُمَلٌ ${arNum(i + 1)}`, sentences: texts })),
 });
 
@@ -815,8 +847,10 @@ stages.push({
   kind: 'sentence',
   title: 'سُلَّمُ الجُمَل',
   sub: 'جملُ «اِقْرَأْ» المتدرّجة — من ثلاث كلماتٍ إلى خمس، نسخاً ثم سماعاً',
+  // **والسقفُ ثلاثٌ هنا كذلك** (ب٤): سلّمُ الجمل حلقتُه حلقةُ الجمل نفسُها — وجملُه
+  // أطول (٣ كلماتٍ إلى ٥)، فتعبُ اليد فيه أشدّ لا أخفّ.
   nodes: GARDENS.flatMap((garden) => batches(
-    ladder.filter((s) => s.garden.id === garden.id).map((s) => s.text), BUNDLE)
+    ladder.filter((s) => s.garden.id === garden.id).map((s) => s.text), SENT_PER_NODE)
     .map((texts, i) => ({
       part: `${garden.id}-${i + 1}`,
       // **ومفصلُ السلّم سلّمُ بستانه** — درجاتُه بمداها من ثلاث كلماتٍ إلى خمس،
@@ -1015,6 +1049,10 @@ function render() {
  *     سلّمُ بستانٍ · وصلُ الحروف). وهو **إعلانُ مفصلٍ لا حدُّ عدد**: السقفُ
  *     \`MAX_NODES\` في \`progress.js\` وحدَه، يقسم ما تجاوزه من الشُّطور ويُسمّي ما
  *     لا مفصلَ له من مادّته — فمرحلةٌ تكبر غداً تنشقّ من نفسها بلا سطرٍ يُعدَّل.
+ *   · \`of\` — **شطرٌ يتقاسم فضاءَ معرّفات مرحلةٍ أخرى** (الجلسة ح): تُقحَم محطةٌ بين
+ *     شطرَي مرحلةٍ واحدة (اسمُ الطفل بعد أوّل بستان)، فيُعلن الشطرُ الثاني أصلَه هنا
+ *     و\`progress.js: stageNodes\` يبني معرّفاتِ عقده من الأصل — **فلا يتبدّل معرّفُ
+ *     عقدةٍ ولا صندوقُ ليتنر**، وإنما موضعُ المحطة من الرحلة وعنوانُ صندوقها.
  */
 export const STAGES = [
 ${list(stages)}
@@ -1227,7 +1265,9 @@ if (flag('--self-test')) {
     'وأسماؤها أسماءُ الأعداد عندهم');
 
   // **وبساتينُ الكتابة بساتينُ معجمه** — لا كلمةَ خارجها ولا بستانَ يُؤلَّف
-  const orchards = stages.find((s) => s.id === 'orchard')?.nodes || [];
+  // **وشُطورُ البساتين تُجمع بأصلها** (`of`، الجلسة ح): شقّتها محطةُ الاسم صندوقين،
+  // والمرحلةُ في المنهج واحدة — فيُقاس مجموعُها لا صندوقُها الأول.
+  const orchards = stages.filter((s) => (s.of ?? s.id) === 'orchard').flatMap((s) => s.nodes);
   // **والبستانُ محطاتٌ لا عقدةٌ واحدة** (حِمْلُ العقدة باقةُ اقرأ): فيُقاس أنّ لكلِّ
   // بستانٍ عقدةً فأكثر، وأنّ كلماتِه كلَّها في عقده — لا أنّ العقدَ عشر.
   const gardenIds = new Set(GARDENS.map((g) => g.id));
@@ -1285,7 +1325,9 @@ if (flag('--self-test')) {
   ok(said.every((t) => SENTENCES[t].say), `وجملُ الإملاء كذلك (${said.length} جملة)`);
 
   console.log('\n— المعرّفات: لا معرّفَ يتكرّر، ولا بوابةَ في الهواء —');
-  const ids = stages.flatMap((s) => s.nodes.map((n) => `${s.id}:${n.part}`));
+  // **والمعرّفُ من أصل الشطر** (`of`) كما يبنيه `progress.js: stageNodes` — لا من
+  // اسم الصندوق، وإلا قاس الحارسُ غيرَ ما يقع في يد الطفل.
+  const ids = stages.flatMap((s) => s.nodes.map((n) => `${s.of ?? s.id}:${n.part}`));
   ok(new Set(ids).size === ids.length, `كلُّ معرّفٍ فريد (${ids.length} عقدة)`);
   ok(GATES.every((g) => g.before === 'end' || stages.some((s) => s.id === g.before)),
     'وكلُّ بوابةٍ تقف قبل محطةٍ موجودة');

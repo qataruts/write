@@ -183,7 +183,10 @@ const STATS = {
   // جدولُ «الرحلة بترتيبها» يعدّ مراحلَ `METHOD §٤` وبواباتِها الثلاث، وقد صارت
   // المرحلةُ الكبيرة تُعرَض محطاتٍ متتالية (`stageSections`) — **شقٌّ في العرض لا في
   // المنهج**. فيُقرأ العددُ من المنهج نفسِه كما يقرؤه الجدول، ولو تبدّل شكلُ عرضه.
-  sections: STAGES.length + GATES.length,
+  // **والشطرُ الذي يعلن أصلَه ليس قسماً ثانياً** (`of`، الجلسة ح): شُقّت «بساتينُ
+  // النسخ» صندوقين لتقع محطةُ الاسم بعد أوّل بستان — والمرحلةُ في المنهج واحدة
+  // باسمها وعقدِها، فتُعَدّ مرّةً كما يعدّها الجدول.
+  sections: new Set(STAGES.map((s) => s.of ?? s.id)).size + GATES.length,
   nodes: progress.allNodes().length,
   letters: Object.keys(LETTERS).length,
   pathForms,
@@ -237,13 +240,15 @@ ok(unused.length === 0, `ولا رقمَ محسوبٌ بلا موضعٍ في ا�
 
 console.log('\n٥ب. جدولُ «الرحلة بترتيبها»: أعدادُه من المنهج');
 
+// **والشطرُ يُجمَع إلى أصله** (`of`) كما يُجمَع شطرُ العرض إلى مرحلته — سواءٌ أشُقّت
+// المرحلةُ لسقفٍ (`stageSections`) أم لتقع محطةٌ بين شطريها (محطةُ الاسم، الجلسة ح).
 const stageNodes = {};
 for (const section of journey) {
-  const key = section.stage ? section.stage.id : section.id;   // البوابةُ لا مرحلةَ لها
+  const key = section.stage ? (section.stage.of ?? section.stage.id) : section.id;
   stageNodes[key] = (stageNodes[key] || 0) + section.nodes.length;
 }
 const TABLE_NODES = new Map([
-  ...STAGES.map((s) => [s.title, stageNodes[s.id] || 0]),
+  ...STAGES.map((s) => [s.title, stageNodes[s.of ?? s.id] || 0]),
   ...GATES.map((g) => [g.title, stageNodes[`gate:${g.id}`] || 0]),
 ]);
 

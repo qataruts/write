@@ -9,8 +9,10 @@
   و«علامات ق٣ في مواضعها ببطاقات تعريفها»، و«بوابة ٢ من أضعف كلماته».
 
   و`test_words.mjs` يُدخِل مسارات الكلمات على `judge` في node، وهذا يقول ما لا يقوله node:
-    · أنّ **المحطةَ تمشي مادّتَها وحدةً وحدة** بحلقة النسخ الثلاثية (شاهِدْ ← انسُخْ
-      موجَّهاً ← انسُخْ خافتاً)، ولا «اكتُبْهُ وحدَك» فيها.
+    · أنّ **المحطةَ تمشي مادّتَها وحدةً وحدة** بحلقة النسخ الثلاثية — **وثالثتُها
+      منذ الجلسة ح (ب١) درجةُ النسخ الحرّ**: شاهِدْ ← انسَخْ موجَّهاً ← **اكتُبْها
+      وحدَك** (صندوقٌ فارغ ونموذجٌ **فوق** اللوح يُرى ولا يُتَّكأ عليه)، وإنتاجُها
+      النظيفُ **يُنضج الكلمة** في سلّمها إلى الإملاء (`reads`).
     · وأنّ **القياسَ يكتب `نسخ` بوحدة الكلمة** (`<كلمة>|كلمة|copy`) — لا حرفَ وهميّ.
     · وأنّ **سطرَ الكرّاسة مرسومٌ من الكلمة نفسِها** (`ref.line`)، وأنّ **سطرَ المسافة**
       يُعرَض كلمتين في لوحٍ واحد.
@@ -165,7 +167,7 @@ function watchNetwork(win) {
     ok(Boolean(doc.querySelector('main.lesson-copy')),
       `شاشةُ النسخ فُتحت بعنوانها (#/join/${pairNode.part})`);
     ok(doc.querySelectorAll('main .dots .dot').length === 3,
-      'وحلقتُها ثلاثُ خطوات — لا «اكتُبْهُ وحدَك» في النسخ');
+      'وحلقتُها ثلاثُ خطوات: شاهِدْ ← انسَخْ موجَّهاً ← اكتُبْها وحدَك');
     const units = unitsOf(pairNode);
     ok(doc.querySelectorAll('main .unit-strip .unit').length === units.length,
       `وشريطُ الوحدات يقول كم فيها (${units.length}: ${units.map((u) => u.text).join(' · ')})`);
@@ -184,11 +186,36 @@ function watchNetwork(win) {
       // وهو ما وقع في أوّل تشغيل (بقيت الشاشةُ على أوّل وحدةٍ وقُيّد مفتاحٌ واحد).
       await wait(STEP_WAIT);
       for (let step = 0; step < 2; step++) {
+        // 🖊 **ودرجةُ النسخ الحرّ تُقاس في أوّل وحدةٍ** (ب١): الخطوةُ الثانيةُ
+        // الكاتبة صندوقٌ فارغ (`--free`) ونموذجُ الكلمة **فوق** اللوح مرسومٌ من
+        // مسارها المرجعيّ — يُرى ولا يُتَّكأ عليه، ولا زرَّ «شاهِدْ» على اللوح
+        // يُبطِل الدرجةَ بنقرة.
+        if (unit === units[0] && step === 1) {
+          ok(Boolean(doc.querySelector('main .pen-box--free')),
+            'والخطوةُ الثالثة **صندوقٌ فارغ** — نسخٌ حرٌّ لا تتبّعٌ خافت');
+          const glyph = doc.querySelector('main .copy-model .ref-glyph');
+          ok(Boolean(glyph),
+            'ونموذجُها **فوق اللوح** مرسومٌ من مسارها — يُرى ولا يُتَّكأ عليه');
+          ok(Boolean(glyph) && glyph.querySelectorAll('.ref-stroke, .ref-dot').length > 0,
+            'وأجزاؤه من المسار نفسِه لا خطُّ نصّ');
+          const labels = [...doc.querySelectorAll('main .foot .btn')]
+            .map((b) => b.textContent.trim());
+          ok(!labels.some((t) => t.includes('شَاهِدْ')),
+            `ولا زرَّ «شاهِدْ» على لوحها (${labels.join(' · ') || 'لا زرّ'})`);
+        }
         await writeWord(unit.ref);
         await wait(STEP_WAIT);
       }
     }
     await wait(600);
+
+    // **والنسخُ الحرُّ النظيف يُنضج الكلمة** (ب١ ⇐ أ١): عدّادُ الإصابات المتباعدة
+    // يرتفع لكلِّ كلمةٍ كتبها وحدَه — وهو أوّلُ درجةٍ في طريقها إلى الإملاء.
+    const reads = stored().reads || {};
+    const ripe = units.filter((u) => !u.space && (reads[u.text]?.n || 0) > 0);
+    ok(ripe.length === units.filter((u) => !u.space).length,
+      `وكلُّ كلمةٍ كتبها وحدَه ارتفع عدّادُ نضجها (${ripe.length}/${
+        units.filter((u) => !u.space).length}) — طريقُها إلى الإملاء`);
 
     // **وأين وقف الطفلُ يُقال ولا يُخمَّن**: الوحدةُ الجارية من شريط الوحدات نفسِه
     const nowUnit = doc.querySelector('main .unit--now')?.getAttribute('aria-label');

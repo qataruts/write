@@ -1658,6 +1658,20 @@ button {
 .mark-text h2 { margin: 0 0 .2rem; }
 .mark-text .hint { margin: 0; }
 
+/* **نموذجُ درجة النسخ الحرّ** (الجلسة ح — ب١): الكلمةُ مرسومةً من مسارها المرجعيّ
+   **فوق** اللوح — تُرى ولا يُكتب عليها، فيكتبها الطفلُ في صندوقٍ فارغ تحتها. ويسقط
+   الشريطُ في سائر الخطوات (لا عنصرَ فيه)، فلا فراغَ يزحم شاشةً قصيرة. */
+.copy-model:not(:empty) {
+  max-width: 22rem;
+  margin: 0 auto .5rem;
+  padding: .35rem .6rem;
+  border: 2px dashed var(--line);
+  border-radius: var(--radius-btn);
+  color: var(--ink-soft);
+}
+
+.copy-model-glyph { aspect-ratio: auto; height: 3.6rem; }
+
 /* تمرينُ المراجعة بالقلم (`review.js`): سطرُ الطلب ثم اللوح */
 .exercise .ask { margin: .2rem auto .4rem; text-align: center; color: var(--ink-soft); }
 

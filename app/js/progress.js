@@ -284,13 +284,21 @@ export function nodeId(stageId, part) {
  * **والعقدةُ ترث نوعَ محطتها**: نوعُ المحطة (`kind`) هو مفتاحُ الشاشة التي تفتحها
  * ومفتاحُ قياسها أو إعفائها في `tools/test_measure.mjs` — فمصدرٌ واحد لا مصدران،
  * ولا يفترق ما تفتحه الخريطةُ عمّا يحرسه الفاحص.
+ *
+ * **و`of` شطرُ مرحلةٍ يتقاسم فضاءَ معرّفاتها** (الجلسة ح — ب٢): حين تُقحَم محطةٌ
+ * **بين** شطرَي مرحلةٍ واحدة (محطةُ الاسم بعد أوّل بستان) لا يسع المولّدَ إلا أن
+ * يقسمها محطتين — **ولو تبدّل معرّفُ الشطر الثاني لتبدّلت معرّفاتُ عقده كلِّها**
+ * فضاعت نجومُ من هو في وسطها. فيُعلن الشطرُ أصلَه في `of`، **فمعرّفُ العقدة ومحطتُها
+ * من الأصل** ولا يتبدّل حرف: ما تبدّل عنوانُ الصندوق وموضعُه من الرحلة وحدَهما
+ * (نظيرُ شقّ العرض في `stageSections`، وبصمةُ البنية ترحّل الترتيبَ كسنّتها).
  */
 export function stageNodes(stage) {
+  const owner = stage.of ?? stage.id;
   return (stage.nodes || []).map((node) => ({
     ...node,
-    id: nodeId(stage.id, node.part),
+    id: nodeId(owner, node.part),
     type: stage.kind,
-    stageId: stage.id,
+    stageId: owner,
   }));
 }
 
@@ -342,8 +350,18 @@ export function stageSections(stage) {
   });
 
   // مرحلةٌ لا تتجاوز السقفَ ولا مفصلَ فيها تبقى محطةً واحدة بمعرّفها وعنوانها كما كانت
+  // — **إلا أن يقول محتواها مفصلَه** (`sect`): شطرٌ كلُّ عقده بستانٌ واحد يُسمّى باسم
+  // بستانه لا باسم مرحلته، وإلا افترق صندوقُه عن إخوته في الخريطة (الجلسة ح).
   if (parts.length <= 1) {
-    return [{ kind: stage.kind, id: stage.id, stage, nodes, part: 1, parts: 1 }];
+    const only = parts[0];
+    return [{
+      kind: stage.kind,
+      id: stage.id,
+      stage: only?.title ? { ...stage, title: only.title } : stage,
+      nodes,
+      part: 1,
+      parts: 1,
+    }];
   }
   return parts.map((chunk, i) => ({
     kind: stage.kind,
