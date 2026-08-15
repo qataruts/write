@@ -102,6 +102,64 @@ const tracking = modules.filter((f) => /pointermove|setPointerCapture|getCoalesc
 ok(tracking.every((f) => CARRIERS.includes(f)),
   `ولا يتتبّع حركةَ القلم ولا يقرأ موضعَ لمسته ملفٌّ خارج حامليه (${tracking.join('، ') || 'لا أحد'})`);
 
+// ————— ١ج. عدّةُ التقاط الميدان: إذنٌ صريح، ولا مخرجَ إلا بيد وليّ الأمر —————
+//
+// **العلّة** (الجلسة ١٢): أرقامُ السماحة لم تُعايَر بطفل، وعهدُ `METHOD §٣.٥` أن
+// تُعايَر بميدانٍ حقيقيّ. فبُنيت عدّةُ التقاطٍ في صفحة التجربة (خلف `?dev=1`).
+// **وهي أخطرُ ما كُتب في هذا التطبيق على العهد**، فحراستُها هنا حيث حراستُه:
+//   · **الإذنُ شرطٌ بنيويّ**: لا يُقيَّد أثرٌ قبله — مجرَّبٌ سالباً بالمناداة قبله.
+//   · **والمخرجُ ملفٌّ بيد وليّ الأمر**: `pendev.js` من حاملي المسار في §١ أعلاه،
+//     فلا `fetch` فيه ولا رفعَ ولا عنوان — الحارسُ نفسُه يمسكه إن دخل.
+//   · **وما في الملفّ أثرٌ لا طفل**: يُقاس نصُّ الملفّ المولَّد فلا اسمَ ولا تقدّم.
+
+console.log('\n— ١ج) عدّةُ التقاط الميدان: إذنٌ صريح، وملفٌّ بيد وليّ الأمر —');
+{
+  const store = new Map();
+  globalThis.localStorage = {
+    getItem: (k) => (store.has(k) ? store.get(k) : null),
+    setItem: (k, v) => store.set(k, String(v)),
+    removeItem: (k) => store.delete(k),
+  };
+  const trace = { ch: 'ب', form: 'isolated', mode: 'free', kind: 'done', accepted: true,
+    strokes: [[[10, 10], [20, 20]]] };
+
+  dev.fieldClear();
+  ok(dev.fieldRecord(trace) === 0 && dev.fieldBook().items.length === 0,
+    '**مجرَّبٌ سالباً**: أثرٌ يُعرَض قبل الإذن فلا يُقيَّد منه شيء');
+  dev.fieldAllow(true);
+  ok(dev.fieldRecord(trace) === 1, 'وبعد الإذن الصريح يُقيَّد');
+  dev.fieldAllow(false);
+  ok(dev.fieldRecord(trace) === 0 && dev.fieldBook().items.length === 1,
+    'وإيقافُ الإذن يوقف التقييد **ولا يمحو ما التُقط**');
+
+  // ولا يمتلئ مخزنُ جهازٍ بقياسٍ منسيّ: للدفتر سقفٌ يُقاس بالتجربة لا يُدَّعى
+  dev.fieldAllow(true);
+  for (let i = 0; i < 400; i++) dev.fieldRecord(trace);
+  const capped = dev.fieldBook().items.length;
+  ok(capped > 0 && capped < 400, `وللدفتر سقفٌ يمنع امتلاءَ المخزن (${capped} أثراً من ٤٠٠ عُرضت)`);
+
+  // **وما في الملفّ أثرٌ لا طفل**: يُقاس نصُّه المولَّد لا يُوثَق بحسن الظنّ
+  const text = dev.fieldText();
+  const leaks = ['stars', 'skills', 'reads', 'faults', 'uktub.progress', 'name']
+    .filter((needle) => text.includes(needle));
+  ok(leaks.length === 0,
+    `وملفُّ وليّ الأمر أثرُ قلمٍ لا تقدّمَ طفل${leaks.length ? ` — تسرّب: ${leaks.join('، ')}` : ''}`);
+  ok(text.includes('"origin": "field"'),
+    'وهو موسومٌ `field` فيدخل عدّةَ المعايرة بلا التباسٍ بالمصنوع');
+  ok(/uktub-field-\d{4}-\d{2}-\d{2}\.json/.test(dev.fieldName()),
+    `واسمُه بيومه فلا يُكتب ملفٌّ فوق ملف (${dev.fieldName()})`);
+
+  // وأثرُ اللوح يُقرأ من `d` نصّاً — نقاطاً على الشبكة كما تدخل العدّة
+  const pts = dev.fieldStrokes(['M10.5 20 L30 40 L50 60', 'M1 1']);
+  ok(pts.length === 1 && pts[0].length === 3 && pts[0][0][0] === 10.5,
+    'وأثرُ الحبر يُقرأ نقاطاً على الشبكة، وما دون نقطتين يسقط');
+
+  dev.fieldClear();
+  ok(dev.fieldBook().items.length === 0 && dev.fieldBook().on === false,
+    'والمحوُ يمحو ويوقف — فلا يبقى التقاطٌ يعمل بلا علمِ أحد');
+  delete globalThis.localStorage;
+}
+
 // ————— ١ب. مقاييسُ الإرشاد: **تصغر بصغر المادّة** (بلاغُ عين المالك) —————
 //
 // 🔴 **العلّة من عين المالك (١٣ أغسطس ٢٠٢٦)**: نقطةُ الحرف ونقطةُ البداية ورأسُ

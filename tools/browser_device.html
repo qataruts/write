@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>عدّةُ الأجهزة — شاشاتُ الرحلة بمقاس الميدان</title>
+<!--
+  **عدّةُ الأجهزة** (الجلسة ١٢ — النصفُ غير المنقول من بذرة اقرأ): تُقاد من
+  `browser_test.py --device`، وتفتح **التطبيقَ نفسَه** في إطارٍ بمقاس منظور الجهاز
+  ثم تمشي شاشاتِ الرحلة وتقيس فائضَها الرأسيّ والأفقيّ.
+
+  ————— ثلاثةُ قيودٍ في بنائها —————
+
+  ١) **ولا قائمةَ شاشاتٍ تُكتب**: الممثِّلون يُقرأون من `progress.allNodes()` —
+     **أوّلُ عقدةٍ من كلّ نوع** — ومعهم الخريطةُ والمراجعةُ ولوحةُ وليّ الأمر.
+     فنوعُ محطةٍ يُبنى غداً يدخل القياسَ يومَ يُبنى، ولا يُنسى في قائمةٍ تشيخ.
+     (وقائمةُ اقرأ المنسوخة كانت تحمل أسماءَ شاشاته هو — فلم تُنقَل.)
+
+  ٢) **والشاشةُ تُقاس في حالاتها لا في أوّلها وحدَه**: خطواتُ الحلقة تتبدّل بها
+     قدما الشاشة (سطرُ الإرشاد وأزرارُ الذيل)، فتُمشى الخطواتُ بيدٍ صغيرة:
+     **تقرأ نموذجَ اللوح المرسوم من اللوح نفسِه** (`.pen-model` بنقاطه) وتعيد
+     مشيَه — فلا يُملى عليها ما تكتب، ولا تعرف شاشةً باسمها. وما لم تُفتَح حالُه
+     يُقال عددُه ولا يُدَّعى (`states` في كل صف).
+
+  ٣) **وحكمُ الفائض بنيويّ لا بقائمة**: كلُّ صفٍّ يقول أفي شاشته **لوحُ كتابة**
+     (`.pen-surface`) أم لا. فما فيه لوحٌ يلزمه أن يسع الوضعَ العرضيّ بلا سحبٍ
+     رأسيّ — طفلٌ يكتب ثم يسحب ليرى بقيّةَ لوحه ينقطع عن حركته — وما سواه
+     (الخريطةُ والمراجعةُ واللوحة) قوائمُ تطول بطبعها. **والفائضُ الأفقيّ ممنوعٌ
+     في الجميع** (`DESIGN §٤`).
+
+  🔇 والصوتُ يُعجَّل ولا يُلغى (نظيرُ `browser_journey.html`): القناةُ تعمل ببنيتها
+  ويمضي الزمنُ في لحظة، فلا تُقاس شاشةٌ وهي تنتظر كلاماً.
+-->
+<style>
+  html, body { margin: 0; background: #111; }
+  /* الإطارُ هو الجهاز: بمقاس المنظور تماماً، والقياسُ من داخله */
+  iframe { border: 0; display: block; }
+  #log { position: fixed; inset-inline-start: 0; bottom: 0; color: #eee;
+         font: 12px/1.5 monospace; padding: 2px 6px; background: #000a; }
+</style>
+</head>
+<body>
+<iframe id="app" src="about:blank"></iframe>
+<div id="log">…</div>
+<script type="module">
+const frame = document.getElementById('app');
+const logEl = document.getElementById('log');
+const say = (t) => { logEl.textContent = t; };
+
+const vw = innerWidth;
+const vh = innerHeight;
+frame.style.width = `${vw}px`;
+frame.style.height = `${vh}px`;
+
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const send = (rows) => fetch('/result', {
+  method: 'POST', body: JSON.stringify({ from: 'write', rows }),
+});
+
+/** 🔇 تعجيلُ الصوت — القناةُ بحالها والزمنُ في لحظة (نصُّ `browser_journey.html`). */
+function hurryAudio(win) {
+  Object.defineProperty(win, 'speechSynthesis', {
+    configurable: true,
+    value: { cancel() {}, speak(u) { setTimeout(() => u.onend && u.onend(), 0); } },
+  });
+  Object.defineProperty(win, 'SpeechSynthesisUtterance', {
+    configurable: true,
+    value: class { constructor(text) { this.text = text; } },
+  });
+  win.Audio = class {
+    constructor() { this.handlers = {}; this.duration = 0.04; }
+    addEventListener(type, fn) { (this.handlers[type] ||= []).push(fn); }
+    removeAttribute() {} load() {} pause() {}
+    play() {
+      setTimeout(() => { for (const fn of this.handlers.ended || []) fn(); }, 0);
+      return Promise.resolve();
+    }
+  };
+}
+
+const rows = [];
+const params = new URLSearchParams(location.search);
+
+try {
+  // ————— الرحلةُ كلُّها مفتوحة: القياسُ ليس امتحانَ قفل —————
+  localStorage.clear();
+  const progress = await import('/js/progress.js');
+  const nodes = progress.allNodes();
+  for (const node of nodes) progress.setStars(node.id, 3);
+  // **وشاشةُ المراجعة لا تُبنى بلا حصيلة**: طفلٌ بلا محاولةٍ واحدة تردّه إلى
+  // خريطته، فتُقاس الخريطةُ مرّتين ويُظنّ أنّ المراجعةَ قِيست. فتُزرَع محاولاتٌ
+  // **من أوّل حروف المنهج نفسِها** (لا حرفٌ يُكتب هنا) ليكون لها ما تجدوله.
+  const forms = await import('/js/curriculum.js');
+  // **وبتاريخٍ ماضٍ**: محاولةُ اليومِ موعدُها غداً بحكم ليتنر، فلا تكون «مستحقّة»
+  const past = progress.dayNumber() - 4;
+  for (const ch of Object.keys(forms.LETTERS)) {
+    progress.recordAttempt(ch, forms.FORMS.ISOLATED, progress.KINDS.TRACE, false, past);
+  }
+
+  let win = null;
+  let doc = null;
+  async function open() {
+    frame.src = '/';
+    await new Promise((r) => frame.addEventListener('load', r, { once: true }));
+    win = frame.contentWindow;
+    doc = frame.contentDocument;
+    hurryAudio(win);
+    await wait(300);
+  }
+  await open();
+
+  // **عنوانُ العقدة كما يبنيه الموجّه** (نصُّ `browser_journey.html`)
+  const route = (node) => (node.type === 'gate'
+    ? `#/gate/${encodeURIComponent(node.part)}`
+    : `#/${node.type}/${encodeURIComponent(node.stageId)}/${encodeURIComponent(node.part)}`);
+
+  /**
+   * الممثِّلون — **مقروءون من الرحلة لا مكتوبين**: أوّلُ عقدةٍ من كل نوع، ثم ثلاثُ
+   * شاشاتٍ عامّة لا عقدةَ لها. **والعقدةُ التي لا مادّةَ لها تُتخطّى** (محطةُ الاسم:
+   * مادّتُها بيد وليّ الأمر) — فلا تُقاس شاشةُ «قريباً» على أنها شاشةُ محطة.
+   */
+  // **والشاشاتُ العامّة أوّلاً** — لا ترتيبَ زينة: مشيُ المحطات يكتب في سجلّ ليتنر
+  // فيرفع صناديقَ المهارات المزروعة، فلو قِيست «مراجعةُ اليوم» بعدَها لَما وجدت
+  // مستحقّاً وردّت إلى الخريطة. فتُقاس قبل أن يُستهلَك ما زُرع لها.
+  const screens = [
+    ['map', 'الخريطة — الرحلةُ كلُّها', '#/'],
+    ['review', 'المراجعة اليومية', '#/review'],
+    ['parent', 'لوحةُ وليّ الأمر', '#/parent'],
+  ];
+  const seen = new Set();
+  for (const node of nodes) {
+    if (seen.has(node.type) || progress.isOptional(node)) continue;
+    seen.add(node.type);
+    screens.push([node.type, `محطةُ ${node.type} — ${node.title || node.part}`, route(node)]);
+  }
+
+  // ————— يدٌ صغيرة: تقرأ النموذجَ من اللوح وتعيد مشيَه —————
+  let pointerId = 100;
+  const toClient = (el, [x, y]) => {
+    const rect = el.getBoundingClientRect();
+    const vb = el.viewBox.baseVal;
+    const unit = Math.min(rect.width / vb.width, rect.height / vb.height);
+    return {
+      clientX: rect.left + (rect.width - vb.width * unit) / 2 + x * unit,
+      clientY: rect.top + (rect.height - vb.height * unit) / 2 + y * unit,
+    };
+  };
+  const fire = (el, type, point, id) => el.dispatchEvent(new win.PointerEvent(type, {
+    bubbles: true, cancelable: true, composed: true,
+    pointerId: id, pointerType: 'touch', isPrimary: true, ...toClient(el, point),
+  }));
+  async function stroke(el, points) {
+    const id = ++pointerId;
+    fire(el, 'pointerdown', points[0], id);
+    for (const p of points.slice(1)) fire(el, 'pointermove', p, id);
+    await wait(4);
+    fire(el, 'pointerup', points[points.length - 1], id);
+    await wait(6);
+  }
+  /**
+   * أجزاءُ نموذج اللوح **بترتيبها في اللوح نفسِه** — تُقرأ من `d` و`cx/cy`، فلا
+   * يُملى على اليد ما تكتب.
+   *
+   * **والترتيبُ ترتيبُ العناصر لا «الضرباتُ ثم النقاط»**: في الكلمة تأتي نقاطُ
+   * كلِّ حرفٍ بعد جسمه هو، فمن كتب الأجسامَ كلَّها ثم النقاطَ كلَّها **خالف الترتيبَ
+   * فرُدَّ عليه** (`dots-first`) — وهو عينُ ما وقع لهذه اليد أوّلَ ما كُتبت: بقيت
+   * محطةُ الخفوت والجملة على حالٍ واحد لا تتقدّم.
+   */
+  function modelOf(el) {
+    const parts = [];
+    for (const node of el.querySelectorAll('.pen-model > *')) {
+      if (node.classList.contains('pen-stroke')) {
+        const nums = (node.getAttribute('d') || '').match(/-?\d+(?:\.\d+)?/g) || [];
+        const pts = [];
+        for (let i = 0; i + 1 < nums.length; i += 2) pts.push([Number(nums[i]), Number(nums[i + 1])]);
+        if (pts.length > 1) parts.push(pts);
+      } else if (node.classList.contains('pen-dot')) {
+        const at = [Number(node.getAttribute('cx')), Number(node.getAttribute('cy'))];
+        if (Number.isFinite(at[0]) && Number.isFinite(at[1])) parts.push([at, at, at]);
+      }
+    }
+    return parts;
+  }
+
+  /**
+   * **ولا يُقاس شيءٌ قبل أن تستقرّ الشاشة**: رسمُ الموجّه غيرُ متزامن (وحداتٌ
+   * تُستورَد ولوحٌ يُبنى)، فمهلةٌ مكتوبة تقيس أحياناً ما قبل الرسم — وقد تقلّبت
+   * أرقامُ هذه العدّة نفسِها بين تشغيلين قبل هذا السطر. فيُنتظَر **حتى يثبت صنفُ
+   * الشاشة قراءتين متتاليتين**، لا مهلةً واحدة تُرجى.
+   */
+  async function settle(limit = 4000) {
+    const t0 = Date.now();
+    let seen = null;
+    while (Date.now() - t0 < limit) {
+      await wait(120);
+      const now = doc.querySelector('main')?.className ?? null;
+      if (now !== null && now === seen) return true;
+      seen = now;
+    }
+    return false;
+  }
+
+  /** بصمةُ حالِ الشاشة: صنفُها وخطوتُها وذيلُها — بها يُعرَف أنّ الحالَ تبدّل. */
+  const stamp = () => {
+    const main = doc.querySelector('main');
+    return [main?.className || '—',
+      doc.querySelectorAll('main .dot--done').length,
+      [...doc.querySelectorAll('main .foot .btn')].map((b) => b.textContent).join('|'),
+      doc.querySelector('main .hint')?.textContent || '',
+      // **والمادّةُ من البصمة**: محطةٌ بوحداتٍ متتالية (كلمةٌ بعد كلمة) تتبدّل
+      // شاشتُها ولا يتبدّل ذيلُها — فلولا هذين لَقيل «حالٌ واحد» وقد مُشي عشرة.
+      doc.querySelector('main .unit--now')?.getAttribute('aria-label') || '',
+      (doc.querySelector('main .pen-model .pen-stroke')?.getAttribute('d') || '').slice(0, 24),
+    ].join('¦');
+  };
+
+  /** قياسُ الحال الراهن: الطولُ والفائضان، وأفيه لوحُ كتابة. */
+  const gauge = () => {
+    const root = doc.documentElement;
+    return {
+      h: root.scrollHeight,
+      over: Math.max(0, root.scrollHeight - vh),
+      overX: Math.max(0, root.scrollWidth - vw),
+      board: Boolean(doc.querySelector('main .pen-surface')),
+    };
+  };
+
+  /** شكاوى المحرّك المسجَّلة حتى الآن — يُقاس فرقُها لكل شاشة، فلا تُنسَب شكوى لغير أهلها. */
+  const faultKeys = () => {
+    try {
+      const store = JSON.parse(win.localStorage.getItem('uktub.progress.v1') || '{}');
+      return new Set(Object.keys(store.faults || {}));
+    } catch { return new Set(); }
+  };
+
+  /** لقطةٌ بالعين لشاشةٍ واحدة (`--device --shots --screen <id>`) — بلا قياس. */
+  if (params.get('screen')) {
+    const found = screens.find(([id]) => id === params.get('screen'));
+    if (!found) say('لا شاشةَ بهذا الاسم: ' + params.get('screen'));
+    else {
+      win.location.hash = found[2];
+      await wait(700);
+      logEl.remove();
+    }
+  } else {
+    const orient = vw > vh ? 'عرضي' : 'طولي';
+    for (const [id, label, hash] of screens) {
+      say(`${label} — ${vw}×${vh}`);
+      try {
+        const before = faultKeys();
+        win.location.hash = hash;
+        await settle();
+        // **وشاشةٌ ردّت الطفلَ إلى خريطته تُقال ولا تُقاس باسمها**: وإلا قِيست
+        // الخريطةُ مرّتين تحت اسمين، وقيل إنّ الشاشةَ قِيست وهي لم تُفتَح.
+        const landed = win.location.hash || '#/';
+        if (landed !== hash && !(hash === '#/' && landed === '#/')) {
+          rows.push({ id, label, orient, vw, vh, states: 0, kind: 'ردٌّ إلى الخريطة',
+            error: `لم تُفتَح: العنوانُ ${hash} ردَّ إلى ${landed}` });
+          continue;
+        }
+        let worst = gauge();
+        let states = 1;
+        let last = stamp();
+        // مشيُ حالات الشاشة: يُكتب ما على اللوح، وتُقاس بعد كل تبدّل — بحدٍّ
+        // قصير، فالمقصودُ قياسُ التخطيط لا عبورُ المحطة.
+        for (let step = 0; step < 6; step++) {
+          const el = doc.querySelector('main .pen-surface');
+          if (!el) break;
+          const parts = modelOf(el);
+          if (!parts.length) break;
+          for (const pts of parts) {
+            if (!doc.contains(el)) break;
+            await stroke(el, pts);
+          }
+          await settle(1500);
+          const now = stamp();
+          if (now === last) break;                 // لم يتبدّل الحال: لا حالَ جديد يُقاس
+          last = now;
+          states++;
+          const m = gauge();
+          if (m.over > worst.over || m.overX > worst.overX) worst = m;
+          else worst.board = worst.board || m.board;
+        }
+        // **وشكوى المحرّك تُقال ولا تُطوى**: يدٌ ردَّها الحَكَمُ تقف عند حالٍ واحد،
+        // فلولا اسمُ الشكوى لَقُرئ الوقوفُ «شاشةٌ بلا خطوات» وهو ردُّ كتابة.
+        // **والمقيسُ ما استُحدث في هذه الشاشة وحدَها** — لا سِجلُّ الشاشات قبلها.
+        const faults = [...new Set([...faultKeys()].filter((k) => !before.has(k))
+          .map((k) => k.split('|').pop()))].slice(0, 4).join('، ');
+        rows.push({ id, label, orient, vw, vh, states, faults, kind: last.split('¦')[0], ...worst });
+      } catch (e) {
+        rows.push({ id, label, orient, vw, vh, states: 0, error: String((e && e.message) || e) });
+      }
+    }
+    say(`تمّ: ${rows.length} شاشة`);
+    await send(rows);
+  }
+} catch (e) {
+  say('عطب: ' + ((e && e.message) || e));
+  await send([{ id: 'device', label: 'صفحةُ الجهاز', vw, vh, states: 0, error: String((e && e.message) || e) }]);
+}
+</script>
+</body>
+</html>

@@ -34,6 +34,10 @@ import time
 import zlib
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import ports  # noqa: E402  (جدولُ المنافذ — تُقرأ من موضعٍ واحد، `tools/ports.py`)
+import browser_test  # noqa: E402  (حظيرةُ كروم — سابقةُ ملفّ الإعدادات تُقرأ منها فيكنسها الكنّاسُ عند الإقلاع)
+
 ROOT = Path(__file__).resolve().parent.parent
 APP = ROOT / "app"
 TOOLS = ROOT / "tools"
@@ -987,7 +991,7 @@ def capture_all(cands: list, port: int, timeout: int, data: dict, shift: dict, s
     fails = 0
     try:
         for candidate, ground, scene in shot_jobs(data, cands):
-            profile = Path(tempfile.mkdtemp(prefix="uktub-identity-"))
+            profile = Path(tempfile.mkdtemp(prefix=browser_test.CHROME_PREFIX + "identity-"))
             try:
                 out, err = capture(base, profile, state, candidate, ground, scene, timeout)
             finally:
@@ -1968,7 +1972,7 @@ def main() -> int:
     ap.add_argument("--numbers", action="store_true", help="الأرقامُ وحدَها بلا متصفّح")
     ap.add_argument("--only", help="مرشَّحٌ واحد بمعرّفه")
     ap.add_argument("--self-test", action="store_true", help="فحصُ الأداة نفسِها")
-    ap.add_argument("--port", type=int, default=8797)
+    ap.add_argument("--port", type=int, default=ports.port_of("identity_panel"))
     ap.add_argument("--timeout", type=int, default=90)
     args = ap.parse_args()
     if args.self_test:

@@ -34,6 +34,10 @@ import threading
 import time
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import ports  # noqa: E402  (جدولُ المنافذ — تُقرأ من موضعٍ واحد، `tools/ports.py`)
+import browser_test  # noqa: E402  (حظيرةُ كروم — سابقةُ ملفّ الإعدادات تُقرأ منها فيكنسها الكنّاسُ عند الإقلاع)
+
 ROOT = Path(__file__).resolve().parent.parent
 APP = ROOT / "app"
 TOOLS = ROOT / "tools"
@@ -142,7 +146,7 @@ def generate(args) -> int:
     results = []
     server = make_server(args.port, results)
     threading.Thread(target=server.serve_forever, daemon=True).start()
-    profile = Path(tempfile.mkdtemp(prefix="uktub-shots-"))
+    profile = Path(tempfile.mkdtemp(prefix=browser_test.CHROME_PREFIX + "shots-"))
     base = f"http://127.0.0.1:{args.port}"
     try:
         for screen, title in SHOTS:
@@ -203,7 +207,7 @@ def main():
     ap.add_argument("--self-test", dest="check", action="store_true",
                     help="اسمٌ ثانٍ لـ--check يدخل به جردَ الحرّاس")
     ap.add_argument("--only", help="لقطة واحدة بمعرّفها")
-    ap.add_argument("--port", type=int, default=8794)
+    ap.add_argument("--port", type=int, default=ports.port_of("make_welcome_shots"))
     ap.add_argument("--timeout", type=int, default=60)
     args = ap.parse_args()
     return check() if args.check else generate(args)

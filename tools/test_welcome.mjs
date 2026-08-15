@@ -222,6 +222,67 @@ for (const [name, text] of Object.entries(PAGES)) {
 const unused = Object.keys(STATS).filter((k) => !seen.has(k));
 ok(unused.length === 0, `ولا رقمَ محسوبٌ بلا موضعٍ في الصفحات${unused.length ? `: ${unused.join('، ')}` : ''}`);
 
+// ————— ٥ب. جدولُ الرحلة: أعدادُه محسوبةٌ كأخواتها —————
+//
+// **الدَّينُ الذي أُغلق هنا** (أُعلن في الجلسة ش ولم يُمَسّ): أعدادُ العقد في جدول
+// «الرحلة بترتيبها» كانت **مكتوبةً بيد وقد شاخت** — بساتينُ النسخ «١٢» والحقُّ ١١١،
+// والإملاء «١٠» والحقُّ ١٠٠، وسلّمُ الجمل «١٠» والحقُّ ٢٨ — **ولا حارسَ يمسكها**،
+// بينما أخواتُها الموسومة `data-stat` محروسةٌ منذ بُنيت الصفحة.
+//
+// **ولا وسمَ يُضاف إلى الجدول**: صفُّه يحمل اسمَ قسمه في خانته، فيُقرأ الاسمُ ويُسأل
+// عنه المنهجُ — فلا مفتاحٌ يُكتب مرّتين ولا سطرٌ يُعدَّل حين يكبر قسم.
+//
+// **والعددُ عددُ العقد لا عددُ الشُّطور**: الشقُّ عرضٌ في الخريطة (الجلسة ش)، وهذه
+// الصفحةُ تصف المنهجَ — فتُجمَع عقدُ شُطور المرحلة كلِّها تحت اسم مرحلتها.
+
+console.log('\n٥ب. جدولُ «الرحلة بترتيبها»: أعدادُه من المنهج');
+
+const stageNodes = {};
+for (const section of journey) {
+  const key = section.stage ? section.stage.id : section.id;   // البوابةُ لا مرحلةَ لها
+  stageNodes[key] = (stageNodes[key] || 0) + section.nodes.length;
+}
+const TABLE_NODES = new Map([
+  ...STAGES.map((s) => [s.title, stageNodes[s.id] || 0]),
+  ...GATES.map((g) => [g.title, stageNodes[`gate:${g.id}`] || 0]),
+]);
+
+const table = cur.match(/<table class="w-table">[\s\S]*?<\/table>/)?.[0] || '';
+const tableRows = [...table.matchAll(
+  /<tr>\s*<td class="w-num-cell">([^<]+)<\/td>\s*<td class="w-stage">([^<]+)<\/td>\s*<td class="w-num-cell">([^<]+)<\/td>/g)]
+  .map((m) => ({ idx: m[1].trim(), title: m[2].trim(), count: m[3].trim() }));
+
+ok(tableRows.length === TABLE_NODES.size,
+  `جدولُ الرحلة ${ar(tableRows.length)} صفاً — بعدد أقسام المنهج (${ar(TABLE_NODES.size)})`);
+for (const [i, row] of tableRows.entries()) {
+  const want = TABLE_NODES.get(row.title);
+  ok(want !== undefined && row.count === ar(want) && row.idx === ar(i + 1),
+    `${row.idx} · ${row.title}: ${row.count} محطة`
+    + (want === undefined ? ' — قسمٌ لا يعرفه المنهج'
+      : ` (المحسوب ${ar(want)}${row.idx === ar(i + 1) ? '' : `، وترتيبُه ${ar(i + 1)}`})`));
+}
+const tableSum = tableRows.reduce((n, row) => n + (TABLE_NODES.get(row.title) || 0), 0);
+ok(tableSum === STATS.nodes,
+  `ومجموعُ الجدول ${ar(tableSum)} = محطاتُ الرحلة كلِّها ${ar(STATS.nodes)}`);
+
+// **وعددُ المخالفات المعلَنة يُعَدّ من الصفحة لا يُكتب بيد**: كان «أربعةُ مواضع»
+// مكتوباً بينما المواضعُ خمسة، ثم دخل سادسٌ (حكمُ «الشكل لا الأثر» في الخطوة
+// الحرّة — مخالفةُ ق١ الحرفيّ من بلاغ الميدان ٢). فمن أعلن مخالفةً جديدة **يُسقِط
+// هذا الفحصَ حتى يُصلِح العدد**، ومن حذف كذلك.
+{
+  const section = PAGES['method.html']
+    .match(/<h2>٦\. المخالفاتُ المعلَنة<\/h2>[\s\S]*?<\/section>/)?.[0] || '';
+  const blocks = (section.match(/<div class="w-why">/g) || []).length;
+  const shown = section.match(/<b data-why-count>([^<]+)<\/b>/)?.[1]?.trim();
+  ok(blocks > 0 && shown === ar(blocks),
+    `المخالفاتُ المعلَنة: الصفحةُ تقول «${shown ?? 'لا عدد'}» وفيها ${ar(blocks)} موضعاً`);
+  // ولا تُعلَن مخالفةٌ بلا سببٍ مكتوب — «قرارٌ لا يُعلَن سببُه لا يُراجَع»
+  const why = [...section.matchAll(/<div class="w-why">([\s\S]*?)<\/div>/g)]
+    .filter((m) => !/وسببُ|وسببُه|القاعدةُ واحدةٌ|حدودُ النطاق/.test(m[1]));
+  ok(why.length === 0,
+    `ولكلِّ موضعٍ سببُه مكتوب${why.length ? ` — بلا سبب: ${why.length}` : ''}`);
+}
+
 // وأسماءُ العلامات الثلاث التي وجدت حاملَها تُذكر بأعيانها — لا عدداً مجرّداً
 for (const entry of Q3_RULING.filter((r) => r.word)) {
   ok(PAGES['method.html'].includes(entry.word),

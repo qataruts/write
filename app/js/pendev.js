@@ -30,6 +30,91 @@ export const penLetters = () => Object.keys(PATHS);
 const state = { letter: null, form: FORMS.ISOLATED, mode: MODES.GUIDED };
 let live = null;
 
+/* ————— عدّةُ التقاط مسارات الميدان (الجلسة ١٢) —————
+ *
+ * **العلّة**: أرقامُ السماحة في `pen.js` (`TOLERANCE`) **مبدئيةٌ لم تُعايَر بطفل**،
+ * وعهدُ `METHOD §٣.٥` أن تُعايَر **بمسارات ميدانٍ حقيقية لا بظنّ**. وعدّةُ المعايرة
+ * اليومَ (`tools/pen_traces.json`) **تشويهاتٌ مصنوعة** تُثبت حكمَ المحرّك ولا تعاير
+ * سماحتَه — ولكلِّ حالةٍ فيها حقلُ `origin`، و`field` مكانٌ محجوزٌ منذ الجلسة ١
+ * ينتظر هذه العدّة.
+ *
+ * **والعهدُ الذي لا يُخدَش**: مسارُ الطفل لا يغادر جهازه. فما يُلتقَط هنا يبقى في
+ * مخزن الجهاز، **ولا سبيلَ إلى إخراجه إلا بيد وليّ الأمر** ملفّاً يحفظه هو
+ * (`Blob` محليّ، لا شبكةَ ولا خادم) — وهذا الملفُّ لا يعرف الشبكةَ أصلاً، يحرسه
+ * `tools/test_pen.mjs §١` كما يحرس `pen.js`.
+ *
+ * **وثلاثةُ قيودٍ في بنائها**:
+ *   ١) **بإذنٍ صريح**: لا يُسجَّل شيءٌ حتى يُضغط زرُّ الإذن — والافتراضُ الصمت.
+ *   ٢) **خلف `?dev=1`**: الصفحةُ كلُّها لا تُبنى بدونه (`renderPenDev`).
+ *   ٣) **وحدٌّ للحجم**: `FIELD_MAX` أثراً، فلا يمتلئ مخزنُ جهازٍ بقياسٍ منسيّ.
+ */
+const FIELD_KEY = 'uktub.field.v1';
+const FIELD_MAX = 240;
+
+/** قراءةُ دفتر الميدان — و**مخزنٌ لا يُقرأ لا يُسقِط شيئاً**: العدّةُ تعمل بلا مخزن. */
+export function fieldBook() {
+  try {
+    const raw = globalThis.localStorage?.getItem(FIELD_KEY);
+    const book = raw ? JSON.parse(raw) : null;
+    if (book && typeof book === 'object') {
+      return { on: Boolean(book.on), items: Array.isArray(book.items) ? book.items : [] };
+    }
+  } catch { /* مخزنٌ ممتلئ أو نصٌّ فاسد: يُقرأ دفتراً خالياً */ }
+  return { on: false, items: [] };
+}
+
+function writeBook(book) {
+  try {
+    globalThis.localStorage?.setItem(FIELD_KEY, JSON.stringify(book));
+  } catch { /* لا مخزن: الالتقاطُ يعيش في الجلسة ولا يُسقِط الصفحة */ }
+  return book;
+}
+
+/** **الإذنُ الصريح** — لا التقاطَ قبله، وإيقافُه يوقف التسجيل ولا يمحو ما التُقط. */
+export const fieldAllow = (on) => writeBook({ ...fieldBook(), on: Boolean(on) });
+
+/** محوُ ما التُقط — بيد وليّ الأمر، وهو الطريقُ الوحيد لخروجه من الجهاز أو ذهابه. */
+export const fieldClear = () => writeBook({ on: false, items: [] });
+
+/**
+ * تقييدُ أثرٍ واحد — **ويُردّ صفراً إن لم يُؤذَن**: فالإذنُ شرطٌ بنيويّ لا سؤالٌ في
+ * الواجهة، يُجرَّب في `node` بلا متصفّح.
+ *
+ * @returns {number} عددُ ما في الدفتر بعدها (وصفرٌ يعني: لم يُسجَّل)
+ */
+export function fieldRecord(entry) {
+  const book = fieldBook();
+  if (!book.on || !entry || !Array.isArray(entry.strokes) || !entry.strokes.length) return 0;
+  book.items = [...book.items, entry].slice(-FIELD_MAX);
+  writeBook(book);
+  return book.items.length;
+}
+
+/** نصُّ الملفّ الذي يحفظه وليُّ الأمر — **بلا اسمٍ ولا تقدّمٍ ولا معرّفِ جهاز**. */
+export function fieldText(book = fieldBook()) {
+  return `${JSON.stringify({
+    what: 'مساراتُ ميدانٍ من «اُكْتُبْ» — أثرُ قلمٍ على شبكة ١٠٠٠ لا أكثر',
+    origin: 'field',
+    note: 'تدخل عدّةَ المعايرة بـ tools/import_traces.mjs — ولا اسمَ طفلٍ فيها ولا تقدّم',
+    items: book.items,
+  }, null, 1)}\n`;
+}
+
+/** اسمُ الملفّ — بيومه، فلا يُكتب ملفٌّ فوق ملف. */
+export const fieldName = () => `uktub-field-${new Date().toISOString().slice(0, 10)}.json`;
+
+/** أثرُ القلم من اللوح: `d` نصّاً ← نقاطاً على الشبكة (يقرؤها مستورِدُ العدّة). */
+export function fieldStrokes(inks) {
+  return (inks || []).map((d) => {
+    const nums = String(d).match(/-?\d+(?:\.\d+)?/g) || [];
+    const points = [];
+    for (let i = 0; i + 1 < nums.length; i += 2) {
+      points.push([Number(nums[i]), Number(nums[i + 1])]);
+    }
+    return points;
+  }).filter((points) => points.length > 1);
+}
+
 /** مسارُ ما يُعرَض الآن — من المنهج بعينه، لا نسخةَ ثانية في هذه الصفحة. */
 const refNow = () => pathOf(state.letter, state.form);
 
@@ -72,22 +157,49 @@ export function renderPenDev() {
       board.replaceChildren(h('p', { class: 'note' }, 'لا مسارَ لهذا الشكل بعدُ.'));
       return;
     }
+    /**
+     * **ما يُقيَّد من كل محاولة**: أثرُ اليد كما رُسم، ومعه ما يعرّف المادّة وحكمَ
+     * المحرّك عليها — **وأثمنُها المردودة**: الشكوى التي رُدّت وهي في عين وليّ
+     * الأمر صحيحة هي التي تعاير العتبة، لا المقبولةُ من أوّل مرّة.
+     */
+    const capture = (kind, extra) => fieldRecord({
+      ch: state.letter,
+      form: state.form,
+      mode: state.mode,
+      kind,
+      ...extra,
+      strokes: fieldStrokes(live?.ink()),
+    });
+
     const surface = penSurface({
       ref,
       mode: state.mode,
       label: `لوحُ كتابة ${state.letter} ${FORM_NAMES[state.form]}`,
-      onFault: (fault) => say(
-        `خطأ: ${FAULT_TEXT[fault.code]} (${fault.code})`,
-        `الجزء ${fault.part + 1} · الانزياح ${Math.round(fault.off[0])}، ${Math.round(fault.off[1])}`,
-      ),
+      onFault: (fault) => {
+        capture('fault', { code: fault.code, part: fault.part });
+        return say(
+          `خطأ: ${FAULT_TEXT[fault.code]} (${fault.code})`,
+          `الجزء ${fault.part + 1} · الانزياح ${Math.round(fault.off[0])}، ${Math.round(fault.off[1])}`,
+        );
+      },
       onPart: (part) => say(`استُوفي جزءٌ — التغطية ${Math.round((part.progress ?? 1) * 100)}٪`),
-      onDone: (verdict) => say(
-        verdict.accepted ? '✓ مقبول — الشروط الأربعة مستوفاة' : '✗ غير مقبول',
-        `المحاولات ${verdict.attempts} · الأخطاء: ${verdict.codes.join('، ') || 'لا شيء'}`,
-        `أقصى انحراف ${Math.round(verdict.metrics.maxLateral)} من سماحة `
-        + `${Math.round(surface.trial.tolerance.lateral)} · التغطية `
-        + `${Math.round(verdict.metrics.coverage * 100)}٪`,
-      ),
+      onDone: (verdict) => {
+        capture('done', {
+          accepted: verdict.accepted,
+          codes: verdict.codes,
+          maxLateral: Math.round(verdict.metrics.maxLateral),
+          coverage: Math.round(verdict.metrics.coverage * 100),
+          lateral: Math.round(surface.trial.tolerance.lateral),
+        });
+        paintField();
+        return say(
+          verdict.accepted ? '✓ مقبول — الشروط الأربعة مستوفاة' : '✗ غير مقبول',
+          `المحاولات ${verdict.attempts} · الأخطاء: ${verdict.codes.join('، ') || 'لا شيء'}`,
+          `أقصى انحراف ${Math.round(verdict.metrics.maxLateral)} من سماحة `
+          + `${Math.round(surface.trial.tolerance.lateral)} · التغطية `
+          + `${Math.round(verdict.metrics.coverage * 100)}٪`,
+        );
+      },
     });
     live = surface;
     board.replaceChildren(surface.el);
@@ -97,6 +209,44 @@ export function renderPenDev() {
     class: `btn${on ? '' : ' btn--ghost'}`,
     onclick: act,
   }, label);
+
+  // ————— لوحةُ التقاط الميدان: إذنٌ صريح، وعدٌّ، وملفٌّ بيد وليّ الأمر —————
+  const fieldBox = h('div', { class: 'dev-row' });
+  const fieldNote = h('p', { class: 'note' });
+
+  /** تنزيلُ ملفّ المسارات — نصٌّ في `Blob` بلا شبكةٍ ولا خادم (نظيرُ نسخة اللوحة). */
+  function saveFieldFile() {
+    const url = URL.createObjectURL(new Blob([fieldText()], { type: 'application/json' }));
+    const link = h('a', { href: url, download: fieldName() });
+    document.body.append(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 20000);
+  }
+
+  function paintField() {
+    const book = fieldBook();
+    fieldNote.textContent = book.on
+      ? `الالتقاطُ يعمل — ${book.items.length} أثراً على هذا الجهاز، ولا يغادره إلا بملفٍّ تحفظه بيدك.`
+      : `الالتقاطُ متوقّف${book.items.length ? ` — و${book.items.length} أثراً محفوظةٌ من قبل` : ''}.`
+        + ' لا يُسجَّل شيءٌ حتى تأذن.';
+    fieldBox.replaceChildren(
+      h('button', {
+        class: book.on ? 'btn' : 'btn btn--primary',
+        onclick: () => { fieldAllow(!book.on); paintField(); },
+      }, book.on ? '■ أوقِفِ الالتقاط' : '● آذَنُ بالتقاط مسارات طفلي'),
+      h('button', {
+        class: 'btn btn--ghost',
+        disabled: !book.items.length,
+        onclick: () => { saveFieldFile(); say(`حُفظ ملفُّ ${book.items.length} أثراً`); },
+      }, '⤓ احفظ الملفّ'),
+      h('button', {
+        class: 'btn btn--ghost',
+        disabled: !book.items.length,
+        onclick: () => { fieldClear(); paintField(); say('مُحي دفترُ الميدان'); },
+      }, '✕ امحُ ما التُقط'),
+    );
+  }
 
   const main = h('main', { class: 'screen' },
     h('h1', {}, 'تجربةُ محرّك القلم'),
@@ -125,8 +275,16 @@ export function renderPenDev() {
       h('button', { class: 'btn', onclick: () => { live?.reset(); say('لوحٌ نظيف'); } }, 'أعِد'),
     ),
     readout,
+    h('h2', {}, 'التقاطُ مسارات الميدان'),
+    h('p', { class: 'note' },
+      'لمعايرة سماحة المحرّك بيدِ طفلٍ حقيقيّ لا بظنّ. '
+      + 'ما يُلتقَط يبقى على هذا الجهاز ولا يُرسَل إلى أحد — '
+      + 'ولا سبيلَ إلى إخراجه إلا ملفّاً تحفظه أنت وترسله إن شئت.'),
+    fieldNote,
+    fieldBox,
   );
 
+  paintField();
   mount();
   say('انقر «شاهِد» لترى الحرفَ يُرسم من مساره، ثم اكتب فوقه.');
   screen.append(main);

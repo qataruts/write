@@ -46,6 +46,7 @@ PAGE = ROOT / "docs" / "REVIEW_HANDWRITING.md"
 
 sys.path.insert(0, str(TOOLS))
 import make_paths  # noqa: E402  (حظيرةُ العدّة وسائقُها — تبعيةٌ معلَنة)
+import ports  # noqa: E402  (جدولُ المنافذ — تُقرأ من موضعٍ واحد، `tools/ports.py`)
 
 FORM_AR = {"isolated": "معزول", "initial": "ابتدائي", "medial": "وسطي", "final": "نهائي"}
 AR_DIGITS = "٠١٢٣٤٥٦٧٨٩"
@@ -358,7 +359,7 @@ def main() -> int:
     ap = argparse.ArgumentParser(description="لوحةُ مرشّحات الكرّاسة لعين المالك")
     ap.add_argument("--case", help="حالةٌ بعينها (معرّفُها في craft_cases.json)")
     ap.add_argument("--self-test", action="store_true", help="عهدُ اللوحة بلا متصفّح")
-    ap.add_argument("--port", type=int, default=8793)
+    ap.add_argument("--port", type=int, default=ports.port_of("craft_panel"))
     ap.add_argument("--timeout", type=int, default=240)
     args = ap.parse_args()
 

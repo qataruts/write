@@ -28,6 +28,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import ports  # noqa: E402  (جدولُ المنافذ — تُقرأ من موضعٍ واحد، `tools/ports.py`)
+import browser_test  # noqa: E402  (حظيرةُ كروم — سابقةُ ملفّ الإعدادات تُقرأ منها فيكنسها الكنّاسُ عند الإقلاع)
 ICONS = ROOT / "app" / "icons"
 CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 
@@ -170,7 +172,7 @@ def check() -> int:
 
 def main():
     ap = argparse.ArgumentParser(description="توليد أيقونات «اُكْتُبْ»")
-    ap.add_argument("--port", type=int, default=8791)
+    ap.add_argument("--port", type=int, default=ports.port_of("make_icons"))
     ap.add_argument("--timeout", type=int, default=40)
     ap.add_argument("--check", action="store_true", help="تحقّق فقط بلا توليد")
     args = ap.parse_args()
@@ -196,7 +198,7 @@ def main():
     ICONS.mkdir(parents=True, exist_ok=True)
     server = serve(args.port)
     threading.Thread(target=server.serve_forever, daemon=True).start()
-    profile = Path(tempfile.mkdtemp(prefix="uktub-icons-"))
+    profile = Path(tempfile.mkdtemp(prefix=browser_test.CHROME_PREFIX + "icons-"))
     made = 0
     try:
         for name, size, pad, round_, bg in TARGETS:

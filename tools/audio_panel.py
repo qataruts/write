@@ -2,7 +2,7 @@
 """لوحة فحص الأصوات — يسمع بها المالك بنفسه ويُبلّغ عن الخطأ بضغطة.
 
     python3 tools/audio_panel.py            # يبني scratch/panel/index.html
-    python3 tools/audio_panel.py --serve    # ويشغّل خادماً على 8110
+    python3 tools/audio_panel.py --serve    # ويشغّل خادماً على منفذنا (tools/ports.py)
 
 العلّة التي تعالجها: عيبُ **المخرج** (نطق «سَجَّادَةْ» سَجَّابَة) لا يكشفه حارسٌ
 آليّ — أدواتُنا تقيس المدد والنطقات والتكرار والنسب، ولا تسمع الحروف. فالأذن
@@ -23,6 +23,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import generate_audio as gen  # noqa: E402
+import ports  # noqa: E402  (جدولُ المنافذ — تُقرأ من موضعٍ واحد، `tools/ports.py`)
 
 PANEL = gen.ROOT / "scratch" / "panel"
 GROUP_AR = {
@@ -271,7 +272,7 @@ render();
     return out
 
 
-def serve(port: int = 8110) -> None:
+def serve(port: int = ports.PORTS["audio_panel"]) -> None:
     class H(http.server.SimpleHTTPRequestHandler):
         def __init__(self, *a, **kw):
             super().__init__(*a, directory=str(gen.ROOT), **kw)
@@ -290,7 +291,7 @@ def main():
     ap.add_argument("--since", default="",
                     help="لا تُدرج إلا ما كُتب بعد هذا الملف الشاهد (أو طابع زمني)")
     ap.add_argument("--title", default="")
-    ap.add_argument("--port", type=int, default=8110)
+    ap.add_argument("--port", type=int, default=ports.port_of("audio_panel"))
     args = ap.parse_args()
     since = 0.0
     if args.since:

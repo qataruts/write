@@ -61,6 +61,7 @@ WARM_SECTION = ("// ————— ٧ب) أشكالُ التهيئة الحرك
 
 sys.path.insert(0, str(TOOLS))
 import browser_test  # noqa: E402  (حظيرةُ الخادم ومُشغِّلُ Chrome — تبعيةٌ معلَنة)
+import ports  # noqa: E402  (جدولُ المنافذ — تُقرأ من موضعٍ واحد، `tools/ports.py`)
 
 
 def sha() -> str:
@@ -212,7 +213,7 @@ def drive(query: str, port: int, timeout: int, shots: Path = None, show: bool = 
     browser_test.PAGES["/__anchors.json"] = anchors_file or ANCHORS
     server = browser_test.make_server(port, results)
     threading.Thread(target=server.serve_forever, daemon=True).start()
-    profile = Path(tempfile.mkdtemp(prefix="uktub-paths-"))
+    profile = Path(tempfile.mkdtemp(prefix=browser_test.CHROME_PREFIX + "paths-"))
     url = f"http://127.0.0.1:{port}/__make_paths.html{query}"
     extra = ["--hide-scrollbars"]
     if shots:
@@ -765,7 +766,7 @@ def main() -> int:
     ap.add_argument("--only", metavar="حروف", help="مع --sheet: حروفٌ بعينها (للتأليف)")
     ap.add_argument("--out", metavar="JSON", help="مع --nodes: ملفُّ الجرد")
     ap.add_argument("--self-test", action="store_true", help="عهدُ الإيماءة والمسار بلا متصفّح")
-    ap.add_argument("--port", type=int, default=8791)
+    ap.add_argument("--port", type=int, default=ports.port_of("make_paths"))
     ap.add_argument("--timeout", type=int, default=180)
     args = ap.parse_args()
 

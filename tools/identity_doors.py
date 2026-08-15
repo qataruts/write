@@ -39,6 +39,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import identity_panel as P            # noqa: E402  (الحسابُ والسَّوقُ لا يُكتبان مرّتين)
+import browser_test  # noqa: E402  (حظيرةُ كروم — سابقةُ ملفّ الإعدادات)
+import ports  # noqa: E402  (جدولُ المنافذ — تُقرأ من موضعٍ واحد، `tools/ports.py`)
 
 ROOT = P.ROOT
 APP = P.APP
@@ -296,7 +298,7 @@ def capture(base: str, state: dict, url: str, out: Path, size: tuple, timeout: i
     state["failed"] = False
     state["timeout"] = timeout
     state["measure"] = None
-    profile = Path(tempfile.mkdtemp(prefix="uktub-doors-"))
+    profile = Path(tempfile.mkdtemp(prefix=browser_test.CHROME_PREFIX + "doors-"))
     try:
         proc = P.run_chrome(f"{base}{url}", profile, out, size=size, dark=dark)
         deadline = time.time() + timeout
@@ -575,7 +577,7 @@ def capture_night(port: int, timeout: int) -> list:
         for name, scene, title in night_jobs():
             out = OUT / name
             err = None
-            profile = Path(tempfile.mkdtemp(prefix="uktub-night-"))
+            profile = Path(tempfile.mkdtemp(prefix=browser_test.CHROME_PREFIX + "night-"))
             try:
                 got, err = P.capture(base, profile, state, "now", "warm", scene, timeout,
                                      dark=True, out=out)
@@ -1285,7 +1287,7 @@ def main() -> int:
     ap.add_argument("--numbers", action="store_true", help="الأرقامُ المحفوظة بلا متصفّح")
     ap.add_argument("--only", help="بابٌ واحد بجزءٍ من اسم لقطته: fonts · icon · world · night")
     ap.add_argument("--self-test", action="store_true", help="فحصُ الأداة نفسِها")
-    ap.add_argument("--port", type=int, default=8799)
+    ap.add_argument("--port", type=int, default=ports.port_of("identity_doors"))
     ap.add_argument("--timeout", type=int, default=90)
     args = ap.parse_args()
     if args.self_test:

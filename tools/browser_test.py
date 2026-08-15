@@ -25,8 +25,10 @@
 import argparse
 import http.server
 import json
+import os
 import re
 import shutil
+import signal
 import socketserver
 import subprocess
 import sys
@@ -34,6 +36,9 @@ import tempfile
 import threading
 import time
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import ports  # noqa: E402  (جدولُ المنافذ — تُقرأ من موضعٍ واحد، `tools/ports.py`)
 
 ROOT = Path(__file__).resolve().parent.parent
 APP = ROOT / "app"
@@ -51,6 +56,7 @@ PAGES = {
     "/__journey.html": TOOLS / "browser_journey.html",
     "/__parent.html": TOOLS / "browser_parent.html",
     "/__welcome.html": TOOLS / "browser_welcome.html",
+    "/__device.html": TOOLS / "browser_device.html",
 }
 # سَوقةُ الصفحات: `--suite <اسم>` يختار أيَّها يُشغَّل، والافتراضُ فحصُ القشرة.
 SUITES = {
@@ -199,6 +205,15 @@ def make_server(port: int, results: list):
         def log_message(self, *a):
             pass
 
+        # **وقتلُ المتصفّح ليس عطباً في الخادم**: نحن نقتله عند تمام الفحص، فيبقى
+        # طلبٌ نصفَ مخدوم فيرتمي `BrokenPipe` أثراً مكدَّساً في المُخرَج — **وأثرٌ
+        # مكدَّس في فحصٍ أخضر يُقرأ عطباً**. فتُبتلَع هذه وحدَها ويبقى غيرُها يُقال.
+        def handle_one_request(self):
+            try:
+                super().handle_one_request()
+            except (BrokenPipeError, ConnectionResetError):
+                self.close_connection = True
+
     socketserver.TCPServer.allow_reuse_address = True
     try:
         return socketserver.TCPServer(("127.0.0.1", port), Handler)
@@ -209,6 +224,63 @@ def make_server(port: int, results: list):
         # وتدلّ على المخرج.
         sys.exit(f"تعذّر فتحُ خادم الفحص على المنفذ {port}: {e}\n"
                  f"  — منفذٌ مشغولٌ الآن (فحصٌ آخر يعمل؟). جرّب: --port {port + 1}")
+
+
+# **سابقةُ ملفّ إعدادات كروم عندنا** — بها تُعرَف نسخُنا من نسخ الجيران ومن متصفّح
+# المالك الحيّ. واجبُنا من بلاغ العائلة `stale-headless-chrome`: يتيمُ فحصٍ ميتٌ يخطف
+# نقرةَ أيقونة كروم عند المالك فيبدو المتصفّحُ معطّلاً.
+CHROME_PREFIX = "write-browser-"
+
+
+def new_profile() -> Path:
+    """ملفُّ إعداداتٍ مؤقّت بسابقتنا — فما نطلقه يُعرَف باسمه ويُكنَس وحدَه."""
+    return Path(tempfile.mkdtemp(prefix=CHROME_PREFIX))
+
+
+def our_chromes() -> list:
+    """**جردٌ مقصور**: نسخُ كروم التي أطلقناها نحن وحدَها — [(معرّف، ملفُّ الإعدادات)].
+
+    ولا يُقرَّب سواها: يُقرأ **قيمةُ `--user-data-dir` نفسِها** ويُشترَط أن يكون
+    اسمُ مجلّدها ببادئتنا — لا «تحوي السلسلة» في سطر الأمر، فعنوانُ صفحةٍ أو راية
+    أخرى قد تحملها. ونسخُ الجيران ومتصفّحُ المالك خارج المرمى **بالبناء**.
+    """
+    proc = subprocess.run(["ps", "-axo", "pid=,command="],
+                          capture_output=True, text=True, check=False)
+    found = []
+    for line in proc.stdout.splitlines():
+        pid, _, cmd = line.strip().partition(" ")
+        if not pid.isdigit() or "--user-data-dir=" not in cmd:
+            continue
+        value = cmd.split("--user-data-dir=", 1)[1].split(" ")[0]
+        if Path(value).name.startswith(CHROME_PREFIX):
+            found.append((int(pid), value))
+    return found
+
+
+def sweep_orphans(loud: bool = False) -> int:
+    """كنسُ يتامانا العالقين **عند الإقلاع** — بالمعرّف بعد الجرد، لا بنمطٍ يلتقط الجيران.
+
+    **وقيدُ صنعةٍ من حادثةٍ وقعت** (مراجعة م٣، ١٣ أغسطس ٢٠٢٦): `pkill` بنمطٍ عامّ
+    أسقط قوقعتَي انتظارٍ لجلسةٍ جارة. فالقتلُ هنا `os.kill` على **معرّفٍ خرج من
+    الجرد أعلاه** — نعرف كم قتلنا ونقوله، ولا نضرب في العمياء.
+
+    والتنظيفُ عند الإقلاع لا عند الخروج وحده: الجلسةُ تُقتَل والفحصُ يُقاطَع
+    فيبقى اليتيم.
+
+    ⚠ **وحدُّه المعلَن**: لا يفرّق بين يتيمٍ ميت وأداةٍ لنا تعمل الآن — فأدواتُنا
+    تُشغَّل بالتتابع لا معاً (وهو عهدُ التسلسل داخل المستودع نفسُه). ولو فُرِّق
+    بالعمر لَنجا يتيمُ الدقيقة الماضية وهو أكثرُها وقوعاً.
+    """
+    killed = 0
+    for pid, where in our_chromes():
+        try:
+            os.kill(pid, signal.SIGTERM)
+            killed += 1
+            if loud:
+                print(f"  · كُنس يتيمُ فحصٍ عالق: {pid} ({Path(where).name})")
+        except (ProcessLookupError, PermissionError):
+            pass
+    return killed
 
 
 def run_chrome(url: str, profile: Path, extra: list, show: bool):
@@ -227,30 +299,182 @@ def run_chrome(url: str, profile: Path, extra: list, show: bool):
     return subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 
-# الشاشات التي **يجب** أن تسع الوضع العرضي بلا سحب: خطوات الدرس والمهارة والبوابة —
-# بطلاتُ «الصندوق الكبير» وشقيقاتُها. وما عداها (قصة، مراجعة، بستان) قوائمُ تطول بطبعها
-# فالسحب فيها أصلٌ لا عطب.
-LANDSCAPE_MUST_FIT = {
-    "lesson-listen", "lesson-harakat", "lesson-trace", "lesson-quiz",
-    "skill-rule", "skill-compare", "skill-quiz", "gate", "contrast-compare", "contrast-quiz",
-    # شاشةُ الحكم في «كلمات السورة» (الحزمة ١٢): الآيةُ والخياراتُ في نظرةٍ واحدة —
-    # طفلٌ يسحب ليرى بقيّة الآية يفقد سياقَ الكلمة التي يبحث عنها.
-    "surah-find",
+# ————— مهلةُ السَّوقة: تُشتقّ من طول عملها لا رقمٌ واحدٌ للجميع —————
+#
+# **العلّة** (قيدُ مراجعة الجلسة ١٠، وبند الجلسة ١٢): كان الافتراضُ ١٤٠ ثانيةً
+# **لسَوقةٍ تمشي شاشةً واحدة ولسَوقةٍ تمشي الرحلةَ كلَّها** — فرحلةُ ٣٤٨ عقدةً تنقطع
+# عند المهلة وتُطبَع «لم تصل أي نتيجة»، **فتُقرأ الحمرةُ عطباً وهي قِصَرُ مهلة**،
+# ويُطارَد عطبٌ لا وجودَ له. وهي قاعدةُ «مهلةٌ تُشتقّ من طول العمل» بعينها — أختُ
+# مهلة ولاية عامل الخدمة التي صارت تُشتقّ من عدد بنك الصوت (الجلسة ب).
+#
+# **والأرضيةُ لا تنزل**: ١٤٠ ثانيةً هي مهلةُ اليوم المجرَّبة على السَّوقات الصغيرة،
+# فتبقى **أرضيةً** ويُزاد فوقها بقدر ما تمشي السَّوقةُ من مادّة الشجرة — فلا سَوقةٌ
+# تأخذ اليومَ أقلَّ ممّا كانت تأخذ، والطويلةُ وحدَها تتّسع.
+FLOOR_TIMEOUT = 140
+# لكلِّ سَوقةٍ تمشي مادّةً: (اسمُ ما تمشيه، ثوانٍ لكلّ واحدة) — **والعددُ يُقاس من
+# الشجرة لحظةَ التشغيل** (`tree_work` أدناه) لا يُكتب هنا، فمنهجٌ يكبر غداً يوسّع
+# مهلتَه من نفسه بلا سطرٍ يُعدَّل.
+SUITE_WORK = {
+    "journey": ("nodes", 8.0),        # الرحلةُ عقدةً عقدة: كتابةٌ ونقرٌ وانتقال
+    "paths": ("forms", 2.0),          # كلُّ شكلِ حرفٍ يُعرَض ويُحكَم عليه
+    "warmup": ("warmupShapes", 4.0),  # إصبعٌ يعبر أشكالَ محطات التهيئة
+    "welcome": ("frames", 4.0),       # صفحةُ مرجعٍ في إطارٍ بمقاس جهاز
+    "device": ("screens", 8.0),       # شاشةُ رحلةٍ تُبنى وتُقاس على مقاسٍ
 }
 
 
-# الحروف الممثِّلة لأصناف الأجرام (بلاغ المهمة): ألفٌ طويلة، باءٌ منقوطة تحت، ميمٌ نازلة،
-# عينٌ وسطى، غينٌ منقوطة فوق — عليها تُحكَّم المعايرة بالعين بعد أن يحكم عليها العدد.
-SAMPLE_LETTERS = "ابمعغ"
-# أقصى بقيّةٍ مقبولة بعد الرفعة (بكسل، عند ١٤٤ بكسل حجم خط الصندوق) — تدوير الوحدات لا أكثر.
-LIFT_TOLERANCE = 1.0
+def tree_work() -> dict:
+    """ما تمشيه السَّوقاتُ من مادّة الشجرة — **مقيسٌ من البيانات لا مكتوب**.
+
+    المنهجُ يُقرأ بـ`node` من وحداته نفسِها (كما يقرؤه `test_welcome.mjs`)،
+    وصفحاتُ المرجع تُجرَد من القرص. وإن تعذّر `node` رجعت المهلةُ إلى أرضيتها
+    **وقيل ذلك** — لا مهلةٌ تنكمش صامتةً.
+    """
+    script = (
+        "globalThis.localStorage={getItem:()=>null,setItem(){},removeItem(){}};"
+        "const p=await import('./app/js/progress.js');"
+        "const {PATHS}=await import('./app/js/paths.js');"
+        "const {WARMUPS}=await import('./app/js/warmups.js');"
+        "const forms=Object.values(PATHS).reduce((n,f)=>n+Object.keys(f).length,0);"
+        "const warmupShapes=Object.values(WARMUPS).reduce((n,w)=>n+w.shapes.length,0);"
+        "const types=new Set(p.allNodes().map((n)=>n.type)).size;"
+        "console.log(JSON.stringify({nodes:p.allNodes().length,forms,warmupShapes,types}));"
+    )
+    work = {}
+    try:
+        out = subprocess.run(["node", "--input-type=module", "-e", script],
+                             cwd=ROOT, capture_output=True, text=True, check=True, timeout=60)
+        work = json.loads(out.stdout.strip().splitlines()[-1])
+    except (OSError, ValueError, subprocess.SubprocessError):
+        return {}
+    # صفحاتُ المرجع من القرص (`perf-check` عدّةُ قياسٍ لا صفحةَ عرض فلا تُقاس)
+    pages = [p for p in sorted((APP / "welcome").glob("*.html")) if p.name != "perf-check.html"]
+    work["frames"] = len(pages) * len(DEVICE_SIZES)
+    # شاشاتُ عدّة الأجهزة: صفحةُ الجهاز تبني ممثِّلاً لكلّ نوع عقدة وثلاثَ شاشاتٍ
+    # عامّة (الخريطة والمراجعة ولوحة وليّ الأمر) — وتُقاس على المقاسات كلِّها.
+    work["screens"] = (work.get("types", 0) + 3) * len(DEVICE_SIZES)
+    return work
 
 
-# **`report_metrics` و`window_of` و`device_main` وصفحتُها (`browser_device.html`) لم
-# تُنقَل**: عدّةُ الأجهزة تقيس الفائضَ الرأسيّ والأفقيّ **شاشةً شاشة**، وتعاير توسيطَ
-# الحرف البطل — ولا شاشةَ في «اُكْتُبْ» بعدُ. وتملكها **الجلسة ١٢** («صقل الجهاز:
-# آيباد ٦/٧ بالقلم والإصبع + `perf_check`»)، و`DEVICE_SIZES` أعلاه باقيةٌ لها:
-# مقاساتُ الأجهزة لا تتبدّل بتبدّل المادة.
+def suite_timeout(suite: str, work: dict) -> tuple:
+    """(المهلةُ بالثواني، سطرُ قياسها) — والسطرُ يُطبع فلا تُقرأ مهلةٌ مجهولةُ الأصل."""
+    if suite not in SUITE_WORK:
+        return FLOOR_TIMEOUT, f"مهلةُ «{suite}»: {FLOOR_TIMEOUT}ث (الأرضية — سَوقةُ شاشةٍ لا تمشي مادّة)"
+    unit, rate = SUITE_WORK[suite]
+    count = work.get(unit)
+    if not count:
+        return FLOOR_TIMEOUT, (f"مهلةُ «{suite}»: {FLOOR_TIMEOUT}ث (الأرضية — **تعذّر قياسُ**"
+                               f" «{unit}» من الشجرة، فلا تُشتقّ)")
+    total = int(FLOOR_TIMEOUT + rate * count)
+    return total, (f"مهلةُ «{suite}»: {total}ث = {FLOOR_TIMEOUT} أرضيةً"
+                   f" + {rate:g}ث × {count} {unit} (مقيسةً من الشجرة)")
+
+
+# ————— عدّةُ الأجهزة: الشاشاتُ على مقاسات الميدان الخمسة —————
+#
+# **وهذا النصفُ غير المنقول من بذرة اقرأ** (`SEED.md`: «`device_main` مُعلَّقةٌ للجلسة
+# ١٢»): يومَ نُسخت الحظيرةُ لم تكن في «اُكْتُبْ» شاشةٌ واحدة تُقاس. وقد صارت الرحلةُ
+# ٥٥ محطةً، فبُنيت هنا بحدّها.
+#
+# **ولا قائمةَ شاشاتٍ تُكتب**: `browser_device.html` يبني ممثِّلاً **لكلّ نوع عقدة في
+# الرحلة** كما يقرؤها `progress.js` — فنوعٌ يُبنى غداً يدخل القياسَ يومَ يُبنى.
+#
+# **والقاعدةُ المقيسة** (`DESIGN §٤`): لا فائضَ أفقيَّ في أيّ شاشةٍ على أيّ مقاس — صفحةٌ
+# تُسحَب يميناً وشمالاً مكسورةٌ بحكمها. **وشاشةُ اللوح تسع الوضع العرضيّ بلا سحبٍ
+# رأسيّ** كذلك: طفلٌ يكتب ثم يسحب ليرى بقيّةَ لوحه ينقطع عن حركته — وأمّا الخريطةُ
+# والمراجعةُ ولوحةُ وليّ الأمر فقوائمُ تطول بطبعها، فالسحبُ فيها أصلٌ لا عطب.
+# **والفصلُ بينهما بنيويّ**: الصفحةُ تقول أفي الشاشة لوحُ كتابةٍ أم لا (`board`)،
+# فلا قائمةُ أسماءِ شاشاتٍ تشيخ (وقائمةُ اقرأ المنسوخة كانت تحمل أسماءَ شاشاته هو).
+
+
+def window_of(size: str) -> str:
+    """مقاسُ نافذةٍ يعطي منظوراً بمقاس الجهاز المطلوب تماماً (مع الإطار الوهميّ)."""
+    w, h = (int(x) for x in size.split(","))
+    return f"{w},{h + VIEWPORT_PAD}"
+
+
+def device_main(args) -> int:
+    results = []
+    server = make_server(args.port, results)
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    profile = new_profile()
+    base = f"http://127.0.0.1:{args.port}"
+    sizes = [("مقاس مطلوب", args.size)] if args.size else DEVICE_SIZES
+    runs = []
+
+    try:
+        if args.shots:
+            out = Path(args.shots).resolve()
+            out.unlink(missing_ok=True)
+            url = f"{base}/__device.html" + (f"?screen={args.screen}" if args.screen else "")
+            proc = run_chrome(url, profile,
+                              [f"--screenshot={out}",
+                               f"--window-size={window_of(args.size or '768,1024')}",
+                               "--hide-scrollbars"], args.show)
+            deadline = time.time() + args.timeout
+            while time.time() < deadline and not out.exists():
+                time.sleep(0.4)
+            proc.kill()
+            print(f"اللقطة: {out}" if out.exists() else "تعذّرت اللقطة")
+            return 0 if out.exists() else 1
+
+        # **ولكلِّ مقاسٍ ملفُّ إعداداتٍ جديد**: كروم لا يُطلِق قفلَ ملفّه لحظةَ قتله،
+        # فإعادةُ إطلاقه على الملفّ نفسِه تسقط صامتةً — وقد سقط بها **المقاسُ
+        # الخامس وحدَه** أوّلَ تشغيلٍ لهذه العدّة، فقُرئ «لم تصل نتيجة» وهو قفلُ ملف.
+        for label, size in sizes:
+            results.clear()
+            spot = new_profile()
+            proc = run_chrome(f"{base}/__device.html", spot,
+                              [f"--window-size={window_of(size)}", "--hide-scrollbars"], args.show)
+            deadline = time.time() + args.timeout
+            while time.time() < deadline and not results:
+                time.sleep(0.4)
+            proc.kill()
+            shutil.rmtree(spot, ignore_errors=True)
+            if not results:
+                print(f"لم تصل نتيجةٌ من المقاس {label} ({size}) خلال {args.timeout}ث")
+                return 1
+            runs.append((label, size, list(results)))
+    finally:
+        server.shutdown()
+        shutil.rmtree(profile, ignore_errors=True)
+
+    bad = []
+    for label, size, rows in runs:
+        vw, vh = (int(x) for x in size.split(","))
+        wide = vw > vh
+        print(f"\n— {label} ({vw}×{vh}) {'عرضي' if wide else 'طولي'} —")
+        if (rows[0]["vw"], rows[0]["vh"]) != (vw, vh):
+            got = f"{rows[0]['vw']}×{rows[0]['vh']}"
+            print(f"  ✗ المنظورُ الفعليّ {got} لا يطابق المطلوب — عايِر VIEWPORT_PAD")
+            bad.append((label, "المنظور", f"جاء {got}"))
+        for r in rows:
+            if r.get("error"):
+                print(f"  ✗ {r['label']}: عطب — {r['error']}")
+                bad.append((label, r["id"], r["error"]))
+                continue
+            over, over_x = r["over"], r["overX"]
+            must = wide and r.get("board")
+            fail = over_x > 0 or (must and over > 0)
+            if fail:
+                bad.append((label, r["id"],
+                            f"فائض أفقي {over_x}px" if over_x else f"فائض رأسي {over}px"))
+            mark = "✗" if fail else ("·" if over else "✓")
+            kind = "لوحُ كتابة" if r.get("board") else "قائمةٌ تُسحَب"
+            note = (f"{kind} · الطولُ {r['h']}px"
+                    + (f" — فائضٌ رأسيّ {over}px" if over else " — يسع الشاشة")
+                    + (f" — **فائضٌ أفقيّ {over_x}px**" if over_x else ""))
+            print(f"  {mark} {r['label']} [{r['states']} حال · {r.get('kind', '؟')}]: {note}"
+                  + (f" · شكوى المحرّك: {r['faults']}" if r.get("faults") else ""))
+
+    if bad:
+        print(f"\n{len(bad)} إخفاق:")
+        for label, sid, why in bad:
+            print(f"  ✗ {label} · {sid}: {why}")
+        return 1
+    print("\nولا فائضَ أفقيٌّ في شاشةٍ على مقاسٍ من الخمسة، وكلُّ لوحِ كتابةٍ يسع الوضعَ"
+          "\nالعرضيّ بلا سحب — والقوائمُ تُسحَب رأسياً بطبعها ولا تُحاسَب عليه.")
+    return 0
 
 
 def main():
@@ -259,18 +483,35 @@ def main():
     # به مرتين في مراجعات المدير): ثلاثةُ تطبيقاتٍ في مساحة عملٍ واحدة وعدَدُها من بذرةٍ
     # واحدة — اقرأ ٨٧٩٠ واحسب ٨٧٩١ **واكتب ٨٧٩٢** — فمنفذٌ مشترك يجعل تشغيلَ أحدها
     # يُفشِل الآخر بلا ذنب، أو يجعله يقرأ تقريرَ جارٍ تقريرَه.
-    ap.add_argument("--port", type=int, default=8792)
-    ap.add_argument("--timeout", type=int, default=140, help="ثوانٍ قبل الاستسلام")
+    ap.add_argument("--port", type=int, default=ports.port_of("browser_test"))
+    ap.add_argument("--timeout", type=int, default=0,
+                    help="ثوانٍ قبل الاستسلام (والافتراضُ مُشتقٌّ من طول السَّوقة)")
     ap.add_argument("--shots", metavar="PNG", help="لقطة للمراجعة البصرية بدل تشغيل الاختبارات")
     ap.add_argument("--show", action="store_true", help="متصفّح مرئي")
     ap.add_argument("--suite", choices=sorted(SUITES), default="shell",
                     help="أيُّ صفحةِ فحصٍ تُشغَّل (القشرة · القلم · المسارات · التهيئة · الميدان)")
+    ap.add_argument("--device", action="store_true",
+                    help="عدّةُ الأجهزة: شاشاتُ الرحلة على مقاسات الميدان الخمسة")
+    ap.add_argument("--size", help="مقاسُ منظورٍ واحد W,H بدل الخمسة (مع --device)")
+    ap.add_argument("--screen", help="اسمُ شاشةٍ واحدة في صفحة الجهاز (مع --device --shots)")
     args = ap.parse_args()
+
+    # **نظافةُ كروم عند الإقلاع** — كنسُ يتامانا وحدَهم قبل إطلاق جولةٍ جديدة
+    swept = sweep_orphans(loud=True)
+    if swept:
+        print(f"  · كُنس {swept} يتيماً من جولاتنا السابقة قبل الإقلاع")
+
+    if not args.timeout:
+        args.timeout, why = suite_timeout("device" if args.device else args.suite, tree_work())
+        print("  · " + why)
+
+    if args.device:
+        return device_main(args)
 
     results = []
     server = make_server(args.port, results)
     threading.Thread(target=server.serve_forever, daemon=True).start()
-    profile = Path(tempfile.mkdtemp(prefix="uktub-chrome-"))
+    profile = new_profile()
     base = f"http://127.0.0.1:{args.port}"
 
     try:

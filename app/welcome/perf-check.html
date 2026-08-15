@@ -202,6 +202,98 @@
           row('فتحُ شاشة', 'لا زرّ «تابع»', '', 'خريطةٌ بلا هدفٍ تالٍ');
         }
 
+        // ٣ب) **مسارُ الرسم** — أثقلُ ما في التطبيق وأخصُّه به (بند الجلسة ١٢).
+        //
+        //    الكتابةُ فعلٌ ممتدّ: إصبعٌ ينزل، فحبرٌ يظهر، فحركةٌ تُبطَّن في إطارٍ
+        //    واحد (`requestAnimationFrame`)، فحكمٌ عند الرفع. **وأيُّها بطؤ بان
+        //    للطفل قبل أن يبين لنا**: الحبرُ الذي يتأخّر عن الإصبع يُقرأ «التطبيق
+        //    بطيء» ولو كان الإقلاعُ سريعاً. فتُقاس الحلقاتُ الثلاث بأعيانها.
+        //
+        //    **ولا يمرّ القياسُ بشاشة**: يُبنى لوحٌ من `pen.js` بمسارِ حرفٍ من
+        //    المنهج نفسِه — فما يُقاس هو محرّكُ الطفل بعينه، ولا يعتمد على أين
+        //    وقف الطفلُ في رحلته ولا يمسّ تقدّمَه.
+        try {
+          var pen = await import('../js/pen.js');
+          var lib = await import('../js/paths.js');
+          var first = Object.keys(lib.PATHS)[0];
+          var ref = first && lib.PATHS[first][Object.keys(lib.PATHS[first])[0]];
+          if (!ref) throw new Error('لا مسارَ مرجعيّاً في المنهج');
+
+          var stage = document.createElement('div');
+          stage.style.cssText = 'position:fixed;inset-block-start:0;inset-inline-start:0;'
+            + 'width:320px;height:320px;opacity:.01;pointer-events:none';
+          document.body.append(stage);
+
+          var verdictAt = 0;
+          var surface = pen.penSurface({
+            ref: ref, mode: pen.MODES.GUIDED, label: 'لوحُ قياس',
+            onDone: function () { verdictAt = performance.now(); },
+          });
+          stage.append(surface.el);
+          await sleep(60);
+
+          var svg = surface.svg;
+          var box = svg.getBoundingClientRect();
+          var vb = svg.viewBox.baseVal;
+          var unit = Math.min(box.width / vb.width, box.height / vb.height);
+          var ox = box.left + (box.width - vb.width * unit) / 2;
+          var oy = box.top + (box.height - vb.height * unit) / 2;
+          var at = function (p) {
+            return { clientX: ox + p[0] * unit, clientY: oy + p[1] * unit };
+          };
+          var fire = function (type, p, id) {
+            svg.dispatchEvent(new PointerEvent(type, Object.assign({
+              bubbles: true, cancelable: true, composed: true,
+              pointerId: id, pointerType: 'touch', isPrimary: true,
+            }, at(p))));
+          };
+          var pts = ref.strokes[0].points;
+          var inked = function () {
+            var line = svg.querySelector('.pen-ink .pen-line');
+            return line ? (line.getAttribute('d') || '').length : 0;
+          };
+
+          // (أ) نزولُ الإصبع ← أوّلُ حبرٍ على اللوح
+          var d0 = performance.now();
+          fire('pointerdown', pts[0], 7);
+          var downMs = await waitFor(function () { return inked() > 0; }, 4000);
+          row('نزولُ الإصبع ← أوّلُ حبر', downMs < 0 ? 'لم يظهر' : ms(performance.now() - d0),
+            downMs < 0 ? 'bad' : grade(performance.now() - d0, 32, 100),
+            'اللحظةُ التي يرى فيها الطفلُ قلمَه');
+
+          // (ب) حركةٌ ← امتدادُ الحبر: دورةُ الإطار الواحد (`pump`)
+          var lags = [];
+          for (var s = 1; s < pts.length; s++) {
+            var was = inked();
+            var t = performance.now();
+            fire('pointermove', pts[s], 7);
+            var got = await waitFor(function () { return inked() > was; }, 1000);
+            if (got >= 0) lags.push(performance.now() - t);
+          }
+          var mid = lags.slice().sort(function (a, b) { return a - b; })[Math.floor(lags.length / 2)] || -1;
+          row('حركةٌ ← امتدادُ الحبر (الوسيط)', mid < 0 ? 'لم يمتدّ' : ms(mid),
+            mid < 0 ? 'bad' : grade(mid, 34, 80),
+            lags.length + ' حركةً — دورةُ إطارٍ واحدة (١٦ م.ث إطارٌ كامل)');
+
+          // (ج) رفعُ القلم ← حكمُ الجزء: الحسابُ الثقيل (`judge`) بعد كل ضربة
+          verdictAt = 0;
+          var u0 = performance.now();
+          fire('pointerup', pts[pts.length - 1], 7);
+          await sleep(0);
+          var judged = performance.now() - u0;
+          row('رفعُ القلم ← حكمُ الضربة', ms(judged), grade(judged, 40, 120),
+            'الشروطُ الأربعة على ضربةٍ كاملة');
+
+          row('ثِقَلُ اللوح المرسوم', svg.querySelectorAll('*').length + ' عنصراً',
+            grade(svg.querySelectorAll('*').length, 60, 200),
+            'نموذجٌ وأثرٌ وإرشادٌ وحبر');
+
+          surface.destroy();
+          stage.remove();
+        } catch (e) {
+          row('مسارُ الرسم', 'تعذّر', 'bad', String((e && e.message) || e));
+        }
+
         // ٤) كتابةُ التقدّم: هل تُثقِل الكتابةُ المتزامنة كلَّ تفاعل؟
         var probe = JSON.stringify({ pad: new Array(2000).join('x') });
         var t4 = performance.now();

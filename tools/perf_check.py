@@ -24,6 +24,10 @@ import threading
 import time
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import ports  # noqa: E402  (جدولُ المنافذ — تُقرأ من موضعٍ واحد، `tools/ports.py`)
+import browser_test  # noqa: E402  (حظيرةُ كروم — سابقةُ ملفّ الإعدادات تُقرأ منها فيكنسها الكنّاسُ عند الإقلاع)
+
 ROOT = Path(__file__).resolve().parent.parent
 APP = ROOT / 'app'
 PAGE = APP / 'welcome' / 'perf-check.html'
@@ -80,7 +84,7 @@ def measure(port: int, timeout: int) -> int:
         print('✗ لم أجد Chrome — استعمل `--serve` وافتح الصفحة بيدك')
         return 1
     server = serve(port)
-    profile = tempfile.mkdtemp(prefix='perf-')
+    profile = tempfile.mkdtemp(prefix=browser_test.CHROME_PREFIX + 'perf-')
     url = f'http://127.0.0.1:{port}/welcome/perf-check.html#auto'
     chrome = subprocess.Popen(
         [CHROME, '--headless=new', '--disable-gpu', '--no-first-run',
@@ -114,6 +118,19 @@ def self_test() -> int:
                    'وترسل أرقامَها نصّاً (لا لقطةً قد تخرج بيضاء)'))
     checks.append(('<script' in text and 'welcome' in str(PAGE),
                    'وهي في `welcome/` — خارج اعتراض عامل الخدمة'))
+    # **ومسارُ الرسم مقيسٌ فيها** (بند الجلسة ١٢): أثقلُ ما في التطبيق وأخصُّه به —
+    # وحلقاتُه الثلاث بأعيانها، فلو سقطت واحدةٌ منها صمت القياسُ عن أهمّ ما يقيس.
+    checks.append(("import('../js/pen.js')" in text and 'penSurface(' in text,
+                   'وتبني لوحاً من `pen.js` نفسِه — فالمقيسُ محرّكُ الطفل لا شاشةٌ تشبهه'))
+    for label in ('نزولُ الإصبع ← أوّلُ حبر',
+                  'حركةٌ ← امتدادُ الحبر (الوسيط)',
+                  'رفعُ القلم ← حكمُ الضربة'):
+        checks.append((label in text, f'  وتقيس «{label}»'))
+    checks.append(('surface.destroy()' in text and 'stage.remove()' in text,
+                   'وتُطلِق اللوحَ وتنزع لوحتَه بعد القياس — لا أثرَ يبقى معلّقاً'))
+    # **ولا يخرج من الجهاز إلا أرقام**: أثرُ القلم لا يُرسَل، والمرفوعُ نصُّ الجدول
+    checks.append(("body: text + '\\n\\n'" in text and '.ink()' not in text,
+                   '**ولا تُرسِل أثرَ قلمٍ ألبتّة** — المرفوعُ نصُّ جدول الأرقام وحدَه'))
     bad = [msg for good, msg in checks if not good]
     for good, msg in checks:
         print(('  ✓ ' if good else '  ✗ ') + msg)
@@ -124,7 +141,7 @@ def self_test() -> int:
 def main() -> int:
     ap = argparse.ArgumentParser(description='قياس سرعة التطبيق على الجهاز')
     ap.add_argument('--serve', action='store_true', help='خادمٌ للشبكة المحلية (للآيباد)')
-    ap.add_argument('--port', type=int, default=8899)
+    ap.add_argument('--port', type=int, default=ports.port_of("perf_check"))
     ap.add_argument('--timeout', type=int, default=90, help='ثوانٍ قبل الاستسلام')
     ap.add_argument('--self-test', action='store_true', help='فحصٌ ذاتيّ بلا شبكة')
     args = ap.parse_args()
