@@ -275,13 +275,30 @@ const send = () => fetch('/result', {
     // يُطلَق `controllerchange` كما يُطلقه المتصفّح يومَ تتبدّل القشرةُ تحت الطفل.
     let swWin = win;
     let swDoc = doc;
+    /**
+     * **والمهلةُ تُشتقّ من طول العمل لا رقماً واحداً للجميع** (قاعدةُ العائلة نفسُها
+     * التي رُفعت في مهلة الحظيرة): `install` يخزن **بنكَ الصوت كلَّه** قبل
+     * `skipWaiting`، فلا متولّيَ قبل أن يتمّ. وكان الحدُّ ست ثوانٍ سُنَّت يومَ كان
+     * البنكُ ١٤١ ملفاً، **فلمّا صار ٧٥٩ قُرئت بطءُ التخزين عطباً في الإشعار** وهي
+     * مهلةٌ قصيرة. فيُقرأ عددُ البنك من فهرسه ويُشتقّ منه الحدّ — **فبنكٌ يكبر غداً
+     * يوسّع مهلتَه من نفسه بلا سطرٍ يُعدَّل**.
+     */
+    const bankSize = await fetch('/audio/manifest.json')
+      .then((r) => r.json()).then((m) => Object.keys(m).length).catch(() => 0);
+    const CEILING = Math.max(30, Math.ceil(bankSize / 8));   // ×200ms
     const controlled = async () => {
-      for (let i = 0; i < 30 && !swWin.navigator.serviceWorker?.controller; i++) await wait(200);
+      const t0 = Date.now();
+      for (let i = 0; i < CEILING && !swWin.navigator.serviceWorker?.controller; i++) await wait(200);
+      waited = Date.now() - t0;
       return Boolean(swWin.navigator.serviceWorker?.controller);
     };
+    let waited = 0;
     if (!(await controlled())) {
-      ok(false, 'لم يستولِ عاملُ الخدمة على الصفحة — لا يُقاس الإشعارُ بلا قشرةٍ متولّية');
+      ok(false, `لم يستولِ عاملُ الخدمة على الصفحة خلال ${Math.round(CEILING * 0.2)}ث`
+        + ` (بنكٌ ${bankSize} ملفاً) — لا يُقاس الإشعارُ بلا قشرةٍ متولّية`);
     } else {
+      ok(true, `تولّى عاملُ الخدمة الصفحة بعد ${(waited / 1000).toFixed(1)}ث`
+        + ` — والحدُّ مشتقٌّ من بنكٍ فيه ${bankSize} ملفاً (${Math.round(CEILING * 0.2)}ث)`);
       swWin.location.reload();
       await new Promise((r) => frame.addEventListener('load', r, { once: true }));
       swWin = frame.contentWindow;
