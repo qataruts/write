@@ -104,6 +104,7 @@ const SHELL = [
   'js/copy.js',
   'js/curriculum.js',
   'js/fade.js',
+  'js/feedback.js',
   'js/gate.js',
   'js/install.js',
   'js/lesson.js',

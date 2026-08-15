@@ -18,6 +18,10 @@
       ويُمحى الجهاز، ويُستعاد منه — فتعود اللوحةُ بأرقامها ذاتِها.
     · وأنّ **المعاينة تفتح ولا تكتب**: يُنقَر زرُّها فتُفتَح الرحلةُ كلُّها ويظهر
       شريطُها، **والمخزنُ لا يتبدّل حرفاً**.
+    · وأنّ **زرَّي «بلِّغنا» مسلَّحان** برسالةٍ جاهزة فيها نسخةُ القشرة الحيّة وموضعُ
+      الشاشة — **وأنّ فيها صفرَ بياناتِ طفل**: يُزرع اسمٌ موسوم ثم **تُفتَّش الرسالةُ
+      نصّاً** عنه وعن نجومه وحرفه وكلمته وجملته. (والفصلُ البنيويّ في
+      `test_feedback.mjs`؛ وهذا يقيس ثمرتَه.)
     · 🔒 وأنّ الدورة كلَّها **بصفر طلباتٍ شبكية** و**صفرِ نطق**: لوحةُ بالغٍ تُقرأ.
 -->
 <style>
@@ -110,6 +114,10 @@ const fromAr = (text) => Number(String(text).replace(/[٠-٩]/g,
     progress.recordAttempt(word, progress.WORD_FORM, progress.KINDS.DICTATE, false);
     progress.recordAttempt(line, progress.SENTENCE_FORM, progress.KINDS.COPY, true);
     progress.addSeconds(300);
+    // **اسمٌ موسومٌ عمداً** (الجلسة ب): سلسلةٌ لا تقع في نصٍّ آخر، فيُقاس بها أنّ
+    // رسالةَ «بلِّغنا» **لا تحمل من الطفل شيئاً** — بحثاً في النصّ لا بحسن ظنّ.
+    const CHILD = 'زُخْرُفَةُ‌الشَّاهِدْ';
+    progress.setChildName(CHILD);
     for (let i = 0; i < 4; i++) progress.recordFault(letter, pen.FAULTS.START_END);
     progress.recordFault(letter, pen.FAULTS.DOTS_FIRST);
     progress.recordFault(warm.part, pen.FAULTS.REVERSE);
@@ -269,7 +277,60 @@ const fromAr = (text) => Number(String(text).replace(/[٠-٩]/g,
     ok([...doc.querySelectorAll('.faults .fault')][0]?.textContent.includes(wanted),
       'واللوحةُ بعد الاستعادة تقرأ الجملةَ نفسَها — عادت معرفةُ الوالد بطفله');
 
-    // ————— ٥) المعاينةُ تفتح ولا تكتب —————
+    // ————— ٥) «بلِّغنا»: الزرّان مسلَّحان، والرسالةُ صفرُ بياناتِ طفل —————
+    //
+    // **الوعدُ يُقاس نصّاً لا يُوثَق به**: الرسالةُ المولَّدة تُفكَّ من الرابط
+    // وتُفتَّش — فإن تسرّب اسمُ الطفل أو نجومُه أو حرفٌ من رحلته، احمرَّ السطر.
+    // (والفصلُ البنيويّ يحرسه `test_feedback.mjs`؛ وهذا يقيس **ثمرته**.)
+
+    const links = [...doc.querySelectorAll('.audit a.btn')];
+    const wa = links.find((el) => (el.getAttribute('href') || '').includes('wa.me'));
+    const mail = links.find((el) => (el.getAttribute('href') || '').startsWith('mailto:'));
+    ok(Boolean(wa) && Boolean(mail), `وفي اللوحة زرّا «بلِّغنا» (${links.length} رابطاً)`);
+    ok(wa && wa.href.includes('wa.me/97433882806'),
+      'واتساب بالرقم المعتمد، مسلَّحاً برسالةٍ جاهزة');
+    ok(mail && mail.href.startsWith('mailto:info@mishkat.qa?'),
+      'والبريدُ إلى info@mishkat.qa بعنوانٍ ومتنٍ مملوءين');
+    ok(wa && wa.target === '_blank' && wa.rel.includes('noopener'),
+      'ويُفتح في نافذةٍ مستقلة موصدة — واللوحةُ لا تُغادَر');
+
+    const message = decodeURIComponent(new URL(wa.href).search.replace(/^\?text=/, ''));
+    const body = decodeURIComponent(
+      (new URL(mail.href).search.match(/[?&]body=([^&]*)/) || [, ''])[1]);
+    ok(message === body, 'ونصُّ القناتين واحدٌ حرفاً — فلا يفترق بلاغان');
+
+    // نسخةُ القشرة من سطر اللوحة نفسِه — وقد ثبت أعلاه أنّه نسخةُ ما **يعمل**
+    // (والقشرةُ تردّ على النافذة لا على قناةٍ خاصّة، فالسطرُ أصدقُ مأخذٍ هنا).
+    const version = (doc.querySelector('[data-sw-version]')?.textContent || '')
+      .replace('نسخة القشرة:', '').trim();
+    ok(Boolean(version) && message.includes(`(قشرة ${version})`),
+      `وسطرُ السياق يحمل نسخةَ القشرة الحيّة (${version || '—'}) — فلا يشهد ميدانٌ على شيفرةٍ لم تصله`);
+    ok(message.includes('الموضع #/parent'),
+      `ويحمل موضعَ الشاشة كما يقرؤه المتصفّح (${(message.match(/الموضع [^\s:]+/) || ['—'])[0]})`);
+
+    /**
+     * **والقياسُ الحاسم: الرسالةُ كلُّها معلومة**. تفتيشُ النصّ عن أسماءٍ بعينها
+     * يمسك ما خطر ببالنا، **وهذا يمسك ما لم يخطر**: إن كان المتنُ حرفاً بحرفٍ هو
+     * هذا، فليس فيه من الطفل شيءٌ **بالضرورة** لا بحسن ظنّ.
+     */
+    const expected = `بلاغ من تطبيق اُكْتُبْ (قشرة ${version}) — الموضع #/parent:\n`
+      + 'اكتب ملاحظتك هنا — وأرفق لقطة شاشة إن أمكن.';
+    ok(message === expected,
+      `والرسالةُ كلُّها معلومةٌ حرفاً — سياقٌ ودعوةٌ ولا شيءَ سواهما${
+        message === expected ? '' : `:\n      المولَّد: ${JSON.stringify(message)}`}`);
+
+    // **ثم التفتيشُ باسمه**: يقول ما الذي يُبحث عنه، فيُقرأ الحارسُ كما يُقرأ العهد.
+    // (والحرفُ المفرد ليس إبرةً: «ا» تقع في كل نثرٍ عربيّ فتقيس لا شيء.)
+    const needles = [CHILD, word, line, String(progress.totalStars()),
+      String(progress.secondsOn())].filter((n) => n && String(n).length > 1);
+    const leaked = needles.filter((needle) => message.includes(needle));
+    ok(leaked.length === 0,
+      `وصفرُ بياناتِ طفلٍ فيها — فُتِّشت عن ${needles.length} إبرةً: اسمُه وكلمتُه`
+      + ` وجملتُه ونجومُه ودقائقُه${leaked.length ? ` — تسرّب: ${leaked.join('، ')}` : ''}`);
+    ok(!/[٠-٩]/.test(message),
+      'ولا رقمَ عربيّاً واحداً فيها — والأرقامُ لغةُ عدّادات الطفل');
+
+    // ————— ٦) المعاينةُ تفتح ولا تكتب —————
 
     const KEY = 'uktub.progress.v1';
     const diskBefore = win.localStorage.getItem(KEY);
@@ -292,7 +353,7 @@ const fromAr = (text) => Number(String(text).replace(/[٠-٩]/g,
     ok(win.localStorage.getItem(KEY) === diskBefore,
       'والمخزنُ لم يتبدّل حرفاً بفتحها');
 
-    // ————— ٦) 🔒 صفرُ طلباتٍ وصفرُ نطق —————
+    // ————— ٧) 🔒 صفرُ طلباتٍ وصفرُ نطق —————
 
     ok(netCalls.length === 0,
       `دورةُ اللوحة كلُّها بصفر طلباتٍ شبكية${netCalls.length ? ` — وقعت: ${netCalls.join('، ')}` : ''}`);

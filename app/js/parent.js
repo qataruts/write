@@ -22,6 +22,10 @@ import {
   h, fill, go, toast, arNum, arCount, topbar, letterTitle, nodeTitle, nodeWhere, stageTitle,
   shake,
 } from './ui.js';
+// **«بلِّغنا» وحدةٌ مستقلة عمداً** (الجلسة ب): تحمل روابطَ خارجية بطبعها، وحارسُ
+// خصوصية القلم يمنع `https://` في حاملي مسار الطفل — **فلا يجمعهما ملفٌ أبداً**،
+// وتبقى هذه اللوحةُ صفرَ عناوين. تُستدعى ولا يُكتب رابطُها هنا.
+import { feedbackSection } from './feedback.js';
 
 const ACCENT = 'var(--accent-skills)';
 const GOOD = 'var(--ok)';
@@ -834,6 +838,8 @@ function dashboard(rerender = () => {}) {
     ...section('تحكّم في الرحلة', journeySection(rerender)),
 
     ...section('معاينةُ التطبيق كلِّه', previewSection()),
+
+    ...section('بلِّغنا عن خطأ أو اقتراح', feedbackSection()),
 
     h('p', { class: 'note' }, 'المهارة = (الحرف أو الكلمة) × شكل الموقع × نوع التمرين — تتبّعاً أو حرّاً أو نسخاً أو إملاءً. الخطأ يعيدها إلى مراجعة الغد، والإصابة تُباعد موعدها (١ ← ٢ ← ٤ ← ٨ ← ١٦ يوماً).'),
   );

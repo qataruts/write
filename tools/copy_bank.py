@@ -3,6 +3,7 @@
 
     python3 tools/copy_bank.py            # جردٌ يُطبع ولا يُكتب
     python3 tools/copy_bank.py --copy     # ينسخ الناقص ويُحدِّث الفهرس
+    python3 tools/copy_bank.py --refresh  # يجدّد ما أُعيد توليدُه عند صاحبه
     python3 tools/copy_bank.py --self-test  # عهدُ النسخ: أكلُّ ملفٍّ عينُ أصله؟
 
 ## العهد
@@ -46,6 +47,13 @@ def key_for(text: str) -> str:
 
 def sha(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()[:12]
+
+
+def tag(path: Path) -> str:
+    """بصمةُ الوسم `?v=` — نظيرُ `fingerprint` في `generate_audio.py` حرفاً
+    (`sha1` أوّلُ ثمانٍ). وهي التي تُكتب في `audio/versions.json` وتُقيَّد في
+    `docs/SEED.md`، فيُطبَع بها التبدُّلُ قابلاً للّصق."""
+    return hashlib.sha1(path.read_bytes()).hexdigest()[:8]
 
 
 def read_root(arg: str | None) -> Path:
@@ -139,6 +147,65 @@ def run(read_dir: Path, do_copy: bool) -> int:
     return 0
 
 
+def refresh(read_dir: Path, do_write: bool) -> int:
+    """**تجديدُ المنسوخ**: أصلٌ أُعيد توليدُه عند صاحبه فتبدّلت بايتاتُه — يُنسَخ
+    ثانيةً **تحت مفتاحه هو** (المفتاحُ من النصّ فلا يتبدّل).
+
+    وهذا هو **الطريقُ الوحيد المشروع** لإصلاح صوتٍ منسوخ: «مَن نسخ لا يُصلح في
+    نسخته بل يُبلّغ مصدرَه» (`SEED §١٣`) — فإذا أصلح المصدرُ وبلّغ، **جُدِّدت
+    النسخةُ ولم تُولَّد**. و`--self-test` هو الذي يكشفها، وهذا يسدّها.
+
+    **ولا يمسّ `versions.json`**: بيانُ البصمات مِلكُ `generate_audio.py`، فلا
+    يُكتب من موضعين. ويُطبع التاليَ أمراً صريحاً، ويُمسِك تخلُّفَه
+    `test_audio_cache.mjs §١` من نفسه.
+    """
+    theirs = bank(read_dir)
+    have = load_manifest()
+    stale, mismatched = [], []
+    for key, text in sorted(have.items(), key=lambda kv: kv[1]):
+        their_key = theirs.get(text)
+        if not their_key:
+            continue                        # ما ليس في بنكهم لا أصلَ له يُجدَّد
+        if their_key != key:
+            mismatched.append(text)         # قاعدةُ المفتاح افترقت — عطبٌ لا يُتجاوَز
+            continue
+        src = read_dir / "app" / "audio" / f"{their_key}.mp3"
+        dest = OUT_DIR / f"{key}.mp3"
+        if not src.exists() or not dest.exists():
+            continue
+        if sha(src) != sha(dest):
+            stale.append((text, key, src, dest))
+
+    if mismatched:
+        print("✗ قاعدةُ المفتاح افترقت بين البنكين — لا يُجدَّد شيء:")
+        for text in mismatched[:5]:
+            print(f"    «{text}»")
+        return 1
+
+    print(f"في الفهرس {len(have)} مدخلاً · تبدّل أصلُه عندهم: {len(stale)}")
+    if not stale:
+        print("لا شيءَ يُجدَّد — كلُّ منسوخٍ عينُ أصله")
+        return 0
+
+    for text, key, src, dest in stale:
+        was = tag(dest)
+        if do_write:
+            shutil.copy2(src, dest)
+            if sha(src) != sha(dest):
+                print(f"✗ «{text}»: المجدَّدُ ليس عينَ أصله")
+                return 1
+        print(f"  {'✓' if do_write else '·'} «{text}» ({key}): {was} ← {tag(src)}"
+              f" · {src.stat().st_size} بايت")
+
+    if not do_write:
+        print("  (جردٌ فقط — للتجديد: --refresh --write)")
+        return 0
+    print(f"جُدِّد {len(stale)} ملفاً ببصماتها الجديدة — والفهرسُ لم يُمَسّ (المفاتيحُ هي هي).\n"
+          "التالي: `python3 tools/generate_audio.py --sync-versions` "
+          "فيكسر الوسمُ `?v=` كاشَ هذه وحدَها.")
+    return 0
+
+
 def self_test(read_dir: Path) -> int:
     """عهدُ النسخ: كلُّ ملفٍّ في بنكنا **عينُ أصله** عندهم، ومفتاحُه من نصّه."""
     fails = 0
@@ -178,11 +245,17 @@ def main() -> int:
     ap = argparse.ArgumentParser(description="نسخُ أصوات المنهج من بنك اقرأ ببصماتها")
     ap.add_argument("--read", metavar="PATH", help="موضع تطبيق اقرأ")
     ap.add_argument("--copy", action="store_true", help="ينسخ الناقص ويحدّث الفهرس")
+    ap.add_argument("--refresh", action="store_true",
+                    help="يجدّد ما أُعيد توليدُه عند صاحبه تحت مفتاحه هو")
+    ap.add_argument("--write", action="store_true",
+                    help="مع --refresh: يكتب فعلاً (وبدونه جردٌ يُطبع)")
     ap.add_argument("--self-test", action="store_true", help="عهدُ النسخ")
     args = ap.parse_args()
     read_dir = read_root(args.read)
     if args.self_test:
         return self_test(read_dir)
+    if args.refresh:
+        return refresh(read_dir, args.write)
     return run(read_dir, args.copy)
 
 
