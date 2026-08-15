@@ -18,7 +18,7 @@ import * as progress from './progress.js';
 import * as audio from './audio.js';
 import { pathOf, WORDS, SENTENCES, SPOKEN_WORDS, SPOKEN_SENTENCES } from './curriculum.js';
 import { WORD_PATHS } from './word_paths.js';
-import { penSurface, MODES } from './pen.js';
+import { penSurface, MODES, FREE } from './pen.js';
 import {
   h, icon, toast, go, arNum, arCount, starsRow, topbar, mascot, cheer, letterName, DEV,
 } from './ui.js';
@@ -66,6 +66,65 @@ export function releaseReview() {
 }
 
 /**
+ * 🚪 **عدّةُ التمرين الكريمة** (م٥ — بلاغُ الميدان ٤، ١٥ أغسطس ٢٠٢٦: «محطةٌ مستحيلة
+ * حتى الكبيرُ لا يعبرها … لا يجب أن يكون هناك مكانٌ يقع فيه الطفل بدون مخرج»):
+ *
+ * ١) **زرُّ «شاهِدْ» متاحٌ دائماً** (حكمُ المدير المنهجيّ الأول): البوابةُ تقيس مهارةَ
+ *    الكتابة — بدايةً واتجاهاً وترتيباً وشكلاً — **لا الاستذكارَ الأعمى**، وطفلٌ لا
+ *    يعرف الحرفَ يتعثّر ولو رآه. **فالرؤيةُ ليست غشاً، ولا تُحصى خطأً ولا تنقص نجمة**:
+ *    لا تمرّ بـ`onFault` ولا بـ`score`. ولمسةُ الطفل على اللوح تعيده إلى تمرينه —
+ *    وهي سنّةُ خطوة «شاهِدْ» في درس الحرف بعينها (`lesson.js`).
+ *
+ * ٢) **والمخرجُ الكريم يسري داخل التمرين** (الحكم الثالث): بعد `FREE.stumbles`
+ *    تعثّراتٍ يُفتَح البابُ بيده هو — «تَتَبَّعْ مَرَّةً» (النموذجُ يبقى مرئياً وهو
+ *    يكتب) أو «تَخَطَّ» (يُحصى **محاولةً غيرَ مصيبة** ويمضي، فيعيده ليتنر — متروكٌ
+ *    مؤجَّلٌ لا مسقَط). **والمعثرةُ تُعَدّ في الحكمين**: الحرُّ يبلّغها بـ`onStuck`،
+ *    والموجَّهُ بعدّاد أخطائه — فلا تمرينَ ينسدّ بابُه.
+ *
+ * وهي **للبوابة** (`assist`) لا لمراجعة اليوم: البوابةُ وحدَها هي الحائطُ الذي يقف
+ * قبل المفصل، ومراجعةُ اليوم بابُها مفتوحٌ إلى الخريطة بلا كلفة.
+ */
+function assistFoot({ surface, mode, skip }) {
+  const foot = h('div', { class: 'row foot assist' });
+  let watching = false;
+
+  /** عرضُ النموذج: `keep` يُبقيه مرئياً وهو يكتب (المخرجُ الكريم)، وإلا فحتى يلمس. */
+  const show = (keep) => {
+    audio.stop();
+    surface.reset();                 // ما رُسم قبل الرؤية يُطوى — يبدأ من أوّله
+    surface.setMode(MODES.GUIDED);
+    surface.play();
+    watching = !keep;
+  };
+
+  // **ولمستُه تردّه إلى تمرينه** — ولا تُبتلَع، فأوّلُ حرفٍ يكتبه لا يضيع
+  surface.el.addEventListener('pointerdown', () => {
+    if (!watching) return;
+    watching = false;
+    surface.stop();
+    surface.setMode(mode);
+  }, { capture: true });
+
+  foot.append(h('button', {
+    class: 'btn assist-watch', onclick: () => show(false),
+  }, icon('eye'), ' شاهِدْ'));
+
+  return {
+    el: foot,
+    /** يُفتَح مرّةً واحدة — والتعثّرُ يتكرر فلا تتكرر الأزرار. */
+    open() {
+      if (foot.classList.contains('assist--open')) return;
+      foot.classList.add('assist--open');
+      foot.append(
+        h('button', { class: 'btn btn--primary', onclick: () => show(true) },
+          icon('pen'), ' تَتَبَّعْ مَرَّةً'),
+        h('button', { class: 'btn', onclick: skip }, 'تَخَطَّ →'),
+      );
+    },
+  };
+}
+
+/**
  * **تمرينُ قلمٍ واحد**: يُعرَض الحرفُ من مساره المرجعيّ نفسِه ويُحكَم عليه بالشروط
  * الأربعة (`METHOD.md §٣.٣`) — موجَّهاً في «تتبّع»، وصندوقاً فارغاً في «حرّ».
  *
@@ -79,12 +138,20 @@ function penExercise(item, api, mode) {
 
   const box = h('div', { class: 'exercise' });
   let faults = 0;
+  let kit = null;
   releaseReview();
   const surface = penSurface({
     ref,
     mode,
     label: `لوحُ مراجعة: ${letterName(item.unit)}`,
-    onFault: (fault) => { faults++; progress.recordFault(item.unit, fault.code); },
+    onFault: (fault) => {
+      faults++;
+      progress.recordFault(item.unit, fault.code);
+      // **والموجَّهُ يُعَدّ بأخطائه**: `onStuck` من عدّة الحكم الحرّ وحدَها، والانسدادُ
+      // لا يعرف وضعاً من وضع — فثلاثةُ أخطاءٍ في تمرينٍ حدُّها كثلاثة تعثّرات
+      if (faults >= FREE.stumbles) kit?.open();
+    },
+    onStuck: () => kit?.open(),
     onDone: () => {
       api.score(item, item.unit, item.form, faults === 0);
       if (faults === 0) api.right(surface.el);
@@ -92,12 +159,20 @@ function penExercise(item, api, mode) {
     },
   });
   live = surface;
+  if (api.assist) {
+    kit = assistFoot({
+      surface,
+      mode,
+      skip: () => { api.score(item, item.unit, item.form, false); api.next(); },
+    });
+  }
   // **وسؤالُ اللوح توأمُ التعليمة المنطوقة**، فيتبعها في ألف الوصل: القاعدةُ حكمُها
   // على المنطوق (`docs/AUDIO_QUEUE.md`)، لكنّ الطفلَ يقرأ هذا السطرَ وأذنُه تسمع
   // صورتَه في الشاشات الأخرى — فصورتان لأمرٍ واحدٍ تعليمُ ازدواج.
   box.append(
     h('p', { class: 'ask' }, mode === MODES.FREE ? 'اكْتُبْهُ وحدَك' : 'تتبّعِ المسار'),
     surface.el,
+    kit?.el,
   );
   surface.play();
   surface.el.addEventListener('pointerdown', () => surface.stop(), { capture: true });
@@ -125,6 +200,7 @@ function wordExercise(item, api, mode) {
 
   const box = h('div', { class: 'exercise' });
   let faults = 0;
+  let kit = null;
   releaseReview();
   const surface = penSurface({
     ref,
@@ -132,7 +208,12 @@ function wordExercise(item, api, mode) {
     tolerance: ref.tolerance,
     baseline: ref.line,
     label: `${dictation ? 'لوحُ إملاء' : 'لوحُ نسخ'}: ${item.unit}`,
-    onFault: (fault) => { faults++; progress.recordFault(item.unit, fault.code); },
+    onFault: (fault) => {
+      faults++;
+      progress.recordFault(item.unit, fault.code);
+      if (faults >= FREE.stumbles) kit?.open();
+    },
+    onStuck: () => kit?.open(),
     onDone: () => {
       // **ومحورُ المهارة محورُها هي** — لا يُعاد تسميتُه هنا، فيرجع إلى صندوقه بعينه
       api.score(item, item.unit, item.form || progress.WORD_FORM, faults === 0);
@@ -141,6 +222,16 @@ function wordExercise(item, api, mode) {
     },
   });
   live = surface;
+  if (api.assist) {
+    kit = assistFoot({
+      surface,
+      mode,
+      skip: () => {
+        api.score(item, item.unit, item.form || progress.WORD_FORM, false);
+        api.next();
+      },
+    });
+  }
   const sentence = item.form === progress.SENTENCE_FORM;
   // **وحدُّ قاعدة همزة الوصل**: العاريةُ للمنطوق وحدَه (بلاغُ العائلة `hamza-rule-scope`)
   // — عُرِّيت هناك لأنّ المولّد يقرأ ما يُكتب فينطق ضمّةَ الوصل حركةً مطوّلة. **وهذا
@@ -149,7 +240,7 @@ function wordExercise(item, api, mode) {
   // وسط الجملة عاريةٌ **رسماً لا استثناءً** (همزةُ الوصل لا تُشكَل في الدَّرْج).
   box.append(h('p', { class: 'ask' }, dictation
     ? `اِسْتَمِعْ ثُمَّ اكْتُبِ ${sentence ? 'الجملة' : 'الكلمة'}`
-    : `اِنْسَخِ ${sentence ? 'الجملة' : 'الكلمة'}`), surface.el);
+    : `اِنْسَخِ ${sentence ? 'الجملة' : 'الكلمة'}`), surface.el, kit?.el);
   surface.play();
   surface.el.addEventListener('pointerdown', () => surface.stop(), { capture: true });
   // **وفي الإملاء الصوتُ هو السؤال كلُّه** — ولا نموذجَ يُرى (`MODES.FREE`)
@@ -208,7 +299,9 @@ export function itemTexts(item) {
 // @param {(ctx) => Node} verdict  شاشة الختام: تتلقّى {right, errors, items, again}
 // @param {string} pill · accent · leaveAsk  زينة الشاشة وسؤال المغادرة
 
-export function renderSession({ make, verdict, pill, accent = ACCENT, leaveAsk, header = null }) {
+export function renderSession({
+  make, verdict, pill, accent = ACCENT, leaveAsk, header = null, assist = false,
+}) {
   let items = make();
   if (!items.length) return null;   // لا حصيلة بعدُ: main.js يعيده إلى الخريطة
 
@@ -236,7 +329,9 @@ export function renderSession({ make, verdict, pill, accent = ACCENT, leaveAsk, 
     audio.preload(itemTexts(item));
     const view = VIEWS[item.kind];
     body.replaceChildren(view
-      ? view(item, { score, wrong, right, next, say, token: () => state.token, root: () => root })
+      ? view(item, {
+        score, wrong, right, next, say, assist, token: () => state.token, root: () => root,
+      })
       // تمرينٌ بلا مُصيِّر لا يقع اليوم (`buildSession` تسقطه)، ويبقى الحارسُ ظاهراً
       // بدل شاشةٍ بيضاء: **العطبُ يُقال ولا يُخفى** (قاعدةُ اقرأ في بلاغات الميدان).
       : h('p', { class: 'hint' }, `لا تمرينَ لهذا النوع بعدُ (${item.kind}).`));

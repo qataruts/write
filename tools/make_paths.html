@@ -993,21 +993,23 @@ function resample(points, scale = 1) {
 // ————— ٧) تركيبُ الشكل: أجسامٌ من الإيماءة ونقاطٌ من الخيال —————
 
 /**
- * النقاطُ **تُقرأ من الخيال آلياً**: الأجرامُ الصغيرة المنفصلة عن الجسم. وتُجمَع
- * المتقاربةُ منها في علامةٍ واحدة بعدد نقراتها (ثاءٌ ثلاثُ نقراتٍ في موضعٍ واحد)،
- * **وكلُّها `after: true`** — النقاطُ بعد الجسم، قاعدةُ الخطّ المدرسيّ (`METHOD.md §٣.١`).
+ * النقاطُ **تُقرأ من الخيال آلياً**: الأجرامُ الصغيرة المنفصلة عن الجسم — **قيدٌ لكلّ
+ * نقطةٍ بموضعها** (`count: 1`)، **وكلُّها `after: true`** — النقاطُ بعد الجسم، قاعدةُ
+ * الخطّ المدرسيّ (`METHOD.md §٣.١`).
  *
- * **والحدُّ من المحرّك نفسِه**: علامتان أقربُ من **دائرة البداية** (`TOLERANCE.start`)
- * لا يفرّق `pen.js` بين موضعيهما — يقيس ترتيبَ الأجزاء بأقرب جزءٍ إلى موضع النزول —
- * وهو عينُ ما يفرضه `check_paths.py` على مبادئ الأجزاء. فما لا يُفرَّق بينهما **علامةٌ
- * واحدةٌ بنقرتين** لا علامتان. ويُدمَج **أقربُ زوجين أوّلاً ثم يُعاد** حتى لا يبقى
- * مركزان دون الحدّ — فلا تخرج العدّةُ بشكلٍ يردّه الفاحص.
+ * **وكان الضمُّ حتى `TOLERANCE.start`** (١٢٠) — بحجّة أنّ `pen.js` لا يفرّق بين مبدأين
+ * أقربَ من دائرة البداية — **فابتلع العنقودَ الثلاثيَّ كلَّه**: شينٌ وثاءٌ نقاطُهما على
+ * بُعد ٩٥–١١١ فخرجتا **علامةً واحدةً بثلاث نقرات**، واللوحُ يرسم دائرةً لكلّ قيدٍ لا
+ * لكلّ نقرة — **فرأى الطفلُ نقطةً واحدة يَنقُرها ثلاثاً** (عينُ المالك، ١٥ أغسطس: «الشين
+ * بنقطة واحدة؟!»). والمجموعُ كان صحيحاً والعرضُ كاذباً، فخُدع الجردُ بالعدّ.
  *
- * **وكان الحدُّ `TOLERANCE.dot * 0.7`** (٩٨) وهو **أوسعُ ممّا يفرّقه المحرّك**، فخرجت
- * ثاءٌ وشينٌ بعلامتين على بُعد ٩٥–١١١ — أمسكها `check_paths` يومَ دخلت المجموعاتُ
- * الثلاثُ الأخيرة (الجلسة ٦). ولا يتبدّل بالتصحيح شكلٌ كان أخضر: ما مرّ الفاحصَ فمركزاه
- * فوق الحدّ أصلاً.
+ * **والحكمُ اليوم**: الضمُّ لا يجوز إلا لما **يتطابق موضعاً فعلاً** (`SAME_SPOT`) — ولا
+ * شيءَ كذلك في أبجديتنا، فالمرشِّحُ حارسُ حالٍ لا قاعدةٌ عاملة. وتمييزُ المتقاربات شأنُ
+ * `pen.js` بأقربِ جزءٍ **من المنتظَرات وحدَها**، وحدُّه في `check_paths.py` (قاعدةُ نقطةٍ
+ * لنقطةٍ داخل الحرف الواحد، لا دائرةُ البداية التي تحكم الأجسام).
  */
+const SAME_SPOT = 1;
+
 function dotsFrom(marks) {
   const groups = marks.map((mark) => ({ at: [mark.at[0] * PX, mark.at[1] * PX], count: 1 }));
   for (;;) {
@@ -1015,7 +1017,7 @@ function dotsFrom(marks) {
     for (let i = 0; i < groups.length; i++) {
       for (let j = i + 1; j < groups.length; j++) {
         const gap = dist(groups[i].at, groups[j].at);
-        if (gap < TOLERANCE.start && (!pair || gap < pair.gap)) pair = { i, j, gap };
+        if (gap < SAME_SPOT && (!pair || gap < pair.gap)) pair = { i, j, gap };
       }
     }
     if (!pair) break;
@@ -1026,10 +1028,17 @@ function dotsFrom(marks) {
       (keep.at[1] * keep.count + gone.at[1] * gone.count) / total];
     keep.count = total;
   }
-  return groups
-    .sort((a, b) => a.at[1] - b.at[1] || b.at[0] - a.at[0])
+  return groups.sort(dotOrder)
     .map((g) => ({ at: [round1(g.at[0]), round1(g.at[1])], count: g.count, after: true }));
 }
+
+/**
+ * **ترتيبُ النقاط داخل العنقود**: أعلاها أوّلاً، ثم اليمينُ فاليسار — ترتيبُ الكتابة
+ * على وجهها العربيّ. والعنقودُ الثلاثيُّ (ش/ث) رأسُه ثم قاعدتُه يميناً فيساراً.
+ * (وإن خالفته كرّاسةُ النسخ المدرسيّ فالكرّاسةُ الحَكَم — يُبدَّل هذا المقياسُ وحدَه
+ * وتُعاد البناءُ، فالترتيبُ من مكانٍ واحد في الحرف والكلمة معاً.)
+ */
+const dotOrder = (a, b) => a.at[1] - b.at[1] || b.at[0] - a.at[0];
 
 /** أصغرُ جرمٍ يُعدّ نقطةً — ما دونه غبارُ تنعيمٍ لا نقطة. */
 const DUST = 8;
@@ -1881,9 +1890,19 @@ function composeWord(studioWord, canon, canonMarks, log) {
     const canonDots = source.ref.dots;
     if (canonDots.length) {
       if (!unit.extras.length) throw new Error(`«${text}»/«${unit.text}»: نقاطُه لم تُعزَ من الخيال`);
-      const area = unit.extras.reduce((a, b) => a + b.area, 0);
-      const at = unit.extras.reduce((p, b) => [p[0] + b.at[0] * b.area / area, p[1] + b.at[1] * b.area / area], [0, 0]);
-      dots.push({ at: [round1(at[0]), round1(at[1])], count: canonDots.reduce((n, d) => n + d.count, 0), after: true });
+      // **نقطةٌ لكلّ جرمٍ بموضعه** — لا مركزَ واحدٌ بمجموع العدّ (عطبُ م٤: العنقودُ
+      // الثلاثيُّ يُرسَم دائرةً واحدة). وأجرامُ الخيال هي المقياس، **وعددُها يُطابَق
+      // بعدد نقاط القانونيّ** فلا يمرّ التصاقٌ في الطبع صامتاً.
+      // **والشكوى تُجمَع ولا توقف البناء** (حكمُ المدير، ١٥ أغسطس): `check_paths` هو
+      // الحَكَم على المبنيّ — فبناءٌ يسقط عند أوّل التصاقٍ يمنع الحَكَمَ من الحكم.
+      const want = canonDots.reduce((n, d) => n + d.count, 0);
+      if (unit.extras.length !== want) {
+        dropped.push(`${text}/${unit.text}: أجرامُ نقاطه في الخيال ${unit.extras.length}`
+          + ` ونقاطُ قانونيّه ${want} — التُصِقت في الطبع أو انشقّت`);
+      }
+      dots.push(...unit.extras
+        .map((b) => ({ at: [round1(b.at[0]), round1(b.at[1])], count: 1, after: true }))
+        .sort(dotOrder));
     } else if (unit.ref.marks.length) {
       // همزةُ أ وإ من القانونيّ (أُلّفت بإيماءتها — حكم ٥ توطئةً لهمزات ق٣)
       for (const placed of unit.ref.marks) markStrokes.push({ ...placed, why: unit.text });
@@ -2068,7 +2087,27 @@ function canonOf(works, done, forms) {
  * الكلمات** حقيقةً مقيسةً لا تركيباً — وهي مادّةُ المحطة بعينها. ولا فرقَ في
  * التأليف بين جملةٍ وسطرِ مسافة: كلاهما كلماتٌ على سطرٍ واحد.
  */
-async function buildWords(spec, canon) {
+/**
+ * **قائمةُ عمل الكلمات — مرتّبةٌ ومقروءةٌ من المنهج** (تجزئةُ البناء، حكمُ المدير
+ * ١٥ أغسطس ٢٠٢٦): وحدةٌ واحدةٌ مرقَّمة تُشرَّح دفعاتٍ، فلكلّ دفعةٍ حدّاها من هذه
+ * القائمة بعينها — **فالترتيبُ عقدٌ**: دفعتان تُبنيان في تشغيلتين مختلفتين لا
+ * تلتقيان على كلمةٍ مرّتين ولا تتركان واحدةً بينهما.
+ */
+function workListOf(cur) {
+  const kind = (k) => cur.STAGES.filter((s) => s.kind === k).flatMap((s) => s.nodes || []);
+  const joinNodes = kind('join');
+  const pairs = joinNodes
+    .filter((n) => (n.words || []).length >= 2 && !String(n.part).startsWith('sign-'))
+    .map((n) => `${n.words[0]} ${n.words[1]}`);
+  return [
+    ...joinNodes.flatMap((n) => n.joins || []).map((text) => ({ kind: 'word', text })),
+    ...Object.keys(cur.WORDS).map((text) => ({ kind: 'word', text })),
+    ...pairs.map((text) => ({ kind: 'pair', text })),
+    ...kind('sentence').flatMap((n) => n.sentences || []).map((text) => ({ kind: 'sentence', text })),
+  ];
+}
+
+async function buildWords(spec, canon, opts = {}) {
   const cur = await import('/js/curriculum.js');
   JOINS_AFTER = {};
   for (const [ch, info] of Object.entries(cur.LETTERS)) JOINS_AFTER[ch] = !!info.joins;
@@ -2104,35 +2143,42 @@ async function buildWords(spec, canon) {
   const failedPairs = [];
   const failed = [];
   const failRefs = {};
+  const failedSentences = [];
+  let reused = 0;
+
+  /**
+   * **الدفعةُ حدّان من قائمة العمل** (تجزئةُ البناء): بلا حدّين تُبنى القائمةُ كلُّها
+   * كما كانت — فالتجزئةُ زيادةٌ لا تبديلُ عقد.
+   *
+   * **والمُعاد من بناءٍ قائم** (بصمةُ المدخلات، حكمُ المدير ب): ما لم يتبدّل مدخلُه
+   * لا يُعاد بناؤه — والسائقُ هو الذي يقرّر ما يُعاد ويرسله في `reuse`، لأنه يعرف
+   * **ما تبدّل في هذه الجلسة** ويقرأ البناءَ القائم من القرص. والكلمةُ المُعادة
+   * تُقيَّد بعددها في الحصيلة فلا يُقال «بُنيت» وهي مَنسوخة.
+   */
+  const list = workListOf(cur);
+  const from = Number.isFinite(opts.from) ? opts.from : 0;
+  const to = Number.isFinite(opts.to) ? opts.to : list.length;
+  const bags = { word: failed, pair: failedPairs, sentence: failedSentences };
   // **وشكوى الكلمة لا توقف جردَ أخواتها**: البناءُ يجمع الشكاوى كلَّها ثم يسقط بها
   // مجتمعةً — فيُرى العطبُ صنفاً لا واحدةً بعد واحدة (وقد كشف ذلك أنّ ما يبدو ثلاثةَ
   // أعطاب في ثلاث تشغيلاتٍ عطبٌ واحدٌ في المحرّك).
-  for (const text of [...joins, ...words]) {
+  for (const item of list.slice(from, to)) {
+    const kept = opts.reuse?.[item.text];
+    if (kept) { out[item.text] = kept; reused++; continue; }
     try {
-      const st = await wordStudio(text);
-      out[text] = composeWord(st, canon, canonMarks, (line) => report.push(line)).ref;
+      const st = await wordStudio(item.text);
+      out[item.text] = composeWord(st, canon, canonMarks, (line) => report.push(line)).ref;
     } catch (e) {
-      failed.push(`«${text}»: ${e.message}`);
-      if (e.ref) failRefs[text] = e.ref;
-    }
-  }
-  // أسطرُ المسافة والجملُ تُقاس ككل شيء — وما ضاق عن مقياس المحرّك سقط **بإعلانٍ لا
-  // صمتاً**، وتمضي محطتُه بما بقي من مادّتها (وعقدةٌ خلت تُجيب الطفلَ ولا تصمت).
-  const failedSentences = [];
-  for (const [list, bag] of [[pairs, failedPairs], [sentences, failedSentences]]) {
-    for (const text of list) {
-      try {
-        const st = await wordStudio(text);
-        out[text] = composeWord(st, canon, canonMarks, (line) => report.push(line)).ref;
-      } catch (e) {
-        bag.push(`${text}: ${e.message}`);
-      }
+      bags[item.kind].push(item.kind === 'word' ? `«${item.text}»: ${e.message}`
+        : `${item.text}: ${e.message}`);
+      if (e.ref) failRefs[item.text] = e.ref;
     }
   }
   const glyphs = {};
   for (const [mark, cm] of Object.entries(canonMarks)) glyphs[mark] = cm.glyph;
   return {
     words: out, report, glyphs, failedPairs, failedSentences, failed, failRefs,
+    reused, total: list.length, from, to,
     counts: {
       joins: joins.length, words: words.length, pairs: pairs.length,
       sentences: sentences.length,
@@ -2465,6 +2511,40 @@ function buildAll(spec, canon = null) {
   return { paths, report };
 }
 
+/**
+ * 🧩 **دفعةُ الكلمات** (تجزئةُ البناء — حكمُ المدير، ١٥ أغسطس ٢٠٢٦): تشغيلةٌ تبني
+ * حدَّين من قائمة العمل وترسلهما، **ولا تبني القانونيّاتِ من جديد**: تقرؤها من
+ * `/__canon.json` الذي كتبته دفعةُ الحروف — وهي كائناتٌ نصّيةٌ صرفة (مسارٌ وصندوقُ
+ * جسدٍ وعددُ أجزائه)، فتُنقَل بلا خسارة.
+ *
+ * **وعلّتُها**: بناءُ ٨٩٠ كلمةً في تشغيلةٍ واحدة لا يعطي نبضاً حتى يتمّ، فإن جاوز
+ * مهلتَه ضاع العملُ كلُّه (وقع مرّتين، ٦٠٠ث و٢٧٠٠ث). فصارت دفعاتٍ: **كلُّ دفعةٍ
+ * تكتب جزأها وتطبع نبضَها**، والملفُّ النهائيّ يُجمَّع من الأجزاء — وعهدُ «لا وحدةَ
+ * ناقصة» يبقى على الملفّ النهائيّ حيث كان.
+ */
+async function runWordChunk() {
+  const spec = await anchors();
+  const canon = await (await fetch('/__canon.json')).json();
+  const reuse = await fetch('/__reuse.json').then((r) => (r.ok ? r.json() : {})).catch(() => ({}));
+  const from = Number(qs.get('from') || 0);
+  const to = Number(qs.get('to') || 0) || undefined;
+  await inlineFont(FONT_SRC);
+  const built = await buildWords(spec, canon, { from, to, reuse });
+  for (const fail of built.failed) say(false, `كلمةٌ لم تُبنَ — ${fail}`);
+  for (const fail of [...built.failedPairs, ...built.failedSentences]) say(true, `⚠ سقط بإعلان: ${fail}`);
+  say(true, `دفعةُ الكلمات [${built.from}–${built.to}] من ${built.total}:`
+    + ` بُنيت ${Object.keys(built.words).length - built.reused}`
+    + ` · نُسخت بلا بناء ${built.reused}`
+    + ` · سقطت ${built.failed.length + built.failedPairs.length + built.failedSentences.length}`, {
+    chunk: {
+      words: built.words, glyphs: built.glyphs, total: built.total,
+      failed: built.failed, failedPairs: built.failedPairs,
+      failedSentences: built.failedSentences, report: built.report, reused: built.reused,
+    },
+  });
+  await send();
+}
+
 async function runBuild() {
   const spec = await anchors();
   // **بناءٌ محدودٌ بحروفٍ بعينها** (`only`، الجلسة ٧): تُقاس به **مرشّحاتُ الكرّاسة**
@@ -2517,6 +2597,20 @@ async function runBuild() {
           + (line.sameAs ? `عينُ ${FORM_AR[line.sameAs]} (${line.sig})`
             : `${line.strokes} جزءاً و${line.dots} نقطةً · عُقَد ${line.nodes} · غوص ${line.depth}`));
       }
+    }
+    // 🧩 **دفعةُ الحروف تقف هنا**: الحروفُ وأشكالُ التهيئة والقانونيّاتُ (ومنها
+    // المتغيّراتُ ولام-ألف) — وترسل القانونيّاتِ ليقرأها كلُّ دفعةِ كلماتٍ بعدها،
+    // ومعها **طولُ قائمة العمل** فيقسّمها السائقُ دفعاتٍ بلا قائمةٍ ثانيةٍ تفترق عنها.
+    if (qs.get('part') === 'letters') {
+      const cur = await import('/js/curriculum.js');
+      const list = workListOf(cur);
+      say(true, `جزءُ الحروف تمّ — قانونيّاتٌ ${Object.keys(canon).length}`
+        + ` · وقائمةُ عمل الكلمات ${list.length}`, {
+        paths, warmups: warm.warmups, canon, wordItems: list.length,
+        meta: { report, grid: GRID, spin: warm.spin, warmups: warm.report },
+      });
+      await send();
+      return;
     }
     const built = await buildWords(spec, canon);
     for (const line of built.report) {
@@ -2774,7 +2868,8 @@ let FONT_SRC = null;
 (async () => {
   try {
     FONT_SRC = await loadFont();
-    if (qs.has('build')) await runBuild();
+    if (qs.get('part') === 'words') await runWordChunk();
+    else if (qs.has('build')) await runBuild();
     else if (qs.has('nodes')) await runNodes();
     else if (qs.has('sheet')) await runSheet();
     else await runStudio();

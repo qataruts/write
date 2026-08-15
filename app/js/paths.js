@@ -1009,7 +1009,7 @@ export const PATHS = {
       [124.8, 570.5]
      ], "folds": [{ "from": 9, "apex": 13, "to": 16 }, { "from": 19, "apex": 23, "to": 27 }] }
     ],
-    "dots": [{ "at": [687, 244.6], "count": 3, "after": true }]
+    "dots": [{ "at": [686.8, 194.9], "count": 1, "after": true }, { "at": [752.6, 263.7], "count": 1, "after": true }, { "at": [621.6, 275.3], "count": 1, "after": true }]
    },
    "initial": {
     "strokes": [
@@ -1048,7 +1048,7 @@ export const PATHS = {
       [115.2, 700.8], [109, 655.2], [113, 609.4], [123.2, 564.7]
      ], "folds": [{ "from": 0, "apex": 3, "to": 6 }, { "from": 8, "apex": 11, "to": 14 }, { "from": 17, "apex": 20, "to": 24 }] }
     ],
-    "dots": [{ "at": [643, 263.4], "count": 3, "after": true }]
+    "dots": [{ "at": [642.8, 217.3], "count": 1, "after": true }, { "at": [703.8, 281], "count": 1, "after": true }, { "at": [582.4, 291.9], "count": 1, "after": true }]
    }
   },
   "ص": {
@@ -1261,7 +1261,7 @@ export const PATHS = {
       [119, 609.2], [115, 564.8], [118.9, 520.5], [121.2, 476]
      ], "folds": [{ "from": 0, "apex": 4, "to": 7 }] }
     ],
-    "dots": [{ "at": [455.2, 322.9], "count": 2, "after": true }, { "at": [340.5, 377], "count": 1, "after": true }]
+    "dots": [{ "at": [416.7, 282.8], "count": 1, "after": true }, { "at": [493.8, 363.1], "count": 1, "after": true }, { "at": [340.5, 377], "count": 1, "after": true }]
    }
   },
   "ذ": {

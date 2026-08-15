@@ -201,7 +201,7 @@ def sheet_window(cells: int) -> str:
 
 
 def drive(query: str, port: int, timeout: int, shots: Path = None, show: bool = False,
-          window: str = None, anchors_file: Path = None) -> list:
+          window: str = None, anchors_file: Path = None, pages: dict = None) -> list:
     """يفتح العدّةَ بوضعٍ من أوضاعها ويعيد ما أرسلته (أو يلتقط صورتها).
 
     و`anchors_file` **إيماءةٌ أخرى تُخدَم مكانَ الملفّ** — تستعملها لوحةُ مرشّحات
@@ -211,6 +211,10 @@ def drive(query: str, port: int, timeout: int, shots: Path = None, show: bool = 
     results = []
     browser_test.PAGES["/__make_paths.html"] = TOOL_PAGE
     browser_test.PAGES["/__anchors.json"] = anchors_file or ANCHORS
+    # **وملفّاتُ الدفعة تُخدَم من القرص** (التجزئة): قانونيّاتُ الحروف وما يُنسَخ بلا
+    # بناء — تُقرأ في الصفحة بـ`fetch`، فلا تُحمَل في العنوان ولا تُبنى مرّتين.
+    for route, file in (pages or {}).items():
+        browser_test.PAGES[route] = file
     server = browser_test.make_server(port, results)
     threading.Thread(target=server.serve_forever, daemon=True).start()
     profile = Path(tempfile.mkdtemp(prefix=browser_test.CHROME_PREFIX + "paths-"))
@@ -501,15 +505,123 @@ def words_module() -> tuple:
             json.loads(source.group(1)) if source else None)
 
 
-def build(port: int, timeout: int) -> int:
-    results = drive("?build=1", port, timeout)
+# ————— 🧩 البناءُ دفعاتٍ (حكمُ المدير، ١٥ أغسطس ٢٠٢٦) —————
+#
+# **علّتُه مقيسة**: البناءُ في تشغيلةٍ واحدة يمشي على ١١٢ شكلاً ثم ٨٩٠ وحدةَ نسخٍ
+# **بلا نبضٍ حتى يتمّ** — فإن جاوز مهلتَه ضاع العملُ كلُّه (وقع مرّتين في جلسة م-ن:
+# ٦٠٠ث و٢٧٠٠ث، وكروم يعمل ولا حصيلة). فصار:
+#   · **دفعةُ حروفٍ واحدة** تكتب القانونيّاتِ إلى `scratch/build/canon.json`،
+#   · **ثم دفعاتُ كلماتٍ** بحدَّين من قائمة العمل، كلٌّ في تشغيلتها ومهلتها، تكتب
+#     جزأها إلى `scratch/build/words-<من>.json` **وتطبع نبضَها باسمها**،
+#   · **ثم يُجمَّع** الملفّان من الأجزاء.
+# **وعهدُ «لا وحدةَ ناقصة» على الملفّ النهائيّ حيث كان**: جزءٌ ناقصٌ لا يُكتب منه ملفّ.
+# **والدفعةُ الخضراءُ لا تُعاد**: جزؤها على القرص ببصمة عدّته ومادّته، فإن طابقتا
+# نُسخ ولم يُبنَ — فإعادةُ التشغيل تكمل من حيث وقفت لا من أوّلها.
+PARTS = ROOT / "scratch" / "build"
+
+
+# **الحروفُ المنقوطة** — جدولُ الحقيقة الإملائية نفسُه الذي يحرسه `check_paths.py`:
+# ما خلا نصُّ الكلمة منها لم يمسّه فكُّ النقاط، فيُنسَخ جزؤه بلا بناء.
+DOTTED = set("بتثنجخذزشضظغفقية")
+
+
+def part_stamp() -> str:
+    """بصمةُ الدفعة: عدّةُ البناء وإيماءاتُها ومادّتُها — تبدّلَ أحدُها فالجزءُ شاخ."""
+    tool = hashlib.sha1(TOOL_PAGE.read_bytes()).hexdigest()[:12]
+    return f"{tool}·{sha()}·{material_sha()}"
+
+
+def build(port: int, timeout: int, chunk: int = 100, fresh: bool = False) -> int:
+    PARTS.mkdir(parents=True, exist_ok=True)
+    stamp = part_stamp()
+    canon_file = PARTS / "canon.json"
+    reuse_file = PARTS / "reuse.json"
+
+    # ١) دفعةُ الحروف: الحروفُ وأشكالُ التهيئة والقانونيّات (ومنها المتغيّراتُ ولام-ألف)
+    results = drive("?build=1&part=letters", port, timeout)
     if not results:
-        print("لم تصل حصيلةٌ من العدّة (تحقّق من تشغيل Chrome).")
+        print("لم تصل حصيلةٌ من دفعة الحروف (تحقّق من تشغيل Chrome).")
         return 1
     good = report(results)
     payload = next((r for r in results if "paths" in r), None)
     if not good or not payload:
         return 1
+    canon_file.write_text(json.dumps(payload["canon"], ensure_ascii=False), encoding="utf-8")
+    total = int(payload.get("wordItems") or 0)
+    print(f"\n🧩 دفعةُ الحروف تمّت — قائمةُ عمل الكلمات {total} وحدةً،"
+          f" والدفعةُ {chunk}\n")
+
+    # ٢) **ما لم يتبدّل مدخلُه لا يُعاد بناؤه**: تبديلُ هذه الجلسة **فكُّ النقاط**،
+    #    فما خلا نصُّه من حرفٍ منقوطٍ لم يمسّه شيء — يُنسَخ من البناء القائم كما هو.
+    #    وحدُّه معلَنٌ: أيُّ تبديلٍ آخر في العدّة يُبطِله، **وبصمةُ العدّة في الجزء**
+    #    هي التي تحرسه — ومع `--fresh` لا يُنسَخ شيء.
+    prior, _ = words_module()
+    reuse = {}
+    if prior and not fresh:
+        reuse = {text: ref for text, ref in prior.items()
+                 if not any(ch in DOTTED for ch in text)}
+    reuse_file.write_text(json.dumps(reuse, ensure_ascii=False), encoding="utf-8")
+    print(f"والمنسوخُ بلا بناءٍ (بلا حرفٍ منقوط): {len(reuse)} من {len(prior or {})}\n")
+
+    # ٣) دفعاتُ الكلمات — كلٌّ بحدَّيها، وجزؤها على القرص ببصمته
+    pages = {"/__canon.json": canon_file, "/__reuse.json": reuse_file}
+    chunks = []
+    for start in range(0, total, chunk):
+        stop = min(start + chunk, total)
+        part_file = PARTS / f"words-{start:04d}.json"
+        if part_file.exists() and not fresh:
+            try:
+                kept = json.loads(part_file.read_text(encoding="utf-8"))
+                # **والجزءُ يحمل حدَّيه**: تبديلُ حجم الدفعة يبدّل ما يغطّيه الاسمُ
+                # نفسُه — فلولا الحدّان لَقُرئ جزءُ مئةٍ على أنه جزءُ خمسٍ وعشرين
+                # فضاعت خمسٌ وسبعون وحدةً **صامتةً**.
+                if kept.get("stamp") == stamp and kept.get("from") == start \
+                        and kept.get("to") == stop:
+                    chunks.append(kept)
+                    print(f"  ⤷ [{start}–{stop}] جزءٌ قائمٌ ببصمته — لا يُعاد")
+                    continue
+            except json.JSONDecodeError:
+                pass
+        got = drive(f"?build=1&part=words&from={start}&to={stop}", port, timeout, pages=pages)
+        if not got:
+            print(f"  ✗ [{start}–{stop}] لم تصل حصيلةٌ — الأجزاءُ الخضرُ محفوظة،"
+                  " وإعادةُ التشغيل تكمل من هنا.")
+            return 1
+        report(got)
+        piece = next((r for r in got if "chunk" in r), None)
+        if not piece:
+            print(f"  ✗ [{start}–{stop}] دفعةٌ بلا حصيلة")
+            return 1
+        data = {"stamp": stamp, "from": start, "to": stop, **piece["chunk"]}
+        part_file.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
+        chunks.append(data)
+
+    # ٤) التجميع: الكلماتُ من الأجزاء كلِّها، والشكاوى مجموعةً
+    words = {}
+    glyphs = {}
+    failed, failed_pairs, failed_sentences, reports = [], [], [], []
+    for piece in chunks:
+        words.update(piece.get("words") or {})
+        glyphs.update(piece.get("glyphs") or {})
+        failed += piece.get("failed") or []
+        failed_pairs += piece.get("failedPairs") or []
+        failed_sentences += piece.get("failedSentences") or []
+        reports += piece.get("report") or []
+    for line in failed:
+        print(f"  ✗ كلمةٌ لم تُبنَ — {line}")
+    print(f"\nالكلماتُ المجمَّعة: {len(words)} من {total}"
+          f" · سقطت {len(failed)} كلمةً و{len(failed_pairs)} سطرَ مسافةٍ"
+          f" و{len(failed_sentences)} جملة")
+    if failed:
+        print(f"{len(failed)} كلمةً لم تُبنَ — لا تُكتب وحدةٌ ناقصة.")
+        return 1
+    payload["words"] = words
+    payload["markGlyphs"] = glyphs
+    payload["dropped"] = [{"kind": "sentence", "why": why} for why in failed_sentences] \
+        + [{"kind": "pair", "why": why} for why in failed_pairs]
+    payload["meta"]["failedPairs"] = failed_pairs
+    payload["meta"]["failedSentences"] = failed_sentences
+    payload["meta"]["words"] = reports
     # **ولا تُكتب وحدةٌ من بناءٍ محدود**: `--only` في العدّة قياسُ مرشّحاتٍ لا بناءُ
     # منهج، ولو كُتبت منه الوحدةُ لخرجت ناقصةَ الحروف صامتةً.
     if payload.get("partial"):
@@ -768,12 +880,15 @@ def main() -> int:
     ap.add_argument("--self-test", action="store_true", help="عهدُ الإيماءة والمسار بلا متصفّح")
     ap.add_argument("--port", type=int, default=ports.port_of("make_paths"))
     ap.add_argument("--timeout", type=int, default=180)
+    # 🧩 حجمُ دفعة الكلمات، ونزعُ المنسوخ: `--fresh` يبني كلَّ شيء من جديد
+    ap.add_argument("--chunk", type=int, default=100, help="عددُ وحدات النسخ في الدفعة")
+    ap.add_argument("--fresh", action="store_true", help="بلا نسخٍ من بناءٍ قائم ولا جزءٍ محفوظ")
     args = ap.parse_args()
 
     if args.self_test:
         return self_test()
     if args.build:
-        return build(args.port, args.timeout)
+        return build(args.port, args.timeout, args.chunk, args.fresh)
     if args.nodes:
         return nodes(args.port, args.timeout, Path(args.out) if args.out else None)
     if args.sheet:

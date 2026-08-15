@@ -161,8 +161,10 @@ function watchNetwork(win) {
     frame.src = '/';
     await new Promise((r) => frame.addEventListener('load', r, { once: true }));
     await wait(600);
-    const win2 = frame.contentWindow;
-    const doc2 = frame.contentDocument;
+    // (`let` لا `const`: فحصُ م٥ يغلق التطبيقَ ويفتحه، فتتبدّل نافذتُه ووثيقتُه —
+    //  وكلُّ يدٍ هنا تقرأ المتغيّرَ لا نسخةً منه، فتمشي على الإطار الحيّ)
+    let win2 = frame.contentWindow;
+    let doc2 = frame.contentDocument;
     win2.addEventListener('error', (e) => errors.push(String(e.message)));
     win2.addEventListener('unhandledrejection', (e) => errors.push(String(e.reason)));
     watchNetwork(win2);
@@ -301,6 +303,137 @@ function watchNetwork(win) {
     ok(starsOf(node.id) > 0, 'والبوابةُ صارت مجتازةً في الرحلة — نجمتُها في مخزن الجهاز');
     ok(/٨٠٪|٨٠ ٪|٨٠/.test(open.textContent),
       'ونسبةُ إصابته مكتوبةٌ له بالحساب نفسِه الذي فتح البوابة');
+
+    // ═════ م٥ — بوابةٌ تُعبَر لا حائطٌ يُرتَطَم (بلاغُ الميدان ٤، ١٥ أغسطس ٢٠٢٦) ═════
+    //
+    // بلاغُ المالك بلفظه: «عشرُ حروفٍ بدون إظهار أيّ شيء … محطةٌ مستحيلة حتى الكبيرُ
+    // لا يعبرها … وعند الخروج والعودة عاد لحرفٍ ثانٍ: المؤشرُ على ١ والحرفُ من الخطوة
+    // ٤ … لا يجب أن يكون هناك مكانٌ يقع فيه الطفل بدون مخرج». فهنا يُمشى بإصبعٍ حقيقيّ.
+    const boxNow = () => doc2.querySelector('.pen-box');
+    const watchBtn = () => [...doc2.querySelectorAll('.exercise .btn')]
+      .find((b) => /شاهِدْ/.test(b.textContent));
+    const exitBtns = () => [...doc2.querySelectorAll('.exercise .assist .btn')]
+      .map((b) => b.textContent.trim());
+    const doneDots = () => doc2.querySelectorAll('.dots .dot--done').length;
+
+    // **ومادّتُها تُصنَع حرّةً كلَّها** — كما وقعت في الميدان: التتبّعُ يُقوّى في
+    // المخزن فلا يدخل الأضعفَ، فتبقى العشرةُ «اكتبه وحدك». وهو أيضاً **حالٌ يقع من
+    // نفسه**: الحرُّ أصعبُ فيقبع في الصندوق الأدنى، فتملأ البوابةَ وحدَها.
+    const raw2 = JSON.parse(win2.localStorage.getItem('uktub.progress.v1') || '{}');
+    for (const [key, skill] of Object.entries(raw2.skills || {})) {
+      if (!key.endsWith(`|${progress.KINDS.FREE}`)) { skill.box = 6; skill.wrong = 0; }
+      else { skill.box = 0; skill.wrong = 3; }
+    }
+    win2.localStorage.setItem('uktub.progress.v1', JSON.stringify(raw2));
+    frame.src = '/';
+    await new Promise((r) => frame.addEventListener('load', r, { once: true }));
+    await wait(600);
+    const win3 = frame.contentWindow;
+    const doc3 = frame.contentDocument;
+    win3.addEventListener('error', (e) => errors.push(String(e.message)));
+    win3.addEventListener('unhandledrejection', (e) => errors.push(String(e.reason)));
+    watchNetwork(win3);
+    win3.location.hash = `#/gate/${encodeURIComponent(one.id)}`;
+    await wait(700);
+    // (الإطارُ أُعيد تحميلُه، فتُعاد الإشارتان إلى وثيقته الجديدة)
+    doc2 = doc3; win2 = win3;
+
+    ok(boxNow()?.classList.contains('pen-box--free'),
+      `وبوابةٌ مادّتُها حرّةٌ كلُّها — كما وقعت في الميدان (${boxNow()?.className || '—'})`);
+
+    // ١) **«شاهِدْ» متاحٌ دائماً** — والرؤيةُ ليست غشاً
+    const watch = watchBtn();
+    ok(Boolean(watch), 'و**زرُّ «شاهِدْ» في التمرين الحرّ** — لا حرفَ يُطلَب بلا سبيلٍ إلى رؤيته');
+    ok(Boolean(watch) && watch.getBoundingClientRect().height >= 64,
+      `وهدفُ لمسه ${watch ? Math.round(watch.getBoundingClientRect().height) : 0} ≥ ٦٤ بكسل`);
+    const seenBefore = stored().skills || {};
+    watch.click();
+    await wait(500);
+    ok(boxNow()?.classList.contains('pen-box--guided'),
+      'وبنقرته يُرى النموذجُ ويُرسَم كما يُكتب');
+    ok(JSON.stringify(stored().skills || {}) === JSON.stringify(seenBefore),
+      '🔒 **ولا تُحصى الرؤيةُ خطأً**: سجلُّ ليتنر كما هو بعدها — لا محاولةَ ولا نجمةَ نقصت');
+    await writeStroke([[500, 300], [500, 320]]);   // لمستُه تعيده إلى تمرينه
+    await wait(200);
+    ok(boxNow()?.classList.contains('pen-box--free'),
+      'ولمستُه على اللوح تردّه إلى «اكتبه وحدك» — الرؤيةُ لا تُبدّل الحكم');
+
+    // ٢) **الحكمُ الحرّ بـ`judgeFree`**: شكلٌ صحيحٌ في غير موضع النموذج يُقبَل
+    const chFree = letterNow();
+    const refFree = PATHS[chFree][ISO];
+    const shifted = (pts) => pts.map(([x, y]) => [x * 0.7 + 190, y * 0.7 + 190]);
+    for (const stroke of refFree.strokes) await writeStroke(shifted(stroke.points));
+    for (const dot of refFree.dots) {
+      for (let i = 0; i < (dot.count || 1); i++) {
+        const [dx, dy] = shifted([dot.at])[0];
+        await writeStroke([[dx, dy], [dx, dy], [dx, dy]]);
+      }
+    }
+    for (let i = 0; i < 40 && stepNow() === 0; i++) await wait(120);
+    ok(stepNow() === 1 || Boolean(doc2.querySelector('.celebrate')),
+      `و«${chFree}» كُتب **مزاحاً ومصغَّراً (٧٠٪) فقُبِل** — الحكمُ على الشكل لا على الأثر (\`judgeFree\`)`);
+
+    // ٣) **المخرجُ الكريم داخل التمرين** — تعثّراتٌ ⇐ بابٌ يُفتَح
+    ok(exitBtns().length === 1,
+      `وقبل التعثّر لا مخرجَ مفتوحاً — الذيلُ «شاهِدْ» وحدَه (${exitBtns().join('، ') || 'لا شيء'})`);
+    for (let i = 0; i < 3; i++) await writeStroke([[120, 880], [160, 900], [200, 880]]);
+    await wait(400);
+    const opened = exitBtns();
+    ok(opened.some((t) => /تَتَبَّعْ مَرَّةً/.test(t)) && opened.some((t) => /تَخَطَّ/.test(t)),
+      `وبعد ثلاثة تعثّرات يُفتَح المخرجُ الكريم: ${opened.join(' · ')}`);
+    const stuckAt = stepNow();
+    const stuckKey = progress.skillKey(letterNow(), ISO, progress.KINDS.FREE);
+    const wrongBefore = ((stored().skills || {})[stuckKey] || {}).wrong || 0;
+    [...doc2.querySelectorAll('.exercise .assist .btn')]
+      .find((b) => /تَخَطَّ/.test(b.textContent)).click();
+    await wait(500);
+    ok(stepNow() === stuckAt + 1, 'و«تَخَطَّ» يمضي به إلى التمرين التالي — لا انسدادَ في أيّ نقطة');
+    ok((((stored().skills || {})[stuckKey] || {}).wrong || 0) === wrongBefore + 1,
+      '**ويُحصى محاولةً غيرَ مصيبة** — فيعيده ليتنر: متروكٌ مؤجَّلٌ لا مسقَط');
+
+    // ٤) **كلُّ دخولٍ جولةٌ نظيفة** — خروجٌ وعودةٌ، ثم إغلاقُ تطبيقٍ وفتحُه
+    win2.location.hash = '#/';
+    await wait(400);
+    win2.location.hash = `#/gate/${encodeURIComponent(one.id)}`;
+    await wait(700);
+    ok(stepNow() === 0 && doneDots() === 0
+      && doc2.querySelectorAll('.dots .dot').length === gate.GATE_SIZE,
+      `وبالخروج والعودة **جولةٌ نظيفة**: المؤشّرُ على الأوّل وبلا خطوةٍ مشطوبة`
+      + ` (${gate.GATE_SIZE} تمارين) — والمؤشّرُ يطابق محتواه`);
+    ok(Boolean(letterNow()) && Boolean(watchBtn()),
+      `وتمرينُها الأوّل قائمٌ بحرفه «${letterNow()}» وبزرّ رؤيته`);
+
+    await writeStroke([[120, 880], [160, 900], [200, 880]]);   // أثرٌ في منتصفها
+    frame.src = '/';                                           // إغلاقُ التطبيق وفتحُه
+    await new Promise((r) => frame.addEventListener('load', r, { once: true }));
+    await wait(600);
+    doc2 = frame.contentDocument; win2 = frame.contentWindow;
+    win2.addEventListener('error', (e) => errors.push(String(e.message)));
+    watchNetwork(win2);
+    win2.location.hash = `#/gate/${encodeURIComponent(one.id)}`;
+    await wait(800);
+    ok(stepNow() === 0 && doneDots() === 0 && Boolean(letterNow()),
+      '**وبإغلاق التطبيق وفتحه** كذلك: جولةٌ من أوّلها لا استئنافَ منتصفٍ — ولا حالَ يُحفَظ أصلاً');
+
+    // ٥) **والبواباتُ الثلاث سواء** — بابٌ واحدٌ يبنيهنّ (`renderGate`)
+    //
+    // (وتُفتَح أقفالُهنّ بإتمام ما قبلهنّ في المخزن — والكتابةُ من نسختنا هنا **آخرُ
+    // ما يقع في الصفحة** فلا تدهس حكماً قبلها: ما سُئل عن سجلّ ليتنر سُئل أعلاه.)
+    for (const n of progress.allNodes()) progress.setStars(n.id, 3);
+    frame.src = '/';
+    await new Promise((r) => frame.addEventListener('load', r, { once: true }));
+    await wait(600);
+    doc2 = frame.contentDocument; win2 = frame.contentWindow;
+    win2.addEventListener('error', (e) => errors.push(String(e.message)));
+    watchNetwork(win2);
+    const gateSeen = [];
+    for (const g of GATES) {
+      win2.location.hash = `#/gate/${encodeURIComponent(g.id)}`;
+      await wait(700);
+      gateSeen.push(`${g.title}: ${watchBtn() ? '✓' : '✗'}`);
+    }
+    ok(gateSeen.length === GATES.length && gateSeen.every((s) => s.endsWith('✓')),
+      `والبواباتُ ${GATES.length} سواءٌ في عدّتها الكريمة — ${gateSeen.join(' · ')}`);
 
     // ————— الخصوصية: صفرُ طلباتٍ من الصفحة في دورة البوابة كلِّها —————
     const netAdded = netCalls.slice(netMark);

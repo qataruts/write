@@ -49,6 +49,17 @@ MAX_STROKES = 3
 # ولا حرفَ عربيّ فوق ثلاث نقاط (ث ش)، ولا نقطَ في أكثر من ثلاثة مواضع.
 MAX_DOTS = 3
 
+# ————— جدولُ الحقيقة الإملائية: كم نقطةً لكلّ حرفٍ عربيّ؟ —————
+# **والمقيسُ عددُ القيود المنفصلة لا مجموعُ `count`** — وهذه علّةُ م٤ بعينها (عينُ
+# المالك، ١٥ أغسطس ٢٠٢٦: «الشين بنقطة واحدة؟!»): كانت نقاطُ العنقود الثلاثيّ تُضَمّ
+# قيداً واحداً `{at, count: 3}`، **واللوحُ يرسم دائرةً لكلّ قيدٍ لا لكلّ نقرة**، فرأى
+# الطفلُ شيناً بنقطةٍ واحدة يَنقُرها ثلاثاً في موضعٍ واحد. **والمجموعُ كان صحيحاً
+# فخُدع الجردُ بالعدّ** — فصار الحارسُ يعدّ المواضع.
+DOTS_OF = {
+    "ب": 1, "ت": 2, "ث": 3, "ن": 1, "ج": 1, "خ": 1, "ذ": 1, "ز": 1,
+    "ش": 3, "ض": 1, "ظ": 1, "غ": 1, "ف": 1, "ق": 2, "ي": 2, "ة": 2,
+}
+
 
 def load_tolerance() -> dict:
     """سماحةُ المحرّك ونسبةُ رأس المسار — **تُقرأ من `pen.js` ولا تُكتب هنا**."""
@@ -196,9 +207,29 @@ def check_folds(stroke: dict, where: str, tol: dict) -> list:
     return bad
 
 
+def check_dot_count(dots: list, want: int, tag: str) -> list:
+    """**النقاطُ مواضعُ لا نقراتٌ في موضع** — يُعَدُّ القيدُ لا مجموعُ `count`.
+
+    فقيدٌ واحدٌ بعدّةِ ثلاثٍ يمرّ بالمجموع وهو **دائرةٌ واحدةٌ في اللوح**: يراها
+    الطفلُ نقطةً فينقرها ثلاثاً في مكانها. والشكوى تسمّي الوجهين (كم موضعاً وكم
+    نقرة) فلا يُقرأ العطبُ نقصاً في العدد وهو دمجٌ في الموضع.
+    """
+    bad = []
+    if len(dots) != want:
+        total = sum(int(d.get("count", 1)) for d in dots)
+        bad.append(f"{tag}: مواضعُ نقطه {len(dots)} والحقيقةُ الإملائية {want}"
+                   f" (ومجموعُ نقراته {total}) — والنقاطُ مواضعُ منفصلة لا نقراتٌ في موضع")
+    for j, dot in enumerate(dots, 1):
+        if int(dot.get("count", 1)) != 1:
+            bad.append(f"{tag} نقطة {j}: عدّتُها {dot.get('count')} — ولكلّ نقطةٍ قيدُها"
+                       " بموضعها، فلا تُضَمّ نقطتان في واحدة")
+    return bad
+
+
 def check(paths: dict, tol: dict, forms: list, letters=None) -> list:
     """كلُّ ما يُخالف — قائمةُ شكاوى، فيصلح الفاحصُ نفسَه للفحص الذاتي."""
     bad = []
+    clusters = []
     grid = tol["grid"]
 
     if letters:
@@ -223,6 +254,7 @@ def check(paths: dict, tol: dict, forms: list, letters=None) -> list:
                 bad.append(f"{tag}: أجزاءُ جسمه {len(strokes)} وأكثرُ حرفٍ {MAX_STROKES}")
             if sum(int(d.get("count", 1)) for d in dots) > MAX_DOTS:
                 bad.append(f"{tag}: نقطُه أكثرُ من {MAX_DOTS} — ولا حرفَ عربيّ كذلك")
+            bad += check_dot_count(dots, DOTS_OF.get(ch, 0), tag)
 
             starts = []
             for i, stroke in enumerate(strokes, 1):
@@ -282,12 +314,35 @@ def check(paths: dict, tol: dict, forms: list, letters=None) -> list:
             # **الأجزاءُ تُميَّز بمباديها**: `pen.js` يعرف قلبَ الترتيب بأقرب جزءٍ إلى
             # موضع النزول، فبدايتان أقربُ من دائرة البداية لا يفرّق بينهما — فيُقرأ
             # ترتيبٌ صحيحٌ خطأً أو خطأٌ صحيحاً. والحدُّ سماحةُ البداية نفسُها.
+            #
+            # **ويُستثنى نقطةٌ لنقطةٍ في الحرف الواحد** (م٤): العنقودُ الثلاثيُّ (ش ث)
+            # نقاطُه على بُعد ٩٥–١١١ — **تركّبها العربيةُ كذلك ولا موضعَ لها سواه**،
+            # فكانت القاعدةُ تضمّها فتخرج دائرةً واحدة. وحدُّ النقطة **أدنى خطوةٍ
+            # يفرّقها المحرّك** (`MIN_STEP`): ما دونها موضعٌ واحدٌ بيقين، وما فوقها
+            # موضعان يفرّقهما أقربُ الأجزاء **المنتظَرة** إلى نزول الطفل.
+            # **وحدُّه معلَنٌ لا مسكوتٌ عنه**: سماحةُ النقرة (`dot`) أوسعُ من فجوة
+            # العنقود، فنقرةٌ شاردةٌ عن نقطتها قد تقع في سماحة جارتها — والعلاجُ
+            # إرشادُ اللوح (يومض موضعُ المنتظَرة) لا تضييقُ السماحة على يد طفلٍ في
+            # الخامسة (قرارُ المدير في بند م٤: «وسماحةُ كل نقرةٍ `tol.dot` كما هي»).
             for a in range(len(starts)):
                 for b in range(a + 1, len(starts)):
                     gap = dist(starts[a][1], starts[b][1])
-                    if gap < tol["start"]:
+                    pair_dots = "نقطة" in starts[a][0] and "نقطة" in starts[b][0]
+                    limit = tol["min_step"] if pair_dots else tol["start"]
+                    if gap < limit:
                         bad.append(f"{tag}: بدايتا «{starts[a][0]}» و«{starts[b][0]}» "
-                                   f"على بُعد {gap:.0f} < {tol['start']:.0f} — لا يفرّق بينهما المحرّك")
+                                   f"على بُعد {gap:.0f} < {limit:.0f} — لا يفرّق بينهما المحرّك")
+                    elif pair_dots and gap < tol["dot"]:
+                        clusters.append((gap, tag))
+
+    # **ويُعلَن العددُ ولا يُسكَت عنه** — مجموعاً لا زوجاً زوجاً: أضيقُ فجوةٍ باسم
+    # حرفها هي المقيسة، وما فوقها يتّسع.
+    if clusters:
+        clusters.sort()
+        print(f"  ○ عناقيدُ النقاط: {len(clusters)} زوجاً فجوتُه دون سماحة النقرة"
+              f" ({tol['dot']:.0f}) — أضيقُها {clusters[0][1]} على {clusters[0][0]:.0f}"
+              f" وأوسعُها {clusters[-1][0]:.0f}. مواضعُ منفصلةٌ يفرّقها أقربُ المنتظَرات،"
+              " وإرشادُ اللوح يومض موضعَ المنتظَرة منها")
     return bad
 
 
@@ -374,6 +429,9 @@ def check_words(words: dict, tol: dict, material: set) -> list:
                        f" وأكثرُ حرفٍ {MAX_STROKES} أجزاء")
         if sum(int(d.get("count", 1)) for d in dots) > MAX_DOTS * max(1, len(letters)):
             bad.append(f"{tag}: نقطُها أكثرُ ممّا تحتمل حروفُها")
+        # **وجدولُ الحقيقة يسري على الكلمة بحروفها** — مجموعُ نقاط حروفها مواضعَ
+        # منفصلة، فدمجُ عنقودٍ في الكلمة كدمجه في الحرف سواءً بسواء
+        bad += check_dot_count(dots, sum(DOTS_OF.get(c, 0) for c in letters), tag)
 
         starts = []
         for i, stroke in enumerate(strokes, 1):
@@ -438,6 +496,12 @@ def check_words(words: dict, tol: dict, material: set) -> list:
                 if strokes_pair and gap > wtol["back"]:
                     stacks.append(f"{text}: {gap:.0f}")
                     continue
+                # **ونقطةٌ لنقطةٍ كما في الحرف** (م٤): عنقودٌ ثلاثيٌّ في كلمةٍ مواضعُه
+                # ثلاثة، وحدُّها أدنى خطوةٍ يفرّقها المحرّك (والعلّةُ وحدُّها مشروحان
+                # عند نظيرتها في `check`)
+                if "نقطة" in starts[a][0] and "نقطة" in starts[b][0]:
+                    if gap >= tol["min_step"]:
+                        continue
                 bad.append(f"{tag}: بدايتا «{starts[a][0]}» و«{starts[b][0]}» "
                            f"على بُعد {gap:.0f} < {wtol['start']:.0f} — لا يفرّق بينهما المحرّك")
     if stacks:
@@ -597,6 +661,44 @@ def self_test() -> int:
     ref["dots"][0]["at"] = [500.0, 120.0]
     ok(any("لا يفرّق بينهما المحرّك" in b for b in check(one(ref), tol, forms)),
        f"ويُمسِك نقطةً تجاور بدايةَ الجسم دون سماحة البداية ({tol['start']:.0f})")
+
+    # ٥ب) **العنقودُ الثلاثيُّ ثلاثةُ مواضع** (م٤) — والدمجُ يُزرَع فيحمرّ باسمه
+    def sheen(dots):
+        """شينٌ صناعية: جسمُ `sound` نفسُه، ونقاطُها كما تُملى عليها."""
+        ref = sound()
+        ref["dots"] = [{"at": list(at), "count": n, "after": True} for at, n in dots]
+        return {"ش": {f: ref for f in forms}}
+
+    trio = [([500.0, 240.0], 1), ([600.0, 330.0], 1), ([400.0, 330.0], 1)]
+    ok(not check(sheen(trio), tol, forms),
+       "والشينُ بثلاثة مواضعَ منفصلة تمرّ — وفجواتُها دون سماحة النقرة ولا تُضَمّ")
+    merged = check(sheen([([500.0, 300.0], 3)]), tol, forms)
+    ok(any("مواضعُ نقطه 1 والحقيقةُ الإملائية 3" in b for b in merged),
+       "ويُمسِك **الدمجَ المزروع**: شينٌ بقيدٍ واحدٍ عدّتُه ثلاث — وهي علّةُ الميدان بعينها")
+    ok(any("فلا تُضَمّ نقطتان في واحدة" in b for b in merged),
+       "ويسمّي وجهَه الثاني: قيدٌ عدّتُه فوق الواحدة")
+    ok(any("لا يفرّق بينهما المحرّك" in b
+           for b in check(sheen([([500.0, 300.0], 1), ([500.0, 302.0], 1)]), tol, forms)),
+       f"ويُمسِك نقطتين دون أدنى خطوةٍ يفرّقها المحرّك ({tol['min_step']:.0f})")
+    ok(any("والحقيقةُ الإملائية 3" in b
+           for b in check(sheen(trio[:2]), tol, forms)),
+       "ويُمسِك شيناً نقصت نقطةٌ من عنقودها")
+
+    # وفي الكلمة كذلك — والمقياسُ مجموعُ حروفها من الجدول
+    def word_of(dots):
+        pts = [[100.0 + i * 20.0, 500.0] for i in range(30)]
+        return {"شَبْ": {
+            "strokes": [{"start": pts[0], "points": pts}],
+            "dots": [{"at": list(at), "count": n, "after": True} for at, n in dots],
+            "line": 700.0, "tolerance": 0.5,
+        }}
+
+    quad = trio + [([800.0, 700.0], 1)]
+    ok(not [b for b in check_words(word_of(quad), tol, set()) if "نقط" in b or "يفرّق" in b],
+       "و«شَبْ» بأربعة مواضع (ش ٣ + ب ١) تمرّ في الكلمة")
+    ok(any("والحقيقةُ الإملائية 4" in b
+           for b in check_words(word_of([([500.0, 300.0], 3), ([800.0, 700.0], 1)]), tol, set())),
+       "ويُمسِك الدمجَ المزروعَ في الكلمة كما يمسكه في الحرف")
 
     # ٦) اكتمالُ أشكال المواقع والتغطية
     shapes = one(sound())

@@ -157,7 +157,7 @@ export const WORD_PATHS = {
      [132.7, 522.1], [120, 506.6], [110.7, 488.8], [107.9, 469], [108, 449], [109.7, 429], [111.9, 409]
     ], "folds": [{ "from": 0, "apex": 5, "to": 10 }, { "from": 19, "apex": 23, "to": 26 }] }
    ],
-   "dots": [{ "at": [854, 663.4], "count": 1, "after": true }, { "at": [667.4, 655.9], "count": 2, "after": true }, { "at": [274.5, 343.3], "count": 2, "after": true }]
+   "dots": [{ "at": [854, 663.4], "count": 1, "after": true }, { "at": [713.2, 651.7], "count": 1, "after": true }, { "at": [620.8, 660.3], "count": 1, "after": true }, { "at": [320.1, 339], "count": 1, "after": true }, { "at": [228.1, 347.8], "count": 1, "after": true }]
   },
   "تين": {
    "line": 607.5,
@@ -180,7 +180,7 @@ export const WORD_PATHS = {
      [112.9, 594.4], [118, 574.8]
     ], "folds": [{ "from": 0, "apex": 5, "to": 11 }, { "from": 18, "apex": 25, "to": 32 }] }
    ],
-   "dots": [{ "at": [808.3, 274.3], "count": 2, "after": true }, { "at": [569.6, 691.6], "count": 2, "after": true }, { "at": [229.5, 404.4], "count": 1, "after": true }]
+   "dots": [{ "at": [858.4, 269.7], "count": 1, "after": true }, { "at": [757.4, 279], "count": 1, "after": true }, { "at": [619.7, 686.9], "count": 1, "after": true }, { "at": [518.6, 696.3], "count": 1, "after": true }, { "at": [229.5, 404.4], "count": 1, "after": true }]
   },
   "تمر": {
    "line": 627.2,
@@ -203,7 +203,7 @@ export const WORD_PATHS = {
      [216.6, 736.6], [196.5, 740.8], [175.9, 740.4], [155.6, 736.9], [135.3, 732.8], [115.6, 726.8], [95.9, 720.6]
     ], "folds": [{ "from": 20, "apex": 40, "to": 57 }, { "from": 62, "apex": 73, "to": 83 }] }
    ],
-   "dots": [{ "at": [814.6, 276.8], "count": 2, "after": true }]
+   "dots": [{ "at": [867.1, 271.7], "count": 1, "after": true }, { "at": [760.7, 282], "count": 1, "after": true }]
   },
   "هلا": {
    "line": 755.3,
@@ -616,7 +616,7 @@ export const WORD_PATHS = {
      [261.5, 252.2], [274.5, 250.5], [287.2, 254.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [842.5, 733.2], "count": 1, "after": true }, { "at": [659.2, 726], "count": 2, "after": true }, { "at": [271.8, 418], "count": 2, "after": true }]
+   "dots": [{ "at": [842.5, 733.2], "count": 1, "after": true }, { "at": [703.7, 721.8], "count": 1, "after": true }, { "at": [613.5, 730.3], "count": 1, "after": true }, { "at": [316.7, 413.7], "count": 1, "after": true }, { "at": [225.9, 422.4], "count": 1, "after": true }]
   },
   "تُوتْ": {
    "line": 669.5,
@@ -651,7 +651,7 @@ export const WORD_PATHS = {
      [237.4, 306.6], [249.3, 305], [261, 308.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [831.6, 398.2], "count": 2, "after": true }, { "at": [246.2, 458.2], "count": 2, "after": true }]
+   "dots": [{ "at": [871.9, 394.4], "count": 1, "after": true }, { "at": [789.8, 402.2], "count": 1, "after": true }, { "at": [286.9, 454.4], "count": 1, "after": true }, { "at": [204.8, 462.1], "count": 1, "after": true }]
   },
   "يَدْ": {
    "line": 742.7,
@@ -680,7 +680,7 @@ export const WORD_PATHS = {
      [335.3, 127.3], [353.4, 125], [371.2, 130]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [697.2, 847.6], "count": 2, "after": true }]
+   "dots": [{ "at": [759.3, 841.7], "count": 1, "after": true }, { "at": [633.5, 853.6], "count": 1, "after": true }]
   },
   "وَلَدْ": {
    "line": 738.5,
@@ -755,7 +755,7 @@ export const WORD_PATHS = {
      [218.2, 235.4], [232.8, 233.5], [247.1, 237.6]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [808.4, 280.9], "count": 2, "after": true }, { "at": [570.1, 698.2], "count": 2, "after": true }, { "at": [229.2, 411.4], "count": 1, "after": true }]
+   "dots": [{ "at": [858.4, 276.1], "count": 1, "after": true }, { "at": [757.3, 285.8], "count": 1, "after": true }, { "at": [619.7, 693.3], "count": 1, "after": true }, { "at": [518.9, 703.3], "count": 1, "after": true }, { "at": [229.2, 411.4], "count": 1, "after": true }]
   },
   "تَمْرْ": {
    "line": 690.9,
@@ -793,7 +793,7 @@ export const WORD_PATHS = {
      [235.5, 204.8], [250.9, 202.8], [265.9, 207]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [814.9, 340.4], "count": 2, "after": true }]
+   "dots": [{ "at": [867.2, 335.2], "count": 1, "after": true }, { "at": [761.1, 345.7], "count": 1, "after": true }]
   },
   "هِلَالْ": {
    "line": 646.8,
@@ -884,7 +884,7 @@ export const WORD_PATHS = {
      [204.3, 292.5], [217.5, 290.8], [230.5, 294.5]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [519.8, 707.9], "count": 2, "after": true }, { "at": [214.5, 450.4], "count": 1, "after": true }]
+   "dots": [{ "at": [564.6, 703.6], "count": 1, "after": true }, { "at": [473.8, 712.3], "count": 1, "after": true }, { "at": [214.5, 450.4], "count": 1, "after": true }]
   },
   "فِيلْ": {
    "line": 669.2,
@@ -921,7 +921,7 @@ export const WORD_PATHS = {
      [186.6, 191.5], [200.7, 189.7], [214.6, 193.5]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [785, 285.1], "count": 1, "after": true }, { "at": [557.6, 750.5], "count": 2, "after": true }]
+   "dots": [{ "at": [785, 285.1], "count": 1, "after": true }, { "at": [605.8, 745.9], "count": 1, "after": true }, { "at": [507.9, 755.3], "count": 1, "after": true }]
   },
   "كَلْبْ": {
    "line": 705,
@@ -1000,7 +1000,7 @@ export const WORD_PATHS = {
      [253.4, 190.1], [269, 188.1], [284.3, 192.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [750.6, 279.2], "count": 2, "after": true }]
+   "dots": [{ "at": [804, 274.1], "count": 1, "after": true }, { "at": [695.9, 284.4], "count": 1, "after": true }]
   },
   "عِنَبْ": {
    "line": 618.7,
@@ -1076,7 +1076,7 @@ export const WORD_PATHS = {
      [218.9, 328], [228.9, 326.7], [238.7, 329.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [227.9, 455.3], "count": 2, "after": true }]
+   "dots": [{ "at": [262.1, 452.2], "count": 1, "after": true }, { "at": [192.8, 458.5], "count": 1, "after": true }]
   },
   "جَمَلْ": {
    "line": 638.4,
@@ -1202,7 +1202,7 @@ export const WORD_PATHS = {
      [211.6, 342], [220.7, 340.7], [229.7, 343.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [483.5, 652.3], "count": 2, "after": true }, { "at": [230.2, 657.2], "count": 1, "after": true }]
+   "dots": [{ "at": [514.2, 649.3], "count": 1, "after": true }, { "at": [451.5, 655.5], "count": 1, "after": true }, { "at": [230.2, 657.2], "count": 1, "after": true }]
   },
   "خَرُوفْ": {
    "line": 627,
@@ -1295,7 +1295,7 @@ export const WORD_PATHS = {
      [350.7, 344.4], [359.7, 343.1], [368.5, 345.6]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [803.4, 432.9], "count": 3, "after": true }]
+   "dots": [{ "at": [803.7, 409.2], "count": 1, "after": true }, { "at": [833.4, 440.5], "count": 1, "after": true }, { "at": [774.2, 445.9], "count": 1, "after": true }]
   },
   "مَطَرْ": {
    "line": 646,
@@ -1378,7 +1378,7 @@ export const WORD_PATHS = {
      [250, 261.6], [262.4, 260], [274.5, 263.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [832.2, 374.4], "count": 1, "after": true }, { "at": [618, 716.4], "count": 2, "after": true }, { "at": [260.5, 421.3], "count": 2, "after": true }]
+   "dots": [{ "at": [832.2, 374.4], "count": 1, "after": true }, { "at": [660.6, 712.1], "count": 1, "after": true }, { "at": [573.8, 720.8], "count": 1, "after": true }, { "at": [303, 417.3], "count": 1, "after": true }, { "at": [216.5, 425.4], "count": 1, "after": true }]
   },
   "صَارُوخْ": {
    "line": 588.8,
@@ -1489,7 +1489,7 @@ export const WORD_PATHS = {
      [190.3, 283.3], [201.1, 281.9], [211.6, 284.9]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [813.6, 338.1], "count": 2, "after": true }]
+   "dots": [{ "at": [850.6, 334.3], "count": 1, "after": true }, { "at": [776.1, 341.9], "count": 1, "after": true }]
   },
   "ثَعْلَبْ": {
    "line": 652.6,
@@ -1538,7 +1538,7 @@ export const WORD_PATHS = {
      [227.7, 358.3], [238, 356.9], [248.1, 359.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [853, 407.4], "count": 3, "after": true }, { "at": [249.7, 717.6], "count": 1, "after": true }]
+   "dots": [{ "at": [852.6, 380.3], "count": 1, "after": true }, { "at": [887.2, 416.2], "count": 1, "after": true }, { "at": [819.2, 422.1], "count": 1, "after": true }, { "at": [249.7, 717.6], "count": 1, "after": true }]
   },
   "ذَهَبْ": {
    "line": 645,
@@ -1950,7 +1950,7 @@ export const WORD_PATHS = {
      [199.6, 241.9], [178.6, 239.5], [158.3, 250.6]
     ], "folds": [{ "from": 0, "apex": 5, "to": 9 }] }
    ],
-   "dots": [{ "at": [750.6, 279.2], "count": 2, "after": true }]
+   "dots": [{ "at": [804, 274.1], "count": 1, "after": true }, { "at": [695.9, 284.4], "count": 1, "after": true }]
   },
   "وَلَدٌ": {
    "line": 738.5,
@@ -2045,7 +2045,7 @@ export const WORD_PATHS = {
      [191, 329.6], [202.1, 328.2], [212.9, 331.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [609.2, 430.3], "count": 2, "after": true }]
+   "dots": [{ "at": [647.4, 426.6], "count": 1, "after": true }, { "at": [570.9, 433.9], "count": 1, "after": true }]
   },
   "الشَّمْسْ": {
    "line": 587.4,
@@ -2099,7 +2099,7 @@ export const WORD_PATHS = {
      [307, 380.1], [314.4, 379.1], [321.6, 381.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [673.3, 452], "count": 3, "after": true }]
+   "dots": [{ "at": [673.1, 433], "count": 1, "after": true }, { "at": [697.3, 458.3], "count": 1, "after": true }, { "at": [649.3, 462.3], "count": 1, "after": true }]
   },
   "السَّمَكْ": {
    "line": 637.9,
@@ -2203,7 +2203,7 @@ export const WORD_PATHS = {
      [576.3, 320], [575.9, 306.2], [578.8, 292.4]
     ] }
    ],
-   "dots": [{ "at": [282.6, 879.1], "count": 2, "after": true }]
+   "dots": [{ "at": [321.4, 875.3], "count": 1, "after": true }, { "at": [242.6, 883.1], "count": 1, "after": true }]
   },
   "إِبْرِيقْ": {
    "line": 589.1,
@@ -2259,7 +2259,7 @@ export const WORD_PATHS = {
      [228.2, 259.6], [237.9, 258.4], [247.4, 261.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [738.6, 649.6], "count": 1, "after": true }, { "at": [420, 644.5], "count": 2, "after": true }, { "at": [236.7, 382.5], "count": 2, "after": true }]
+   "dots": [{ "at": [738.6, 649.6], "count": 1, "after": true }, { "at": [452.8, 641.2], "count": 1, "after": true }, { "at": [386.1, 647.9], "count": 1, "after": true }, { "at": [270, 379.5], "count": 1, "after": true }, { "at": [202.8, 385.5], "count": 1, "after": true }]
   },
   "قِرَاءَةْ": {
    "line": 641.2,
@@ -2316,7 +2316,7 @@ export const WORD_PATHS = {
      [140.9, 276], [150.9, 274.7], [160.7, 277.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [825.7, 378.2], "count": 2, "after": true }, { "at": [149.3, 401.3], "count": 2, "after": true }]
+   "dots": [{ "at": [859.3, 374.8], "count": 1, "after": true }, { "at": [791, 381.6], "count": 1, "after": true }, { "at": [183.5, 398.1], "count": 1, "after": true }, { "at": [114.9, 404.5], "count": 1, "after": true }]
   },
   "وَاسِعَةْ": {
    "line": 618.8,
@@ -2375,7 +2375,7 @@ export const WORD_PATHS = {
      [149.2, 311.7], [157.6, 310.6], [165.8, 312.9]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [156.9, 416.9], "count": 2, "after": true }]
+   "dots": [{ "at": [185.1, 414.2], "count": 1, "after": true }, { "at": [127.5, 419.7], "count": 1, "after": true }]
   },
   "نَظِيفْ": {
    "line": 620.1,
@@ -2426,7 +2426,7 @@ export const WORD_PATHS = {
      [318.7, 301], [327.8, 299.8], [336.7, 302.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [867.5, 409.1], "count": 1, "after": true }, { "at": [725.1, 401.5], "count": 1, "after": true }, { "at": [483, 671.3], "count": 2, "after": true }, { "at": [324.8, 409], "count": 1, "after": true }]
+   "dots": [{ "at": [867.5, 409.1], "count": 1, "after": true }, { "at": [725.1, 401.5], "count": 1, "after": true }, { "at": [513.5, 668.3], "count": 1, "after": true }, { "at": [451.6, 674.4], "count": 1, "after": true }, { "at": [324.8, 409], "count": 1, "after": true }]
   },
   "مَفْتُوحَةْ": {
    "line": 598.6,
@@ -2493,7 +2493,7 @@ export const WORD_PATHS = {
      [137.5, 351.4], [144.3, 350.5], [150.9, 352.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [723, 443.9], "count": 1, "after": true }, { "at": [609.3, 482.1], "count": 2, "after": true }, { "at": [141.5, 436], "count": 2, "after": true }]
+   "dots": [{ "at": [723, 443.9], "count": 1, "after": true }, { "at": [632.7, 480], "count": 1, "after": true }, { "at": [586.4, 484.1], "count": 1, "after": true }, { "at": [164.8, 434], "count": 1, "after": true }, { "at": [118.4, 438.1], "count": 1, "after": true }]
   },
   "صَغِيرْ": {
    "line": 606.8,
@@ -2537,7 +2537,7 @@ export const WORD_PATHS = {
      [177.5, 312.7], [186.8, 311.4], [195.9, 314]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [512.5, 389.6], "count": 1, "after": true }, { "at": [352.5, 659.8], "count": 2, "after": true }]
+   "dots": [{ "at": [512.5, 389.6], "count": 1, "after": true }, { "at": [384, 656.8], "count": 1, "after": true }, { "at": [320, 662.9], "count": 1, "after": true }]
   },
   "جَمِيلَةْ": {
    "line": 625.8,
@@ -2593,7 +2593,7 @@ export const WORD_PATHS = {
      [154.7, 300.4], [163.7, 299.1], [172.5, 301.6]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [807.1, 671.4], "count": 1, "after": true }, { "at": [429.4, 676.2], "count": 2, "after": true }, { "at": [161.4, 411.9], "count": 2, "after": true }]
+   "dots": [{ "at": [807.1, 671.4], "count": 1, "after": true }, { "at": [459.3, 673.3], "count": 1, "after": true }, { "at": [398.9, 679.2], "count": 1, "after": true }, { "at": [191.4, 409.3], "count": 1, "after": true }, { "at": [130.8, 414.7], "count": 1, "after": true }]
   },
   "مُنِيرْ": {
    "line": 647.6,
@@ -2637,7 +2637,7 @@ export const WORD_PATHS = {
      [205.4, 271.9], [217.2, 270.3], [228.8, 273.6]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [603.9, 434.8], "count": 1, "after": true }, { "at": [429, 715.7], "count": 2, "after": true }]
+   "dots": [{ "at": [603.9, 434.8], "count": 1, "after": true }, { "at": [469.8, 711.7], "count": 1, "after": true }, { "at": [387.5, 719.7], "count": 1, "after": true }]
   },
   "كَبِيرْ": {
    "line": 610.8,
@@ -2682,7 +2682,7 @@ export const WORD_PATHS = {
      [207.4, 230.6], [219.3, 229], [231, 232.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [613.7, 686.5], "count": 1, "after": true }, { "at": [433.8, 679.8], "count": 2, "after": true }]
+   "dots": [{ "at": [613.7, 686.5], "count": 1, "after": true }, { "at": [475.4, 675.7], "count": 1, "after": true }, { "at": [391.9, 683.9], "count": 1, "after": true }]
   },
   "حَادَّةْ": {
    "line": 712.6,
@@ -2734,7 +2734,7 @@ export const WORD_PATHS = {
      [147.2, 306.9], [158.1, 305.5], [168.8, 308.5]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [155.2, 446], "count": 2, "after": true }]
+   "dots": [{ "at": [193, 442.6], "count": 1, "after": true }, { "at": [116.7, 449.5], "count": 1, "after": true }]
   },
   "كَبِيرَةْ": {
    "line": 609.3,
@@ -2787,7 +2787,7 @@ export const WORD_PATHS = {
      [138.9, 244], [148.9, 242.7], [158.7, 245.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [668.1, 671.4], "count": 1, "after": true }, { "at": [520.5, 665.9], "count": 2, "after": true }, { "at": [147, 369.4], "count": 2, "after": true }]
+   "dots": [{ "at": [668.1, 671.4], "count": 1, "after": true }, { "at": [554.3, 662.8], "count": 1, "after": true }, { "at": [486, 669], "count": 1, "after": true }, { "at": [180.6, 366], "count": 1, "after": true }, { "at": [112.2, 372.8], "count": 1, "after": true }]
   },
   "نَاعِمَةْ": {
    "line": 641.2,
@@ -2846,7 +2846,7 @@ export const WORD_PATHS = {
      [154.9, 276], [164.9, 274.7], [174.7, 277.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [857.9, 409.1], "count": 1, "after": true }, { "at": [162.9, 401.3], "count": 2, "after": true }]
+   "dots": [{ "at": [857.9, 409.1], "count": 1, "after": true }, { "at": [196.9, 397.9], "count": 1, "after": true }, { "at": [128.3, 404.9], "count": 1, "after": true }]
   },
   "تَدُورْ": {
    "line": 646.4,
@@ -2893,7 +2893,7 @@ export const WORD_PATHS = {
      [192.4, 310.6], [203, 309.2], [213.4, 312.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [841.4, 404.1], "count": 2, "after": true }]
+   "dots": [{ "at": [877.9, 400.7], "count": 1, "after": true }, { "at": [804.4, 407.6], "count": 1, "after": true }]
   },
   "سَاخِنْ": {
    "line": 585.2,
@@ -2994,7 +2994,7 @@ export const WORD_PATHS = {
      [158.4, 264.6], [169, 263.2], [179.4, 266.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [781.9, 407.8], "count": 1, "after": true }, { "at": [364.8, 368.1], "count": 1, "after": true }, { "at": [167.7, 399.1], "count": 2, "after": true }]
+   "dots": [{ "at": [781.9, 407.8], "count": 1, "after": true }, { "at": [364.8, 368.1], "count": 1, "after": true }, { "at": [203.7, 395.5], "count": 1, "after": true }, { "at": [130.4, 402.9], "count": 1, "after": true }]
   },
   "مَطْبَخْ": {
    "line": 605.7,
@@ -3101,7 +3101,7 @@ export const WORD_PATHS = {
      [182.9, 262], [192.9, 260.7], [202.7, 263.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [361.4, 635.7], "count": 2, "after": true }]
+   "dots": [{ "at": [395.7, 632.4], "count": 1, "after": true }, { "at": [326.3, 639], "count": 1, "after": true }]
   },
   "نَافِذَةْ": {
    "line": 646.1,
@@ -3157,7 +3157,7 @@ export const WORD_PATHS = {
      [142.8, 268.7], [152.9, 267.3], [162.9, 270.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [858.9, 405.7], "count": 1, "after": true }, { "at": [565.1, 367.8], "count": 1, "after": true }, { "at": [359.9, 396.9], "count": 1, "after": true }, { "at": [151.1, 397.7], "count": 2, "after": true }]
+   "dots": [{ "at": [858.9, 405.7], "count": 1, "after": true }, { "at": [565.1, 367.8], "count": 1, "after": true }, { "at": [359.9, 396.9], "count": 1, "after": true }, { "at": [186, 394.4], "count": 1, "after": true }, { "at": [115.1, 401.1], "count": 1, "after": true }]
   },
   "مَقْعَدْ": {
    "line": 697.6,
@@ -3211,7 +3211,7 @@ export const WORD_PATHS = {
      [181.2, 332.9], [192.1, 331.5], [202.8, 334.5]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [612.9, 456.8], "count": 2, "after": true }]
+   "dots": [{ "at": [649.6, 453.2], "count": 1, "after": true }, { "at": [575.5, 460.4], "count": 1, "after": true }]
   },
   "مِفْتَاحْ": {
    "line": 603.5,
@@ -3269,7 +3269,7 @@ export const WORD_PATHS = {
      [198.7, 296.4], [207.7, 295.1], [216.5, 297.6]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [661.1, 396], "count": 1, "after": true }, { "at": [510.2, 447.6], "count": 2, "after": true }]
+   "dots": [{ "at": [661.1, 396], "count": 1, "after": true }, { "at": [540.9, 444.7], "count": 1, "after": true }, { "at": [478.4, 450.6], "count": 1, "after": true }]
   },
   "سَاعَةْ": {
    "line": 695.7,
@@ -3319,7 +3319,7 @@ export const WORD_PATHS = {
      [163.7, 321.6], [173.9, 320.3], [183.9, 323.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [171.9, 450.4], "count": 2, "after": true }]
+   "dots": [{ "at": [206.3, 447], "count": 1, "after": true }, { "at": [136.1, 453.9], "count": 1, "after": true }]
   },
   "مِصْبَاحْ": {
    "line": 585.6,
@@ -3523,7 +3523,7 @@ export const WORD_PATHS = {
      [158.2, 295.6], [167.9, 294.4], [177.4, 297.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [350.2, 434.9], "count": 2, "after": true }, { "at": [165.6, 417.7], "count": 2, "after": true }]
+   "dots": [{ "at": [383.2, 431.8], "count": 1, "after": true }, { "at": [316.8, 438], "count": 1, "after": true }, { "at": [198.5, 414.8], "count": 1, "after": true }, { "at": [132.4, 420.7], "count": 1, "after": true }]
   },
   "سِكِّينْ": {
    "line": 635.3,
@@ -3574,7 +3574,7 @@ export const WORD_PATHS = {
      [167.5, 396.7], [176.8, 395.4], [185.9, 398]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [388.4, 687.8], "count": 2, "after": true }, { "at": [174.3, 507.2], "count": 1, "after": true }]
+   "dots": [{ "at": [419.7, 684.7], "count": 1, "after": true }, { "at": [356.1, 691], "count": 1, "after": true }, { "at": [174.3, 507.2], "count": 1, "after": true }]
   },
   "حَمَّامْ": {
    "line": 625.4,
@@ -3727,7 +3727,7 @@ export const WORD_PATHS = {
      [190.6, 297.5], [204.7, 295.7], [218.6, 299.5]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [201.8, 476.6], "count": 2, "after": true }]
+   "dots": [{ "at": [250.5, 472], "count": 1, "after": true }, { "at": [152.5, 481.2], "count": 1, "after": true }]
   },
   "مِكْنَسَةْ": {
    "line": 614.5,
@@ -3787,7 +3787,7 @@ export const WORD_PATHS = {
      [146.5, 317.4], [154.6, 316.3], [162.5, 318.6]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [535.3, 470.2], "count": 1, "after": true }, { "at": [152, 419.9], "count": 2, "after": true }]
+   "dots": [{ "at": [535.3, 470.2], "count": 1, "after": true }, { "at": [179.2, 417.2], "count": 1, "after": true }, { "at": [123.8, 422.6], "count": 1, "after": true }]
   },
   "تِلْفَازْ": {
    "line": 672.1,
@@ -3843,7 +3843,7 @@ export const WORD_PATHS = {
      [189, 303.6], [200.1, 302.2], [210.9, 305.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [835.1, 420.8], "count": 2, "after": true }, { "at": [519.8, 418.8], "count": 1, "after": true }, { "at": [196.8, 435.5], "count": 1, "after": true }]
+   "dots": [{ "at": [872.2, 417.2], "count": 1, "after": true }, { "at": [796.3, 424.5], "count": 1, "after": true }, { "at": [519.8, 418.8], "count": 1, "after": true }, { "at": [196.8, 435.5], "count": 1, "after": true }]
   },
   "هَاتِفْ": {
    "line": 630.7,
@@ -3894,7 +3894,7 @@ export const WORD_PATHS = {
      [338.2, 283.6], [347.9, 282.4], [357.4, 285.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [515.1, 406.8], "count": 2, "after": true }, { "at": [345.6, 400.9], "count": 1, "after": true }]
+   "dots": [{ "at": [548.7, 403.5], "count": 1, "after": true }, { "at": [481.1, 410.1], "count": 1, "after": true }, { "at": [345.6, 400.9], "count": 1, "after": true }]
   },
   "حَدِيقَةْ": {
    "line": 616.6,
@@ -3947,7 +3947,7 @@ export const WORD_PATHS = {
      [144.5, 315.4], [152.6, 314.3], [160.5, 316.6]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [444.3, 663.1], "count": 2, "after": true }, { "at": [308.4, 433.1], "count": 2, "after": true }, { "at": [151.3, 418.2], "count": 2, "after": true }]
+   "dots": [{ "at": [472.3, 660.4], "count": 1, "after": true }, { "at": [416, 665.8], "count": 1, "after": true }, { "at": [336.4, 430.3], "count": 1, "after": true }, { "at": [280.1, 435.9], "count": 1, "after": true }, { "at": [179.3, 415.4], "count": 1, "after": true }, { "at": [122.9, 420.9], "count": 1, "after": true }]
   },
   "جِدَارْ": {
    "line": 591.6,
@@ -4051,7 +4051,7 @@ export const WORD_PATHS = {
      [139.1, 278.4], [147.6, 277.2], [156, 279.6]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [145.2, 385.1], "count": 2, "after": true }]
+   "dots": [{ "at": [174, 382.4], "count": 1, "after": true }, { "at": [115.7, 387.8], "count": 1, "after": true }]
   },
   "مِرْوَحَةْ": {
    "line": 610.5,
@@ -4116,7 +4116,7 @@ export const WORD_PATHS = {
      [141.8, 324.4], [149.5, 323.3], [157, 325.5]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [146.8, 422.7], "count": 2, "after": true }]
+   "dots": [{ "at": [173.5, 420.1], "count": 1, "after": true }, { "at": [120.2, 425.2], "count": 1, "after": true }]
   },
   "خِزَانَةْ": {
    "line": 633.8,
@@ -4170,7 +4170,7 @@ export const WORD_PATHS = {
      [154.2, 287], [163.8, 285.7], [173.2, 288.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [779.2, 423.1], "count": 1, "after": true }, { "at": [564.5, 432], "count": 1, "after": true }, { "at": [314.8, 413.7], "count": 1, "after": true }, { "at": [161.7, 406.4], "count": 2, "after": true }]
+   "dots": [{ "at": [779.2, 423.1], "count": 1, "after": true }, { "at": [564.5, 432], "count": 1, "after": true }, { "at": [314.8, 413.7], "count": 1, "after": true }, { "at": [193.8, 403.2], "count": 1, "after": true }, { "at": [128.9, 409.7], "count": 1, "after": true }]
   },
   "مِظَلَّةْ": {
    "line": 685.5,
@@ -4235,7 +4235,7 @@ export const WORD_PATHS = {
      [158.4, 294.6], [169, 293.2], [179.4, 296.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [599.7, 427.7], "count": 1, "after": true }, { "at": [167.2, 428.4], "count": 2, "after": true }]
+   "dots": [{ "at": [599.7, 427.7], "count": 1, "after": true }, { "at": [203.4, 424.9], "count": 1, "after": true }, { "at": [130.2, 432], "count": 1, "after": true }]
   },
   "قِدْرْ": {
    "line": 682.2,
@@ -4276,7 +4276,7 @@ export const WORD_PATHS = {
      [224.6, 235.5], [238.7, 233.7], [252.6, 237.5]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [781.5, 306.6], "count": 2, "after": true }]
+   "dots": [{ "at": [829.4, 302], "count": 1, "after": true }, { "at": [731.6, 311.4], "count": 1, "after": true }]
   },
   "صُنْبُورْ": {
    "line": 611.8,
@@ -4373,7 +4373,7 @@ export const WORD_PATHS = {
      [186.9, 245.5], [200.6, 243.8], [214, 247.5]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [784.4, 344.4], "count": 2, "after": true }, { "at": [550.1, 392.6], "count": 1, "after": true }]
+   "dots": [{ "at": [831.1, 339.9], "count": 1, "after": true }, { "at": [736.5, 349], "count": 1, "after": true }, { "at": [550.1, 392.6], "count": 1, "after": true }]
   },
   "مُنَبِّهْ": {
    "line": 678.3,
@@ -4478,7 +4478,7 @@ export const WORD_PATHS = {
      [301, 295.3], [310.9, 294], [320.6, 296.7]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [588.4, 444.7], "count": 3, "after": true }]
+   "dots": [{ "at": [588.1, 419.4], "count": 1, "after": true }, { "at": [620.7, 453], "count": 1, "after": true }, { "at": [555.8, 458.9], "count": 1, "after": true }]
   },
   "مِنْدِيلْ": {
    "line": 603.5,
@@ -4533,7 +4533,7 @@ export const WORD_PATHS = {
      [152, 312], [160.7, 310.9], [169.2, 313.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [687.5, 448.3], "count": 1, "after": true }, { "at": [369.4, 652.9], "count": 2, "after": true }]
+   "dots": [{ "at": [687.5, 448.3], "count": 1, "after": true }, { "at": [399, 649.9], "count": 1, "after": true }, { "at": [339.3, 655.9], "count": 1, "after": true }]
   },
   "مُثَلَّجْ": {
    "line": 677.2,
@@ -4591,7 +4591,7 @@ export const WORD_PATHS = {
      [223, 317.6], [234.1, 316.2], [244.9, 319.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [619.5, 477.7], "count": 3, "after": true }, { "at": [225.5, 694.5], "count": 1, "after": true }]
+   "dots": [{ "at": [619.4, 449.1], "count": 1, "after": true }, { "at": [655.9, 486.9], "count": 1, "after": true }, { "at": [583, 493.7], "count": 1, "after": true }, { "at": [225.5, 694.5], "count": 1, "after": true }]
   },
   "جَرَّةْ": {
    "line": 692.9,
@@ -4636,7 +4636,7 @@ export const WORD_PATHS = {
      [164.3, 208.5], [177.5, 206.8], [190.5, 210.5]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [764, 761.7], "count": 1, "after": true }, { "at": [175, 375.8], "count": 2, "after": true }]
+   "dots": [{ "at": [764, 761.7], "count": 1, "after": true }, { "at": [219.6, 371.6], "count": 1, "after": true }, { "at": [129.2, 380.1], "count": 1, "after": true }]
   },
   "طَنْجَرَةْ": {
    "line": 612.1,
@@ -4699,7 +4699,7 @@ export const WORD_PATHS = {
      [129.8, 330.4], [137.5, 329.3], [145, 331.5]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [641.4, 475.3], "count": 1, "after": true }, { "at": [477.4, 651.3], "count": 1, "after": true }, { "at": [135.1, 427.4], "count": 2, "after": true }]
+   "dots": [{ "at": [641.4, 475.3], "count": 1, "after": true }, { "at": [477.4, 651.3], "count": 1, "after": true }, { "at": [160.9, 424.9], "count": 1, "after": true }, { "at": [108.4, 429.9], "count": 1, "after": true }]
   },
   "شَفْرَةْ": {
    "line": 649.1,
@@ -4750,7 +4750,7 @@ export const WORD_PATHS = {
      [144.9, 276], [154.9, 274.7], [164.7, 277.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [792.2, 461.7], "count": 3, "after": true }, { "at": [537.5, 415.6], "count": 1, "after": true }, { "at": [153.5, 403.8], "count": 2, "after": true }]
+   "dots": [{ "at": [792.5, 435.5], "count": 1, "after": true }, { "at": [826.3, 470.2], "count": 1, "after": true }, { "at": [759.3, 476.1], "count": 1, "after": true }, { "at": [537.5, 415.6], "count": 1, "after": true }, { "at": [188, 400.5], "count": 1, "after": true }, { "at": [117.7, 407.2], "count": 1, "after": true }]
   },
   "سَجَّادَةْ": {
    "line": 616.6,
@@ -4811,7 +4811,7 @@ export const WORD_PATHS = {
      [135.7, 333.1], [143.5, 332], [151.1, 334.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [579.6, 656.3], "count": 1, "after": true }, { "at": [140.8, 430.2], "count": 2, "after": true }]
+   "dots": [{ "at": [579.6, 656.3], "count": 1, "after": true }, { "at": [167.1, 427.8], "count": 1, "after": true }, { "at": [114, 432.7], "count": 1, "after": true }]
   },
   "مِصْعَدْ": {
    "line": 611.5,
@@ -5037,7 +5037,7 @@ export const WORD_PATHS = {
      [139, 308.1], [146.4, 307.1], [153.6, 309.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [703.4, 420.3], "count": 1, "after": true }, { "at": [275.1, 617.9], "count": 2, "after": true }, { "at": [145, 400.8], "count": 2, "after": true }]
+   "dots": [{ "at": [703.4, 420.3], "count": 1, "after": true }, { "at": [300.4, 615.4], "count": 1, "after": true }, { "at": [250.1, 620.4], "count": 1, "after": true }, { "at": [169.6, 398.7], "count": 1, "after": true }, { "at": [120, 403], "count": 1, "after": true }]
   },
   "مِسْمَارْ": {
    "line": 595.8,
@@ -5189,7 +5189,7 @@ export const WORD_PATHS = {
      [161.1, 262.8], [174.6, 261.1], [187.9, 264.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [171.9, 434], "count": 2, "after": true }]
+   "dots": [{ "at": [217.8, 429.7], "count": 1, "after": true }, { "at": [124.6, 438.4], "count": 1, "after": true }]
   },
   "سَقْفْ": {
    "line": 688.5,
@@ -5232,7 +5232,7 @@ export const WORD_PATHS = {
      [344.9, 326], [354.9, 324.7], [364.7, 327.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [534, 458.7], "count": 2, "after": true }, { "at": [352.3, 448.3], "count": 1, "after": true }]
+   "dots": [{ "at": [569.1, 455.2], "count": 1, "after": true }, { "at": [498.2, 462.2], "count": 1, "after": true }, { "at": [352.3, 448.3], "count": 1, "after": true }]
   },
   "مِغْرَفَةْ": {
    "line": 623.4,
@@ -5295,7 +5295,7 @@ export const WORD_PATHS = {
      [154, 304], [162.7, 302.9], [171.2, 305.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [659.2, 420.7], "count": 1, "after": true }, { "at": [321.1, 388.1], "count": 1, "after": true }, { "at": [159.8, 413.8], "count": 2, "after": true }]
+   "dots": [{ "at": [659.2, 420.7], "count": 1, "after": true }, { "at": [321.1, 388.1], "count": 1, "after": true }, { "at": [189.4, 411], "count": 1, "after": true }, { "at": [129.5, 416.7], "count": 1, "after": true }]
   },
   "دَلْوْ": {
    "line": 760.9,
@@ -5395,7 +5395,7 @@ export const WORD_PATHS = {
      [150, 280], [158.7, 278.9], [167.2, 281.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [639.5, 395], "count": 1, "after": true }, { "at": [480.2, 660], "count": 2, "after": true }]
+   "dots": [{ "at": [639.5, 395], "count": 1, "after": true }, { "at": [510.1, 657.1], "count": 1, "after": true }, { "at": [449.2, 663], "count": 1, "after": true }]
   },
   "مِنْشَارْ": {
    "line": 601.5,
@@ -5450,7 +5450,7 @@ export const WORD_PATHS = {
      [171.8, 322.7], [180.7, 321.5], [189.3, 324]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [686, 443.2], "count": 1, "after": true }, { "at": [500.7, 438], "count": 3, "after": true }]
+   "dots": [{ "at": [686, 443.2], "count": 1, "after": true }, { "at": [500.7, 415], "count": 1, "after": true }, { "at": [529.8, 445.4], "count": 1, "after": true }, { "at": [471.6, 450.8], "count": 1, "after": true }]
   },
   "ثَلَّاجَةْ": {
    "line": 667.3,
@@ -5511,7 +5511,7 @@ export const WORD_PATHS = {
      [152.7, 331], [161.8, 329.8], [170.7, 332.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [856.1, 452.3], "count": 3, "after": true }, { "at": [399.9, 714.8], "count": 1, "after": true }, { "at": [160.3, 447.1], "count": 2, "after": true }]
+   "dots": [{ "at": [855.8, 428.2], "count": 1, "after": true }, { "at": [886.1, 459.9], "count": 1, "after": true }, { "at": [826.1, 465.4], "count": 1, "after": true }, { "at": [399.9, 714.8], "count": 1, "after": true }, { "at": [191.4, 444.2], "count": 1, "after": true }, { "at": [128.9, 450], "count": 1, "after": true }]
   },
   "مَغْسَلَةْ": {
    "line": 660.9,
@@ -5569,7 +5569,7 @@ export const WORD_PATHS = {
      [149.2, 353.7], [157.6, 352.6], [165.8, 354.9]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [669.4, 465.7], "count": 1, "after": true }, { "at": [156.8, 459], "count": 2, "after": true }]
+   "dots": [{ "at": [669.4, 465.7], "count": 1, "after": true }, { "at": [185.1, 456.4], "count": 1, "after": true }, { "at": [127.5, 461.7], "count": 1, "after": true }]
   },
   "أَبِي": {
    "line": 677.3,
@@ -5607,7 +5607,7 @@ export const WORD_PATHS = {
      [583.2, 856.9], [576.5, 859.5], [569.6, 861.8]
     ] }
    ],
-   "dots": [{ "at": [613, 753.1], "count": 1, "after": true }, { "at": [320.9, 877.8], "count": 2, "after": true }]
+   "dots": [{ "at": [613, 753.1], "count": 1, "after": true }, { "at": [361.9, 873.9], "count": 1, "after": true }, { "at": [278.7, 881.9], "count": 1, "after": true }]
   },
   "جَدِّي": {
    "line": 611.4,
@@ -5648,7 +5648,7 @@ export const WORD_PATHS = {
      [442.2, 239.2], [441.7, 226], [444.5, 212.8]
     ] }
    ],
-   "dots": [{ "at": [787.7, 668.5], "count": 1, "after": true }, { "at": [197.1, 794.3], "count": 2, "after": true }]
+   "dots": [{ "at": [787.7, 668.5], "count": 1, "after": true }, { "at": [235.3, 790.7], "count": 1, "after": true }, { "at": [158.9, 797.9], "count": 1, "after": true }]
   },
   "جَدَّةْ": {
    "line": 690.6,
@@ -5694,7 +5694,7 @@ export const WORD_PATHS = {
      [152.9, 227.2], [165.4, 225.6], [177.7, 229]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [767.3, 756.2], "count": 1, "after": true }, { "at": [162.5, 386.8], "count": 2, "after": true }]
+   "dots": [{ "at": [767.3, 756.2], "count": 1, "after": true }, { "at": [205.4, 382.6], "count": 1, "after": true }, { "at": [118.7, 391], "count": 1, "after": true }]
   },
   "أُخْتْ": {
    "line": 795.8,
@@ -5736,7 +5736,7 @@ export const WORD_PATHS = {
      [237.8, 451.9], [249.2, 450.5], [260.3, 453.6]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [630.9, 543], "count": 1, "after": true }, { "at": [246.9, 595.2], "count": 2, "after": true }]
+   "dots": [{ "at": [630.9, 543], "count": 1, "after": true }, { "at": [285.4, 591.5], "count": 1, "after": true }, { "at": [207.5, 599], "count": 1, "after": true }]
   },
   "أَخْ": {
    "line": 729.1,
@@ -5815,7 +5815,7 @@ export const WORD_PATHS = {
      [492.4, 229.5], [492, 215.3], [494.9, 201.2]
     ], "folds": [{ "from": 6, "apex": 8, "to": 11 }] }
    ],
-   "dots": [{ "at": [216.6, 803], "count": 2, "after": true }]
+   "dots": [{ "at": [256.1, 799.2], "count": 1, "after": true }, { "at": [175.4, 807], "count": 1, "after": true }]
   },
   "خَالْ": {
    "line": 654.5,
@@ -5987,7 +5987,7 @@ export const WORD_PATHS = {
      [213.2, 313.7], [221.6, 312.6], [229.8, 314.9]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [379.3, 648.4], "count": 2, "after": true }, { "at": [220.6, 421.1], "count": 2, "after": true }]
+   "dots": [{ "at": [408.3, 645.6], "count": 1, "after": true }, { "at": [350.1, 651.2], "count": 1, "after": true }, { "at": [249.3, 418.3], "count": 1, "after": true }, { "at": [191.1, 423.9], "count": 1, "after": true }]
   },
   "جَارْ": {
    "line": 669.2,
@@ -6071,7 +6071,7 @@ export const WORD_PATHS = {
      [209.8, 322.7], [218.7, 321.5], [227.3, 324]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [605, 628.3], "count": 1, "after": true }, { "at": [473.3, 623.4], "count": 2, "after": true }, { "at": [228.1, 628.3], "count": 1, "after": true }]
+   "dots": [{ "at": [605, 628.3], "count": 1, "after": true }, { "at": [503.6, 620.7], "count": 1, "after": true }, { "at": [442.3, 626.2], "count": 1, "after": true }, { "at": [228.1, 628.3], "count": 1, "after": true }]
   },
   "شُرْطَةْ": {
    "line": 627.4,
@@ -6131,7 +6131,7 @@ export const WORD_PATHS = {
      [148, 308], [156.7, 306.9], [165.2, 309.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [809.2, 467.3], "count": 3, "after": true }, { "at": [154.5, 417.6], "count": 2, "after": true }]
+   "dots": [{ "at": [809, 444.4], "count": 1, "after": true }, { "at": [837.3, 474.2], "count": 1, "after": true }, { "at": [780.7, 479.4], "count": 1, "after": true }, { "at": [184.1, 414.8], "count": 1, "after": true }, { "at": [124.4, 420.6], "count": 1, "after": true }]
   },
   "فَلَّاحْ": {
    "line": 678.7,
@@ -6392,7 +6392,7 @@ export const WORD_PATHS = {
      [194.3, 257.3], [205.1, 255.9], [215.6, 258.9]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [840.8, 351.8], "count": 2, "after": true }, { "at": [477.8, 656.6], "count": 1, "after": true }]
+   "dots": [{ "at": [878.2, 348.3], "count": 1, "after": true }, { "at": [803.1, 355.2], "count": 1, "after": true }, { "at": [477.8, 656.6], "count": 1, "after": true }]
   },
   "ضَيْفْ": {
    "line": 633.7,
@@ -6434,7 +6434,7 @@ export const WORD_PATHS = {
      [336.2, 289.6], [345.9, 288.4], [355.4, 291.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [760, 403], "count": 1, "after": true }, { "at": [512.5, 689.1], "count": 2, "after": true }, { "at": [342.1, 406.7], "count": 1, "after": true }]
+   "dots": [{ "at": [760, 403], "count": 1, "after": true }, { "at": [545.3, 686], "count": 1, "after": true }, { "at": [478.4, 692.4], "count": 1, "after": true }, { "at": [342.1, 406.7], "count": 1, "after": true }]
   },
   "عَجُوزْ": {
    "line": 616.6,
@@ -6528,7 +6528,7 @@ export const WORD_PATHS = {
      [165.5, 271], [176, 269.6], [186.2, 272.5]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [837, 399.9], "count": 1, "after": true }, { "at": [440.8, 685.3], "count": 2, "after": true }]
+   "dots": [{ "at": [837, 399.9], "count": 1, "after": true }, { "at": [476.6, 681.9], "count": 1, "after": true }, { "at": [403.9, 688.9], "count": 1, "after": true }]
   },
   "حَفِيدْ": {
    "line": 627.6,
@@ -6572,7 +6572,7 @@ export const WORD_PATHS = {
      [172.9, 292], [182.9, 290.7], [192.7, 293.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [546.5, 399.6], "count": 1, "after": true }, { "at": [380.2, 684.1], "count": 2, "after": true }]
+   "dots": [{ "at": [546.5, 399.6], "count": 1, "after": true }, { "at": [414.4, 681], "count": 1, "after": true }, { "at": [345.9, 687.3], "count": 1, "after": true }]
   },
   "أُسْرَةْ": {
    "line": 737.9,
@@ -6627,7 +6627,7 @@ export const WORD_PATHS = {
      [147, 331.6], [158.1, 330.2], [168.9, 333.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [156, 471.4], "count": 2, "after": true }]
+   "dots": [{ "at": [193.5, 467.9], "count": 1, "after": true }, { "at": [117.5, 475.1], "count": 1, "after": true }]
   },
   "صَيَّادْ": {
    "line": 638.3,
@@ -6679,7 +6679,7 @@ export const WORD_PATHS = {
      [174.4, 286.6], [185, 285.2], [195.4, 288.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [487.2, 697.5], "count": 2, "after": true }]
+   "dots": [{ "at": [522.6, 694.1], "count": 1, "after": true }, { "at": [450.9, 701.1], "count": 1, "after": true }]
   },
   "عَرُوسْ": {
    "line": 584.8,
@@ -6850,7 +6850,7 @@ export const WORD_PATHS = {
      [135.5, 345.4], [142.3, 344.5], [148.9, 346.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [794.5, 639.4], "count": 1, "after": true }, { "at": [698.9, 478.8], "count": 2, "after": true }, { "at": [140, 431.7], "count": 2, "after": true }]
+   "dots": [{ "at": [794.5, 639.4], "count": 1, "after": true }, { "at": [722.3, 476.4], "count": 1, "after": true }, { "at": [675.3, 481.2], "count": 1, "after": true }, { "at": [163.4, 429.4], "count": 1, "after": true }, { "at": [116.2, 434.1], "count": 1, "after": true }]
   },
   "بَحَّارْ": {
    "line": 664,
@@ -7095,7 +7095,7 @@ export const WORD_PATHS = {
      [177.2, 285.2], [189.3, 283.7], [201.1, 287]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [736.9, 462.1], "count": 1, "after": true }, { "at": [187.7, 440.3], "count": 2, "after": true }]
+   "dots": [{ "at": [736.9, 462.1], "count": 1, "after": true }, { "at": [229, 436.4], "count": 1, "after": true }, { "at": [144.7, 444.4], "count": 1, "after": true }]
   },
   "حَدَّادْ": {
    "line": 702.6,
@@ -7244,7 +7244,7 @@ export const WORD_PATHS = {
      [234.9, 330], [244.9, 328.7], [254.7, 331.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [243.6, 456.8], "count": 2, "after": true }]
+   "dots": [{ "at": [277.9, 453.4], "count": 1, "after": true }, { "at": [208.7, 460.2], "count": 1, "after": true }]
   },
   "تَوْأَمْ": {
    "line": 713.4,
@@ -7298,7 +7298,7 @@ export const WORD_PATHS = {
      [175.2, 319.2], [187.3, 317.7], [199.1, 321]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [827.8, 434.7], "count": 2, "after": true }]
+   "dots": [{ "at": [869.6, 430.7], "count": 1, "after": true }, { "at": [785.1, 438.9], "count": 1, "after": true }]
   },
   "عَمَّةْ": {
    "line": 769.1,
@@ -7347,7 +7347,7 @@ export const WORD_PATHS = {
      [183.8, 255.2], [197.6, 253.4], [211.2, 257.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [195.8, 431.9], "count": 2, "after": true }]
+   "dots": [{ "at": [243.3, 427.4], "count": 1, "after": true }, { "at": [147, 436.5], "count": 1, "after": true }]
   },
   "سَبَّاكْ": {
    "line": 625.4,
@@ -7495,7 +7495,7 @@ export const WORD_PATHS = {
      [326.5, 291.4], [334.6, 290.3], [342.5, 292.6]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [535.6, 628.1], "count": 2, "after": true }, { "at": [332.5, 388.7], "count": 1, "after": true }]
+   "dots": [{ "at": [563.5, 625.3], "count": 1, "after": true }, { "at": [507.4, 631.1], "count": 1, "after": true }, { "at": [332.5, 388.7], "count": 1, "after": true }]
   },
   "جَمَاعَةْ": {
    "line": 625.3,
@@ -7553,7 +7553,7 @@ export const WORD_PATHS = {
      [144.5, 321.4], [152.6, 320.3], [160.5, 322.6]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [812.2, 668.2], "count": 1, "after": true }, { "at": [150.3, 425.3], "count": 2, "after": true }]
+   "dots": [{ "at": [812.2, 668.2], "count": 1, "after": true }, { "at": [178.5, 422.7], "count": 1, "after": true }, { "at": [121.7, 427.8], "count": 1, "after": true }]
   },
   "رَاكِبْ": {
    "line": 608.4,
@@ -7653,7 +7653,7 @@ export const WORD_PATHS = {
      [284.7, 313], [293.8, 311.8], [302.7, 314.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [777.8, 417.2], "count": 1, "after": true }, { "at": [586, 673.2], "count": 2, "after": true }]
+   "dots": [{ "at": [777.8, 417.2], "count": 1, "after": true }, { "at": [617.1, 670.3], "count": 1, "after": true }, { "at": [553.8, 676.2], "count": 1, "after": true }]
   },
   "رَاعِي": {
    "line": 562.7,
@@ -7697,7 +7697,7 @@ export const WORD_PATHS = {
      [491.8, 652], [486, 654.2], [480.1, 656.2]
     ] }
    ],
-   "dots": [{ "at": [200.4, 736.9], "count": 2, "after": true }]
+   "dots": [{ "at": [236, 733.5], "count": 1, "after": true }, { "at": [163.6, 740.4], "count": 1, "after": true }]
   },
   "عَامِلْ": {
    "line": 624,
@@ -7819,7 +7819,7 @@ export const WORD_PATHS = {
      [133.9, 361.5], [140.2, 360.7], [146.4, 362.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [699.9, 623.6], "count": 1, "after": true }, { "at": [138.6, 440.2], "count": 2, "after": true }]
+   "dots": [{ "at": [699.9, 623.6], "count": 1, "after": true }, { "at": [159.5, 438.1], "count": 1, "after": true }, { "at": [116.3, 442.4], "count": 1, "after": true }]
   },
   "طَيَّارْ": {
    "line": 630,
@@ -7877,7 +7877,7 @@ export const WORD_PATHS = {
      [198.3, 287.3], [209.1, 285.9], [219.6, 288.9]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [520.9, 692.2], "count": 2, "after": true }]
+   "dots": [{ "at": [558, 688.5], "count": 1, "after": true }, { "at": [482.8, 695.9], "count": 1, "after": true }]
   },
   "مُمَرِّضَةْ": {
    "line": 608.4,
@@ -7945,7 +7945,7 @@ export const WORD_PATHS = {
      [143, 336.1], [150.4, 335.1], [157.6, 337.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [355.4, 432.4], "count": 1, "after": true }, { "at": [148.7, 429.6], "count": 2, "after": true }]
+   "dots": [{ "at": [355.4, 432.4], "count": 1, "after": true }, { "at": [173.6, 427.2], "count": 1, "after": true }, { "at": [122.9, 432.2], "count": 1, "after": true }]
   },
   "صَدَاقَةْ": {
    "line": 653.8,
@@ -8001,7 +8001,7 @@ export const WORD_PATHS = {
      [143.6, 359.8], [151.5, 358.7], [159.3, 360.9]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [297.9, 442.2], "count": 2, "after": true }, { "at": [149.9, 460.6], "count": 2, "after": true }]
+   "dots": [{ "at": [324.9, 439.7], "count": 1, "after": true }, { "at": [269.9, 444.8], "count": 1, "after": true }, { "at": [177.2, 458], "count": 1, "after": true }, { "at": [122.3, 463.2], "count": 1, "after": true }]
   },
   "رَأْسْ": {
    "line": 729,
@@ -8296,7 +8296,7 @@ export const WORD_PATHS = {
      [197.8, 223.2], [211.6, 221.4], [225.2, 225.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [790.7, 303.3], "count": 2, "after": true }]
+   "dots": [{ "at": [838.2, 298.7], "count": 1, "after": true }, { "at": [741.8, 307.9], "count": 1, "after": true }]
   },
   "شَعْرْ": {
    "line": 657.3,
@@ -8339,7 +8339,7 @@ export const WORD_PATHS = {
      [206.1, 270.9], [218.3, 269.3], [230.3, 272.7]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [763.3, 431.5], "count": 3, "after": true }]
+   "dots": [{ "at": [763.1, 399.7], "count": 1, "after": true }, { "at": [803.3, 441.8], "count": 1, "after": true }, { "at": [723, 449], "count": 1, "after": true }]
   },
   "أَسْنَانْ": {
    "line": 667.3,
@@ -8481,7 +8481,7 @@ export const WORD_PATHS = {
      [267.6, 341.5], [280.4, 339.9], [293, 343.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [793, 365.1], "count": 2, "after": true }, { "at": [294.6, 789.2], "count": 1, "after": true }]
+   "dots": [{ "at": [837, 360.8], "count": 1, "after": true }, { "at": [747.8, 369.5], "count": 1, "after": true }, { "at": [294.6, 789.2], "count": 1, "after": true }]
   },
   "وَجْهْ": {
    "line": 668.5,
@@ -8570,7 +8570,7 @@ export const WORD_PATHS = {
      [390.5, 240.9], [402.3, 239.4], [413.8, 242.7]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [604, 453.3], "count": 2, "after": true }, { "at": [398.6, 381.7], "count": 1, "after": true }]
+   "dots": [{ "at": [644.1, 449.5], "count": 1, "after": true }, { "at": [562.8, 457.3], "count": 1, "after": true }, { "at": [398.6, 381.7], "count": 1, "after": true }]
   },
   "دَمْ": {
    "line": 673.5,
@@ -8697,7 +8697,7 @@ export const WORD_PATHS = {
      [205.5, 326.7], [214.8, 325.4], [223.9, 328]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [212.6, 445.3], "count": 2, "after": true }]
+   "dots": [{ "at": [244.5, 442.2], "count": 1, "after": true }, { "at": [179.8, 448.6], "count": 1, "after": true }]
   },
   "دَمْعْ": {
    "line": 656.2,
@@ -8786,7 +8786,7 @@ export const WORD_PATHS = {
      [270.3, 234.2], [282.3, 232.6], [294.2, 236]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [280, 387.3], "count": 2, "after": true }]
+   "dots": [{ "at": [321, 383.4], "count": 1, "after": true }, { "at": [237.7, 391.3], "count": 1, "after": true }]
   },
   "ضِرْسْ": {
    "line": 590.7,
@@ -8879,7 +8879,7 @@ export const WORD_PATHS = {
      [162.9, 276], [172.9, 274.7], [182.7, 277.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [170.9, 401.4], "count": 2, "after": true }]
+   "dots": [{ "at": [204.4, 398], "count": 1, "after": true }, { "at": [136.1, 404.9], "count": 1, "after": true }]
   },
   "مَرَضْ": {
    "line": 623.4,
@@ -8974,7 +8974,7 @@ export const WORD_PATHS = {
      [163.2, 310.9], [174.1, 309.5], [184.8, 312.5]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [523.1, 466.7], "count": 2, "after": true }, { "at": [357, 515.1], "count": 1, "after": true }, { "at": [172, 447.4], "count": 2, "after": true }]
+   "dots": [{ "at": [559.6, 463.1], "count": 1, "after": true }, { "at": [485.7, 470.4], "count": 1, "after": true }, { "at": [357, 515.1], "count": 1, "after": true }, { "at": [208.4, 444], "count": 1, "after": true }, { "at": [134.5, 450.9], "count": 1, "after": true }]
   },
   "نَوْمْ": {
    "line": 658.2,
@@ -9105,7 +9105,7 @@ export const WORD_PATHS = {
      [187.5, 429], [198, 427.6], [208.2, 430.5]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [563, 378.5], "count": 3, "after": true }, { "at": [202.5, 746.7], "count": 2, "after": true }]
+   "dots": [{ "at": [563.3, 351.2], "count": 1, "after": true }, { "at": [598.3, 387.2], "count": 1, "after": true }, { "at": [529.2, 393.2], "count": 1, "after": true }, { "at": [238.2, 743.3], "count": 1, "after": true }, { "at": [165.9, 750.2], "count": 1, "after": true }]
   },
   "دِمَاغْ": {
    "line": 651.9,
@@ -9200,7 +9200,7 @@ export const WORD_PATHS = {
      [169, 255.6], [180.1, 254.2], [190.9, 257.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [178, 395.5], "count": 2, "after": true }]
+   "dots": [{ "at": [215.2, 392.1], "count": 1, "after": true }, { "at": [139.3, 399.2], "count": 1, "after": true }]
   },
   "صَدْرْ": {
    "line": 648.6,
@@ -9501,7 +9501,7 @@ export const WORD_PATHS = {
      [144.3, 257.3], [155.1, 255.9], [165.6, 258.9]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [153.7, 393.1], "count": 2, "after": true }]
+   "dots": [{ "at": [190, 389.7], "count": 1, "after": true }, { "at": [116, 396.7], "count": 1, "after": true }]
   },
   "عَطَشْ": {
    "line": 590.7,
@@ -9549,7 +9549,7 @@ export const WORD_PATHS = {
      [344, 322], [352.7, 320.9], [361.2, 323.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [350.8, 432], "count": 3, "after": true }]
+   "dots": [{ "at": [350.7, 409.8], "count": 1, "after": true }, { "at": [379.3, 439.2], "count": 1, "after": true }, { "at": [322.6, 444.6], "count": 1, "after": true }]
   },
   "شَفَةْ": {
    "line": 749.6,
@@ -9592,7 +9592,7 @@ export const WORD_PATHS = {
      [175.5, 272.2], [188.5, 270.5], [201.2, 274.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [760.7, 510.9], "count": 3, "after": true }, { "at": [434.9, 452.2], "count": 1, "after": true }, { "at": [185.5, 436.8], "count": 2, "after": true }]
+   "dots": [{ "at": [760.9, 477.1], "count": 1, "after": true }, { "at": [803.5, 521.5], "count": 1, "after": true }, { "at": [718.5, 529.3], "count": 1, "after": true }, { "at": [434.9, 452.2], "count": 1, "after": true }, { "at": [229.7, 432.5], "count": 1, "after": true }, { "at": [140.6, 441.2], "count": 1, "after": true }]
   },
   "خَدْ": {
    "line": 807.5,
@@ -9732,7 +9732,7 @@ export const WORD_PATHS = {
      [133.7, 329.1], [141.5, 328], [149.1, 330.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [650.8, 475], "count": 1, "after": true }, { "at": [485.2, 653], "count": 1, "after": true }, { "at": [139.8, 426.6], "count": 2, "after": true }]
+   "dots": [{ "at": [650.8, 475], "count": 1, "after": true }, { "at": [485.2, 653], "count": 1, "after": true }, { "at": [165.8, 424.1], "count": 1, "after": true }, { "at": [113, 429.2], "count": 1, "after": true }]
   },
   "تَعَبْ": {
    "line": 647.6,
@@ -9770,7 +9770,7 @@ export const WORD_PATHS = {
      [249.4, 310.6], [261.3, 309], [273, 312.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [828.6, 376.3], "count": 2, "after": true }, { "at": [274.8, 722.3], "count": 1, "after": true }]
+   "dots": [{ "at": [869.4, 372.4], "count": 1, "after": true }, { "at": [787.2, 380.2], "count": 1, "after": true }, { "at": [274.8, 722.3], "count": 1, "after": true }]
   },
   "ظُفْرْ": {
    "line": 684.8,
@@ -9858,7 +9858,7 @@ export const WORD_PATHS = {
      [180.9, 318], [190.9, 316.7], [200.7, 319.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [794.8, 630.4], "count": 1, "after": true }, { "at": [571.2, 641.1], "count": 1, "after": true }, { "at": [421.9, 635.5], "count": 2, "after": true }, { "at": [188.8, 438.8], "count": 1, "after": true }]
+   "dots": [{ "at": [794.8, 630.4], "count": 1, "after": true }, { "at": [571.2, 641.1], "count": 1, "after": true }, { "at": [456.2, 632.2], "count": 1, "after": true }, { "at": [387, 638.9], "count": 1, "after": true }, { "at": [188.8, 438.8], "count": 1, "after": true }]
   },
   "رُكْبَةْ": {
    "line": 682.2,
@@ -9911,7 +9911,7 @@ export const WORD_PATHS = {
      [180.9, 225.2], [193.4, 223.6], [205.7, 227]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [406.9, 760.2], "count": 1, "after": true }, { "at": [190.9, 382.3], "count": 2, "after": true }]
+   "dots": [{ "at": [406.9, 760.2], "count": 1, "after": true }, { "at": [233.3, 378.3], "count": 1, "after": true }, { "at": [147.7, 386.4], "count": 1, "after": true }]
   },
   "بِنْصِرْ": {
    "line": 584.8,
@@ -10061,7 +10061,7 @@ export const WORD_PATHS = {
      [152.9, 282], [162.9, 280.7], [172.7, 283.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [825.5, 384], "count": 2, "after": true }, { "at": [682.8, 705.6], "count": 1, "after": true }, { "at": [436.2, 411.2], "count": 1, "after": true }, { "at": [161.2, 406.9], "count": 2, "after": true }]
+   "dots": [{ "at": [858.8, 380.9], "count": 1, "after": true }, { "at": [791.1, 387.3], "count": 1, "after": true }, { "at": [682.8, 705.6], "count": 1, "after": true }, { "at": [436.2, 411.2], "count": 1, "after": true }, { "at": [194.8, 403.7], "count": 1, "after": true }, { "at": [127.1, 410.1], "count": 1, "after": true }]
   },
   "رَقَبَةْ": {
    "line": 679.7,
@@ -10114,7 +10114,7 @@ export const WORD_PATHS = {
      [178.1, 228.9], [190.3, 227.3], [202.3, 230.7]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [579.2, 355.5], "count": 2, "after": true }, { "at": [401.4, 756.4], "count": 1, "after": true }, { "at": [188.1, 384.1], "count": 2, "after": true }]
+   "dots": [{ "at": [620.7, 351.4], "count": 1, "after": true }, { "at": [536.2, 359.7], "count": 1, "after": true }, { "at": [401.4, 756.4], "count": 1, "after": true }, { "at": [229.8, 380.1], "count": 1, "after": true }, { "at": [145.3, 388.3], "count": 1, "after": true }]
   },
   "مِرْفَقْ": {
    "line": 626.2,
@@ -10167,7 +10167,7 @@ export const WORD_PATHS = {
      [235, 293.3], [244.9, 292], [254.6, 294.7]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [433.4, 360.1], "count": 1, "after": true }, { "at": [242.9, 417.1], "count": 2, "after": true }]
+   "dots": [{ "at": [433.4, 360.1], "count": 1, "after": true }, { "at": [276.3, 413.7], "count": 1, "after": true }, { "at": [208.5, 420.6], "count": 1, "after": true }]
   },
   "نَفَسْ": {
    "line": 624.6,
@@ -10266,7 +10266,7 @@ export const WORD_PATHS = {
      [157.4, 289.4], [166.8, 288.1], [176, 290.7]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [491, 380], "count": 1, "after": true }, { "at": [341.2, 685.3], "count": 2, "after": true }, { "at": [164.1, 407.6], "count": 2, "after": true }]
+   "dots": [{ "at": [491, 380], "count": 1, "after": true }, { "at": [373.3, 682.3], "count": 1, "after": true }, { "at": [309.1, 688.4], "count": 1, "after": true }, { "at": [196, 404.6], "count": 1, "after": true }, { "at": [131.7, 410.6], "count": 1, "after": true }]
   },
   "خُبْزْ": {
    "line": 689.2,
@@ -10384,7 +10384,7 @@ export const WORD_PATHS = {
      [405.2, 252.9], [416.1, 251.5], [426.8, 254.5]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [845.2, 705.4], "count": 1, "after": true }, { "at": [695.2, 699.8], "count": 2, "after": true }, { "at": [413.4, 382.7], "count": 1, "after": true }]
+   "dots": [{ "at": [845.2, 705.4], "count": 1, "after": true }, { "at": [731.8, 696.3], "count": 1, "after": true }, { "at": [657.5, 703.3], "count": 1, "after": true }, { "at": [413.4, 382.7], "count": 1, "after": true }]
   },
   "لَحْمْ": {
    "line": 667.7,
@@ -10530,7 +10530,7 @@ export const WORD_PATHS = {
      [149.2, 315.7], [157.6, 314.6], [165.8, 316.9]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [809.9, 468.5], "count": 3, "after": true }, { "at": [292.5, 674.7], "count": 1, "after": true }, { "at": [154.9, 420.8], "count": 2, "after": true }]
+   "dots": [{ "at": [809.8, 446.5], "count": 1, "after": true }, { "at": [837.3, 475.3], "count": 1, "after": true }, { "at": [782.4, 480.2], "count": 1, "after": true }, { "at": [292.5, 674.7], "count": 1, "after": true }, { "at": [183.2, 418.1], "count": 1, "after": true }, { "at": [125.5, 423.6], "count": 1, "after": true }]
   },
   "تُفَّاحَةْ": {
    "line": 680.4,
@@ -10591,7 +10591,7 @@ export const WORD_PATHS = {
      [153.8, 350.7], [162.7, 349.5], [171.3, 352]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [852.5, 476.5], "count": 2, "after": true }, { "at": [697.5, 475.2], "count": 1, "after": true }, { "at": [161, 464.5], "count": 2, "after": true }]
+   "dots": [{ "at": [882.9, 473.7], "count": 1, "after": true }, { "at": [821.3, 479.3], "count": 1, "after": true }, { "at": [697.5, 475.2], "count": 1, "after": true }, { "at": [191.4, 461.6], "count": 1, "after": true }, { "at": [129.8, 467.5], "count": 1, "after": true }]
   },
   "مَوْزْ": {
    "line": 676.6,
@@ -10696,7 +10696,7 @@ export const WORD_PATHS = {
      [145.2, 325.7], [153.6, 324.6], [161.8, 326.9]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [875.4, 659.3], "count": 1, "after": true }, { "at": [608.8, 416.9], "count": 2, "after": true }, { "at": [463.4, 420.3], "count": 2, "after": true }]
+   "dots": [{ "at": [875.4, 659.3], "count": 1, "after": true }, { "at": [637.1, 414.2], "count": 1, "after": true }, { "at": [579.5, 419.7], "count": 1, "after": true }, { "at": [492.1, 417.5], "count": 1, "after": true }, { "at": [434.3, 423], "count": 1, "after": true }]
   },
   "بَطِّيخْ": {
    "line": 629.2,
@@ -10754,7 +10754,7 @@ export const WORD_PATHS = {
      [203, 297.3], [212.9, 296], [222.6, 298.7]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [859.3, 690], "count": 1, "after": true }, { "at": [443.7, 684.5], "count": 2, "after": true }, { "at": [210.1, 414.2], "count": 1, "after": true }]
+   "dots": [{ "at": [859.3, 690], "count": 1, "after": true }, { "at": [476.4, 681.3], "count": 1, "after": true }, { "at": [409.7, 687.8], "count": 1, "after": true }, { "at": [210.1, 414.2], "count": 1, "after": true }]
   },
   "فَرَاوِلَةْ": {
    "line": 589.8,
@@ -10820,7 +10820,7 @@ export const WORD_PATHS = {
      [150, 276], [158.7, 274.9], [167.2, 277.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [831.5, 358.7], "count": 1, "after": true }, { "at": [157.2, 383.8], "count": 2, "after": true }]
+   "dots": [{ "at": [831.5, 358.7], "count": 1, "after": true }, { "at": [186.2, 381.3], "count": 1, "after": true }, { "at": [127.7, 386.5], "count": 1, "after": true }]
   },
   "لَيْمُونْ": {
    "line": 621.3,
@@ -10875,7 +10875,7 @@ export const WORD_PATHS = {
      [171.5, 384.7], [180.8, 383.4], [189.9, 386]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [758.8, 673.2], "count": 2, "after": true }, { "at": [178, 494.8], "count": 1, "after": true }]
+   "dots": [{ "at": [790.3, 670.3], "count": 1, "after": true }, { "at": [727.2, 676.1], "count": 1, "after": true }, { "at": [178, 494.8], "count": 1, "after": true }]
   },
   "جَزَرْ": {
    "line": 650.1,
@@ -11026,7 +11026,7 @@ export const WORD_PATHS = {
      [195.2, 278.9], [206.1, 277.5], [216.8, 280.5]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [754.5, 379.4], "count": 1, "after": true }, { "at": [522, 689.7], "count": 2, "after": true }]
+   "dots": [{ "at": [754.5, 379.4], "count": 1, "after": true }, { "at": [559.7, 686], "count": 1, "after": true }, { "at": [483.6, 693.4], "count": 1, "after": true }]
   },
   "بَصَلْ": {
    "line": 636.7,
@@ -11216,7 +11216,7 @@ export const WORD_PATHS = {
      [162, 353.6], [174.4, 352], [186.5, 355.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [762.6, 343.2], "count": 3, "after": true }, { "at": [212.3, 783.9], "count": 2, "after": true }]
+   "dots": [{ "at": [762.7, 310.2], "count": 1, "after": true }, { "at": [803.8, 353.4], "count": 1, "after": true }, { "at": [721.5, 361], "count": 1, "after": true }, { "at": [255.5, 779.9], "count": 1, "after": true }, { "at": [168.6, 788.1], "count": 1, "after": true }]
   },
   "قَهْوَةْ": {
    "line": 666.1,
@@ -11271,7 +11271,7 @@ export const WORD_PATHS = {
      [145.8, 249.9], [157.2, 248.5], [168.3, 251.6]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [806.2, 366.2], "count": 2, "after": true }, { "at": [155.4, 392.9], "count": 2, "after": true }]
+   "dots": [{ "at": [844.8, 362.4], "count": 1, "after": true }, { "at": [766.8, 370.1], "count": 1, "after": true }, { "at": [193.8, 389.1], "count": 1, "after": true }, { "at": [116, 396.8], "count": 1, "after": true }]
   },
   "عَصِيرْ": {
    "line": 600.5,
@@ -11318,7 +11318,7 @@ export const WORD_PATHS = {
      [172, 324], [180.7, 322.9], [189.2, 325.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [335.7, 650.2], "count": 2, "after": true }]
+   "dots": [{ "at": [365.8, 647.3], "count": 1, "after": true }, { "at": [305.5, 653.2], "count": 1, "after": true }]
   },
   "كَعْكْ": {
    "line": 707.7,
@@ -11447,7 +11447,7 @@ export const WORD_PATHS = {
      [128.5, 380.2], [134, 379.4], [139.5, 381]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [843.8, 480.7], "count": 3, "after": true }, { "at": [236.8, 457.6], "count": 2, "after": true }, { "at": [132.1, 449.1], "count": 2, "after": true }]
+   "dots": [{ "at": [843.5, 466.4], "count": 1, "after": true }, { "at": [862.2, 485.3], "count": 1, "after": true }, { "at": [825.4, 488.5], "count": 1, "after": true }, { "at": [255.7, 456], "count": 1, "after": true }, { "at": [217.4, 459.2], "count": 1, "after": true }, { "at": [151.2, 447.1], "count": 1, "after": true }, { "at": [112.9, 451], "count": 1, "after": true }]
   },
   "فُولْ": {
    "line": 690.1,
@@ -11532,7 +11532,7 @@ export const WORD_PATHS = {
      [156, 225.6], [168.4, 224], [180.5, 227.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [832.4, 416.1], "count": 1, "after": true }, { "at": [640.9, 760.2], "count": 1, "after": true }, { "at": [165.8, 382.7], "count": 2, "after": true }]
+   "dots": [{ "at": [832.4, 416.1], "count": 1, "after": true }, { "at": [640.9, 760.2], "count": 1, "after": true }, { "at": [208, 378.7], "count": 1, "after": true }, { "at": [122.5, 386.9], "count": 1, "after": true }]
   },
   "بَطَاطَا": {
    "line": 607.7,
@@ -11712,7 +11712,7 @@ export const WORD_PATHS = {
      [255.3, 365.8], [261.1, 365], [266.7, 366.6]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [712.9, 442], "count": 1, "after": true }, { "at": [382.7, 576.2], "count": 2, "after": true }, { "at": [259.9, 438.7], "count": 3, "after": true }]
+   "dots": [{ "at": [712.9, 442], "count": 1, "after": true }, { "at": [401.3, 574.4], "count": 1, "after": true }, { "at": [362.4, 578.3], "count": 1, "after": true }, { "at": [259.5, 424.2], "count": 1, "after": true }, { "at": [278.4, 443.4], "count": 1, "after": true }, { "at": [241, 447], "count": 1, "after": true }]
   },
   "قِشْطَةْ": {
    "line": 623.4,
@@ -11770,7 +11770,7 @@ export const WORD_PATHS = {
      [150, 304], [158.7, 302.9], [167.2, 305.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [831.5, 393.2], "count": 2, "after": true }, { "at": [637.9, 463.2], "count": 3, "after": true }, { "at": [156.7, 413.7], "count": 2, "after": true }]
+   "dots": [{ "at": [861, 390.3], "count": 1, "after": true }, { "at": [801.3, 396.2], "count": 1, "after": true }, { "at": [637.7, 440.8], "count": 1, "after": true }, { "at": [666.5, 470.6], "count": 1, "after": true }, { "at": [609.6, 475.7], "count": 1, "after": true }, { "at": [186.1, 410.8], "count": 1, "after": true }, { "at": [126.4, 416.6], "count": 1, "after": true }]
   },
   "حَلَاوَةْ": {
    "line": 628.6,
@@ -11829,7 +11829,7 @@ export const WORD_PATHS = {
      [140, 306], [148.7, 304.9], [157.2, 307.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [147.5, 416.7], "count": 2, "after": true }]
+   "dots": [{ "at": [177.5, 413.7], "count": 1, "after": true }, { "at": [116.8, 419.9], "count": 1, "after": true }]
   },
   "أَنَانَاسْ": {
    "line": 646.4,
@@ -11954,7 +11954,7 @@ export const WORD_PATHS = {
      [146.5, 319.4], [154.6, 318.3], [162.5, 320.6]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [854.7, 444.3], "count": 1, "after": true }, { "at": [715.2, 667.1], "count": 2, "after": true }, { "at": [587.9, 478.5], "count": 2, "after": true }, { "at": [286.2, 428.3], "count": 1, "after": true }, { "at": [153, 421.9], "count": 2, "after": true }]
+   "dots": [{ "at": [854.7, 444.3], "count": 1, "after": true }, { "at": [742.9, 664.5], "count": 1, "after": true }, { "at": [686.4, 669.9], "count": 1, "after": true }, { "at": [615.8, 475.8], "count": 1, "after": true }, { "at": [559.2, 481.2], "count": 1, "after": true }, { "at": [286.2, 428.3], "count": 1, "after": true }, { "at": [180.8, 419.2], "count": 1, "after": true }, { "at": [124.1, 424.7], "count": 1, "after": true }]
   },
   "فَطِيرَةْ": {
    "line": 619.9,
@@ -12017,7 +12017,7 @@ export const WORD_PATHS = {
      [135.2, 309.7], [143.6, 308.6], [151.8, 310.9]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [837.3, 391.2], "count": 1, "after": true }, { "at": [458.7, 667.8], "count": 2, "after": true }, { "at": [141.5, 416.1], "count": 2, "after": true }]
+   "dots": [{ "at": [837.3, 391.2], "count": 1, "after": true }, { "at": [487.7, 665.1], "count": 1, "after": true }, { "at": [429.4, 670.5], "count": 1, "after": true }, { "at": [170.2, 413.3], "count": 1, "after": true }, { "at": [112, 419], "count": 1, "after": true }]
   },
   "زَبِيبْ": {
    "line": 580.1,
@@ -12057,7 +12057,7 @@ export const WORD_PATHS = {
      [231.7, 288.3], [242, 286.9], [252.1, 289.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [839.5, 359.9], "count": 1, "after": true }, { "at": [681.5, 644.2], "count": 1, "after": true }, { "at": [538, 638.6], "count": 2, "after": true }, { "at": [252.7, 644.5], "count": 1, "after": true }]
+   "dots": [{ "at": [839.5, 359.9], "count": 1, "after": true }, { "at": [681.5, 644.2], "count": 1, "after": true }, { "at": [572.7, 635.2], "count": 1, "after": true }, { "at": [502.1, 642.1], "count": 1, "after": true }, { "at": [252.7, 644.5], "count": 1, "after": true }]
   },
   "مَطْبُوخْ": {
    "line": 589.6,
@@ -12161,7 +12161,7 @@ export const WORD_PATHS = {
      [180.1, 146.4], [196, 144.4], [211.6, 148.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [795.5, 348], "count": 1, "after": true }, { "at": [193.4, 349.4], "count": 2, "after": true }]
+   "dots": [{ "at": [795.5, 348], "count": 1, "after": true }, { "at": [247.9, 344.2], "count": 1, "after": true }, { "at": [137.6, 354.7], "count": 1, "after": true }]
   },
   "عَدَسْ": {
    "line": 598.2,
@@ -12267,7 +12267,7 @@ export const WORD_PATHS = {
      [168.1, 368.1], [174.2, 367.3], [180.1, 369]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [874.4, 591], "count": 1, "after": true }, { "at": [344.5, 587.2], "count": 2, "after": true }, { "at": [172.1, 444.4], "count": 2, "after": true }]
+   "dots": [{ "at": [874.4, 591], "count": 1, "after": true }, { "at": [365.3, 585.4], "count": 1, "after": true }, { "at": [323.3, 589.2], "count": 1, "after": true }, { "at": [192.4, 442.4], "count": 1, "after": true }, { "at": [150.9, 446.4], "count": 1, "after": true }]
   },
   "طَبَقْ": {
    "line": 642.1,
@@ -12312,7 +12312,7 @@ export const WORD_PATHS = {
      [268.5, 238.9], [280.3, 237.4], [291.8, 240.7]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [495.7, 717], "count": 1, "after": true }, { "at": [277.6, 389], "count": 2, "after": true }]
+   "dots": [{ "at": [495.7, 717], "count": 1, "after": true }, { "at": [318.4, 385], "count": 1, "after": true }, { "at": [236.1, 392.9], "count": 1, "after": true }]
   },
   "مِشْمِشْ": {
    "line": 576.7,
@@ -12362,7 +12362,7 @@ export const WORD_PATHS = {
      [305, 350.1], [312.4, 349.1], [319.6, 351.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [667.1, 442.5], "count": 3, "after": true }, { "at": [311.1, 442.3], "count": 3, "after": true }]
+   "dots": [{ "at": [667.1, 423.6], "count": 1, "after": true }, { "at": [691.3, 448.4], "count": 1, "after": true }, { "at": [643.5, 452.6], "count": 1, "after": true }, { "at": [311, 423.5], "count": 1, "after": true }, { "at": [335, 448.4], "count": 1, "after": true }, { "at": [287.3, 452.6], "count": 1, "after": true }]
   },
   "فُطْرْ": {
    "line": 702.1,
@@ -12573,7 +12573,7 @@ export const WORD_PATHS = {
      [179.5, 393.4], [186.3, 392.5], [192.9, 394.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [687.9, 459], "count": 3, "after": true }, { "at": [186.2, 625], "count": 1, "after": true }]
+   "dots": [{ "at": [688, 441.6], "count": 1, "after": true }, { "at": [709.7, 464.8], "count": 1, "after": true }, { "at": [665.7, 468.7], "count": 1, "after": true }, { "at": [186.2, 625], "count": 1, "after": true }]
   },
   "شَرَابْ": {
    "line": 599.4,
@@ -12619,7 +12619,7 @@ export const WORD_PATHS = {
      [210.7, 344.4], [219.7, 343.1], [228.5, 345.6]
     ], "folds": [{ "from": 0, "apex": 8, "to": 16 }] }
    ],
-   "dots": [{ "at": [800.8, 432.8], "count": 3, "after": true }, { "at": [221.9, 655.7], "count": 1, "after": true }]
+   "dots": [{ "at": [800.5, 409.2], "count": 1, "after": true }, { "at": [830.2, 440.2], "count": 1, "after": true }, { "at": [770.7, 445.9], "count": 1, "after": true }, { "at": [221.9, 655.7], "count": 1, "after": true }]
   },
   "بَاذِنْجَانْ": {
    "line": 583.9,
@@ -12769,7 +12769,7 @@ export const WORD_PATHS = {
      [132.8, 359.1], [139.3, 358.3], [145.6, 360.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [240.5, 444.3], "count": 1, "after": true }, { "at": [137.6, 439.6], "count": 2, "after": true }]
+   "dots": [{ "at": [240.5, 444.3], "count": 1, "after": true }, { "at": [159.5, 437.4], "count": 1, "after": true }, { "at": [115.6, 441.7], "count": 1, "after": true }]
   },
   "لَبَنْ": {
    "line": 716.2,
@@ -12912,7 +12912,7 @@ export const WORD_PATHS = {
      [165.3, 375], [173.6, 373.9], [181.7, 376.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [361.3, 633.3], "count": 2, "after": true }, { "at": [170.7, 472.3], "count": 1, "after": true }]
+   "dots": [{ "at": [389.2, 630.6], "count": 1, "after": true }, { "at": [332.6, 636], "count": 1, "after": true }, { "at": [170.7, 472.3], "count": 1, "after": true }]
   },
   "قِطَّةْ": {
    "line": 690.1,
@@ -12965,7 +12965,7 @@ export const WORD_PATHS = {
      [173.6, 213.5], [186.4, 211.9], [199, 215.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [798.7, 347.1], "count": 2, "after": true }, { "at": [184.5, 377.5], "count": 2, "after": true }]
+   "dots": [{ "at": [842.4, 343], "count": 1, "after": true }, { "at": [753.4, 351.4], "count": 1, "after": true }, { "at": [228.7, 373.2], "count": 1, "after": true }, { "at": [139.4, 381.9], "count": 1, "after": true }]
   },
   "دَجَاجَةْ": {
    "line": 617.7,
@@ -13023,7 +13023,7 @@ export const WORD_PATHS = {
      [145.7, 331.1], [153.5, 330], [161.1, 332.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [672.9, 657.6], "count": 1, "after": true }, { "at": [355.7, 657.8], "count": 1, "after": true }, { "at": [152, 429.8], "count": 2, "after": true }]
+   "dots": [{ "at": [672.9, 657.6], "count": 1, "after": true }, { "at": [355.7, 657.8], "count": 1, "after": true }, { "at": [178.2, 427.2], "count": 1, "after": true }, { "at": [124.7, 432.5], "count": 1, "after": true }]
   },
   "حِصَانْ": {
    "line": 588.1,
@@ -13245,7 +13245,7 @@ export const WORD_PATHS = {
      [218.7, 183.1], [233.9, 181.2], [248.8, 185.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [771.8, 293.7], "count": 2, "after": true }]
+   "dots": [{ "at": [823.3, 288.6], "count": 1, "after": true }, { "at": [718.9, 298.9], "count": 1, "after": true }]
   },
   "زَرَافَةْ": {
    "line": 647.4,
@@ -13302,7 +13302,7 @@ export const WORD_PATHS = {
      [158.9, 278], [168.9, 276.7], [178.7, 279.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [842.1, 432], "count": 1, "after": true }, { "at": [353.8, 375.3], "count": 1, "after": true }, { "at": [167.4, 404.7], "count": 2, "after": true }]
+   "dots": [{ "at": [842.1, 432], "count": 1, "after": true }, { "at": [353.8, 375.3], "count": 1, "after": true }, { "at": [201.6, 401.3], "count": 1, "after": true }, { "at": [132.6, 408.1], "count": 1, "after": true }]
   },
   "تِمْسَاحْ": {
    "line": 587.9,
@@ -13359,7 +13359,7 @@ export const WORD_PATHS = {
      [190.5, 316.7], [198.5, 315.6], [206.3, 317.9]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [858.1, 405.8], "count": 2, "after": true }]
+   "dots": [{ "at": [885.1, 403.2], "count": 1, "after": true }, { "at": [829.8, 408.5], "count": 1, "after": true }]
   },
   "غَزَالْ": {
    "line": 630,
@@ -13519,7 +13519,7 @@ export const WORD_PATHS = {
      [187.8, 197.2], [201.6, 195.4], [215.2, 199.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [833.1, 799.2], "count": 1, "after": true }, { "at": [200.1, 374.4], "count": 2, "after": true }]
+   "dots": [{ "at": [833.1, 799.2], "count": 1, "after": true }, { "at": [247.7, 369.9], "count": 1, "after": true }, { "at": [151.5, 379], "count": 1, "after": true }]
   },
   "حَمَامَةْ": {
    "line": 664,
@@ -13576,7 +13576,7 @@ export const WORD_PATHS = {
      [147.1, 350.4], [155.6, 349.2], [164, 351.6]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [153.8, 458.3], "count": 2, "after": true }]
+   "dots": [{ "at": [182.8, 455.6], "count": 1, "after": true }, { "at": [124.2, 461.1], "count": 1, "after": true }]
   },
   "عُصْفُورْ": {
    "line": 600.9,
@@ -13678,7 +13678,7 @@ export const WORD_PATHS = {
      [252.7, 289.9], [265.4, 288.3], [277.8, 291.7]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [581.7, 707.7], "count": 2, "after": true }]
+   "dots": [{ "at": [625.3, 703.4], "count": 1, "after": true }, { "at": [537, 712.2], "count": 1, "after": true }]
   },
   "نَحْلَةْ": {
    "line": 723.6,
@@ -13729,7 +13729,7 @@ export const WORD_PATHS = {
      [170.6, 296.3], [182.2, 294.7], [193.6, 298]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [854.5, 452.5], "count": 1, "after": true }, { "at": [180.9, 443.5], "count": 2, "after": true }]
+   "dots": [{ "at": [854.5, 452.5], "count": 1, "after": true }, { "at": [220.4, 439.6], "count": 1, "after": true }, { "at": [140.4, 447.4], "count": 1, "after": true }]
   },
   "فَرَاشَةْ": {
    "line": 627.4,
@@ -13787,7 +13787,7 @@ export const WORD_PATHS = {
      [148, 308], [156.7, 306.9], [165.2, 309.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [833.3, 392.2], "count": 1, "after": true }, { "at": [386.1, 467.1], "count": 3, "after": true }, { "at": [154.9, 417.4], "count": 2, "after": true }]
+   "dots": [{ "at": [833.3, 392.2], "count": 1, "after": true }, { "at": [385.9, 444.6], "count": 1, "after": true }, { "at": [414.6, 474.7], "count": 1, "after": true }, { "at": [357.6, 479.8], "count": 1, "after": true }, { "at": [184.5, 414.5], "count": 1, "after": true }, { "at": [124.8, 420.3], "count": 1, "after": true }]
   },
   "عَنْكَبُوتْ": {
    "line": 584.4,
@@ -13853,7 +13853,7 @@ export const WORD_PATHS = {
      [176.8, 385.1], [183.3, 384.3], [189.6, 386.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [719.3, 466.3], "count": 1, "after": true }, { "at": [494.3, 625.2], "count": 1, "after": true }, { "at": [181.4, 467.4], "count": 2, "after": true }]
+   "dots": [{ "at": [719.3, 466.3], "count": 1, "after": true }, { "at": [494.3, 625.2], "count": 1, "after": true }, { "at": [203.6, 465.4], "count": 1, "after": true }, { "at": [158.4, 469.5], "count": 1, "after": true }]
   },
   "سُلَحْفَاةْ": {
    "line": 636.7,
@@ -13921,7 +13921,7 @@ export const WORD_PATHS = {
      [128.3, 375.7], [135.4, 374.8], [142.3, 376.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [353.3, 473.3], "count": 1, "after": true }, { "at": [134.5, 464.9], "count": 2, "after": true }]
+   "dots": [{ "at": [353.3, 473.3], "count": 1, "after": true }, { "at": [158, 462.7], "count": 1, "after": true }, { "at": [109.3, 467.2], "count": 1, "after": true }]
   },
   "قُنْفُذْ": {
    "line": 751.5,
@@ -13973,7 +13973,7 @@ export const WORD_PATHS = {
      [187.4, 320.6], [199.3, 319], [211, 322.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [804.8, 436], "count": 2, "after": true }, { "at": [629.1, 538.8], "count": 1, "after": true }, { "at": [442.1, 478], "count": 1, "after": true }, { "at": [195.7, 462.7], "count": 1, "after": true }]
+   "dots": [{ "at": [845.6, 432.1], "count": 1, "after": true }, { "at": [763.4, 439.9], "count": 1, "after": true }, { "at": [629.1, 538.8], "count": 1, "after": true }, { "at": [442.1, 478], "count": 1, "after": true }, { "at": [195.7, 462.7], "count": 1, "after": true }]
   },
   "مَاعِزْ": {
    "line": 638.4,
@@ -14127,7 +14127,7 @@ export const WORD_PATHS = {
      [147.9, 255.2], [159.1, 253.8], [170.1, 256.9]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [157.1, 395.3], "count": 2, "after": true }]
+   "dots": [{ "at": [194.7, 391.6], "count": 1, "after": true }, { "at": [118.6, 399.1], "count": 1, "after": true }]
   },
   "دُلْفِينْ": {
    "line": 641.1,
@@ -14180,7 +14180,7 @@ export const WORD_PATHS = {
      [176.2, 393], [185.8, 391.7], [195.2, 394.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [567.4, 420.1], "count": 1, "after": true }, { "at": [406.7, 695.9], "count": 2, "after": true }, { "at": [183, 507.5], "count": 1, "after": true }]
+   "dots": [{ "at": [567.4, 420.1], "count": 1, "after": true }, { "at": [439.3, 692.8], "count": 1, "after": true }, { "at": [373.1, 699.1], "count": 1, "after": true }, { "at": [183, 507.5], "count": 1, "after": true }]
   },
   "بُومَةْ": {
    "line": 670.4,
@@ -14227,7 +14227,7 @@ export const WORD_PATHS = {
      [168.6, 242.3], [180.2, 240.7], [191.6, 244]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [860.7, 743.2], "count": 1, "after": true }, { "at": [177.5, 390.2], "count": 2, "after": true }]
+   "dots": [{ "at": [860.7, 743.2], "count": 1, "after": true }, { "at": [216.9, 386.5], "count": 1, "after": true }, { "at": [136.7, 394], "count": 1, "after": true }]
   },
   "عَقْرَبْ": {
    "line": 623,
@@ -14279,7 +14279,7 @@ export const WORD_PATHS = {
      [210.7, 370.4], [219.7, 369.1], [228.5, 371.6]
     ], "folds": [{ "from": 0, "apex": 8, "to": 16 }] }
    ],
-   "dots": [{ "at": [630.2, 422.7], "count": 2, "after": true }, { "at": [221.4, 679], "count": 1, "after": true }]
+   "dots": [{ "at": [660.9, 420], "count": 1, "after": true }, { "at": [599.2, 425.4], "count": 1, "after": true }, { "at": [221.4, 679], "count": 1, "after": true }]
   },
   "فَهْدْ": {
    "line": 708.4,
@@ -14449,7 +14449,7 @@ export const WORD_PATHS = {
      [220.2, 353.6], [229.9, 352.4], [239.4, 355.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [607.7, 411.8], "count": 2, "after": true }, { "at": [231, 689.9], "count": 1, "after": true }]
+   "dots": [{ "at": [641.2, 408.6], "count": 1, "after": true }, { "at": [574.1, 415], "count": 1, "after": true }, { "at": [231, 689.9], "count": 1, "after": true }]
   },
   "لَامَا": {
    "line": 814.8,
@@ -14529,7 +14529,7 @@ export const WORD_PATHS = {
      [232.1, 222.1], [246.8, 220.2], [261.3, 224.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [821, 340.7], "count": 3, "after": true }]
+   "dots": [{ "at": [821, 301.9], "count": 1, "after": true }, { "at": [870.1, 353], "count": 1, "after": true }, { "at": [772.4, 362], "count": 1, "after": true }]
   },
   "جَامُوسْ": {
    "line": 574.8,
@@ -14706,7 +14706,7 @@ export const WORD_PATHS = {
      [206.5, 300.7], [214.5, 299.6], [222.3, 301.9]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [861.2, 624.1], "count": 1, "after": true }, { "at": [365, 619.5], "count": 2, "after": true }, { "at": [212.8, 402.5], "count": 2, "after": true }]
+   "dots": [{ "at": [861.2, 624.1], "count": 1, "after": true }, { "at": [392.5, 616.8], "count": 1, "after": true }, { "at": [336.9, 622.2], "count": 1, "after": true }, { "at": [240.4, 400.1], "count": 1, "after": true }, { "at": [185, 405.1], "count": 1, "after": true }]
   },
   "نَمْلَةْ": {
    "line": 764.9,
@@ -14756,7 +14756,7 @@ export const WORD_PATHS = {
      [191.1, 258.8], [204.6, 257.1], [217.9, 260.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [840.5, 444], "count": 1, "after": true }, { "at": [202.3, 433.2], "count": 2, "after": true }]
+   "dots": [{ "at": [840.5, 444], "count": 1, "after": true }, { "at": [248.7, 428.8], "count": 1, "after": true }, { "at": [154.2, 437.8], "count": 1, "after": true }]
   },
   "دُبّْ": {
    "line": 727.8,
@@ -14855,7 +14855,7 @@ export const WORD_PATHS = {
      [141.7, 321.1], [149.5, 320], [157.1, 322.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [297.7, 657.2], "count": 2, "after": true }, { "at": [147.6, 421.3], "count": 2, "after": true }]
+   "dots": [{ "at": [325, 654.6], "count": 1, "after": true }, { "at": [270.5, 659.7], "count": 1, "after": true }, { "at": [174.3, 418.7], "count": 1, "after": true }, { "at": [119.7, 424], "count": 1, "after": true }]
   },
   "رُبْيَانْ": {
    "line": 617.8,
@@ -14909,7 +14909,7 @@ export const WORD_PATHS = {
      [177.7, 352.3], [188, 350.9], [198.1, 353.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [686.5, 682], "count": 1, "after": true }, { "at": [543, 676.4], "count": 2, "after": true }, { "at": [184.6, 475.2], "count": 1, "after": true }]
+   "dots": [{ "at": [686.5, 682], "count": 1, "after": true }, { "at": [578, 673.2], "count": 1, "after": true }, { "at": [507.1, 679.6], "count": 1, "after": true }, { "at": [184.6, 475.2], "count": 1, "after": true }]
   },
   "خُفَّاشْ": {
    "line": 616.6,
@@ -14961,7 +14961,7 @@ export const WORD_PATHS = {
      [329.3, 361], [337.6, 359.9], [345.7, 362.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [796.9, 432.9], "count": 1, "after": true }, { "at": [616, 427.9], "count": 1, "after": true }, { "at": [335.6, 465.2], "count": 3, "after": true }]
+   "dots": [{ "at": [796.9, 432.9], "count": 1, "after": true }, { "at": [616, 427.9], "count": 1, "after": true }, { "at": [335.4, 443.9], "count": 1, "after": true }, { "at": [362.3, 472], "count": 1, "after": true }, { "at": [308.8, 476.5], "count": 1, "after": true }]
   },
   "بَغْلْ": {
    "line": 684.5,
@@ -15052,7 +15052,7 @@ export const WORD_PATHS = {
      [172, 294], [180.7, 292.9], [189.2, 295.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [788.1, 373.4], "count": 1, "after": true }, { "at": [616.7, 412.3], "count": 1, "after": true }, { "at": [474.2, 381.3], "count": 1, "after": true }, { "at": [326.1, 617], "count": 2, "after": true }]
+   "dots": [{ "at": [788.1, 373.4], "count": 1, "after": true }, { "at": [616.7, 412.3], "count": 1, "after": true }, { "at": [474.2, 381.3], "count": 1, "after": true }, { "at": [355.9, 614.4], "count": 1, "after": true }, { "at": [296, 619.7], "count": 1, "after": true }]
   },
   "ضِفْدَعَةْ": {
    "line": 602.5,
@@ -15116,7 +15116,7 @@ export const WORD_PATHS = {
      [139.1, 337.3], [146.4, 336.4], [153.5, 338.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [798.3, 431.1], "count": 1, "after": true }, { "at": [607.6, 436.4], "count": 1, "after": true }, { "at": [144.9, 428.1], "count": 2, "after": true }]
+   "dots": [{ "at": [798.3, 431.1], "count": 1, "after": true }, { "at": [607.6, 436.4], "count": 1, "after": true }, { "at": [169.6, 425.8], "count": 1, "after": true }, { "at": [119.6, 430.5], "count": 1, "after": true }]
   },
   "قِرْشْ": {
    "line": 608.4,
@@ -15159,7 +15159,7 @@ export const WORD_PATHS = {
      [392.8, 288.7], [402.9, 287.3], [412.9, 290.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [815.7, 336.2], "count": 2, "after": true }, { "at": [400.7, 419], "count": 3, "after": true }]
+   "dots": [{ "at": [850.7, 332.8], "count": 1, "after": true }, { "at": [779.9, 339.7], "count": 1, "after": true }, { "at": [400.5, 392.1], "count": 1, "after": true }, { "at": [434.3, 427.3], "count": 1, "after": true }, { "at": [367.1, 433.8], "count": 1, "after": true }]
   },
   "قُنْدُسْ": {
    "line": 628.9,
@@ -15211,7 +15211,7 @@ export const WORD_PATHS = {
      [338, 388], [346.7, 386.9], [355.2, 389.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [832.4, 403], "count": 2, "after": true }, { "at": [706.4, 476.8], "count": 1, "after": true }]
+   "dots": [{ "at": [861.3, 400.3], "count": 1, "after": true }, { "at": [802.6, 405.9], "count": 1, "after": true }, { "at": [706.4, 476.8], "count": 1, "after": true }]
   },
   "ضَبُعْ": {
    "line": 636.7,
@@ -15408,7 +15408,7 @@ export const WORD_PATHS = {
      [187, 362.1], [194.4, 361.1], [201.6, 363.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [807.9, 420.4], "count": 1, "after": true }, { "at": [525, 417.4], "count": 2, "after": true }, { "at": [406.3, 624.5], "count": 2, "after": true }, { "at": [192.3, 454.2], "count": 2, "after": true }]
+   "dots": [{ "at": [807.9, 420.4], "count": 1, "after": true }, { "at": [549.2, 415.1], "count": 1, "after": true }, { "at": [499.2, 420], "count": 1, "after": true }, { "at": [430.9, 622], "count": 1, "after": true }, { "at": [380.8, 627], "count": 1, "after": true }, { "at": [216.7, 451.9], "count": 1, "after": true }, { "at": [167.1, 456.5], "count": 1, "after": true }]
   },
   "كَنْغَرْ": {
    "line": 649.1,
@@ -15519,7 +15519,7 @@ export const WORD_PATHS = {
      [158.9, 322], [168.9, 320.7], [178.7, 323.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [854.9, 458.4], "count": 1, "after": true }, { "at": [166.6, 450.3], "count": 2, "after": true }]
+   "dots": [{ "at": [854.9, 458.4], "count": 1, "after": true }, { "at": [201.1, 447.1], "count": 1, "after": true }, { "at": [131.3, 453.5], "count": 1, "after": true }]
   },
   "قَمَرْ": {
    "line": 715.1,
@@ -15560,7 +15560,7 @@ export const WORD_PATHS = {
      [229.2, 252.5], [243.8, 250.6], [258.1, 254.6]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [775.7, 327.4], "count": 2, "after": true }]
+   "dots": [{ "at": [825.8, 322.7], "count": 1, "after": true }, { "at": [724.6, 332.2], "count": 1, "after": true }]
   },
   "نَجْمْ": {
    "line": 636.7,
@@ -15685,7 +15685,7 @@ export const WORD_PATHS = {
      [259.8, 165.2], [273.6, 163.4], [287.2, 167.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [581.2, 692.4], "count": 2, "after": true }]
+   "dots": [{ "at": [627.9, 687.9], "count": 1, "after": true }, { "at": [533, 697.1], "count": 1, "after": true }]
   },
   "ثَلْجْ": {
    "line": 715.4,
@@ -15727,7 +15727,7 @@ export const WORD_PATHS = {
      [277.9, 221.5], [292.9, 219.6], [307.6, 223.7]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [818.9, 358.9], "count": 3, "after": true }, { "at": [281, 739.5], "count": 1, "after": true }]
+   "dots": [{ "at": [818.6, 319.3], "count": 1, "after": true }, { "at": [868.4, 371.2], "count": 1, "after": true }, { "at": [769.2, 380.5], "count": 1, "after": true }, { "at": [281, 739.5], "count": 1, "after": true }]
   },
   "نَهْرْ": {
    "line": 732.1,
@@ -15814,7 +15814,7 @@ export const WORD_PATHS = {
      [177.6, 217.5], [190.4, 215.9], [203, 219.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [751.6, 390], "count": 1, "after": true }, { "at": [398.6, 767.4], "count": 1, "after": true }, { "at": [187.8, 379.2], "count": 2, "after": true }]
+   "dots": [{ "at": [751.6, 390], "count": 1, "after": true }, { "at": [398.6, 767.4], "count": 1, "after": true }, { "at": [231.2, 375.1], "count": 1, "after": true }, { "at": [143.6, 383.3], "count": 1, "after": true }]
   },
   "زَهْرَةْ": {
    "line": 664,
@@ -15867,7 +15867,7 @@ export const WORD_PATHS = {
      [147.9, 253.2], [159.1, 251.8], [170.1, 254.9]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [840.7, 424.4], "count": 1, "after": true }, { "at": [157.5, 394], "count": 2, "after": true }]
+   "dots": [{ "at": [840.7, 424.4], "count": 1, "after": true }, { "at": [195.3, 390.3], "count": 1, "after": true }, { "at": [118.6, 397.8], "count": 1, "after": true }]
   },
   "عُشْبْ": {
    "line": 625.2,
@@ -15906,7 +15906,7 @@ export const WORD_PATHS = {
      [213.5, 358.7], [222.8, 357.4], [231.9, 360]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [565.8, 451.5], "count": 3, "after": true }, { "at": [233.6, 683.7], "count": 1, "after": true }]
+   "dots": [{ "at": [565.5, 427.2], "count": 1, "after": true }, { "at": [596.5, 459.3], "count": 1, "after": true }, { "at": [534.8, 465], "count": 1, "after": true }, { "at": [233.6, 683.7], "count": 1, "after": true }]
   },
   "حَجَرْ": {
    "line": 625.4,
@@ -16031,7 +16031,7 @@ export const WORD_PATHS = {
      [232.4, 350.6], [243, 349.2], [253.4, 352.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [843.5, 408.9], "count": 2, "after": true }, { "at": [244.1, 717.9], "count": 1, "after": true }]
+   "dots": [{ "at": [879.4, 405.4], "count": 1, "after": true }, { "at": [806.1, 412.7], "count": 1, "after": true }, { "at": [244.1, 717.9], "count": 1, "after": true }]
   },
   "كَهْفْ": {
    "line": 659.7,
@@ -16114,7 +16114,7 @@ export const WORD_PATHS = {
      [301.4, 183.1], [315.7, 181.3], [329.7, 185.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [834.3, 755.9], "count": 1, "after": true }, { "at": [313.5, 365.8], "count": 2, "after": true }]
+   "dots": [{ "at": [834.3, 755.9], "count": 1, "after": true }, { "at": [362.5, 361.1], "count": 1, "after": true }, { "at": [263.4, 370.5], "count": 1, "after": true }]
   },
   "رَعْدْ": {
    "line": 682.9,
@@ -16208,7 +16208,7 @@ export const WORD_PATHS = {
      [164.9, 326], [174.9, 324.7], [184.7, 327.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [794.5, 480.2], "count": 3, "after": true }]
+   "dots": [{ "at": [794.2, 453.9], "count": 1, "after": true }, { "at": [827.8, 488.5], "count": 1, "after": true }, { "at": [760.9, 494.9], "count": 1, "after": true }]
   },
   "جَزِيرَةْ": {
    "line": 589.8,
@@ -16260,7 +16260,7 @@ export const WORD_PATHS = {
      [133.1, 276.4], [141.6, 275.2], [150, 277.6]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [812.9, 633.8], "count": 1, "after": true }, { "at": [595.9, 406.8], "count": 1, "after": true }, { "at": [450.5, 638.2], "count": 2, "after": true }, { "at": [139.3, 384], "count": 2, "after": true }]
+   "dots": [{ "at": [812.9, 633.8], "count": 1, "after": true }, { "at": [595.9, 406.8], "count": 1, "after": true }, { "at": [479.8, 635.4], "count": 1, "after": true }, { "at": [420.5, 641.1], "count": 1, "after": true }, { "at": [168.3, 381.3], "count": 1, "after": true }, { "at": [109.9, 386.7], "count": 1, "after": true }]
   },
   "نَخْلَةْ": {
    "line": 723.6,
@@ -16311,7 +16311,7 @@ export const WORD_PATHS = {
      [170.6, 296.3], [182.2, 294.7], [193.6, 298]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [854.5, 452.5], "count": 1, "after": true }, { "at": [584.7, 463.9], "count": 1, "after": true }, { "at": [180.9, 443.5], "count": 2, "after": true }]
+   "dots": [{ "at": [854.5, 452.5], "count": 1, "after": true }, { "at": [584.7, 463.9], "count": 1, "after": true }, { "at": [220.4, 439.6], "count": 1, "after": true }, { "at": [140.4, 447.4], "count": 1, "after": true }]
   },
   "وَرَقْ": {
    "line": 648.6,
@@ -16357,7 +16357,7 @@ export const WORD_PATHS = {
      [275.6, 215.5], [288.4, 213.9], [301, 217.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [286.1, 379.2], "count": 2, "after": true }]
+   "dots": [{ "at": [330.3, 375], "count": 1, "after": true }, { "at": [241, 383.5], "count": 1, "after": true }]
   },
   "جَذْرْ": {
    "line": 671.8,
@@ -16455,7 +16455,7 @@ export const WORD_PATHS = {
      [145.8, 326.4], [153.5, 325.3], [161, 327.5]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [300.5, 432.5], "count": 1, "after": true }, { "at": [152.5, 423.3], "count": 2, "after": true }]
+   "dots": [{ "at": [300.5, 432.5], "count": 1, "after": true }, { "at": [178.9, 421], "count": 1, "after": true }, { "at": [125.7, 425.8], "count": 1, "after": true }]
   },
   "ضَبَابْ": {
    "line": 616,
@@ -16643,7 +16643,7 @@ export const WORD_PATHS = {
      [169.4, 246.6], [181.3, 245], [193, 248.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [483.6, 381.2], "count": 2, "after": true }]
+   "dots": [{ "at": [524.5, 377.3], "count": 1, "after": true }, { "at": [442.2, 385.2], "count": 1, "after": true }]
   },
   "شُرُوقْ": {
    "line": 599.5,
@@ -16695,7 +16695,7 @@ export const WORD_PATHS = {
      [216, 310], [224.7, 308.9], [233.2, 311.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [809.6, 439.5], "count": 3, "after": true }, { "at": [221.8, 418.7], "count": 2, "after": true }]
+   "dots": [{ "at": [809.6, 416.9], "count": 1, "after": true }, { "at": [838, 446.7], "count": 1, "after": true }, { "at": [781.2, 451.8], "count": 1, "after": true }, { "at": [251.6, 415.8], "count": 1, "after": true }, { "at": [191.8, 421.5], "count": 1, "after": true }]
   },
   "وَادِي": {
    "line": 565.8,
@@ -16739,7 +16739,7 @@ export const WORD_PATHS = {
      [444.3, 658.6], [438.2, 661], [432, 663.1]
     ] }
    ],
-   "dots": [{ "at": [195, 748.8], "count": 2, "after": true }]
+   "dots": [{ "at": [232.3, 745.2], "count": 1, "after": true }, { "at": [156.5, 752.6], "count": 1, "after": true }]
   },
   "رِيشَةْ": {
    "line": 608.4,
@@ -16784,7 +16784,7 @@ export const WORD_PATHS = {
      [160.8, 230.7], [170.9, 229.3], [180.9, 232.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [666, 666.8], "count": 2, "after": true }, { "at": [442.6, 418.9], "count": 3, "after": true }, { "at": [168.5, 360.1], "count": 2, "after": true }]
+   "dots": [{ "at": [700.9, 663.5], "count": 1, "after": true }, { "at": [630.2, 670.3], "count": 1, "after": true }, { "at": [442.5, 392.2], "count": 1, "after": true }, { "at": [476.2, 427.3], "count": 1, "after": true }, { "at": [408.9, 433.7], "count": 1, "after": true }, { "at": [203.9, 356.8], "count": 1, "after": true }, { "at": [132.9, 363.5], "count": 1, "after": true }]
   },
   "خَرِيفْ": {
    "line": 582,
@@ -16828,7 +16828,7 @@ export const WORD_PATHS = {
      [305.2, 281.7], [313.6, 280.6], [321.8, 282.9]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [790.6, 391.3], "count": 1, "after": true }, { "at": [451.4, 630.2], "count": 2, "after": true }, { "at": [311.8, 382.5], "count": 1, "after": true }]
+   "dots": [{ "at": [790.6, 391.3], "count": 1, "after": true }, { "at": [480.3, 627.4], "count": 1, "after": true }, { "at": [422, 633.1], "count": 1, "after": true }, { "at": [311.8, 382.5], "count": 1, "after": true }]
   },
   "حَصَاةْ": {
    "line": 673.9,
@@ -16877,7 +16877,7 @@ export const WORD_PATHS = {
      [134.7, 341], [143.8, 339.8], [152.7, 342.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [142.4, 455.8], "count": 2, "after": true }]
+   "dots": [{ "at": [173.1, 452.8], "count": 1, "after": true }, { "at": [110.9, 458.9], "count": 1, "after": true }]
   },
   "غُرُوبْ": {
    "line": 622.2,
@@ -16984,7 +16984,7 @@ export const WORD_PATHS = {
      [143.7, 275.6], [153.9, 274.3], [163.9, 277.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [822.3, 380], "count": 2, "after": true }, { "at": [152.1, 403.8], "count": 2, "after": true }]
+   "dots": [{ "at": [856.9, 376.8], "count": 1, "after": true }, { "at": [786.9, 383.3], "count": 1, "after": true }, { "at": [186.7, 400.6], "count": 1, "after": true }, { "at": [117, 407.1], "count": 1, "after": true }]
   },
   "عُشّْ": {
    "line": 665.1,
@@ -17020,7 +17020,7 @@ export const WORD_PATHS = {
      [452.1, 202.9], [464.3, 201.3], [476.3, 204.7]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [464.1, 436.3], "count": 3, "after": true }]
+   "dots": [{ "at": [463.9, 404.1], "count": 1, "after": true }, { "at": [505.2, 446.6], "count": 1, "after": true }, { "at": [423.5, 454.1], "count": 1, "after": true }]
   },
   "قَوْسْ": {
    "line": 633.6,
@@ -17064,7 +17064,7 @@ export const WORD_PATHS = {
      [378.9, 350], [388.9, 348.7], [398.7, 351.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [823.6, 367.6], "count": 2, "after": true }]
+   "dots": [{ "at": [857.7, 364.3], "count": 1, "after": true }, { "at": [788.4, 371], "count": 1, "after": true }]
   },
   "صَخْرَةْ": {
    "line": 621.5,
@@ -17115,7 +17115,7 @@ export const WORD_PATHS = {
      [133.3, 317], [141.6, 315.9], [149.7, 318.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [488.5, 436.2], "count": 1, "after": true }, { "at": [139.5, 421.4], "count": 2, "after": true }]
+   "dots": [{ "at": [488.5, 436.2], "count": 1, "after": true }, { "at": [168.2, 418.5], "count": 1, "after": true }, { "at": [110.9, 424.2], "count": 1, "after": true }]
   },
   "بُرْكَانْ": {
    "line": 617.1,
@@ -17224,7 +17224,7 @@ export const WORD_PATHS = {
      [163.2, 258.9], [174.1, 257.5], [184.8, 260.5]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [776.1, 405.9], "count": 1, "after": true }, { "at": [586.3, 722.4], "count": 2, "after": true }, { "at": [171.8, 396.8], "count": 2, "after": true }]
+   "dots": [{ "at": [776.1, 405.9], "count": 1, "after": true }, { "at": [623.4, 718.8], "count": 1, "after": true }, { "at": [548.1, 726], "count": 1, "after": true }, { "at": [209.2, 393.3], "count": 1, "after": true }, { "at": [134.2, 400.2], "count": 1, "after": true }]
   },
   "زَرْعْ": {
    "line": 682.2,
@@ -17315,7 +17315,7 @@ export const WORD_PATHS = {
      [179.2, 185.2], [191.3, 183.7], [203.1, 187]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [851, 711.7], "count": 1, "after": true }, { "at": [189.1, 339.2], "count": 2, "after": true }]
+   "dots": [{ "at": [851, 711.7], "count": 1, "after": true }, { "at": [230.9, 335.2], "count": 1, "after": true }, { "at": [146.4, 343.2], "count": 1, "after": true }]
   },
   "كَوْكَبَةْ": {
    "line": 633.9,
@@ -17377,7 +17377,7 @@ export const WORD_PATHS = {
      [152.7, 298.4], [161.7, 297.1], [170.5, 299.6]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [319.2, 690.6], "count": 1, "after": true }, { "at": [160.3, 413.5], "count": 2, "after": true }]
+   "dots": [{ "at": [319.2, 690.6], "count": 1, "after": true }, { "at": [191.3, 410.3], "count": 1, "after": true }, { "at": [128.4, 416.7], "count": 1, "after": true }]
   },
   "بَادِيَةْ": {
    "line": 653.1,
@@ -17433,7 +17433,7 @@ export const WORD_PATHS = {
      [160.3, 257.3], [171.1, 255.9], [181.6, 258.9]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [845.9, 720.4], "count": 1, "after": true }, { "at": [363, 714.7], "count": 2, "after": true }, { "at": [169.8, 393.2], "count": 2, "after": true }]
+   "dots": [{ "at": [845.9, 720.4], "count": 1, "after": true }, { "at": [399.5, 711.1], "count": 1, "after": true }, { "at": [325.7, 718.4], "count": 1, "after": true }, { "at": [206.1, 389.7], "count": 1, "after": true }, { "at": [132.2, 396.8], "count": 1, "after": true }]
   },
   "بُسْتَانْ": {
    "line": 605.5,
@@ -17486,7 +17486,7 @@ export const WORD_PATHS = {
      [165.8, 376.7], [174.7, 375.5], [183.3, 378]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [873.3, 661], "count": 1, "after": true }, { "at": [480.2, 452.4], "count": 2, "after": true }, { "at": [172.2, 482.3], "count": 1, "after": true }]
+   "dots": [{ "at": [873.3, 661], "count": 1, "after": true }, { "at": [510.5, 449.7], "count": 1, "after": true }, { "at": [449.2, 455.3], "count": 1, "after": true }, { "at": [172.2, 482.3], "count": 1, "after": true }]
   },
   "صَقِيعْ": {
    "line": 604.7,
@@ -17534,7 +17534,7 @@ export const WORD_PATHS = {
      [164.2, 291.6], [173.9, 290.4], [183.4, 293.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [512.3, 391.9], "count": 2, "after": true }, { "at": [353.5, 658.9], "count": 2, "after": true }]
+   "dots": [{ "at": [544.8, 388.8], "count": 1, "after": true }, { "at": [479.1, 395.1], "count": 1, "after": true }, { "at": [385.9, 655.7], "count": 1, "after": true }, { "at": [320.2, 662.1], "count": 1, "after": true }]
   },
   "نَبْعْ": {
    "line": 677.9,
@@ -17617,7 +17617,7 @@ export const WORD_PATHS = {
      [336.2, 289.6], [345.9, 288.4], [355.4, 291.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [512.5, 689.1], "count": 2, "after": true }, { "at": [342.1, 406.7], "count": 1, "after": true }]
+   "dots": [{ "at": [545.3, 686], "count": 1, "after": true }, { "at": [478.4, 692.4], "count": 1, "after": true }, { "at": [342.1, 406.7], "count": 1, "after": true }]
   },
   "تَلّْ": {
    "line": 726.2,
@@ -17651,7 +17651,7 @@ export const WORD_PATHS = {
      [296.7, 115.1], [311.9, 113.2], [326.8, 117.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [699.5, 375.8], "count": 2, "after": true }]
+   "dots": [{ "at": [751.8, 370.7], "count": 1, "after": true }, { "at": [645.7, 380.9], "count": 1, "after": true }]
   },
   "غُصْنْ": {
    "line": 627.6,
@@ -17740,7 +17740,7 @@ export const WORD_PATHS = {
      [189.6, 193.5], [202.4, 191.9], [215, 195.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [627.9, 700], "count": 1, "after": true }, { "at": [447.1, 693.1], "count": 2, "after": true }]
+   "dots": [{ "at": [627.9, 700], "count": 1, "after": true }, { "at": [491.2, 688.8], "count": 1, "after": true }, { "at": [402, 697.6], "count": 1, "after": true }]
   },
   "سَيْلْ": {
    "line": 642.1,
@@ -17783,7 +17783,7 @@ export const WORD_PATHS = {
      [171.4, 240.6], [183.3, 239], [195, 242.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [483.2, 710.3], "count": 2, "after": true }]
+   "dots": [{ "at": [523.8, 706.6], "count": 1, "after": true }, { "at": [441.4, 714.2], "count": 1, "after": true }]
   },
   "طَقْسْ": {
    "line": 613,
@@ -17831,7 +17831,7 @@ export const WORD_PATHS = {
      [359.5, 354.7], [368.8, 353.4], [377.9, 356]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [576.1, 408.8], "count": 2, "after": true }]
+   "dots": [{ "at": [606.8, 405.8], "count": 1, "after": true }, { "at": [544, 411.9], "count": 1, "after": true }]
   },
   "مَدْرَسَةْ": {
    "line": 612.1,
@@ -17894,7 +17894,7 @@ export const WORD_PATHS = {
      [145.8, 330.4], [153.5, 329.3], [161, 331.5]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [151.6, 427.3], "count": 2, "after": true }]
+   "dots": [{ "at": [177.6, 424.8], "count": 1, "after": true }, { "at": [124.9, 429.8], "count": 1, "after": true }]
   },
   "مُعَلِّمْ": {
    "line": 686.4,
@@ -18006,7 +18006,7 @@ export const WORD_PATHS = {
      [175, 295.3], [184.9, 294], [194.6, 296.7]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [847, 428.7], "count": 2, "after": true }, { "at": [384.9, 711.5], "count": 2, "after": true }, { "at": [182, 413.9], "count": 1, "after": true }]
+   "dots": [{ "at": [880.7, 425.7], "count": 1, "after": true }, { "at": [812.5, 431.8], "count": 1, "after": true }, { "at": [419.3, 708.3], "count": 1, "after": true }, { "at": [350.7, 714.6], "count": 1, "after": true }, { "at": [182, 413.9], "count": 1, "after": true }]
   },
   "دَفْتَرْ": {
    "line": 676.5,
@@ -18056,7 +18056,7 @@ export const WORD_PATHS = {
      [197.8, 319.9], [209.2, 318.5], [220.3, 321.6]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [591.9, 370], "count": 1, "after": true }, { "at": [409.9, 481.2], "count": 2, "after": true }]
+   "dots": [{ "at": [591.9, 370], "count": 1, "after": true }, { "at": [448.6, 477.6], "count": 1, "after": true }, { "at": [370.4, 485], "count": 1, "after": true }]
   },
   "مِمْحَاةْ": {
    "line": 621,
@@ -18114,7 +18114,7 @@ export const WORD_PATHS = {
      [132.1, 307.3], [140.6, 306.2], [149, 308.6]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [139, 415.3], "count": 2, "after": true }]
+   "dots": [{ "at": [168, 412.6], "count": 1, "after": true }, { "at": [109.3, 418.1], "count": 1, "after": true }]
   },
   "مِسْطَرَةْ": {
    "line": 602.5,
@@ -18181,7 +18181,7 @@ export const WORD_PATHS = {
      [132.3, 337.7], [139.4, 336.8], [146.3, 338.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [137.6, 428.1], "count": 2, "after": true }]
+   "dots": [{ "at": [162.1, 425.6], "count": 1, "after": true }, { "at": [112.3, 430.7], "count": 1, "after": true }]
   },
   "حَقِيبَةْ": {
    "line": 625.8,
@@ -18235,7 +18235,7 @@ export const WORD_PATHS = {
      [149.8, 300.7], [158.7, 299.5], [167.3, 302]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [592, 427.7], "count": 2, "after": true }, { "at": [444.2, 676.2], "count": 2, "after": true }, { "at": [311.1, 681.2], "count": 1, "after": true }, { "at": [157, 411.9], "count": 2, "after": true }]
+   "dots": [{ "at": [622.1, 424.7], "count": 1, "after": true }, { "at": [561, 430.8], "count": 1, "after": true }, { "at": [474.4, 673.4], "count": 1, "after": true }, { "at": [413.2, 679.2], "count": 1, "after": true }, { "at": [311.1, 681.2], "count": 1, "after": true }, { "at": [187.2, 409.2], "count": 1, "after": true }, { "at": [126.5, 414.6], "count": 1, "after": true }]
   },
   "لَوْحْ": {
    "line": 678.5,
@@ -18340,7 +18340,7 @@ export const WORD_PATHS = {
      [157.4, 362.1], [164.3, 361.2], [171.1, 363.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [675.8, 621.3], "count": 1, "after": true }, { "at": [451.6, 451.7], "count": 3, "after": true }, { "at": [285.9, 617.7], "count": 2, "after": true }]
+   "dots": [{ "at": [675.8, 621.3], "count": 1, "after": true }, { "at": [452, 433.7], "count": 1, "after": true }, { "at": [474.6, 457.6], "count": 1, "after": true }, { "at": [429.4, 461.4], "count": 1, "after": true }, { "at": [309.4, 615.4], "count": 1, "after": true }, { "at": [262.2, 620.1], "count": 1, "after": true }]
   },
   "قِصَّةْ": {
    "line": 665.1,
@@ -18389,7 +18389,7 @@ export const WORD_PATHS = {
      [168.6, 238.3], [180.2, 236.7], [191.6, 240]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [806.9, 357.7], "count": 2, "after": true }, { "at": [177.7, 384.8], "count": 2, "after": true }]
+   "dots": [{ "at": [846.6, 353.9], "count": 1, "after": true }, { "at": [766.5, 361.6], "count": 1, "after": true }, { "at": [217.3, 381], "count": 1, "after": true }, { "at": [137.1, 388.8], "count": 1, "after": true }]
   },
   "مَكْتَبَةْ": {
    "line": 638.1,
@@ -18449,7 +18449,7 @@ export const WORD_PATHS = {
      [151.4, 291.4], [160.8, 290.1], [170, 292.7]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [463.5, 475.5], "count": 2, "after": true }, { "at": [322.8, 696.6], "count": 1, "after": true }, { "at": [158.6, 410.8], "count": 2, "after": true }]
+   "dots": [{ "at": [495.9, 472.6], "count": 1, "after": true }, { "at": [430.8, 478.4], "count": 1, "after": true }, { "at": [322.8, 696.6], "count": 1, "after": true }, { "at": [191, 407.7], "count": 1, "after": true }, { "at": [126, 413.9], "count": 1, "after": true }]
   },
   "جَرَسْ": {
    "line": 593,
@@ -18640,7 +18640,7 @@ export const WORD_PATHS = {
      [141.5, 263], [152, 261.6], [162.2, 264.5]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [643.7, 715.2], "count": 1, "after": true }, { "at": [150.7, 395.4], "count": 2, "after": true }]
+   "dots": [{ "at": [643.7, 715.2], "count": 1, "after": true }, { "at": [186.3, 392], "count": 1, "after": true }, { "at": [114, 398.9], "count": 1, "after": true }]
   },
   "صَمْغْ": {
    "line": 636.7,
@@ -18744,7 +18744,7 @@ export const WORD_PATHS = {
      [144.9, 302.7], [152.4, 301.7], [159.8, 303.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [801.8, 410.9], "count": 1, "after": true }, { "at": [502.6, 621.8], "count": 2, "after": true }, { "at": [151.1, 397.5], "count": 2, "after": true }]
+   "dots": [{ "at": [801.8, 410.9], "count": 1, "after": true }, { "at": [527.9, 619.5], "count": 1, "after": true }, { "at": [476.3, 624.2], "count": 1, "after": true }, { "at": [176.5, 394.9], "count": 1, "after": true }, { "at": [124.4, 400.1], "count": 1, "after": true }]
   },
   "مَقْلَمَةْ": {
    "line": 685.2,
@@ -18808,7 +18808,7 @@ export const WORD_PATHS = {
      [158.2, 331], [167.8, 329.7], [177.2, 332.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [640.7, 470.2], "count": 2, "after": true }, { "at": [166.2, 452.8], "count": 2, "after": true }]
+   "dots": [{ "at": [673.6, 467.2], "count": 1, "after": true }, { "at": [607.3, 473.3], "count": 1, "after": true }, { "at": [198.9, 449.6], "count": 1, "after": true }, { "at": [132.4, 456.2], "count": 1, "after": true }]
   },
   "طَابُورْ": {
    "line": 617.7,
@@ -19091,7 +19091,7 @@ export const WORD_PATHS = {
      [174.1, 222.9], [186.3, 221.3], [198.3, 224.7]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [184.2, 378.4], "count": 2, "after": true }]
+   "dots": [{ "at": [225.6, 374.4], "count": 1, "after": true }, { "at": [141.1, 382.7], "count": 1, "after": true }]
   },
   "شَهَادَةْ": {
    "line": 629.9,
@@ -19150,7 +19150,7 @@ export const WORD_PATHS = {
      [134.7, 304.4], [143.7, 303.1], [152.5, 305.6]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [803.3, 466.4], "count": 3, "after": true }, { "at": [141.4, 416], "count": 2, "after": true }]
+   "dots": [{ "at": [803, 443.5], "count": 1, "after": true }, { "at": [832.1, 473.7], "count": 1, "after": true }, { "at": [774.2, 479.1], "count": 1, "after": true }, { "at": [171.4, 413.3], "count": 1, "after": true }, { "at": [110.9, 418.8], "count": 1, "after": true }]
   },
   "كَاتِبْ": {
    "line": 625.8,
@@ -19193,7 +19193,7 @@ export const WORD_PATHS = {
      [232.9, 338], [242.9, 336.7], [252.7, 339.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [532.9, 394.4], "count": 2, "after": true }, { "at": [253.2, 689.2], "count": 1, "after": true }]
+   "dots": [{ "at": [567.2, 391.2], "count": 1, "after": true }, { "at": [497.6, 397.7], "count": 1, "after": true }, { "at": [253.2, 689.2], "count": 1, "after": true }]
   },
   "اِمْتِحَانْ": {
    "line": 578.7,
@@ -19256,7 +19256,7 @@ export const WORD_PATHS = {
      [154.3, 393.7], [161.4, 392.8], [168.3, 394.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [627, 454.9], "count": 2, "after": true }, { "at": [159.2, 479], "count": 1, "after": true }]
+   "dots": [{ "at": [651.3, 452.5], "count": 1, "after": true }, { "at": [601.7, 457.4], "count": 1, "after": true }, { "at": [159.2, 479], "count": 1, "after": true }]
   },
   "جَدْوَلْ": {
    "line": 603.5,
@@ -19367,7 +19367,7 @@ export const WORD_PATHS = {
      [152, 304], [160.7, 302.9], [169.2, 305.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [159.8, 413.7], "count": 2, "after": true }]
+   "dots": [{ "at": [189.2, 411.1], "count": 1, "after": true }, { "at": [129.4, 416.5], "count": 1, "after": true }]
   },
   "كِتَابَةْ": {
    "line": 651.3,
@@ -19421,7 +19421,7 @@ export const WORD_PATHS = {
      [165.4, 259.6], [176, 258.3], [186.4, 261.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [634, 467.5], "count": 2, "after": true }, { "at": [349.6, 717.7], "count": 1, "after": true }, { "at": [174.1, 394.3], "count": 2, "after": true }]
+   "dots": [{ "at": [670, 464.1], "count": 1, "after": true }, { "at": [596.4, 471.1], "count": 1, "after": true }, { "at": [349.6, 717.7], "count": 1, "after": true }, { "at": [210.1, 390.8], "count": 1, "after": true }, { "at": [137, 397.9], "count": 1, "after": true }]
   },
   "مَكْتُوبْ": {
    "line": 605,
@@ -19478,7 +19478,7 @@ export const WORD_PATHS = {
      [189, 396.1], [196.4, 395.1], [203.6, 397.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [555.1, 476.9], "count": 2, "after": true }, { "at": [197.1, 650.6], "count": 1, "after": true }]
+   "dots": [{ "at": [580.4, 474.4], "count": 1, "after": true }, { "at": [529.6, 479.3], "count": 1, "after": true }, { "at": [197.1, 650.6], "count": 1, "after": true }]
   },
   "مِلَفّْ": {
    "line": 707.9,
@@ -19569,7 +19569,7 @@ export const WORD_PATHS = {
      [222.1, 230.1], [236.8, 228.2], [251.3, 232.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [522.3, 313.7], "count": 2, "after": true }]
+   "dots": [{ "at": [571.9, 309], "count": 1, "after": true }, { "at": [471.1, 318.6], "count": 1, "after": true }]
   },
   "عِلْمْ": {
    "line": 705,
@@ -19718,7 +19718,7 @@ export const WORD_PATHS = {
      [145.8, 330.4], [153.5, 329.3], [161, 331.5]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [151.6, 427.3], "count": 2, "after": true }]
+   "dots": [{ "at": [177.6, 424.8], "count": 1, "after": true }, { "at": [124.9, 429.8], "count": 1, "after": true }]
   },
   "وَرَقَةْ": {
    "line": 662,
@@ -19773,7 +19773,7 @@ export const WORD_PATHS = {
      [165, 255.6], [176.1, 254.2], [186.9, 257.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [378.6, 369.6], "count": 2, "after": true }, { "at": [174, 395.6], "count": 2, "after": true }]
+   "dots": [{ "at": [416.6, 365.8], "count": 1, "after": true }, { "at": [340.4, 373.3], "count": 1, "after": true }, { "at": [211.6, 392], "count": 1, "after": true }, { "at": [135.6, 399.3], "count": 1, "after": true }]
   },
   "جَمْعْ": {
    "line": 632.8,
@@ -19887,7 +19887,7 @@ export const WORD_PATHS = {
      [141, 348.1], [148.4, 347.1], [155.6, 349.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [146.5, 442.2], "count": 2, "after": true }]
+   "dots": [{ "at": [171.7, 439.7], "count": 1, "after": true }, { "at": [120, 444.9], "count": 1, "after": true }]
   },
   "سَبُّورَةْ": {
    "line": 623.8,
@@ -19948,7 +19948,7 @@ export const WORD_PATHS = {
      [137.2, 313.7], [145.6, 312.6], [153.8, 314.9]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [620.9, 676.4], "count": 1, "after": true }, { "at": [143.4, 419.8], "count": 2, "after": true }]
+   "dots": [{ "at": [620.9, 676.4], "count": 1, "after": true }, { "at": [172.1, 417.1], "count": 1, "after": true }, { "at": [113.9, 422.6], "count": 1, "after": true }]
   },
   "عَالِمْ": {
    "line": 628.9,
@@ -20056,7 +20056,7 @@ export const WORD_PATHS = {
      [156.2, 247.6], [165.9, 246.4], [175.4, 249.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [164.4, 369.2], "count": 2, "after": true }]
+   "dots": [{ "at": [197.1, 366.1], "count": 1, "after": true }, { "at": [130.5, 372.5], "count": 1, "after": true }]
   },
   "طَرْحْ": {
    "line": 624.6,
@@ -20160,7 +20160,7 @@ export const WORD_PATHS = {
      [180.2, 287.6], [189.9, 286.4], [199.4, 289.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [841.9, 379.7], "count": 2, "after": true }, { "at": [385, 659.7], "count": 2, "after": true }]
+   "dots": [{ "at": [875.5, 376.4], "count": 1, "after": true }, { "at": [808, 383], "count": 1, "after": true }, { "at": [418.8, 656.6], "count": 1, "after": true }, { "at": [350.6, 662.9], "count": 1, "after": true }]
   },
   "طَبْشُورَةْ": {
    "line": 594.4,
@@ -20231,7 +20231,7 @@ export const WORD_PATHS = {
      [122.8, 357.1], [129.3, 356.3], [135.6, 358.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [686.4, 634.3], "count": 1, "after": true }, { "at": [550.3, 475.4], "count": 3, "after": true }, { "at": [126.4, 439], "count": 2, "after": true }]
+   "dots": [{ "at": [686.4, 634.3], "count": 1, "after": true }, { "at": [550, 458.8], "count": 1, "after": true }, { "at": [571.1, 480.6], "count": 1, "after": true }, { "at": [529, 484.8], "count": 1, "after": true }, { "at": [148.7, 436.9], "count": 1, "after": true }, { "at": [104.2, 441], "count": 1, "after": true }]
   },
   "مَقَالْ": {
    "line": 634.9,
@@ -20280,7 +20280,7 @@ export const WORD_PATHS = {
      [165.8, 253.9], [177.2, 252.5], [188.3, 255.6]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [598.4, 381.9], "count": 2, "after": true }]
+   "dots": [{ "at": [636.6, 378.2], "count": 1, "after": true }, { "at": [558.8, 385.8], "count": 1, "after": true }]
   },
   "مُغَلَّفْ": {
    "line": 720.8,
@@ -20394,7 +20394,7 @@ export const WORD_PATHS = {
      [300.1, 362.4], [307.3, 361.5], [314.4, 363.5]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [865.5, 401.5], "count": 2, "after": true }, { "at": [461.5, 606.9], "count": 2, "after": true }]
+   "dots": [{ "at": [890.2, 399.1], "count": 1, "after": true }, { "at": [840.2, 403.9], "count": 1, "after": true }, { "at": [485.8, 604.7], "count": 1, "after": true }, { "at": [436.3, 609.3], "count": 1, "after": true }]
   },
   "خَتْمْ": {
    "line": 627,
@@ -20437,7 +20437,7 @@ export const WORD_PATHS = {
      [206.7, 221.9], [219.4, 220.3], [231.8, 223.7]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [735.3, 345.4], "count": 1, "after": true }, { "at": [469.9, 409.9], "count": 2, "after": true }]
+   "dots": [{ "at": [735.3, 345.4], "count": 1, "after": true }, { "at": [512.8, 405.7], "count": 1, "after": true }, { "at": [425.9, 414.1], "count": 1, "after": true }]
   },
   "قَمِيصْ": {
    "line": 609.1,
@@ -20483,7 +20483,7 @@ export const WORD_PATHS = {
      [330.3, 332.1], [338.5, 331], [346.6, 333.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [837.2, 391.6], "count": 2, "after": true }, { "at": [551, 655.5], "count": 2, "after": true }]
+   "dots": [{ "at": [865.2, 389], "count": 1, "after": true }, { "at": [808.4, 394.2], "count": 1, "after": true }, { "at": [578.8, 652.9], "count": 1, "after": true }, { "at": [522.3, 658.3], "count": 1, "after": true }]
   },
   "بَنْطَالْ": {
    "line": 608.8,
@@ -20596,7 +20596,7 @@ export const WORD_PATHS = {
      [162.3, 408.1], [170.5, 407], [178.6, 409.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [835.9, 397.8], "count": 1, "after": true }, { "at": [453.9, 478.5], "count": 2, "after": true }, { "at": [168.6, 506.2], "count": 1, "after": true }]
+   "dots": [{ "at": [835.9, 397.8], "count": 1, "after": true }, { "at": [482.2, 475.9], "count": 1, "after": true }, { "at": [425.4, 481.2], "count": 1, "after": true }, { "at": [168.6, 506.2], "count": 1, "after": true }]
   },
   "مِعْطَفْ": {
    "line": 607.1,
@@ -20716,7 +20716,7 @@ export const WORD_PATHS = {
      [170.1, 250.9], [182.3, 249.3], [194.3, 252.7]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [804, 377.9], "count": 2, "after": true }, { "at": [625.9, 779], "count": 1, "after": true }, { "at": [179.9, 406.6], "count": 2, "after": true }]
+   "dots": [{ "at": [845.4, 373.9], "count": 1, "after": true }, { "at": [761, 382], "count": 1, "after": true }, { "at": [625.9, 779], "count": 1, "after": true }, { "at": [221.8, 402.5], "count": 1, "after": true }, { "at": [137.4, 410.8], "count": 1, "after": true }]
   },
   "وِشَاحْ": {
    "line": 590.6,
@@ -20769,7 +20769,7 @@ export const WORD_PATHS = {
      [201.4, 271.4], [210.8, 270.1], [220, 272.7]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [598.9, 417.2], "count": 3, "after": true }]
+   "dots": [{ "at": [599, 392.5], "count": 1, "after": true }, { "at": [629.9, 424.6], "count": 1, "after": true }, { "at": [568, 430.7], "count": 1, "after": true }]
   },
   "قُفَّازْ": {
    "line": 707.9,
@@ -20821,7 +20821,7 @@ export const WORD_PATHS = {
      [204.9, 287.2], [217.4, 285.6], [229.7, 289]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [797.4, 374.5], "count": 2, "after": true }, { "at": [582.6, 418.9], "count": 1, "after": true }, { "at": [214.1, 438], "count": 1, "after": true }]
+   "dots": [{ "at": [840.2, 370.6], "count": 1, "after": true }, { "at": [753.5, 378.6], "count": 1, "after": true }, { "at": [582.6, 418.9], "count": 1, "after": true }, { "at": [214.1, 438], "count": 1, "after": true }]
   },
   "جَوْرَبْ": {
    "line": 598.7,
@@ -20924,7 +20924,7 @@ export const WORD_PATHS = {
      [160.2, 287], [169.8, 285.7], [179.2, 288.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [798.9, 691], "count": 1, "after": true }, { "at": [553.7, 434.7], "count": 1, "after": true }, { "at": [167.3, 408.8], "count": 2, "after": true }]
+   "dots": [{ "at": [798.9, 691], "count": 1, "after": true }, { "at": [553.7, 434.7], "count": 1, "after": true }, { "at": [199.9, 405.8], "count": 1, "after": true }, { "at": [134, 412], "count": 1, "after": true }]
   },
   "نَظَّارَةْ": {
    "line": 654.3,
@@ -20991,7 +20991,7 @@ export const WORD_PATHS = {
      [139.4, 301.4], [148.8, 300.1], [158, 302.7]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [862.7, 429.4], "count": 1, "after": true }, { "at": [711, 421.5], "count": 1, "after": true }, { "at": [146.7, 422], "count": 2, "after": true }]
+   "dots": [{ "at": [862.7, 429.4], "count": 1, "after": true }, { "at": [711, 421.5], "count": 1, "after": true }, { "at": [179.5, 418.9], "count": 1, "after": true }, { "at": [113.2, 425.3], "count": 1, "after": true }]
   },
   "خَاتَمْ": {
    "line": 608.7,
@@ -21038,7 +21038,7 @@ export const WORD_PATHS = {
      [190.4, 262.6], [201, 261.2], [211.4, 264.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [759.4, 367.5], "count": 1, "after": true }, { "at": [414, 363.5], "count": 2, "after": true }]
+   "dots": [{ "at": [759.4, 367.5], "count": 1, "after": true }, { "at": [450.2, 360.2], "count": 1, "after": true }, { "at": [376.5, 367], "count": 1, "after": true }]
   },
   "صَنْدَلْ": {
    "line": 604.5,
@@ -21146,7 +21146,7 @@ export const WORD_PATHS = {
      [161, 255.6], [172.1, 254.2], [182.9, 257.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [670.3, 731.1], "count": 1, "after": true }, { "at": [169.9, 395.6], "count": 2, "after": true }]
+   "dots": [{ "at": [670.3, 731.1], "count": 1, "after": true }, { "at": [207.5, 392], "count": 1, "after": true }, { "at": [131.6, 399.2], "count": 1, "after": true }]
   },
   "تَاجْ": {
    "line": 669.7,
@@ -21183,7 +21183,7 @@ export const WORD_PATHS = {
      [281.5, 145.5], [296.9, 143.5], [312.1, 147.7]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [811.7, 319.1], "count": 2, "after": true }, { "at": [313, 673.2], "count": 1, "after": true }]
+   "dots": [{ "at": [864.2, 314.2], "count": 1, "after": true }, { "at": [758.3, 324.2], "count": 1, "after": true }, { "at": [313, 673.2], "count": 1, "after": true }]
   },
   "مِحْفَظَةْ": {
    "line": 601.7,
@@ -21251,7 +21251,7 @@ export const WORD_PATHS = {
      [141, 338.1], [148.4, 337.1], [155.6, 339.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [490.7, 437], "count": 1, "after": true }, { "at": [356.7, 428.6], "count": 1, "after": true }, { "at": [146.9, 428.6], "count": 2, "after": true }]
+   "dots": [{ "at": [490.7, 437], "count": 1, "after": true }, { "at": [356.7, 428.6], "count": 1, "after": true }, { "at": [171.3, 426.4], "count": 1, "after": true }, { "at": [122, 431], "count": 1, "after": true }]
   },
   "خَيْطْ": {
    "line": 641.5,
@@ -21296,7 +21296,7 @@ export const WORD_PATHS = {
      [310.4, 282.6], [321, 281.2], [331.4, 284.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [763.8, 403.5], "count": 1, "after": true }, { "at": [540.2, 702.4], "count": 2, "after": true }]
+   "dots": [{ "at": [763.8, 403.5], "count": 1, "after": true }, { "at": [576.4, 698.9], "count": 1, "after": true }, { "at": [503.1, 706], "count": 1, "after": true }]
   },
   "إِبْرَةْ": {
    "line": 647.3,
@@ -21347,7 +21347,7 @@ export const WORD_PATHS = {
      [169.8, 133.2], [183.6, 131.4], [197.2, 135.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [670.7, 735.2], "count": 1, "after": true }, { "at": [181.2, 310.4], "count": 2, "after": true }]
+   "dots": [{ "at": [670.7, 735.2], "count": 1, "after": true }, { "at": [228.8, 305.9], "count": 1, "after": true }, { "at": [132.3, 314.9], "count": 1, "after": true }]
   },
   "صُوفْ": {
    "line": 644.9,
@@ -21436,7 +21436,7 @@ export const WORD_PATHS = {
      [194.3, 352.1], [202.5, 351], [210.6, 353.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [812.6, 450.2], "count": 3, "after": true }, { "at": [200.9, 455.7], "count": 2, "after": true }]
+   "dots": [{ "at": [812.5, 428.9], "count": 1, "after": true }, { "at": [839.7, 456.9], "count": 1, "after": true }, { "at": [786, 461.7], "count": 1, "after": true }, { "at": [229.1, 453.1], "count": 1, "after": true }, { "at": [172.3, 458.4], "count": 1, "after": true }]
   },
   "صُنْدُوقْ": {
    "line": 586.5,
@@ -21497,7 +21497,7 @@ export const WORD_PATHS = {
      [195.4, 352.1], [202.3, 351.2], [209.1, 353.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [629.9, 461.5], "count": 1, "after": true }, { "at": [200, 441], "count": 2, "after": true }]
+   "dots": [{ "at": [629.9, 461.5], "count": 1, "after": true }, { "at": [224.5, 438.8], "count": 1, "after": true }, { "at": [176.2, 443], "count": 1, "after": true }]
   },
   "جَيْبْ": {
    "line": 620.6,
@@ -21534,7 +21534,7 @@ export const WORD_PATHS = {
      [231.5, 323], [242, 321.6], [252.2, 324.5]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [794.2, 675.3], "count": 1, "after": true }, { "at": [544.8, 680.7], "count": 2, "after": true }, { "at": [253.1, 686.3], "count": 1, "after": true }]
+   "dots": [{ "at": [794.2, 675.3], "count": 1, "after": true }, { "at": [580.4, 677.2], "count": 1, "after": true }, { "at": [508.1, 684.2], "count": 1, "after": true }, { "at": [253.1, 686.3], "count": 1, "after": true }]
   },
   "نَعْلْ": {
    "line": 680.7,
@@ -21699,7 +21699,7 @@ export const WORD_PATHS = {
      [154, 302], [162.7, 300.9], [171.2, 303.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [467.5, 392.2], "count": 2, "after": true }, { "at": [327.4, 674.2], "count": 2, "after": true }, { "at": [160.5, 413], "count": 2, "after": true }]
+   "dots": [{ "at": [497.6, 389.3], "count": 1, "after": true }, { "at": [437.2, 395.1], "count": 1, "after": true }, { "at": [357.6, 671.3], "count": 1, "after": true }, { "at": [297.2, 677.2], "count": 1, "after": true }, { "at": [190.5, 410.1], "count": 1, "after": true }, { "at": [130.2, 415.9], "count": 1, "after": true }]
   },
   "سِوَارْ": {
    "line": 617.8,
@@ -21786,7 +21786,7 @@ export const WORD_PATHS = {
      [242.5, 314.9], [254.3, 313.4], [265.8, 316.7]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [835.3, 372.2], "count": 3, "after": true }, { "at": [255.9, 727.9], "count": 1, "after": true }]
+   "dots": [{ "at": [834.8, 341.4], "count": 1, "after": true }, { "at": [874, 382.1], "count": 1, "after": true }, { "at": [795.9, 389.1], "count": 1, "after": true }, { "at": [255.9, 727.9], "count": 1, "after": true }]
   },
   "عِمَامَةْ": {
    "line": 627.1,
@@ -21848,7 +21848,7 @@ export const WORD_PATHS = {
      [152.7, 298.4], [161.7, 297.1], [170.5, 299.6]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [159.6, 411], "count": 2, "after": true }]
+   "dots": [{ "at": [190.1, 407.9], "count": 1, "after": true }, { "at": [128.3, 414.1], "count": 1, "after": true }]
   },
   "مِكْيَاجْ": {
    "line": 603.5,
@@ -21909,7 +21909,7 @@ export const WORD_PATHS = {
      [196, 308], [204.7, 306.9], [213.2, 309.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [495.7, 652.9], "count": 2, "after": true }, { "at": [212.6, 605.1], "count": 1, "after": true }]
+   "dots": [{ "at": [525.2, 649.9], "count": 1, "after": true }, { "at": [465.4, 655.9], "count": 1, "after": true }, { "at": [212.6, 605.1], "count": 1, "after": true }]
   },
   "رِبَاطْ": {
    "line": 602.5,
@@ -22011,7 +22011,7 @@ export const WORD_PATHS = {
      [150.4, 244.6], [161, 243.2], [171.4, 246.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [790.5, 692], "count": 1, "after": true }, { "at": [159.9, 379.6], "count": 2, "after": true }]
+   "dots": [{ "at": [790.5, 692], "count": 1, "after": true }, { "at": [196, 376.3], "count": 1, "after": true }, { "at": [122.4, 383.2], "count": 1, "after": true }]
   },
   "عَبَاءَةْ": {
    "line": 644.2,
@@ -22068,7 +22068,7 @@ export const WORD_PATHS = {
      [144, 282.3], [153.8, 281], [163.5, 283.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [633.8, 705.5], "count": 1, "after": true }, { "at": [151.3, 406.9], "count": 2, "after": true }]
+   "dots": [{ "at": [633.8, 705.5], "count": 1, "after": true }, { "at": [185, 403.8], "count": 1, "after": true }, { "at": [117.2, 410.1], "count": 1, "after": true }]
   },
   "طَرْحَةْ": {
    "line": 627.4,
@@ -22126,7 +22126,7 @@ export const WORD_PATHS = {
      [152, 308], [160.7, 306.9], [169.2, 309.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [158.9, 417.4], "count": 2, "after": true }]
+   "dots": [{ "at": [188.5, 414.5], "count": 1, "after": true }, { "at": [128.8, 420.3], "count": 1, "after": true }]
   },
   "غَسِيلْ": {
    "line": 604.5,
@@ -22171,7 +22171,7 @@ export const WORD_PATHS = {
      [152, 310], [160.7, 308.9], [169.2, 311.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [799.9, 399.7], "count": 1, "after": true }, { "at": [380.8, 654.5], "count": 2, "after": true }]
+   "dots": [{ "at": [799.9, 399.7], "count": 1, "after": true }, { "at": [410.7, 651.8], "count": 1, "after": true }, { "at": [350.2, 657.2], "count": 1, "after": true }]
   },
   "صُدْرِيَّةْ": {
    "line": 581.3,
@@ -22237,7 +22237,7 @@ export const WORD_PATHS = {
      [143.7, 297.1], [151.5, 296], [159.1, 298.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [287.9, 624.8], "count": 2, "after": true }, { "at": [149.5, 394.7], "count": 2, "after": true }]
+   "dots": [{ "at": [314, 622.3], "count": 1, "after": true }, { "at": [261.2, 627.3], "count": 1, "after": true }, { "at": [175.5, 392.3], "count": 1, "after": true }, { "at": [122.8, 397.3], "count": 1, "after": true }]
   },
   "حِزَامْ": {
    "line": 608.7,
@@ -22332,7 +22332,7 @@ export const WORD_PATHS = {
      [142.8, 272.7], [152.9, 271.3], [162.9, 274.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [536.9, 473.3], "count": 2, "after": true }, { "at": [151.1, 402.7], "count": 2, "after": true }]
+   "dots": [{ "at": [572, 469.8], "count": 1, "after": true }, { "at": [501.1, 476.9], "count": 1, "after": true }, { "at": [185.9, 399.4], "count": 1, "after": true }, { "at": [115, 406.1], "count": 1, "after": true }]
   },
   "زِرّْ": {
    "line": 658.7,
@@ -22425,7 +22425,7 @@ export const WORD_PATHS = {
      [137.5, 290.7], [146.8, 289.4], [155.9, 292]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [144.3, 408.3], "count": 2, "after": true }]
+   "dots": [{ "at": [176.2, 405.3], "count": 1, "after": true }, { "at": [112.3, 411.2], "count": 1, "after": true }]
   },
   "نَسِيجْ": {
    "line": 601.4,
@@ -22469,7 +22469,7 @@ export const WORD_PATHS = {
      [206.2, 287.6], [215.9, 286.4], [225.4, 289.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [865.5, 376.6], "count": 1, "after": true }, { "at": [440.9, 656.2], "count": 2, "after": true }, { "at": [208.4, 616.3], "count": 1, "after": true }]
+   "dots": [{ "at": [865.5, 376.6], "count": 1, "after": true }, { "at": [473.7, 653.1], "count": 1, "after": true }, { "at": [407.3, 659.3], "count": 1, "after": true }, { "at": [208.4, 616.3], "count": 1, "after": true }]
   },
   "عِقْدْ": {
    "line": 680.2,
@@ -22513,7 +22513,7 @@ export const WORD_PATHS = {
      [207.1, 222.8], [220.6, 221.1], [233.9, 224.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [492.6, 377.5], "count": 2, "after": true }]
+   "dots": [{ "at": [538.5, 373.1], "count": 1, "after": true }, { "at": [445.2, 382.1], "count": 1, "after": true }]
   },
   "خُفّْ": {
    "line": 787.6,
@@ -22607,7 +22607,7 @@ export const WORD_PATHS = {
      [146.8, 270.7], [156.9, 269.3], [166.9, 272.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [820.1, 375.4], "count": 2, "after": true }, { "at": [154.5, 399.1], "count": 2, "after": true }]
+   "dots": [{ "at": [854.7, 372.1], "count": 1, "after": true }, { "at": [784.9, 378.7], "count": 1, "after": true }, { "at": [189, 395.7], "count": 1, "after": true }, { "at": [118.9, 402.6], "count": 1, "after": true }]
   },
   "كُمّْ": {
    "line": 701.5,
@@ -22687,7 +22687,7 @@ export const WORD_PATHS = {
      [186.9, 262], [196.9, 260.7], [206.7, 263.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [365.9, 635.6], "count": 2, "after": true }]
+   "dots": [{ "at": [400.4, 632.3], "count": 1, "after": true }, { "at": [331, 638.9], "count": 1, "after": true }]
   },
   "مِشْبَكْ": {
    "line": 599.5,
@@ -22743,7 +22743,7 @@ export const WORD_PATHS = {
      [206, 366], [214.7, 364.9], [223.2, 367.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [620.1, 439.2], "count": 3, "after": true }, { "at": [423.9, 653.6], "count": 1, "after": true }]
+   "dots": [{ "at": [620, 416.6], "count": 1, "after": true }, { "at": [648.6, 446.9], "count": 1, "after": true }, { "at": [591.7, 451.9], "count": 1, "after": true }, { "at": [423.9, 653.6], "count": 1, "after": true }]
   },
   "سِلْسِلَةْ": {
    "line": 629.1,
@@ -22805,7 +22805,7 @@ export const WORD_PATHS = {
      [151.2, 323.7], [159.6, 322.6], [167.8, 324.9]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [157.7, 428.9], "count": 2, "after": true }]
+   "dots": [{ "at": [185.6, 426.1], "count": 1, "after": true }, { "at": [128.5, 431.9], "count": 1, "after": true }]
   },
   "مِشْجَبْ": {
    "line": 582,
@@ -22853,7 +22853,7 @@ export const WORD_PATHS = {
      [188.3, 379.7], [195.4, 378.8], [202.3, 380.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [673.5, 449.9], "count": 3, "after": true }, { "at": [452.2, 619], "count": 1, "after": true }, { "at": [202.4, 626.4], "count": 1, "after": true }]
+   "dots": [{ "at": [673.5, 431.3], "count": 1, "after": true }, { "at": [697, 455.5], "count": 1, "after": true }, { "at": [649.8, 460], "count": 1, "after": true }, { "at": [452.2, 619], "count": 1, "after": true }, { "at": [202.4, 626.4], "count": 1, "after": true }]
   },
   "مِعْصَمْ": {
    "line": 591.6,
@@ -22954,7 +22954,7 @@ export const WORD_PATHS = {
      [194.7, 375.6], [206.2, 374.1], [217.5, 377.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [802.3, 368.2], "count": 2, "after": true }, { "at": [203.9, 514.8], "count": 1, "after": true }]
+   "dots": [{ "at": [842.2, 364.4], "count": 1, "after": true }, { "at": [762.1, 372.1], "count": 1, "after": true }, { "at": [203.9, 514.8], "count": 1, "after": true }]
   },
   "عِطْرْ": {
    "line": 649.1,
@@ -23064,7 +23064,7 @@ export const WORD_PATHS = {
      [137.6, 298], [146.7, 296.7], [155.7, 299.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [586.3, 685.6], "count": 2, "after": true }, { "at": [144.7, 413.4], "count": 2, "after": true }]
+   "dots": [{ "at": [617.5, 682.4], "count": 1, "after": true }, { "at": [554.3, 688.9], "count": 1, "after": true }, { "at": [175.9, 410.6], "count": 1, "after": true }, { "at": [113.2, 416.3], "count": 1, "after": true }]
   },
   "حَافِلَةْ": {
    "line": 633.8,
@@ -23122,7 +23122,7 @@ export const WORD_PATHS = {
      [153.4, 287.4], [162.8, 286.1], [172, 288.7]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [442, 378.9], "count": 1, "after": true }, { "at": [161.6, 406.4], "count": 2, "after": true }]
+   "dots": [{ "at": [442, 378.9], "count": 1, "after": true }, { "at": [193.5, 403.2], "count": 1, "after": true }, { "at": [128.7, 409.7], "count": 1, "after": true }]
   },
   "دَرَّاجَةْ": {
    "line": 629.9,
@@ -23187,7 +23187,7 @@ export const WORD_PATHS = {
      [149.8, 304.7], [158.7, 303.5], [167.3, 306]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [389.9, 675.7], "count": 1, "after": true }, { "at": [157.3, 415.9], "count": 2, "after": true }]
+   "dots": [{ "at": [389.9, 675.7], "count": 1, "after": true }, { "at": [187.3, 413.3], "count": 1, "after": true }, { "at": [126.7, 418.5], "count": 1, "after": true }]
   },
   "طَيَّارَةْ": {
    "line": 633.9,
@@ -23256,7 +23256,7 @@ export const WORD_PATHS = {
      [136.7, 298.4], [145.7, 297.1], [154.5, 299.6]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [585.8, 685.8], "count": 2, "after": true }, { "at": [144.6, 413.5], "count": 2, "after": true }]
+   "dots": [{ "at": [617.2, 682.7], "count": 1, "after": true }, { "at": [554.1, 688.9], "count": 1, "after": true }, { "at": [175.5, 410.3], "count": 1, "after": true }, { "at": [112.8, 416.8], "count": 1, "after": true }]
   },
   "سَفِينَةْ": {
    "line": 623.4,
@@ -23310,7 +23310,7 @@ export const WORD_PATHS = {
      [152, 304], [160.7, 302.9], [169.2, 305.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [585.9, 423.6], "count": 1, "after": true }, { "at": [440.9, 672.8], "count": 2, "after": true }, { "at": [308.6, 468.2], "count": 1, "after": true }, { "at": [159.6, 413.5], "count": 2, "after": true }]
+   "dots": [{ "at": [585.9, 423.6], "count": 1, "after": true }, { "at": [470.3, 670.1], "count": 1, "after": true }, { "at": [410.5, 675.7], "count": 1, "after": true }, { "at": [308.6, 468.2], "count": 1, "after": true }, { "at": [189, 410.8], "count": 1, "after": true }, { "at": [129, 416.4], "count": 1, "after": true }]
   },
   "قَارِبْ": {
    "line": 608.4,
@@ -23359,7 +23359,7 @@ export const WORD_PATHS = {
      [228.9, 318], [238.9, 316.7], [248.7, 319.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [814.1, 336.3], "count": 2, "after": true }, { "at": [240.2, 672.7], "count": 1, "after": true }]
+   "dots": [{ "at": [849.2, 332.9], "count": 1, "after": true }, { "at": [778.5, 339.7], "count": 1, "after": true }, { "at": [240.2, 672.7], "count": 1, "after": true }]
   },
   "شَارِعْ": {
    "line": 606,
@@ -23410,7 +23410,7 @@ export const WORD_PATHS = {
      [156.9, 232], [166.9, 230.7], [176.7, 233.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [795.1, 420.8], "count": 3, "after": true }]
+   "dots": [{ "at": [795, 394.4], "count": 1, "after": true }, { "at": [828, 428.9], "count": 1, "after": true }, { "at": [762.1, 435], "count": 1, "after": true }]
   },
   "جِسْرْ": {
    "line": 591.6,
@@ -23488,7 +23488,7 @@ export const WORD_PATHS = {
      [246.3, 263.3], [257.1, 261.9], [267.6, 264.9]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [254.7, 399.4], "count": 2, "after": true }]
+   "dots": [{ "at": [291.8, 395.8], "count": 1, "after": true }, { "at": [217.1, 403], "count": 1, "after": true }]
   },
   "عِيَادَةْ": {
    "line": 636.7,
@@ -23546,7 +23546,7 @@ export const WORD_PATHS = {
      [141.4, 283.4], [150.8, 282.1], [160, 284.7]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [627.1, 691.4], "count": 2, "after": true }, { "at": [148.9, 404.5], "count": 2, "after": true }]
+   "dots": [{ "at": [659.4, 688.1], "count": 1, "after": true }, { "at": [593.2, 694.9], "count": 1, "after": true }, { "at": [181.8, 401.5], "count": 1, "after": true }, { "at": [115.5, 407.6], "count": 1, "after": true }]
   },
   "مَسْجِدْ": {
    "line": 582.8,
@@ -23765,7 +23765,7 @@ export const WORD_PATHS = {
      [149.1, 354.4], [157.6, 353.2], [166, 355.6]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [155.2, 462.1], "count": 2, "after": true }]
+   "dots": [{ "at": [184.3, 459.4], "count": 1, "after": true }, { "at": [125.9, 464.9], "count": 1, "after": true }]
   },
   "مَتْحَفْ": {
    "line": 650.5,
@@ -23814,7 +23814,7 @@ export const WORD_PATHS = {
      [294.5, 361.4], [302.6, 360.3], [310.5, 362.6]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [693.7, 508.4], "count": 2, "after": true }, { "at": [299.9, 458.6], "count": 1, "after": true }]
+   "dots": [{ "at": [721.5, 505.8], "count": 1, "after": true }, { "at": [665.1, 511.1], "count": 1, "after": true }, { "at": [299.9, 458.6], "count": 1, "after": true }]
   },
   "مَصْنَعْ": {
    "line": 603.6,
@@ -23931,7 +23931,7 @@ export const WORD_PATHS = {
      [149.2, 311.7], [157.6, 310.6], [165.8, 312.9]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [667.3, 442.2], "count": 1, "after": true }, { "at": [155.4, 419.2], "count": 2, "after": true }]
+   "dots": [{ "at": [667.3, 442.2], "count": 1, "after": true }, { "at": [184.4, 416.5], "count": 1, "after": true }, { "at": [125.4, 422.1], "count": 1, "after": true }]
   },
   "بُرْجْ": {
    "line": 661.3,
@@ -24023,7 +24023,7 @@ export const WORD_PATHS = {
      [224.7, 273], [233.8, 271.8], [242.7, 274.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [405.5, 637], "count": 2, "after": true }, { "at": [231.9, 388.6], "count": 2, "after": true }]
+   "dots": [{ "at": [437, 633.9], "count": 1, "after": true }, { "at": [373.3, 640.2], "count": 1, "after": true }, { "at": [263.1, 385.6], "count": 1, "after": true }, { "at": [199.7, 391.6], "count": 1, "after": true }]
   },
   "إِشَارَةْ": {
    "line": 599.3,
@@ -24083,7 +24083,7 @@ export const WORD_PATHS = {
      [139.4, 253.4], [148.8, 252.1], [158, 254.7]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [674.2, 425.5], "count": 3, "after": true }, { "at": [147.5, 371.9], "count": 2, "after": true }]
+   "dots": [{ "at": [673.9, 401.2], "count": 1, "after": true }, { "at": [704.9, 433.4], "count": 1, "after": true }, { "at": [643.2, 439], "count": 1, "after": true }, { "at": [179.2, 369], "count": 1, "after": true }, { "at": [114.5, 375], "count": 1, "after": true }]
   },
   "مَخْبَزْ": {
    "line": 632.1,
@@ -24204,7 +24204,7 @@ export const WORD_PATHS = {
      [138.3, 339.7], [145.4, 338.8], [152.3, 340.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [619.6, 640.7], "count": 2, "after": true }, { "at": [278.9, 640.9], "count": 2, "after": true }, { "at": [144.3, 429.3], "count": 2, "after": true }]
+   "dots": [{ "at": [643.5, 638.3], "count": 1, "after": true }, { "at": [594.7, 643.2], "count": 1, "after": true }, { "at": [303.3, 638.6], "count": 1, "after": true }, { "at": [254.3, 643.2], "count": 1, "after": true }, { "at": [168.1, 427], "count": 1, "after": true }, { "at": [119.5, 431.7], "count": 1, "after": true }]
   },
   "مَكْتَبْ": {
    "line": 628.4,
@@ -24253,7 +24253,7 @@ export const WORD_PATHS = {
      [211.8, 372.7], [220.7, 371.5], [229.3, 374]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [480.1, 472.2], "count": 2, "after": true }, { "at": [229.9, 684.8], "count": 1, "after": true }]
+   "dots": [{ "at": [510.8, 469.2], "count": 1, "after": true }, { "at": [448.8, 475.2], "count": 1, "after": true }, { "at": [229.9, 684.8], "count": 1, "after": true }]
   },
   "مَطْعَمْ": {
    "line": 601.4,
@@ -24357,7 +24357,7 @@ export const WORD_PATHS = {
      [313.2, 178.5], [327.8, 176.6], [342.1, 180.6]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [835.6, 332.5], "count": 1, "after": true }, { "at": [619.3, 338.5], "count": 1, "after": true }, { "at": [324.7, 363.5], "count": 2, "after": true }]
+   "dots": [{ "at": [835.6, 332.5], "count": 1, "after": true }, { "at": [619.3, 338.5], "count": 1, "after": true }, { "at": [374.5, 358.6], "count": 1, "after": true }, { "at": [273.4, 368.5], "count": 1, "after": true }]
   },
   "قَاطِرَةْ": {
    "line": 624.6,
@@ -24421,7 +24421,7 @@ export const WORD_PATHS = {
      [136, 302], [144.7, 300.9], [153.2, 303.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [835.5, 392.2], "count": 2, "after": true }, { "at": [142.5, 413], "count": 2, "after": true }]
+   "dots": [{ "at": [865.1, 389.4], "count": 1, "after": true }, { "at": [804.5, 395.1], "count": 1, "after": true }, { "at": [172.5, 410.1], "count": 1, "after": true }, { "at": [112.1, 415.9], "count": 1, "after": true }]
   },
   "مِرْكَبْ": {
    "line": 611.8,
@@ -24515,7 +24515,7 @@ export const WORD_PATHS = {
      [294.5, 323.4], [302.6, 322.3], [310.5, 324.6]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [439.6, 651.4], "count": 2, "after": true }, { "at": [299.8, 419.1], "count": 1, "after": true }]
+   "dots": [{ "at": [466.7, 648.7], "count": 1, "after": true }, { "at": [411.4, 654.2], "count": 1, "after": true }, { "at": [299.8, 419.1], "count": 1, "after": true }]
   },
   "مَقْبَرَةْ": {
    "line": 641.1,
@@ -24575,7 +24575,7 @@ export const WORD_PATHS = {
      [140.2, 287], [149.8, 285.7], [159.2, 288.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [639.7, 426.2], "count": 2, "after": true }, { "at": [493.4, 701.3], "count": 1, "after": true }, { "at": [147.7, 408.8], "count": 2, "after": true }]
+   "dots": [{ "at": [672.3, 422.9], "count": 1, "after": true }, { "at": [606, 429.5], "count": 1, "after": true }, { "at": [493.4, 701.3], "count": 1, "after": true }, { "at": [180.3, 405.7], "count": 1, "after": true }, { "at": [114.1, 412.1], "count": 1, "after": true }]
   },
   "بَوَّابَةْ": {
    "line": 660,
@@ -24634,7 +24634,7 @@ export const WORD_PATHS = {
      [169.2, 258.9], [180.1, 257.5], [190.8, 260.5]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [847.8, 728.2], "count": 1, "after": true }, { "at": [357.5, 728.2], "count": 1, "after": true }, { "at": [177.4, 396.6], "count": 2, "after": true }]
+   "dots": [{ "at": [847.8, 728.2], "count": 1, "after": true }, { "at": [357.5, 728.2], "count": 1, "after": true }, { "at": [215, 393], "count": 1, "after": true }, { "at": [139.7, 400.2], "count": 1, "after": true }]
   },
   "شَاحِنَةْ": {
    "line": 616.6,
@@ -24688,7 +24688,7 @@ export const WORD_PATHS = {
      [145.3, 315], [153.6, 313.9], [161.7, 316.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [813.7, 465.2], "count": 3, "after": true }, { "at": [292.2, 470.1], "count": 1, "after": true }, { "at": [151.3, 418.2], "count": 2, "after": true }]
+   "dots": [{ "at": [813.7, 443.9], "count": 1, "after": true }, { "at": [841.1, 472.1], "count": 1, "after": true }, { "at": [787.2, 476.9], "count": 1, "after": true }, { "at": [292.2, 470.1], "count": 1, "after": true }, { "at": [179.3, 415.4], "count": 1, "after": true }, { "at": [123, 421], "count": 1, "after": true }]
   },
   "عَرَبَةْ": {
    "line": 668.2,
@@ -24740,7 +24740,7 @@ export const WORD_PATHS = {
      [170.7, 245.6], [182.2, 244.1], [193.5, 247.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [369.2, 739.8], "count": 1, "after": true }, { "at": [180.1, 391.4], "count": 2, "after": true }]
+   "dots": [{ "at": [369.2, 739.8], "count": 1, "after": true }, { "at": [219.3, 387.6], "count": 1, "after": true }, { "at": [140.1, 395.3], "count": 1, "after": true }]
   },
   "مَصْرِفْ": {
    "line": 589.6,
@@ -24985,7 +24985,7 @@ export const WORD_PATHS = {
      [133.5, 347.4], [140.3, 346.5], [146.9, 348.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [266.9, 633.3], "count": 2, "after": true }, { "at": [139.7, 432.7], "count": 2, "after": true }]
+   "dots": [{ "at": [290.2, 631], "count": 1, "after": true }, { "at": [243.9, 635.5], "count": 1, "after": true }, { "at": [162.3, 430.6], "count": 1, "after": true }, { "at": [116, 435], "count": 1, "after": true }]
   },
   "فُنْدُقْ": {
    "line": 650.8,
@@ -25037,7 +25037,7 @@ export const WORD_PATHS = {
      [243.7, 306.3], [254, 304.9], [264.1, 307.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [815.1, 372.6], "count": 1, "after": true }, { "at": [663.2, 467.2], "count": 1, "after": true }, { "at": [252.1, 436.9], "count": 2, "after": true }]
+   "dots": [{ "at": [815.1, 372.6], "count": 1, "after": true }, { "at": [663.2, 467.2], "count": 1, "after": true }, { "at": [286.9, 433.5], "count": 1, "after": true }, { "at": [216.2, 440.3], "count": 1, "after": true }]
   },
   "جَرَّارْ": {
    "line": 648.2,
@@ -25158,7 +25158,7 @@ export const WORD_PATHS = {
      [226.6, 387.1], [232.2, 388.6]
     ], "folds": [{ "from": 0, "apex": 8, "to": 15 }] }
    ],
-   "dots": [{ "at": [611.9, 480.6], "count": 2, "after": true }, { "at": [225.5, 449.4], "count": 1, "after": true }]
+   "dots": [{ "at": [629.9, 479], "count": 1, "after": true }, { "at": [594.4, 482.1], "count": 1, "after": true }, { "at": [225.5, 449.4], "count": 1, "after": true }]
   },
   "مِطْفَأَةْ": {
    "line": 668.8,
@@ -25231,7 +25231,7 @@ export const WORD_PATHS = {
      [138, 346], [146.7, 344.9], [155.2, 347.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [415.9, 467.3], "count": 1, "after": true }, { "at": [144.9, 457], "count": 2, "after": true }]
+   "dots": [{ "at": [415.9, 467.3], "count": 1, "after": true }, { "at": [175.1, 454.1], "count": 1, "after": true }, { "at": [114.4, 459.9], "count": 1, "after": true }]
   },
   "مِيكْرُوبَاصْ": {
    "line": 562.7,
@@ -25312,7 +25312,7 @@ export const WORD_PATHS = {
      [238.6, 396.4], [244, 397.9]
     ], "folds": [{ "from": 0, "apex": 8, "to": 15 }] }
    ],
-   "dots": [{ "at": [779.7, 590.3], "count": 2, "after": true }, { "at": [407.8, 593], "count": 1, "after": true }]
+   "dots": [{ "at": [796.8, 589], "count": 1, "after": true }, { "at": [763.1, 591.7], "count": 1, "after": true }, { "at": [407.8, 593], "count": 1, "after": true }]
   },
   "مَتْجَرْ": {
    "line": 614.6,
@@ -25362,7 +25362,7 @@ export const WORD_PATHS = {
      [179.4, 311.4], [188.8, 310.1], [198, 312.7]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [653.9, 448.5], "count": 2, "after": true }, { "at": [429.7, 664.5], "count": 1, "after": true }]
+   "dots": [{ "at": [686.3, 445.4], "count": 1, "after": true }, { "at": [620.1, 451.8], "count": 1, "after": true }, { "at": [429.7, 664.5], "count": 1, "after": true }]
   },
   "سَاحَةْ": {
    "line": 681.3,
@@ -25411,7 +25411,7 @@ export const WORD_PATHS = {
      [155.4, 335.4], [164.8, 334.1], [174, 336.7]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [163.5, 454], "count": 2, "after": true }]
+   "dots": [{ "at": [195.2, 451], "count": 1, "after": true }, { "at": [130.4, 457.1], "count": 1, "after": true }]
   },
   "مَلْجَأْ": {
    "line": 747.1,
@@ -25528,7 +25528,7 @@ export const WORD_PATHS = {
      [151.4, 291.4], [160.8, 290.1], [170, 292.7]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [322.8, 696.6], "count": 1, "after": true }, { "at": [158.6, 410.8], "count": 2, "after": true }]
+   "dots": [{ "at": [322.8, 696.6], "count": 1, "after": true }, { "at": [191, 407.7], "count": 1, "after": true }, { "at": [126, 413.9], "count": 1, "after": true }]
   },
   "رَافِعَةْ": {
    "line": 639.7,
@@ -25587,7 +25587,7 @@ export const WORD_PATHS = {
      [160.2, 277.6], [169.9, 276.4], [179.4, 279.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [537.2, 373.8], "count": 1, "after": true }, { "at": [168.4, 402.2], "count": 2, "after": true }]
+   "dots": [{ "at": [537.2, 373.8], "count": 1, "after": true }, { "at": [202.1, 399.1], "count": 1, "after": true }, { "at": [134.2, 405.3], "count": 1, "after": true }]
   },
   "مَشْرَبْ": {
    "line": 597.8,
@@ -25637,7 +25637,7 @@ export const WORD_PATHS = {
      [196.5, 365.4], [204.6, 364.3], [212.5, 366.6]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [641, 446.4], "count": 3, "after": true }, { "at": [205.2, 649], "count": 1, "after": true }]
+   "dots": [{ "at": [641.1, 425], "count": 1, "after": true }, { "at": [668.3, 453.2], "count": 1, "after": true }, { "at": [614.6, 458], "count": 1, "after": true }, { "at": [205.2, 649], "count": 1, "after": true }]
   },
   "سُورْ": {
    "line": 642.1,
@@ -25731,7 +25731,7 @@ export const WORD_PATHS = {
      [142.4, 262.6], [153, 261.2], [163.4, 264.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [640.4, 461.5], "count": 1, "after": true }, { "at": [151, 395.5], "count": 2, "after": true }]
+   "dots": [{ "at": [640.4, 461.5], "count": 1, "after": true }, { "at": [187.1, 392], "count": 1, "after": true }, { "at": [114.2, 399.1], "count": 1, "after": true }]
   },
   "كُرَةْ": {
    "line": 726.2,
@@ -25771,7 +25771,7 @@ export const WORD_PATHS = {
      [170.7, 159.1], [185.9, 157.2], [200.8, 161.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [182.9, 354.4], "count": 2, "after": true }]
+   "dots": [{ "at": [235.4, 349.3], "count": 1, "after": true }, { "at": [129.4, 359.5], "count": 1, "after": true }]
   },
   "لُعْبَةْ": {
    "line": 730.6,
@@ -25823,7 +25823,7 @@ export const WORD_PATHS = {
      [183.8, 217.2], [197.6, 215.4], [211.2, 219.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [438.8, 818.4], "count": 1, "after": true }, { "at": [195.5, 393.6], "count": 2, "after": true }]
+   "dots": [{ "at": [438.8, 818.4], "count": 1, "after": true }, { "at": [243.2, 389], "count": 1, "after": true }, { "at": [146.7, 398.2], "count": 1, "after": true }]
   },
   "دُمْيَةْ": {
    "line": 666.1,
@@ -25874,7 +25874,7 @@ export const WORD_PATHS = {
      [167.8, 249.9], [179.2, 248.5], [190.3, 251.6]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [393, 730.6], "count": 2, "after": true }, { "at": [177.5, 392.9], "count": 2, "after": true }]
+   "dots": [{ "at": [431.3, 727.1], "count": 1, "after": true }, { "at": [353.2, 734.3], "count": 1, "after": true }, { "at": [215.8, 389.1], "count": 1, "after": true }, { "at": [138, 396.8], "count": 1, "after": true }]
   },
   "أُرْجُوحَةْ": {
    "line": 641.7,
@@ -25946,7 +25946,7 @@ export const WORD_PATHS = {
      [133.5, 399.4], [140.3, 398.5], [146.9, 400.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [643.7, 675.7], "count": 1, "after": true }, { "at": [138.6, 482.3], "count": 2, "after": true }]
+   "dots": [{ "at": [643.7, 675.7], "count": 1, "after": true }, { "at": [160.7, 480.1], "count": 1, "after": true }, { "at": [115.4, 484.5], "count": 1, "after": true }]
   },
   "حَبْلْ": {
    "line": 650.1,
@@ -26153,7 +26153,7 @@ export const WORD_PATHS = {
      [253.9, 329.2], [265.1, 327.8], [276.1, 330.9]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [693.1, 465], "count": 1, "after": true }, { "at": [262.3, 472.2], "count": 2, "after": true }]
+   "dots": [{ "at": [693.1, 465], "count": 1, "after": true }, { "at": [300.8, 468.4], "count": 1, "after": true }, { "at": [223, 476.1], "count": 1, "after": true }]
   },
   "أَخْضَرْ": {
    "line": 671.2,
@@ -26317,7 +26317,7 @@ export const WORD_PATHS = {
      [365.5, 336.7], [374.8, 335.4], [383.9, 338]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [750, 731.3], "count": 1, "after": true }, { "at": [618.9, 726.2], "count": 2, "after": true }, { "at": [373, 449.1], "count": 1, "after": true }]
+   "dots": [{ "at": [750, 731.3], "count": 1, "after": true }, { "at": [651, 723.2], "count": 1, "after": true }, { "at": [585.8, 729.3], "count": 1, "after": true }, { "at": [373, 449.1], "count": 1, "after": true }]
   },
   "أَسْوَدْ": {
    "line": 702.6,
@@ -26429,7 +26429,7 @@ export const WORD_PATHS = {
      [154.2, 327.6], [163.9, 326.4], [173.4, 329.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [796.4, 508.2], "count": 3, "after": true }, { "at": [162.3, 451.9], "count": 2, "after": true }]
+   "dots": [{ "at": [796.4, 482.5], "count": 1, "after": true }, { "at": [828.7, 516.2], "count": 1, "after": true }, { "at": [764.3, 522.1], "count": 1, "after": true }, { "at": [195.8, 448.7], "count": 1, "after": true }, { "at": [128.1, 455.2], "count": 1, "after": true }]
   },
   "طَبْلْ": {
    "line": 648.1,
@@ -26557,7 +26557,7 @@ export const WORD_PATHS = {
      [177.7, 282.3], [188, 280.9], [198.1, 283.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [854, 390.8], "count": 1, "after": true }, { "at": [645.8, 442.1], "count": 3, "after": true }, { "at": [395, 692.8], "count": 2, "after": true }]
+   "dots": [{ "at": [854, 390.8], "count": 1, "after": true }, { "at": [645.8, 414.9], "count": 1, "after": true }, { "at": [679.6, 450.7], "count": 1, "after": true }, { "at": [611.8, 456.8], "count": 1, "after": true }, { "at": [430.6, 689.3], "count": 1, "after": true }, { "at": [358.9, 696.4], "count": 1, "after": true }]
   },
   "رَقْصْ": {
    "line": 645.8,
@@ -26601,7 +26601,7 @@ export const WORD_PATHS = {
      [386.9, 310], [396.9, 308.7], [406.7, 311.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [649.7, 382.7], "count": 2, "after": true }]
+   "dots": [{ "at": [683.1, 379.6], "count": 1, "after": true }, { "at": [614.9, 385.9], "count": 1, "after": true }]
   },
   "سِبَاقْ": {
    "line": 617.8,
@@ -26649,7 +26649,7 @@ export const WORD_PATHS = {
      [239.7, 274.3], [250, 272.9], [260.1, 275.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [557.4, 682], "count": 1, "after": true }, { "at": [248.2, 404.2], "count": 2, "after": true }]
+   "dots": [{ "at": [557.4, 682], "count": 1, "after": true }, { "at": [283.1, 400.8], "count": 1, "after": true }, { "at": [212.3, 407.7], "count": 1, "after": true }]
   },
   "كَأْسْ": {
    "line": 720.4,
@@ -26755,7 +26755,7 @@ export const WORD_PATHS = {
      [160.3, 257.3], [171.1, 255.9], [181.6, 258.9]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [363, 714.7], "count": 2, "after": true }, { "at": [169.8, 393.2], "count": 2, "after": true }]
+   "dots": [{ "at": [399.5, 711.1], "count": 1, "after": true }, { "at": [325.7, 718.4], "count": 1, "after": true }, { "at": [206.1, 389.7], "count": 1, "after": true }, { "at": [132.2, 396.8], "count": 1, "after": true }]
   },
   "بَالُونْ": {
    "line": 657.3,
@@ -26910,7 +26910,7 @@ export const WORD_PATHS = {
      [141.5, 296.7], [150.8, 295.4], [159.9, 298]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [149.2, 412.7], "count": 2, "after": true }]
+   "dots": [{ "at": [180.4, 409.6], "count": 1, "after": true }, { "at": [117, 415.8], "count": 1, "after": true }]
   },
   "لَوْنْ": {
    "line": 698.2,
@@ -27153,7 +27153,7 @@ export const WORD_PATHS = {
      [336.2, 620.8], [330.9, 622.8], [325.6, 624.9], [320.3, 626.9], [315.1, 628.9], [309.7, 630.7]
     ] }
    ],
-   "dots": [{ "at": [877.2, 612.1], "count": 1, "after": true }, { "at": [645, 400.8], "count": 2, "after": true }, { "at": [519.3, 403.7], "count": 2, "after": true }, { "at": [168.1, 686.8], "count": 2, "after": true }]
+   "dots": [{ "at": [877.2, 612.1], "count": 1, "after": true }, { "at": [669.6, 398.7], "count": 1, "after": true }, { "at": [620, 403], "count": 1, "after": true }, { "at": [543.9, 401.2], "count": 1, "after": true }, { "at": [493.4, 406.3], "count": 1, "after": true }, { "at": [193.3, 684.3], "count": 1, "after": true }, { "at": [142.6, 689.4], "count": 1, "after": true }]
   },
   "نَايْ": {
    "line": 604.2,
@@ -27188,7 +27188,7 @@ export const WORD_PATHS = {
      [226.7, 337.1], [241.9, 335.2], [256.8, 339.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [792.2, 250.5], "count": 1, "after": true }, { "at": [287.5, 855.9], "count": 2, "after": true }]
+   "dots": [{ "at": [792.2, 250.5], "count": 1, "after": true }, { "at": [339, 850.8], "count": 1, "after": true }, { "at": [234.6, 861.1], "count": 1, "after": true }]
   },
   "صَفَّارَةْ": {
    "line": 631.5,
@@ -27249,7 +27249,7 @@ export const WORD_PATHS = {
      [135.2, 321.7], [143.6, 320.6], [151.8, 322.9]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [551.3, 437.9], "count": 1, "after": true }, { "at": [141.9, 427.8], "count": 2, "after": true }]
+   "dots": [{ "at": [551.3, 437.9], "count": 1, "after": true }, { "at": [170.3, 425.2], "count": 1, "after": true }, { "at": [112.4, 430.5], "count": 1, "after": true }]
   },
   "سَهْمْ": {
    "line": 640.4,
@@ -27349,7 +27349,7 @@ export const WORD_PATHS = {
      [160.9, 280], [170.9, 278.7], [180.7, 281.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [169.5, 406], "count": 2, "after": true }]
+   "dots": [{ "at": [203.4, 402.7], "count": 1, "after": true }, { "at": [134.8, 409.3], "count": 1, "after": true }]
   },
   "بَنَفْسَجِي": {
    "line": 554.1,
@@ -27407,7 +27407,7 @@ export const WORD_PATHS = {
      [360.9, 636.2], [355.6, 638.2], [350.1, 640.2], [344.7, 642.1]
     ] }
    ],
-   "dots": [{ "at": [877.4, 592.5], "count": 1, "after": true }, { "at": [798.6, 442.8], "count": 1, "after": true }, { "at": [701, 411.2], "count": 1, "after": true }, { "at": [366.2, 586], "count": 1, "after": true }, { "at": [155.7, 656.6], "count": 2, "after": true }]
+   "dots": [{ "at": [877.4, 592.5], "count": 1, "after": true }, { "at": [798.6, 442.8], "count": 1, "after": true }, { "at": [701, 411.2], "count": 1, "after": true }, { "at": [366.2, 586], "count": 1, "after": true }, { "at": [176.4, 654.4], "count": 1, "after": true }, { "at": [134, 658.9], "count": 1, "after": true }]
   },
   "قِيثَارَةْ": {
    "line": 622.2,
@@ -27464,7 +27464,7 @@ export const WORD_PATHS = {
      [134, 306], [142.7, 304.9], [151.2, 307.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [836.6, 394.3], "count": 2, "after": true }, { "at": [699.6, 671.1], "count": 2, "after": true }, { "at": [559.7, 466.8], "count": 3, "after": true }, { "at": [141.2, 414.5], "count": 2, "after": true }]
+   "dots": [{ "at": [866.3, 391.4], "count": 1, "after": true }, { "at": [806.5, 397.2], "count": 1, "after": true }, { "at": [728.6, 668.1], "count": 1, "after": true }, { "at": [669.3, 674.1], "count": 1, "after": true }, { "at": [559.2, 444.2], "count": 1, "after": true }, { "at": [587.7, 474], "count": 1, "after": true }, { "at": [531.3, 479], "count": 1, "after": true }, { "at": [170.5, 411.7], "count": 1, "after": true }, { "at": [111.6, 417.3], "count": 1, "after": true }]
   },
   "لَوْحَةْ": {
    "line": 654.4,
@@ -27515,7 +27515,7 @@ export const WORD_PATHS = {
      [161.5, 267], [172, 265.6], [182.2, 268.5]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [169.7, 400.3], "count": 2, "after": true }]
+   "dots": [{ "at": [205.7, 396.7], "count": 1, "after": true }, { "at": [133.1, 404], "count": 1, "after": true }]
   },
   "وَرَقِيَّةْ": {
    "line": 628.4,
@@ -27585,7 +27585,7 @@ export const WORD_PATHS = {
      [150.7, 296.4], [159.7, 295.1], [168.5, 297.6]
     ], "folds": [{ "from": 0, "apex": 8, "to": 16 }] }
    ],
-   "dots": [{ "at": [474.9, 389], "count": 2, "after": true }, { "at": [330.9, 679.8], "count": 2, "after": true }, { "at": [158.9, 410.2], "count": 2, "after": true }]
+   "dots": [{ "at": [505.8, 386.1], "count": 1, "after": true }, { "at": [443.7, 392], "count": 1, "after": true }, { "at": [361.4, 676.7], "count": 1, "after": true }, { "at": [299.2, 682.9], "count": 1, "after": true }, { "at": [189.7, 407.3], "count": 1, "after": true }, { "at": [127.3, 413.2], "count": 1, "after": true }]
   },
   "مِلْصَقْ": {
    "line": 629.9,
@@ -27638,7 +27638,7 @@ export const WORD_PATHS = {
      [220.9, 329.6], [229.7, 328.5], [238.4, 330.9]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [228, 441.5], "count": 2, "after": true }]
+   "dots": [{ "at": [258.2, 438.5], "count": 1, "after": true }, { "at": [196.9, 444.6], "count": 1, "after": true }]
   },
   "رَمَادِي": {
    "line": 552.8,
@@ -27694,7 +27694,7 @@ export const WORD_PATHS = {
      [371.3, 630.1], [366, 631.9]
     ] }
    ],
-   "dots": [{ "at": [176.2, 699.4], "count": 2, "after": true }]
+   "dots": [{ "at": [206.3, 696.4], "count": 1, "after": true }, { "at": [145.4, 702.4], "count": 1, "after": true }]
   },
   "بِيَانُو": {
    "line": 620.9,
@@ -27741,7 +27741,7 @@ export const WORD_PATHS = {
      [356.1, 279.5], [342.9, 284.3], [329.2, 282.2]
     ], "folds": [{ "from": 0, "apex": 6, "to": 11 }] }
    ],
-   "dots": [{ "at": [855.8, 692.5], "count": 1, "after": true }, { "at": [695.7, 686.4], "count": 2, "after": true }, { "at": [386.6, 353.1], "count": 1, "after": true }]
+   "dots": [{ "at": [855.8, 692.5], "count": 1, "after": true }, { "at": [735, 682.8], "count": 1, "after": true }, { "at": [656.1, 690.1], "count": 1, "after": true }, { "at": [386.6, 353.1], "count": 1, "after": true }]
   },
   "تَلْوِينْ": {
    "line": 615.3,
@@ -27795,7 +27795,7 @@ export const WORD_PATHS = {
      [176.7, 375], [185.8, 373.8], [194.7, 376.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [848.5, 403.2], "count": 2, "after": true }, { "at": [390, 668.3], "count": 2, "after": true }, { "at": [183.3, 486.1], "count": 1, "after": true }]
+   "dots": [{ "at": [880.3, 400.1], "count": 1, "after": true }, { "at": [815.9, 406.4], "count": 1, "after": true }, { "at": [421.4, 665.2], "count": 1, "after": true }, { "at": [357.4, 671.5], "count": 1, "after": true }, { "at": [183.3, 486.1], "count": 1, "after": true }]
   },
   "مِضْرَبْ": {
    "line": 607,
@@ -27899,7 +27899,7 @@ export const WORD_PATHS = {
      [414.8, 654.7], [409.2, 656.7], [403.6, 658.7]
     ] }
    ],
-   "dots": [{ "at": [188, 735.5], "count": 2, "after": true }]
+   "dots": [{ "at": [222.4, 732.2], "count": 1, "after": true }, { "at": [153, 738.9], "count": 1, "after": true }]
   },
   "نَغْمَةْ": {
    "line": 735.9,
@@ -27951,7 +27951,7 @@ export const WORD_PATHS = {
      [177.2, 285.2], [189.3, 283.7], [201.1, 287]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [850.7, 449.6], "count": 1, "after": true }, { "at": [660.6, 450.3], "count": 1, "after": true }, { "at": [186.7, 440.2], "count": 2, "after": true }]
+   "dots": [{ "at": [850.7, 449.6], "count": 1, "after": true }, { "at": [660.6, 450.3], "count": 1, "after": true }, { "at": [228.5, 436.2], "count": 1, "after": true }, { "at": [144.2, 444.2], "count": 1, "after": true }]
   },
   "بِطَاقَةْ": {
    "line": 601.4,
@@ -28015,7 +28015,7 @@ export const WORD_PATHS = {
      [156.7, 263], [165.8, 261.8], [174.7, 264.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [866.1, 659.1], "count": 1, "after": true }, { "at": [334.6, 357.4], "count": 2, "after": true }, { "at": [163.5, 378.9], "count": 2, "after": true }]
+   "dots": [{ "at": [866.1, 659.1], "count": 1, "after": true }, { "at": [365.7, 354.3], "count": 1, "after": true }, { "at": [302.4, 360.5], "count": 1, "after": true }, { "at": [195, 375.8], "count": 1, "after": true }, { "at": [131.5, 382.1], "count": 1, "after": true }]
   },
   "مِزْمَارْ": {
    "line": 614.1,
@@ -28141,7 +28141,7 @@ export const WORD_PATHS = {
      [138.1, 354.4], [145.3, 353.5], [152.4, 355.5]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [862.4, 464.3], "count": 1, "after": true }, { "at": [276.9, 428.1], "count": 2, "after": true }, { "at": [144, 445.2], "count": 2, "after": true }]
+   "dots": [{ "at": [862.4, 464.3], "count": 1, "after": true }, { "at": [301.1, 425.9], "count": 1, "after": true }, { "at": [251.7, 430.4], "count": 1, "after": true }, { "at": [168.3, 442.9], "count": 1, "after": true }, { "at": [119, 447.6], "count": 1, "after": true }]
   },
   "بُنِّي": {
    "line": 623,
@@ -28180,7 +28180,7 @@ export const WORD_PATHS = {
      [578.5, 178.9], [577.9, 160.7], [581.7, 142.7]
     ], "folds": [{ "from": 6, "apex": 8, "to": 11 }] }
    ],
-   "dots": [{ "at": [827.7, 716.8], "count": 1, "after": true }, { "at": [638.1, 357.2], "count": 1, "after": true }, { "at": [268.1, 870.3], "count": 2, "after": true }]
+   "dots": [{ "at": [827.7, 716.8], "count": 1, "after": true }, { "at": [638.1, 357.2], "count": 1, "after": true }, { "at": [318.4, 865.4], "count": 1, "after": true }, { "at": [215.8, 875.3], "count": 1, "after": true }]
   },
   "مُوسِيقَا": {
    "line": 589.3,
@@ -28236,7 +28236,7 @@ export const WORD_PATHS = {
      [205.3, 370.5], [199.8, 372.6], [194.2, 374.7], [189.1, 377.5], [184.7, 381.5]
     ] }
    ],
-   "dots": [{ "at": [341.6, 630.1], "count": 2, "after": true }, { "at": [214.7, 427.8], "count": 2, "after": true }]
+   "dots": [{ "at": [366.1, 627.6], "count": 1, "after": true }, { "at": [316.3, 632.7], "count": 1, "after": true }, { "at": [239.2, 425.6], "count": 1, "after": true }, { "at": [189.4, 430.2], "count": 1, "after": true }]
   },
   "مِيدَالِيَّةْ": {
    "line": 603.3,
@@ -28307,7 +28307,7 @@ export const WORD_PATHS = {
      [142.1, 336.4], [149.3, 335.5], [156.4, 337.5]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [714.2, 644.5], "count": 2, "after": true }, { "at": [286.2, 644.5], "count": 2, "after": true }, { "at": [147.2, 427.2], "count": 2, "after": true }]
+   "dots": [{ "at": [738.5, 642], "count": 1, "after": true }, { "at": [688.4, 647], "count": 1, "after": true }, { "at": [310.5, 642], "count": 1, "after": true }, { "at": [260.4, 647], "count": 1, "after": true }, { "at": [172.2, 424.9], "count": 1, "after": true }, { "at": [122.2, 429.6], "count": 1, "after": true }]
   },
   "لُغْزْ": {
    "line": 763.6,
@@ -28370,7 +28370,7 @@ export const WORD_PATHS = {
      [725.8, 720.2], [716.8, 723.5], [707.7, 726.6]
     ] }
    ],
-   "dots": [{ "at": [735.7, 142.3], "count": 1, "after": true }, { "at": [308.7, 852.1], "count": 2, "after": true }]
+   "dots": [{ "at": [735.7, 142.3], "count": 1, "after": true }, { "at": [364.1, 846.8], "count": 1, "after": true }, { "at": [252.1, 857.5], "count": 1, "after": true }]
   },
   "فَوْقَ": {
    "line": 661.7,
@@ -28414,7 +28414,7 @@ export const WORD_PATHS = {
      [239, 308.5], [233.7, 313.2], [228.5, 318]
     ] }
    ],
-   "dots": [{ "at": [800.2, 320.7], "count": 1, "after": true }, { "at": [282.2, 400], "count": 2, "after": true }]
+   "dots": [{ "at": [800.2, 320.7], "count": 1, "after": true }, { "at": [325.3, 395.9], "count": 1, "after": true }, { "at": [238.5, 404.1], "count": 1, "after": true }]
   },
   "خَلْفَ": {
    "line": 730.6,
@@ -28494,7 +28494,7 @@ export const WORD_PATHS = {
      [193.1, 422.2], [188.8, 426.1], [184.6, 430]
     ] }
    ],
-   "dots": [{ "at": [842.7, 445.2], "count": 2, "after": true }, { "at": [228.6, 497.1], "count": 2, "after": true }]
+   "dots": [{ "at": [877.7, 441.7], "count": 1, "after": true }, { "at": [806.9, 448.7], "count": 1, "after": true }, { "at": [263.6, 493.7], "count": 1, "after": true }, { "at": [192.8, 500.5], "count": 1, "after": true }]
   },
   "أَمَامَ": {
    "line": 729.1,
@@ -28596,7 +28596,7 @@ export const WORD_PATHS = {
      [133.7, 321.1], [141.5, 320], [149.1, 322.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [573.7, 427.8], "count": 1, "after": true }, { "at": [437.4, 657.4], "count": 2, "after": true }, { "at": [140.1, 420.8], "count": 2, "after": true }]
+   "dots": [{ "at": [573.7, 427.8], "count": 1, "after": true }, { "at": [464.3, 654.8], "count": 1, "after": true }, { "at": [409.8, 660], "count": 1, "after": true }, { "at": [167, 418.3], "count": 1, "after": true }, { "at": [112.3, 423.4], "count": 1, "after": true }]
   },
   "تَغْسِلْ": {
    "line": 614.1,
@@ -28645,7 +28645,7 @@ export const WORD_PATHS = {
      [152.7, 305], [161.8, 303.8], [170.7, 306.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [846.4, 404], "count": 2, "after": true }, { "at": [680.1, 399.1], "count": 1, "after": true }]
+   "dots": [{ "at": [877.9, 400.9], "count": 1, "after": true }, { "at": [814.2, 407.2], "count": 1, "after": true }, { "at": [680.1, 399.1], "count": 1, "after": true }]
   },
   "عِنْدَ": {
    "line": 668,
@@ -28738,7 +28738,7 @@ export const WORD_PATHS = {
      [168.2, 287.6], [177.9, 286.4], [187.4, 289.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [842.1, 670.4], "count": 2, "after": true }, { "at": [346.7, 436.3], "count": 1, "after": true }]
+   "dots": [{ "at": [876.1, 667.1], "count": 1, "after": true }, { "at": [807.5, 673.8], "count": 1, "after": true }, { "at": [346.7, 436.3], "count": 1, "after": true }]
   },
   "يَبْنِي": {
    "line": 559.3,
@@ -28780,7 +28780,7 @@ export const WORD_PATHS = {
      [480.3, 659.5], [473.7, 661.9], [467.1, 664.2]
     ] }
    ],
-   "dots": [{ "at": [831, 626.4], "count": 2, "after": true }, { "at": [666.6, 632.9], "count": 1, "after": true }, { "at": [506.5, 349.2], "count": 1, "after": true }, { "at": [214.1, 754.6], "count": 2, "after": true }]
+   "dots": [{ "at": [871.2, 622.6], "count": 1, "after": true }, { "at": [789.8, 630.4], "count": 1, "after": true }, { "at": [666.6, 632.9], "count": 1, "after": true }, { "at": [506.5, 349.2], "count": 1, "after": true }, { "at": [253.8, 750.7], "count": 1, "after": true }, { "at": [172.9, 758.6], "count": 1, "after": true }]
   },
   "يُسَاعِدْ": {
    "line": 605.3,
@@ -28835,7 +28835,7 @@ export const WORD_PATHS = {
      [162.3, 328.1], [170.5, 327], [178.6, 329.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [859, 651.7], "count": 2, "after": true }]
+   "dots": [{ "at": [887.2, 649.1], "count": 1, "after": true }, { "at": [830.4, 654.3], "count": 1, "after": true }]
   },
   "يَجْلِسْ": {
    "line": 594,
@@ -28885,7 +28885,7 @@ export const WORD_PATHS = {
      [330.5, 363.4], [338.6, 362.3], [346.5, 364.6]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [857.9, 640.5], "count": 2, "after": true }, { "at": [675, 636.7], "count": 1, "after": true }]
+   "dots": [{ "at": [885.8, 637.8], "count": 1, "after": true }, { "at": [829.3, 643.3], "count": 1, "after": true }, { "at": [675, 636.7], "count": 1, "after": true }]
   },
   "يَنَامْ": {
    "line": 640.9,
@@ -28930,7 +28930,7 @@ export const WORD_PATHS = {
      [187.8, 191.2], [201.6, 189.4], [215.2, 193.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [817.4, 721], "count": 2, "after": true }, { "at": [618.9, 391.5], "count": 1, "after": true }]
+   "dots": [{ "at": [864.8, 716.3], "count": 1, "after": true }, { "at": [768.8, 725.8], "count": 1, "after": true }, { "at": [618.9, 391.5], "count": 1, "after": true }]
   },
   "أُخْتِي": {
    "line": 662.2,
@@ -28978,7 +28978,7 @@ export const WORD_PATHS = {
      [432.5, 745.4], [427.2, 747.4], [421.7, 749.2]
     ] }
    ],
-   "dots": [{ "at": [665.3, 442.2], "count": 1, "after": true }, { "at": [458.8, 492.3], "count": 2, "after": true }, { "at": [196.2, 825.1], "count": 2, "after": true }]
+   "dots": [{ "at": [665.3, 442.2], "count": 1, "after": true }, { "at": [492.1, 489.1], "count": 1, "after": true }, { "at": [424.4, 495.6], "count": 1, "after": true }, { "at": [229.6, 822], "count": 1, "after": true }, { "at": [161.8, 828.2], "count": 1, "after": true }]
   },
   "تَجْلِسْ": {
    "line": 593.2,
@@ -29029,7 +29029,7 @@ export const WORD_PATHS = {
      [328.5, 363.4], [336.6, 362.3], [344.5, 364.6]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [857.6, 408], "count": 2, "after": true }, { "at": [669.8, 635.2], "count": 1, "after": true }]
+   "dots": [{ "at": [885.3, 405.3], "count": 1, "after": true }, { "at": [829, 410.7], "count": 1, "after": true }, { "at": [669.8, 635.2], "count": 1, "after": true }]
   },
   "يَفْتَحْ": {
    "line": 623.5,
@@ -29079,7 +29079,7 @@ export const WORD_PATHS = {
      [222.4, 272.6], [233, 271.2], [243.4, 274.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [842.7, 685], "count": 2, "after": true }, { "at": [665.5, 376.1], "count": 1, "after": true }, { "at": [484.6, 437.4], "count": 2, "after": true }]
+   "dots": [{ "at": [879.6, 681.3], "count": 1, "after": true }, { "at": [805.2, 688.7], "count": 1, "after": true }, { "at": [665.5, 376.1], "count": 1, "after": true }, { "at": [521.7, 433.9], "count": 1, "after": true }, { "at": [447.1, 441], "count": 1, "after": true }]
   },
   "يُعَالِجْ": {
    "line": 604.8,
@@ -29139,7 +29139,7 @@ export const WORD_PATHS = {
      [210.2, 281.6], [219.9, 280.4], [229.4, 283.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [841.2, 661.3], "count": 2, "after": true }, { "at": [211.4, 620.4], "count": 1, "after": true }]
+   "dots": [{ "at": [875.5, 658.3], "count": 1, "after": true }, { "at": [807, 664.4], "count": 1, "after": true }, { "at": [211.4, 620.4], "count": 1, "after": true }]
   },
   "أُذُنِي": {
    "line": 689.2,
@@ -29187,7 +29187,7 @@ export const WORD_PATHS = {
      [470, 786.2], [463.6, 788.6], [457.1, 790.8]
     ] }
    ],
-   "dots": [{ "at": [682.8, 411.4], "count": 1, "after": true }, { "at": [495.9, 421.6], "count": 1, "after": true }, { "at": [220.8, 879.4], "count": 2, "after": true }]
+   "dots": [{ "at": [682.8, 411.4], "count": 1, "after": true }, { "at": [495.9, 421.6], "count": 1, "after": true }, { "at": [260.1, 875.7], "count": 1, "after": true }, { "at": [181.1, 883.1], "count": 1, "after": true }]
   },
   "تَسْمَعْ": {
    "line": 608.1,
@@ -29239,7 +29239,7 @@ export const WORD_PATHS = {
      [166.2, 285.6], [175.9, 284.4], [185.4, 287.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [843.2, 384.5], "count": 2, "after": true }]
+   "dots": [{ "at": [876.6, 381.2], "count": 1, "after": true }, { "at": [809.1, 387.8], "count": 1, "after": true }]
   },
   "سَرِيعَةْ": {
    "line": 586.5,
@@ -29295,7 +29295,7 @@ export const WORD_PATHS = {
      [148.5, 285.4], [156.6, 284.3], [164.5, 286.6]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [458.2, 633.1], "count": 2, "after": true }, { "at": [155.2, 388.1], "count": 2, "after": true }]
+   "dots": [{ "at": [486.3, 630.4], "count": 1, "after": true }, { "at": [430, 635.8], "count": 1, "after": true }, { "at": [183.3, 385.5], "count": 1, "after": true }, { "at": [126.8, 390.8], "count": 1, "after": true }]
   },
   "صُلْبْ": {
    "line": 666.9,
@@ -29392,7 +29392,7 @@ export const WORD_PATHS = {
      [202.2, 283], [211.8, 281.7], [221.2, 284.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [843.2, 391.1], "count": 2, "after": true }, { "at": [424.2, 670.2], "count": 1, "after": true }, { "at": [208.8, 397.4], "count": 1, "after": true }]
+   "dots": [{ "at": [876.2, 388], "count": 1, "after": true }, { "at": [810, 394.2], "count": 1, "after": true }, { "at": [424.2, 670.2], "count": 1, "after": true }, { "at": [208.8, 397.4], "count": 1, "after": true }]
   },
   "أَخِي": {
    "line": 677.3,
@@ -29432,7 +29432,7 @@ export const WORD_PATHS = {
      [578.5, 778.8], [571.8, 781.3], [565, 783.6]
     ] }
    ],
-   "dots": [{ "at": [598.5, 407.2], "count": 1, "after": true }, { "at": [220.9, 877.8], "count": 2, "after": true }]
+   "dots": [{ "at": [598.5, 407.2], "count": 1, "after": true }, { "at": [261.8, 873.8], "count": 1, "after": true }, { "at": [178.7, 881.9], "count": 1, "after": true }]
   },
   "يَأْكُلْ": {
    "line": 735.1,
@@ -29488,7 +29488,7 @@ export const WORD_PATHS = {
      [173.4, 334.6], [185.3, 333], [197, 336.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [837.3, 803.1], "count": 2, "after": true }]
+   "dots": [{ "at": [878.2, 799.2], "count": 1, "after": true }, { "at": [796.1, 807.1], "count": 1, "after": true }]
   },
   "يَشْرَبْ": {
    "line": 602.5,
@@ -29536,7 +29536,7 @@ export const WORD_PATHS = {
      [200.1, 359.3], [208.6, 358.2], [217, 360.6]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [853.7, 651.3], "count": 2, "after": true }, { "at": [666.7, 443.8], "count": 3, "after": true }, { "at": [209.3, 656.2], "count": 1, "after": true }]
+   "dots": [{ "at": [883, 648.4], "count": 1, "after": true }, { "at": [823.3, 654.3], "count": 1, "after": true }, { "at": [666.3, 421.6], "count": 1, "after": true }, { "at": [695, 451], "count": 1, "after": true }, { "at": [638.3, 456], "count": 1, "after": true }, { "at": [209.3, 656.2], "count": 1, "after": true }]
   },
   "حَمْرَاءْ": {
    "line": 608.5,
@@ -29648,7 +29648,7 @@ export const WORD_PATHS = {
      [145.3, 315], [153.6, 313.9], [161.7, 316.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [454.6, 432.6], "count": 1, "after": true }, { "at": [292.2, 470.1], "count": 1, "after": true }, { "at": [151.3, 418.2], "count": 2, "after": true }]
+   "dots": [{ "at": [454.6, 432.6], "count": 1, "after": true }, { "at": [292.2, 470.1], "count": 1, "after": true }, { "at": [179.3, 415.4], "count": 1, "after": true }, { "at": [123, 421], "count": 1, "after": true }]
   },
   "تَأْكُلْ": {
    "line": 732,
@@ -29703,7 +29703,7 @@ export const WORD_PATHS = {
      [172.6, 336.3], [184.2, 334.7], [195.6, 338]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [837.7, 464.2], "count": 2, "after": true }]
+   "dots": [{ "at": [877.4, 460.3], "count": 1, "after": true }, { "at": [796.5, 468.2], "count": 1, "after": true }]
   },
   "لَذِيذْ": {
    "line": 674.1,
@@ -29744,7 +29744,7 @@ export const WORD_PATHS = {
      [186.1, 230.9], [198.3, 229.3], [210.3, 232.7]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [654.7, 377.3], "count": 1, "after": true }, { "at": [434, 744.2], "count": 2, "after": true }, { "at": [195.9, 377.2], "count": 1, "after": true }]
+   "dots": [{ "at": [654.7, 377.3], "count": 1, "after": true }, { "at": [475.6, 740.1], "count": 1, "after": true }, { "at": [391.1, 748.5], "count": 1, "after": true }, { "at": [195.9, 377.2], "count": 1, "after": true }]
   },
   "تَشْرَبْ": {
    "line": 605.4,
@@ -29791,7 +29791,7 @@ export const WORD_PATHS = {
      [199.1, 364.4], [207.6, 363.2], [216, 365.6]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [853.2, 411.4], "count": 2, "after": true }, { "at": [660.8, 448.4], "count": 3, "after": true }, { "at": [208.2, 658.8], "count": 1, "after": true }]
+   "dots": [{ "at": [882.4, 408.7], "count": 1, "after": true }, { "at": [823.4, 414.2], "count": 1, "after": true }, { "at": [660.9, 426.2], "count": 1, "after": true }, { "at": [689.2, 455.3], "count": 1, "after": true }, { "at": [632.7, 460.7], "count": 1, "after": true }, { "at": [208.2, 658.8], "count": 1, "after": true }]
   },
   "تَنْظُرْ": {
    "line": 656.2,
@@ -29845,7 +29845,7 @@ export const WORD_PATHS = {
      [193.5, 321], [204, 319.6], [214.2, 322.5]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [840.5, 413.8], "count": 2, "after": true }, { "at": [680.9, 466.2], "count": 1, "after": true }, { "at": [503.8, 398.8], "count": 1, "after": true }]
+   "dots": [{ "at": [877.1, 410.3], "count": 1, "after": true }, { "at": [803.8, 417.3], "count": 1, "after": true }, { "at": [680.9, 466.2], "count": 1, "after": true }, { "at": [503.8, 398.8], "count": 1, "after": true }]
   },
   "مِنَ": {
    "line": 622.1,
@@ -29980,7 +29980,7 @@ export const WORD_PATHS = {
      [158.3, 259.3], [169.1, 257.9], [179.6, 260.9]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [370.2, 712.1], "count": 2, "after": true }, { "at": [166.9, 394.3], "count": 2, "after": true }]
+   "dots": [{ "at": [406.2, 708.6], "count": 1, "after": true }, { "at": [332.9, 715.8], "count": 1, "after": true }, { "at": [203.3, 390.9], "count": 1, "after": true }, { "at": [130, 397.7], "count": 1, "after": true }]
   },
   "مُظْلِمْ": {
    "line": 622.5,
@@ -30086,7 +30086,7 @@ export const WORD_PATHS = {
      [155.4, 295.4], [164.8, 294.1], [174, 296.7]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [803.6, 661.1], "count": 1, "after": true }, { "at": [401.9, 665.8], "count": 2, "after": true }]
+   "dots": [{ "at": [803.6, 661.1], "count": 1, "after": true }, { "at": [434.3, 662.6], "count": 1, "after": true }, { "at": [369.1, 669], "count": 1, "after": true }]
   },
   "يَنْزِلْ": {
    "line": 606.5,
@@ -30134,7 +30134,7 @@ export const WORD_PATHS = {
      [172.6, 216.3], [184.2, 214.7], [195.6, 218]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [837.4, 672.9], "count": 2, "after": true }, { "at": [672.5, 399.1], "count": 1, "after": true }, { "at": [481.8, 357.6], "count": 1, "after": true }]
+   "dots": [{ "at": [876.8, 669], "count": 1, "after": true }, { "at": [797, 676.9], "count": 1, "after": true }, { "at": [672.5, 399.1], "count": 1, "after": true }, { "at": [481.8, 357.6], "count": 1, "after": true }]
   },
   "حَالِكْ": {
    "line": 613.1,
@@ -30238,7 +30238,7 @@ export const WORD_PATHS = {
      [134.3, 116.5], [147.5, 114.8], [160.5, 118.5]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [818.6, 478], "count": 2, "after": true }, { "at": [587.6, 483.4], "count": 2, "after": true }]
+   "dots": [{ "at": [863.9, 473.7], "count": 1, "after": true }, { "at": [772.3, 482.3], "count": 1, "after": true }, { "at": [632.9, 479.1], "count": 1, "after": true }, { "at": [540.9, 488], "count": 1, "after": true }]
   },
   "يَكْتُبْ": {
    "line": 635.2,
@@ -30284,7 +30284,7 @@ export const WORD_PATHS = {
      [216.2, 365], [225.8, 363.7], [235.2, 366.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [847.2, 689.4], "count": 2, "after": true }, { "at": [499.4, 470.9], "count": 2, "after": true }, { "at": [236.2, 694.3], "count": 1, "after": true }]
+   "dots": [{ "at": [879.5, 686.4], "count": 1, "after": true }, { "at": [814, 692.5], "count": 1, "after": true }, { "at": [531.8, 467.7], "count": 1, "after": true }, { "at": [466.2, 474.1], "count": 1, "after": true }, { "at": [236.2, 694.3], "count": 1, "after": true }]
   },
   "طَوِيلَةْ": {
    "line": 595.5,
@@ -30346,7 +30346,7 @@ export const WORD_PATHS = {
      [148, 276], [156.7, 274.9], [165.2, 277.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [409.5, 644.9], "count": 2, "after": true }, { "at": [155.9, 385.8], "count": 2, "after": true }]
+   "dots": [{ "at": [438.6, 642.1], "count": 1, "after": true }, { "at": [379, 647.9], "count": 1, "after": true }, { "at": [185.2, 383.1], "count": 1, "after": true }, { "at": [125.4, 388.5], "count": 1, "after": true }]
   },
   "ثَقِيلَةْ": {
    "line": 647.8,
@@ -30398,7 +30398,7 @@ export const WORD_PATHS = {
      [165.5, 265], [176, 263.6], [186.2, 266.5]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [845.5, 402.7], "count": 3, "after": true }, { "at": [661.8, 415.3], "count": 2, "after": true }, { "at": [488.4, 707.1], "count": 2, "after": true }, { "at": [173.8, 396.8], "count": 2, "after": true }]
+   "dots": [{ "at": [845.1, 375.6], "count": 1, "after": true }, { "at": [879.6, 411.3], "count": 1, "after": true }, { "at": [811.4, 417.7], "count": 1, "after": true }, { "at": [697.2, 412.1], "count": 1, "after": true }, { "at": [625.8, 418.6], "count": 1, "after": true }, { "at": [524, 703.7], "count": 1, "after": true }, { "at": [452, 710.6], "count": 1, "after": true }, { "at": [209.2, 393.5], "count": 1, "after": true }, { "at": [137.7, 400.1], "count": 1, "after": true }]
   },
   "مَاهِرْ": {
    "line": 626.5,
@@ -30502,7 +30502,7 @@ export const WORD_PATHS = {
      [178.2, 285.6], [187.9, 284.4], [197.4, 287.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [844.2, 653.4], "count": 2, "after": true }]
+   "dots": [{ "at": [877.3, 650.2], "count": 1, "after": true }, { "at": [810.2, 656.7], "count": 1, "after": true }]
   },
   "ثَقِيلْ": {
    "line": 633.3,
@@ -30546,7 +30546,7 @@ export const WORD_PATHS = {
      [167.9, 257.2], [179.1, 255.8], [190.1, 258.9]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [844.2, 369.9], "count": 3, "after": true }, { "at": [646.9, 383.5], "count": 2, "after": true }, { "at": [460.3, 696.9], "count": 2, "after": true }]
+   "dots": [{ "at": [843.8, 340.8], "count": 1, "after": true }, { "at": [880.7, 379.2], "count": 1, "after": true }, { "at": [807.7, 385.6], "count": 1, "after": true }, { "at": [685.1, 379.9], "count": 1, "after": true }, { "at": [608, 387.2], "count": 1, "after": true }, { "at": [498.4, 693.3], "count": 1, "after": true }, { "at": [421.7, 700.6], "count": 1, "after": true }]
   },
   "طَوِيلْ": {
    "line": 588.8,
@@ -30599,7 +30599,7 @@ export const WORD_PATHS = {
      [149.5, 278.7], [158.8, 277.4], [167.9, 280]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [381.5, 641], "count": 2, "after": true }]
+   "dots": [{ "at": [412.8, 638], "count": 1, "after": true }, { "at": [349.2, 644.2], "count": 1, "after": true }]
   },
   "يَلْبَسْ": {
    "line": 645.8,
@@ -30647,7 +30647,7 @@ export const WORD_PATHS = {
      [376.2, 365.6], [385.9, 364.4], [395.4, 367.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [844.1, 702.4], "count": 2, "after": true }, { "at": [593.5, 707.8], "count": 1, "after": true }]
+   "dots": [{ "at": [877.5, 699], "count": 1, "after": true }, { "at": [809.2, 705.9], "count": 1, "after": true }, { "at": [593.5, 707.8], "count": 1, "after": true }]
   },
   "جَدِيدَةْ": {
    "line": 612.5,
@@ -30701,7 +30701,7 @@ export const WORD_PATHS = {
      [133.7, 321.1], [141.5, 320], [149.1, 322.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [816.2, 653.3], "count": 1, "after": true }, { "at": [453.7, 657.2], "count": 2, "after": true }, { "at": [139.6, 421.3], "count": 2, "after": true }]
+   "dots": [{ "at": [816.2, 653.3], "count": 1, "after": true }, { "at": [481, 654.6], "count": 1, "after": true }, { "at": [426.5, 659.7], "count": 1, "after": true }, { "at": [166.4, 418.7], "count": 1, "after": true }, { "at": [111.7, 424], "count": 1, "after": true }]
   },
   "تَشْتَرِي": {
    "line": 553,
@@ -30752,7 +30752,7 @@ export const WORD_PATHS = {
      [332.9, 665.3], [327.6, 667.3], [322.3, 669.4], [317, 671.5], [311.7, 673.5], [306.4, 675.5], [301, 677.4]
     ] }
    ],
-   "dots": [{ "at": [859.7, 376.9], "count": 2, "after": true }, { "at": [685.7, 410.9], "count": 3, "after": true }, { "at": [499.8, 419.8], "count": 2, "after": true }, { "at": [168.7, 680.3], "count": 2, "after": true }]
+   "dots": [{ "at": [885.8, 374.4], "count": 1, "after": true }, { "at": [832.9, 379.5], "count": 1, "after": true }, { "at": [685.1, 390.6], "count": 1, "after": true }, { "at": [711.2, 417.2], "count": 1, "after": true }, { "at": [660.3, 421.8], "count": 1, "after": true }, { "at": [525.9, 417.4], "count": 1, "after": true }, { "at": [472.6, 422.3], "count": 1, "after": true }, { "at": [194.7, 677.6], "count": 1, "after": true }, { "at": [141.5, 683.1], "count": 1, "after": true }]
   },
   "يَرْكَبْ": {
    "line": 622.1,
@@ -30800,7 +30800,7 @@ export const WORD_PATHS = {
      [216.2, 353], [225.8, 351.7], [235.2, 354.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [846.9, 676.3], "count": 2, "after": true }, { "at": [236.1, 681.7], "count": 1, "after": true }]
+   "dots": [{ "at": [879.2, 673.3], "count": 1, "after": true }, { "at": [813.9, 679.4], "count": 1, "after": true }, { "at": [236.1, 681.7], "count": 1, "after": true }]
   },
   "يَزْرَعْ": {
    "line": 640,
@@ -30851,7 +30851,7 @@ export const WORD_PATHS = {
      [163.2, 232.9], [174.1, 231.5], [184.8, 234.5]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [837.6, 702.2], "count": 2, "after": true }, { "at": [649.7, 406.3], "count": 1, "after": true }]
+   "dots": [{ "at": [874.6, 698.7], "count": 1, "after": true }, { "at": [799.8, 705.8], "count": 1, "after": true }, { "at": [649.7, 406.3], "count": 1, "after": true }]
   },
   "تَقِفْ": {
    "line": 660.7,
@@ -30894,7 +30894,7 @@ export const WORD_PATHS = {
      [399.4, 234.6], [411.3, 233], [423, 236.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [831.6, 385.8], "count": 2, "after": true }, { "at": [622.1, 390.8], "count": 2, "after": true }, { "at": [408, 378.5], "count": 1, "after": true }]
+   "dots": [{ "at": [872.4, 382], "count": 1, "after": true }, { "at": [789.4, 389.8], "count": 1, "after": true }, { "at": [663, 386.9], "count": 1, "after": true }, { "at": [580, 394.9], "count": 1, "after": true }, { "at": [408, 378.5], "count": 1, "after": true }]
   },
   "لَامِعَةْ": {
    "line": 650.8,
@@ -30954,7 +30954,7 @@ export const WORD_PATHS = {
      [161.7, 272.3], [172, 270.9], [182.1, 273.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [169.9, 402.5], "count": 2, "after": true }]
+   "dots": [{ "at": [204.7, 399.2], "count": 1, "after": true }, { "at": [134.1, 406], "count": 1, "after": true }]
   },
   "يَضَعْ": {
    "line": 625.7,
@@ -30998,7 +30998,7 @@ export const WORD_PATHS = {
      [187.4, 234.6], [199.3, 233], [211, 236.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [836.5, 693.9], "count": 2, "after": true }, { "at": [530.8, 342.7], "count": 1, "after": true }]
+   "dots": [{ "at": [877.2, 690], "count": 1, "after": true }, { "at": [795, 697.9], "count": 1, "after": true }, { "at": [530.8, 342.7], "count": 1, "after": true }]
   },
   "بَابَا مَامَا": {
    "box": [2568, 1000],
@@ -31204,7 +31204,7 @@ export const WORD_PATHS = {
      [307.8, 216.7], [325.3, 214.5], [342.5, 219.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2542.1, 859.5], "count": 1, "after": true }, { "at": [2297.6, 850], "count": 2, "after": true }, { "at": [1781.2, 439], "count": 2, "after": true }, { "at": [1183.3, 350.6], "count": 2, "after": true }, { "at": [323.1, 439], "count": 2, "after": true }]
+   "dots": [{ "at": [2542.1, 859.5], "count": 1, "after": true }, { "at": [2357, 844.3], "count": 1, "after": true }, { "at": [2236.3, 855.8], "count": 1, "after": true }, { "at": [1840.9, 433.4], "count": 1, "after": true }, { "at": [1720, 444.8], "count": 1, "after": true }, { "at": [1242.9, 345], "count": 1, "after": true }, { "at": [1122.2, 356.4], "count": 1, "after": true }, { "at": [382.8, 433.4], "count": 1, "after": true }, { "at": [262, 444.8], "count": 1, "after": true }]
   },
   "عَيْنْ فِيلْ": {
    "box": [2514, 1000],
@@ -31277,7 +31277,7 @@ export const WORD_PATHS = {
      [209.2, 127.7], [226.2, 125.5], [243, 130.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [1910.5, 803.8], "count": 2, "after": true }, { "at": [1511.2, 466.9], "count": 1, "after": true }, { "at": [935.7, 240], "count": 1, "after": true }, { "at": [660.3, 803.7], "count": 2, "after": true }]
+   "dots": [{ "at": [1969.3, 798.2], "count": 1, "after": true }, { "at": [1850.8, 809.5], "count": 1, "after": true }, { "at": [1511.2, 466.9], "count": 1, "after": true }, { "at": [935.7, 240], "count": 1, "after": true }, { "at": [718.6, 798.2], "count": 1, "after": true }, { "at": [600.4, 809.4], "count": 1, "after": true }]
   },
   "حُوتْ جَمَلْ": {
    "box": [3050, 1000],
@@ -31350,7 +31350,7 @@ export const WORD_PATHS = {
      [203.2, 127.7], [220.2, 125.5], [237, 130.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [1785.5, 400.9], "count": 2, "after": true }, { "at": [1104.2, 795], "count": 1, "after": true }]
+   "dots": [{ "at": [1844.2, 395.3], "count": 1, "after": true }, { "at": [1725.7, 406.6], "count": 1, "after": true }, { "at": [1104.2, 795], "count": 1, "after": true }]
   },
   "شَمْسْ مَطَرْ": {
    "box": [3280, 1000],
@@ -31439,7 +31439,7 @@ export const WORD_PATHS = {
      [260.6, 133], [278.4, 130.8], [295.9, 135.6]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2976.2, 368], "count": 3, "after": true }]
+   "dots": [{ "at": [2975.9, 321.4], "count": 1, "after": true }, { "at": [3035.3, 382.9], "count": 1, "after": true }, { "at": [2917.7, 393.2], "count": 1, "after": true }]
   },
   "ثَعْلَبْ ذَهَبْ": {
    "box": [3082, 1000],
@@ -31528,7 +31528,7 @@ export const WORD_PATHS = {
      [319.2, 265.7], [336.2, 263.5], [353, 268.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2898, 347.8], "count": 3, "after": true }, { "at": [1900.7, 860.5], "count": 1, "after": true }, { "at": [1248.6, 336.1], "count": 1, "after": true }, { "at": [355.2, 860.4], "count": 1, "after": true }]
+   "dots": [{ "at": [2897.9, 303], "count": 1, "after": true }, { "at": [2954.5, 362.2], "count": 1, "after": true }, { "at": [2842.2, 372.1], "count": 1, "after": true }, { "at": [1900.7, 860.5], "count": 1, "after": true }, { "at": [1248.6, 336.1], "count": 1, "after": true }, { "at": [355.2, 860.4], "count": 1, "after": true }]
   },
   "وَاسِعَةْ نَظِيفْ": {
    "box": [3600, 1000],
@@ -31638,7 +31638,7 @@ export const WORD_PATHS = {
      [512.4, 143.4], [529.2, 141.3], [545.7, 145.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [1998.4, 333.2], "count": 2, "after": true }, { "at": [1538.8, 346.2], "count": 1, "after": true }, { "at": [1273.6, 332.3], "count": 1, "after": true }, { "at": [820.9, 836.6], "count": 2, "after": true }, { "at": [525.6, 346.1], "count": 1, "after": true }]
+   "dots": [{ "at": [2055.5, 327.8], "count": 1, "after": true }, { "at": [1939.5, 338.9], "count": 1, "after": true }, { "at": [1538.8, 346.2], "count": 1, "after": true }, { "at": [1273.6, 332.3], "count": 1, "after": true }, { "at": [878.2, 831.2], "count": 1, "after": true }, { "at": [762, 842.2], "count": 1, "after": true }, { "at": [525.6, 346.1], "count": 1, "after": true }]
   },
   "جَمِيلَةْ مُنِيرْ": {
    "box": [3136, 1000],
@@ -31735,7 +31735,7 @@ export const WORD_PATHS = {
      [250.4, 207.4], [267.2, 205.3], [283.7, 209.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2855.3, 828], "count": 1, "after": true }, { "at": [2135.6, 836.6], "count": 2, "after": true }, { "at": [1624.9, 333], "count": 2, "after": true }, { "at": [815.5, 439.1], "count": 1, "after": true }, { "at": [568.2, 836.7], "count": 2, "after": true }]
+   "dots": [{ "at": [2855.3, 828], "count": 1, "after": true }, { "at": [2192.9, 831.2], "count": 1, "after": true }, { "at": [2076.7, 842.3], "count": 1, "after": true }, { "at": [1682.4, 327.7], "count": 1, "after": true }, { "at": [1566.1, 338.5], "count": 1, "after": true }, { "at": [815.5, 439.1], "count": 1, "after": true }, { "at": [625.8, 831.1], "count": 1, "after": true }, { "at": [509.3, 842.5], "count": 1, "after": true }]
   },
   "كَبِيرَةْ نَاعِمَةْ": {
    "box": [2858, 1000],
@@ -31845,7 +31845,7 @@ export const WORD_PATHS = {
      [194.1, 116.1], [208.8, 114.2], [223.3, 118.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2405.5, 757.4], "count": 1, "after": true }, { "at": [2183.8, 749.4], "count": 2, "after": true }, { "at": [1623.7, 304.7], "count": 2, "after": true }, { "at": [1248.7, 316.2], "count": 1, "after": true }, { "at": [206.9, 304.7], "count": 2, "after": true }]
+   "dots": [{ "at": [2405.5, 757.4], "count": 1, "after": true }, { "at": [2234.5, 744.6], "count": 1, "after": true }, { "at": [2132, 754.3], "count": 1, "after": true }, { "at": [1674.4, 299.8], "count": 1, "after": true }, { "at": [1571.7, 309.7], "count": 1, "after": true }, { "at": [1248.7, 316.2], "count": 1, "after": true }, { "at": [257.4, 299.8], "count": 1, "after": true }, { "at": [154.9, 309.8], "count": 1, "after": true }]
   },
   "غُرْفَةْ مَطْبَخْ": {
    "box": [3080, 1000],
@@ -31954,7 +31954,7 @@ export const WORD_PATHS = {
      [278.1, 160.4], [294, 158.4], [309.6, 162.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2792.1, 333.1], "count": 1, "after": true }, { "at": [2166.7, 273.1], "count": 1, "after": true }, { "at": [1870.8, 320.1], "count": 2, "after": true }, { "at": [647.5, 805.4], "count": 1, "after": true }, { "at": [290.1, 352.1], "count": 1, "after": true }]
+   "dots": [{ "at": [2792.1, 333.1], "count": 1, "after": true }, { "at": [2166.7, 273.1], "count": 1, "after": true }, { "at": [1924.8, 314.8], "count": 1, "after": true }, { "at": [1815, 325.5], "count": 1, "after": true }, { "at": [647.5, 805.4], "count": 1, "after": true }, { "at": [290.1, 352.1], "count": 1, "after": true }]
   },
   "مِفْتَاحْ سَاعَةْ": {
    "box": [3114, 1000],
@@ -32061,7 +32061,7 @@ export const WORD_PATHS = {
      [191.5, 117.5], [206.9, 115.5], [222.1, 119.7]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2581.8, 334.6], "count": 1, "after": true }, { "at": [2318.9, 424], "count": 2, "after": true }, { "at": [204.9, 316.1], "count": 2, "after": true }]
+   "dots": [{ "at": [2581.8, 334.6], "count": 1, "after": true }, { "at": [2372.3, 418.9], "count": 1, "after": true }, { "at": [2264.4, 429.1], "count": 1, "after": true }, { "at": [258.1, 311], "count": 1, "after": true }, { "at": [150.1, 321.4], "count": 1, "after": true }]
   },
   "مِلْعَقَةْ سِكِّينْ": {
    "box": [3106, 1000],
@@ -32175,7 +32175,7 @@ export const WORD_PATHS = {
      [228.6, 327.8], [243.9, 325.8], [258.9, 330]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2120.9, 382.1], "count": 2, "after": true }, { "at": [1824.9, 354.5], "count": 2, "after": true }, { "at": [598.7, 814.6], "count": 2, "after": true }, { "at": [240.6, 512.9], "count": 1, "after": true }]
+   "dots": [{ "at": [2173.3, 377.1], "count": 1, "after": true }, { "at": [2067.4, 387.1], "count": 1, "after": true }, { "at": [1877.3, 349.2], "count": 1, "after": true }, { "at": [1771, 359.8], "count": 1, "after": true }, { "at": [651, 809.5], "count": 1, "after": true }, { "at": [544.7, 819.9], "count": 1, "after": true }, { "at": [240.6, 512.9], "count": 1, "after": true }]
   },
   "مِكْنَسَةْ تِلْفَازْ": {
    "box": [3212, 1000],
@@ -32292,7 +32292,7 @@ export const WORD_PATHS = {
      [240.3, 215.7], [256, 213.7], [271.5, 218.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2377.7, 464.2], "count": 1, "after": true }, { "at": [1618.6, 363.7], "count": 2, "after": true }, { "at": [1174.5, 385.9], "count": 2, "after": true }, { "at": [718.6, 383], "count": 1, "after": true }, { "at": [251.4, 406.9], "count": 1, "after": true }]
+   "dots": [{ "at": [2377.7, 464.2], "count": 1, "after": true }, { "at": [1672.5, 358.4], "count": 1, "after": true }, { "at": [1562.6, 369.2], "count": 1, "after": true }, { "at": [1228.7, 380.5], "count": 1, "after": true }, { "at": [1118.8, 391.4], "count": 1, "after": true }, { "at": [718.6, 383], "count": 1, "after": true }, { "at": [251.4, 406.9], "count": 1, "after": true }]
   },
   "وِسَادَةْ مِرْوَحَةْ": {
    "box": [3366, 1000],
@@ -32418,7 +32418,7 @@ export const WORD_PATHS = {
      [193.3, 115.8], [207.7, 113.9], [221.9, 117.9]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [1947, 301], "count": 2, "after": true }, { "at": [205.1, 301], "count": 2, "after": true }]
+   "dots": [{ "at": [1996.9, 296.2], "count": 1, "after": true }, { "at": [1896.2, 305.9], "count": 1, "after": true }, { "at": [254.7, 296.2], "count": 1, "after": true }, { "at": [153.9, 306], "count": 1, "after": true }]
   },
   "صُنْبُورْ قُفْلْ": {
    "box": [2766, 1000],
@@ -32514,7 +32514,7 @@ export const WORD_PATHS = {
      [195.9, 219.5], [210.9, 217.6], [225.6, 221.7]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2074.9, 459.1], "count": 1, "after": true }, { "at": [1875.8, 824.4], "count": 1, "after": true }, { "at": [853.9, 328.5], "count": 2, "after": true }, { "at": [595.5, 382], "count": 1, "after": true }]
+   "dots": [{ "at": [2074.9, 459.1], "count": 1, "after": true }, { "at": [1875.8, 824.4], "count": 1, "after": true }, { "at": [905.5, 323.5], "count": 1, "after": true }, { "at": [800.9, 333.5], "count": 1, "after": true }, { "at": [595.5, 382], "count": 1, "after": true }]
   },
   "مُثَلَّجْ جَرَّةْ": {
    "box": [2294, 1000],
@@ -32614,7 +32614,7 @@ export const WORD_PATHS = {
      [159.7, 203.8], [173.7, 202], [187.4, 205.9]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [1832.4, 465.7], "count": 3, "after": true }, { "at": [1334.1, 740.2], "count": 1, "after": true }, { "at": [797.5, 790.4], "count": 1, "after": true }, { "at": [171.5, 380.8], "count": 2, "after": true }]
+   "dots": [{ "at": [1832.4, 429.2], "count": 1, "after": true }, { "at": [1878.6, 477.4], "count": 1, "after": true }, { "at": [1786.9, 485.8], "count": 1, "after": true }, { "at": [1334.1, 740.2], "count": 1, "after": true }, { "at": [797.5, 790.4], "count": 1, "after": true }, { "at": [218.6, 376.2], "count": 1, "after": true }, { "at": [122.8, 385.6], "count": 1, "after": true }]
   },
   "مِصْعَدْ مَخْزَنْ": {
    "box": [3602, 1000],
@@ -32805,7 +32805,7 @@ export const WORD_PATHS = {
      [180.3, 161.7], [196, 159.7], [211.5, 164.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [193.9, 363.9], "count": 2, "after": true }]
+   "dots": [{ "at": [248.3, 358.7], "count": 1, "after": true }, { "at": [138.2, 369.2], "count": 1, "after": true }]
   },
   "مِذْيَاعْ مِنْشَارْ": {
    "box": [3386, 1000],
@@ -32917,7 +32917,7 @@ export const WORD_PATHS = {
      [240.3, 201.7], [256, 199.7], [271.5, 204.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2806.4, 318.7], "count": 1, "after": true }, { "at": [2518.3, 796.7], "count": 2, "after": true }, { "at": [1169, 420.3], "count": 1, "after": true }, { "at": [834.4, 411.3], "count": 3, "after": true }]
+   "dots": [{ "at": [2806.4, 318.7], "count": 1, "after": true }, { "at": [2573, 791.5], "count": 1, "after": true }, { "at": [2462.5, 802], "count": 1, "after": true }, { "at": [1169, 420.3], "count": 1, "after": true }, { "at": [834.5, 369.7], "count": 1, "after": true }, { "at": [886.9, 424.9], "count": 1, "after": true }, { "at": [782.1, 434], "count": 1, "after": true }]
   },
   "أَبِي جَدِّي": {
    "box": [1864, 1000],
@@ -32991,7 +32991,7 @@ export const WORD_PATHS = {
      [474.5, 266.9], [474, 252.4], [477, 238]
     ] }
    ],
-   "dots": [{ "at": [1576.4, 744.1], "count": 1, "after": true }, { "at": [1287.6, 867.2], "count": 2, "after": true }, { "at": [848.4, 731.7], "count": 1, "after": true }, { "at": [211.3, 867.1], "count": 2, "after": true }]
+   "dots": [{ "at": [1576.4, 744.1], "count": 1, "after": true }, { "at": [1328.5, 863.3], "count": 1, "after": true }, { "at": [1246.2, 871.2], "count": 1, "after": true }, { "at": [848.4, 731.7], "count": 1, "after": true }, { "at": [252, 863.1], "count": 1, "after": true }, { "at": [170, 871.1], "count": 1, "after": true }]
   },
   "عَمِّي خَالْ": {
    "box": [2322, 1000],
@@ -33064,7 +33064,7 @@ export const WORD_PATHS = {
      [194.4, 148.1], [208.7, 146.3], [222.7, 150.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [1377.3, 871.6], "count": 2, "after": true }, { "at": [806.9, 310.3], "count": 1, "after": true }]
+   "dots": [{ "at": [1426.1, 867], "count": 1, "after": true }, { "at": [1327.1, 876.5], "count": 1, "after": true }, { "at": [806.9, 310.3], "count": 1, "after": true }]
   },
   "جَارْ طَبِيبْ": {
    "box": [2852, 1000],
@@ -33147,7 +33147,7 @@ export const WORD_PATHS = {
      [307.8, 168.4], [324.1, 166.3], [340.2, 170.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2570.1, 723.2], "count": 1, "after": true }, { "at": [1048.2, 740.8], "count": 1, "after": true }, { "at": [802, 731.7], "count": 2, "after": true }, { "at": [342.7, 740.8], "count": 1, "after": true }]
+   "dots": [{ "at": [2570.1, 723.2], "count": 1, "after": true }, { "at": [1048.2, 740.8], "count": 1, "after": true }, { "at": [858.2, 726.4], "count": 1, "after": true }, { "at": [744.1, 737.2], "count": 1, "after": true }, { "at": [342.7, 740.8], "count": 1, "after": true }]
   },
   "نَجَّارْ مُهَنْدِسْ": {
    "box": [3400, 1000],
@@ -33347,7 +33347,7 @@ export const WORD_PATHS = {
      [229.2, 123.7], [246.2, 121.5], [263, 126.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2966.4, 337], "count": 1, "after": true }, { "at": [2318.6, 803.8], "count": 2, "after": true }, { "at": [875.2, 310.7], "count": 1, "after": true }, { "at": [588, 803.7], "count": 2, "after": true }]
+   "dots": [{ "at": [2966.4, 337], "count": 1, "after": true }, { "at": [2377, 798.3], "count": 1, "after": true }, { "at": [2258.6, 809.4], "count": 1, "after": true }, { "at": [875.2, 310.7], "count": 1, "after": true }, { "at": [646.4, 798.1], "count": 1, "after": true }, { "at": [528.1, 809.4], "count": 1, "after": true }]
   },
   "سَاحِرْ اِبْتِسَامَةْ": {
    "box": [3878, 1000],
@@ -33468,7 +33468,7 @@ export const WORD_PATHS = {
      [212.4, 119.4], [229.2, 117.3], [245.7, 121.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [1844, 846], "count": 1, "after": true }, { "at": [1607.4, 449], "count": 2, "after": true }, { "at": [226, 333.2], "count": 2, "after": true }]
+   "dots": [{ "at": [1844, 846], "count": 1, "after": true }, { "at": [1665, 443.5], "count": 1, "after": true }, { "at": [1548.8, 454.7], "count": 1, "after": true }, { "at": [283.3, 327.7], "count": 1, "after": true }, { "at": [167.2, 338.8], "count": 1, "after": true }]
   },
   "بَطَلْ خَالَةْ": {
    "box": [2566, 1000],
@@ -33554,7 +33554,7 @@ export const WORD_PATHS = {
      [207, 118.1], [223, 116], [238.8, 120.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2384.2, 818.3], "count": 1, "after": true }, { "at": [950.6, 353.2], "count": 1, "after": true }, { "at": [221.2, 324.3], "count": 2, "after": true }]
+   "dots": [{ "at": [2384.2, 818.3], "count": 1, "after": true }, { "at": [950.6, 353.2], "count": 1, "after": true }, { "at": [276.4, 319], "count": 1, "after": true }, { "at": [164.5, 329.7], "count": 1, "after": true }]
   },
   "تَوْأَمْ عَمَّةْ": {
    "box": [2026, 1000],
@@ -33649,7 +33649,7 @@ export const WORD_PATHS = {
      [179.5, 246.2], [192.5, 244.5], [205.2, 248.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [1844.7, 430.1], "count": 2, "after": true }, { "at": [190, 412], "count": 2, "after": true }]
+   "dots": [{ "at": [1889.3, 425.9], "count": 1, "after": true }, { "at": [1798.9, 434.5], "count": 1, "after": true }, { "at": [235, 407.7], "count": 1, "after": true }, { "at": [144.1, 416.3], "count": 1, "after": true }]
   },
   "جَمَاعَةْ رَاكِبْ": {
    "box": [3460, 1000],
@@ -33750,7 +33750,7 @@ export const WORD_PATHS = {
      [316.4, 261.4], [333.2, 259.3], [349.7, 263.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3170.8, 828.1], "count": 1, "after": true }, { "at": [1822.5, 333.2], "count": 2, "after": true }, { "at": [351, 845.9], "count": 1, "after": true }]
+   "dots": [{ "at": [3170.8, 828.1], "count": 1, "after": true }, { "at": [1879.7, 327.7], "count": 1, "after": true }, { "at": [1763.6, 338.9], "count": 1, "after": true }, { "at": [351, 845.9], "count": 1, "after": true }]
   },
   "مَجْمُوعَةْ طَيَّارْ": {
    "box": [3980, 1000],
@@ -33876,7 +33876,7 @@ export const WORD_PATHS = {
      [253.2, 209.7], [270.2, 207.5], [287, 212.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3313.5, 842.2], "count": 1, "after": true }, { "at": [1769.6, 338], "count": 2, "after": true }, { "at": [761.7, 851.1], "count": 2, "after": true }]
+   "dots": [{ "at": [3313.5, 842.2], "count": 1, "after": true }, { "at": [1828, 332.4], "count": 1, "after": true }, { "at": [1709.5, 343.8], "count": 1, "after": true }, { "at": [820.2, 845.4], "count": 1, "after": true }, { "at": [702, 856.8], "count": 1, "after": true }]
   },
   "رَأْسْ أُذُنْ": {
    "box": [1926, 1000],
@@ -34037,7 +34037,7 @@ export const WORD_PATHS = {
      [193.2, 182.5], [207.8, 180.6], [222.1, 184.6]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [1754.8, 731.3], "count": 1, "after": true }, { "at": [813.7, 266.9], "count": 2, "after": true }]
+   "dots": [{ "at": [1754.8, 731.3], "count": 1, "after": true }, { "at": [863.7, 262.1], "count": 1, "after": true }, { "at": [762.5, 271.9], "count": 1, "after": true }]
   },
   "قَلْبْ وَجْهْ": {
    "box": [2520, 1000],
@@ -34117,7 +34117,7 @@ export const WORD_PATHS = {
      [202.9, 196.7], [219.1, 194.7], [235, 199.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2289.6, 331], "count": 2, "after": true }, { "at": [1664.7, 863], "count": 1, "after": true }, { "at": [636.4, 846], "count": 1, "after": true }]
+   "dots": [{ "at": [2345, 325.6], "count": 1, "after": true }, { "at": [2233, 336.6], "count": 1, "after": true }, { "at": [1664.7, 863], "count": 1, "after": true }, { "at": [636.4, 846], "count": 1, "after": true }]
   },
   "صَوْتْ دَمْعْ": {
    "box": [2924, 1000],
@@ -34199,7 +34199,7 @@ export const WORD_PATHS = {
      [231.2, 123.7], [248.2, 121.5], [265, 126.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [1563.8, 385.1], "count": 2, "after": true }]
+   "dots": [{ "at": [1622.4, 379.5], "count": 1, "after": true }, { "at": [1504, 390.8], "count": 1, "after": true }]
   },
   "مَرَضْ حُقْنَةْ": {
    "box": [3058, 1000],
@@ -34289,7 +34289,7 @@ export const WORD_PATHS = {
      [209, 118.1], [225, 116], [240.8, 120.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2072, 330.7], "count": 1, "after": true }, { "at": [752.9, 353.3], "count": 2, "after": true }, { "at": [502.2, 426.3], "count": 1, "after": true }, { "at": [222.9, 324.3], "count": 2, "after": true }]
+   "dots": [{ "at": [2072, 330.7], "count": 1, "after": true }, { "at": [808.4, 348], "count": 1, "after": true }, { "at": [696.4, 358.7], "count": 1, "after": true }, { "at": [502.2, 426.3], "count": 1, "after": true }, { "at": [278.4, 319], "count": 1, "after": true }, { "at": [166.2, 329.7], "count": 1, "after": true }]
   },
   "دِمَاغْ رَاحَةْ": {
    "box": [2654, 1000],
@@ -34379,7 +34379,7 @@ export const WORD_PATHS = {
      [188.7, 157.1], [203.9, 155.2], [218.8, 159.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [1539.2, 295.7], "count": 1, "after": true }, { "at": [201.2, 350], "count": 2, "after": true }]
+   "dots": [{ "at": [1539.2, 295.7], "count": 1, "after": true }, { "at": [252.7, 345], "count": 1, "after": true }, { "at": [148.5, 355.2], "count": 1, "after": true }]
   },
   "نَبْضْ حَاجِبْ": {
    "box": [3106, 1000],
@@ -34533,7 +34533,7 @@ export const WORD_PATHS = {
      [262.8, 191.2], [284, 188.5], [304.8, 194.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2524.9, 518.7], "count": 3, "after": true }, { "at": [1989.9, 422.3], "count": 1, "after": true }, { "at": [1580.6, 397], "count": 2, "after": true }, { "at": [804.4, 434.9], "count": 1, "after": true }]
+   "dots": [{ "at": [2524.6, 463.2], "count": 1, "after": true }, { "at": [2595.1, 536.3], "count": 1, "after": true }, { "at": [2455.3, 549], "count": 1, "after": true }, { "at": [1989.9, 422.3], "count": 1, "after": true }, { "at": [1653, 390.1], "count": 1, "after": true }, { "at": [1506.5, 404.1], "count": 1, "after": true }, { "at": [804.4, 434.9], "count": 1, "after": true }]
   },
   "ظُفْرْ جَبِينْ": {
    "box": [2530, 1000],
@@ -34621,7 +34621,7 @@ export const WORD_PATHS = {
      [228, 278.8], [242.8, 276.9], [257.4, 281]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2304.2, 303.9], "count": 1, "after": true }, { "at": [1895.4, 322.5], "count": 1, "after": true }, { "at": [1138.5, 742], "count": 1, "after": true }, { "at": [807.3, 757.5], "count": 1, "after": true }, { "at": [585, 749.4], "count": 2, "after": true }, { "at": [239.6, 457.4], "count": 1, "after": true }]
+   "dots": [{ "at": [2304.2, 303.9], "count": 1, "after": true }, { "at": [1895.4, 322.5], "count": 1, "after": true }, { "at": [1138.5, 742], "count": 1, "after": true }, { "at": [807.3, 757.5], "count": 1, "after": true }, { "at": [636.1, 744.5], "count": 1, "after": true }, { "at": [533.4, 754.4], "count": 1, "after": true }, { "at": [239.6, 457.4], "count": 1, "after": true }]
   },
   "قَبْضَةْ رَقَبَةْ": {
    "box": [3034, 1000],
@@ -34722,7 +34722,7 @@ export const WORD_PATHS = {
      [213.2, 119.7], [230.2, 117.5], [247, 122.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2784.9, 297.6], "count": 2, "after": true }, { "at": [2535.6, 860.4], "count": 1, "after": true }, { "at": [2104.5, 344.9], "count": 1, "after": true }, { "at": [1623.3, 337.9], "count": 2, "after": true }, { "at": [775.8, 297.7], "count": 2, "after": true }, { "at": [526.1, 860.5], "count": 1, "after": true }, { "at": [226.6, 337.8], "count": 2, "after": true }]
+   "dots": [{ "at": [2843.9, 291.9], "count": 1, "after": true }, { "at": [2725.2, 303.5], "count": 1, "after": true }, { "at": [2535.6, 860.4], "count": 1, "after": true }, { "at": [2104.5, 344.9], "count": 1, "after": true }, { "at": [1681.8, 332.3], "count": 1, "after": true }, { "at": [1563.3, 343.7], "count": 1, "after": true }, { "at": [834.2, 292.1], "count": 1, "after": true }, { "at": [715.8, 303.4], "count": 1, "after": true }, { "at": [526.1, 860.5], "count": 1, "after": true }, { "at": [285.5, 332.1], "count": 1, "after": true }, { "at": [166.9, 343.6], "count": 1, "after": true }]
   },
   "خُبْزْ جُبْنْ": {
    "box": [2486, 1000],
@@ -34910,7 +34910,7 @@ export const WORD_PATHS = {
      [201.6, 149], [218.1, 147], [234.3, 151.5]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3253.2, 453.5], "count": 3, "after": true }, { "at": [2228.1, 862.2], "count": 1, "after": true }, { "at": [1955.5, 358.9], "count": 2, "after": true }, { "at": [1494.9, 381.8], "count": 2, "after": true }, { "at": [1208.5, 378.9], "count": 1, "after": true }, { "at": [215, 358.9], "count": 2, "after": true }]
+   "dots": [{ "at": [3253.1, 410.4], "count": 1, "after": true }, { "at": [3307.5, 467.3], "count": 1, "after": true }, { "at": [3199.2, 477.1], "count": 1, "after": true }, { "at": [2228.1, 862.2], "count": 1, "after": true }, { "at": [2011.6, 353.6], "count": 1, "after": true }, { "at": [1897.6, 364.3], "count": 1, "after": true }, { "at": [1551.6, 376.4], "count": 1, "after": true }, { "at": [1437.2, 387.3], "count": 1, "after": true }, { "at": [1208.5, 378.9], "count": 1, "after": true }, { "at": [271.4, 353.6], "count": 1, "after": true }, { "at": [157.2, 364.4], "count": 1, "after": true }]
   },
   "فَرَاوِلَةْ لَيْمُونْ": {
    "box": [3146, 1000],
@@ -35029,7 +35029,7 @@ export const WORD_PATHS = {
      [218, 278.8], [232.8, 276.9], [247.4, 281]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2925.6, 261], "count": 1, "after": true }, { "at": [1745.8, 304.6], "count": 2, "after": true }, { "at": [1179, 749.4], "count": 2, "after": true }, { "at": [229.7, 457.4], "count": 1, "after": true }]
+   "dots": [{ "at": [2925.6, 261], "count": 1, "after": true }, { "at": [1796.6, 299.7], "count": 1, "after": true }, { "at": [1693.8, 309.7], "count": 1, "after": true }, { "at": [1229.5, 744.6], "count": 1, "after": true }, { "at": [1126.7, 754.4], "count": 1, "after": true }, { "at": [229.7, 457.4], "count": 1, "after": true }]
   },
   "بَصَلْ بَطَاطِسْ": {
    "box": [3822, 1000],
@@ -35231,7 +35231,7 @@ export const WORD_PATHS = {
      [331.3, 235.3], [349.4, 233], [367.2, 238]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2037.1, 830.8], "count": 2, "after": true }]
+   "dots": [{ "at": [2098.8, 824.8], "count": 1, "after": true }, { "at": [1973.4, 837], "count": 1, "after": true }]
   },
   "بَطَاطَا فُلْفُلْ": {
    "box": [2908, 1000],
@@ -35464,7 +35464,7 @@ export const WORD_PATHS = {
      [181.1, 250.1], [194.5, 248.4], [207.7, 252.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2801.5, 432.2], "count": 1, "after": true }, { "at": [2473.5, 432.2], "count": 1, "after": true }, { "at": [1350.9, 458.2], "count": 1, "after": true }, { "at": [1120.4, 826.1], "count": 2, "after": true }, { "at": [910.3, 514.7], "count": 2, "after": true }, { "at": [411.8, 432.3], "count": 1, "after": true }, { "at": [192.1, 421.8], "count": 2, "after": true }]
+   "dots": [{ "at": [2801.5, 432.2], "count": 1, "after": true }, { "at": [2473.5, 432.2], "count": 1, "after": true }, { "at": [1350.9, 458.2], "count": 1, "after": true }, { "at": [1166.5, 821.7], "count": 1, "after": true }, { "at": [1073, 830.7], "count": 1, "after": true }, { "at": [956.4, 510.3], "count": 1, "after": true }, { "at": [863.4, 519.3], "count": 1, "after": true }, { "at": [411.8, 432.3], "count": 1, "after": true }, { "at": [237.9, 417.4], "count": 1, "after": true }, { "at": [144.5, 426.2], "count": 1, "after": true }]
   },
   "ذُرَةْ عَدَسْ": {
    "box": [2654, 1000],
@@ -35542,7 +35542,7 @@ export const WORD_PATHS = {
      [557, 258.1], [573, 256], [588.8, 260.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2437.4, 322.9], "count": 1, "after": true }, { "at": [1824.5, 324.3], "count": 2, "after": true }]
+   "dots": [{ "at": [2437.4, 322.9], "count": 1, "after": true }, { "at": [1879.9, 319.1], "count": 1, "after": true }, { "at": [1767.9, 329.8], "count": 1, "after": true }]
   },
   "فُطْرْ أَرُزّْ": {
    "box": [1912, 1000],
@@ -35779,7 +35779,7 @@ export const WORD_PATHS = {
      [192.4, 162.1], [206.7, 160.3], [220.7, 164.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3829.6, 781.2], "count": 1, "after": true }, { "at": [3440.1, 343.2], "count": 1, "after": true }, { "at": [3205.8, 355.7], "count": 1, "after": true }, { "at": [2910.8, 766.2], "count": 1, "after": true }, { "at": [2306.3, 492.1], "count": 1, "after": true }, { "at": [438.3, 355.9], "count": 1, "after": true }, { "at": [204.6, 344.6], "count": 2, "after": true }]
+   "dots": [{ "at": [3829.6, 781.2], "count": 1, "after": true }, { "at": [3440.1, 343.2], "count": 1, "after": true }, { "at": [3205.8, 355.7], "count": 1, "after": true }, { "at": [2910.8, 766.2], "count": 1, "after": true }, { "at": [2306.3, 492.1], "count": 1, "after": true }, { "at": [438.3, 355.9], "count": 1, "after": true }, { "at": [253.7, 340], "count": 1, "after": true }, { "at": [154.6, 349.3], "count": 1, "after": true }]
   },
   "قِطَّةْ دَجَاجَةْ": {
    "box": [3232, 1000],
@@ -35886,7 +35886,7 @@ export const WORD_PATHS = {
      [207.6, 133], [224.1, 131], [240.3, 135.5]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2989.2, 304.9], "count": 2, "after": true }, { "at": [2204.5, 343.8], "count": 2, "after": true }, { "at": [1331.4, 829.8], "count": 1, "after": true }, { "at": [656.4, 829.4], "count": 1, "after": true }, { "at": [221.9, 343.8], "count": 2, "after": true }]
+   "dots": [{ "at": [3045.5, 299.6], "count": 1, "after": true }, { "at": [2931.4, 310.4], "count": 1, "after": true }, { "at": [2261.1, 338.4], "count": 1, "after": true }, { "at": [2147.1, 349.4], "count": 1, "after": true }, { "at": [1331.4, 829.8], "count": 1, "after": true }, { "at": [656.4, 829.4], "count": 1, "after": true }, { "at": [278.2, 338.4], "count": 1, "after": true }, { "at": [164.1, 349.2], "count": 1, "after": true }]
   },
   "نَمِرْ قِرْدْ": {
    "box": [2214, 1000],
@@ -35960,7 +35960,7 @@ export const WORD_PATHS = {
      [228.7, 126.4], [246.3, 124.1], [263.7, 128.9]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2036.3, 312.5], "count": 1, "after": true }, { "at": [881.3, 256.7], "count": 2, "after": true }]
+   "dots": [{ "at": [2036.3, 312.5], "count": 1, "after": true }, { "at": [942.2, 250.9], "count": 1, "after": true }, { "at": [818.9, 262.7], "count": 1, "after": true }]
   },
   "طَاوُوسْ بَطَّةْ": {
    "box": [3358, 1000],
@@ -36069,7 +36069,7 @@ export const WORD_PATHS = {
      [202.1, 132.4], [218, 130.4], [233.6, 134.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [938.8, 820.1], "count": 1, "after": true }, { "at": [215.4, 334.5], "count": 2, "after": true }]
+   "dots": [{ "at": [938.8, 820.1], "count": 1, "after": true }, { "at": [269.4, 329.2], "count": 1, "after": true }, { "at": [159.5, 340], "count": 1, "after": true }]
   },
   "نَحْلَةْ فَرَاشَةْ": {
    "box": [3286, 1000],
@@ -36172,7 +36172,7 @@ export const WORD_PATHS = {
      [213.2, 119.7], [230.2, 117.5], [247, 122.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3111.7, 351.2], "count": 1, "after": true }, { "at": [2114.2, 337.7], "count": 2, "after": true }, { "at": [1571.3, 287.4], "count": 1, "after": true }, { "at": [685.3, 436.2], "count": 3, "after": true }, { "at": [227.9, 337.9], "count": 2, "after": true }]
+   "dots": [{ "at": [3111.7, 351.2], "count": 1, "after": true }, { "at": [2172.5, 332.2], "count": 1, "after": true }, { "at": [2054.3, 343.4], "count": 1, "after": true }, { "at": [1571.3, 287.4], "count": 1, "after": true }, { "at": [685.4, 391.3], "count": 1, "after": true }, { "at": [742, 450.3], "count": 1, "after": true }, { "at": [628.8, 460.6], "count": 1, "after": true }, { "at": [286.2, 332.3], "count": 1, "after": true }, { "at": [167.8, 343.7], "count": 1, "after": true }]
   },
   "مَاعِزْ سِنْجَابْ": {
    "box": [3844, 1000],
@@ -36365,7 +36365,7 @@ export const WORD_PATHS = {
      [242, 158], [259.3, 155.8], [276.4, 160.6]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2378.9, 357.9], "count": 2, "after": true }, { "at": [1577.1, 859.4], "count": 1, "after": true }, { "at": [906.7, 275.1], "count": 1, "after": true }]
+   "dots": [{ "at": [2438.8, 352.1], "count": 1, "after": true }, { "at": [2318, 363.8], "count": 1, "after": true }, { "at": [1577.1, 859.4], "count": 1, "after": true }, { "at": [906.7, 275.1], "count": 1, "after": true }]
   },
   "ثَوْرْ جَامُوسْ": {
    "box": [3524, 1000],
@@ -36456,7 +36456,7 @@ export const WORD_PATHS = {
      [600, 206], [617.3, 203.8], [634.4, 208.6]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3332.6, 288.7], "count": 3, "after": true }, { "at": [2082.3, 792.6], "count": 1, "after": true }]
+   "dots": [{ "at": [3332.4, 242.9], "count": 1, "after": true }, { "at": [3390.3, 303.2], "count": 1, "after": true }, { "at": [3275.1, 313.7], "count": 1, "after": true }, { "at": [2082.3, 792.6], "count": 1, "after": true }]
   },
   "دُبّْ سَحْلِيَّةْ": {
    "box": [3042, 1000],
@@ -36553,7 +36553,7 @@ export const WORD_PATHS = {
      [212.4, 119.4], [229.2, 117.3], [245.7, 121.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2351.3, 845.7], "count": 1, "after": true }, { "at": [547.5, 836.6], "count": 2, "after": true }, { "at": [226.5, 333.2], "count": 2, "after": true }]
+   "dots": [{ "at": [2351.3, 845.7], "count": 1, "after": true }, { "at": [604.5, 831.1], "count": 1, "after": true }, { "at": [488.5, 842.2], "count": 1, "after": true }, { "at": [283.7, 327.7], "count": 1, "after": true }, { "at": [167.6, 338.9], "count": 1, "after": true }]
   },
   "خِنْزِيرْ ضِفْدَعَةْ": {
    "box": [3420, 1000],
@@ -36669,7 +36669,7 @@ export const WORD_PATHS = {
      [197.3, 115.8], [211.7, 113.9], [225.9, 117.9]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3119.9, 327.3], "count": 1, "after": true }, { "at": [2830.3, 393.1], "count": 1, "after": true }, { "at": [2589.5, 340.5], "count": 1, "after": true }, { "at": [2339.9, 738.7], "count": 2, "after": true }, { "at": [1538.3, 307.1], "count": 1, "after": true }, { "at": [1149.6, 318.4], "count": 1, "after": true }, { "at": [209.6, 301.2], "count": 2, "after": true }]
+   "dots": [{ "at": [3119.9, 327.3], "count": 1, "after": true }, { "at": [2830.3, 393.1], "count": 1, "after": true }, { "at": [2589.5, 340.5], "count": 1, "after": true }, { "at": [2389.7, 733.9], "count": 1, "after": true }, { "at": [2288.9, 743.7], "count": 1, "after": true }, { "at": [1538.3, 307.1], "count": 1, "after": true }, { "at": [1149.6, 318.4], "count": 1, "after": true }, { "at": [259.8, 296.5], "count": 1, "after": true }, { "at": [158.5, 306], "count": 1, "after": true }]
   },
   "حِمَارْ حَلَزُونْ": {
    "box": [3266, 1000],
@@ -36844,7 +36844,7 @@ export const WORD_PATHS = {
      [234.3, 189.7], [250, 187.7], [265.5, 192.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [1977.9, 279.2], "count": 2, "after": true }, { "at": [998.4, 328.2], "count": 1, "after": true }, { "at": [676.2, 776.2], "count": 1, "after": true }]
+   "dots": [{ "at": [2031.6, 274.1], "count": 1, "after": true }, { "at": [1923.5, 284.4], "count": 1, "after": true }, { "at": [998.4, 328.2], "count": 1, "after": true }, { "at": [676.2, 776.2], "count": 1, "after": true }]
   },
   "نَهْرْ غَابَةْ": {
    "box": [2278, 1000],
@@ -36925,7 +36925,7 @@ export const WORD_PATHS = {
      [207.2, 119.7], [224.2, 117.5], [241, 122.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2109.3, 351.1], "count": 1, "after": true }, { "at": [981.1, 352], "count": 1, "after": true }, { "at": [505.5, 860.4], "count": 1, "after": true }, { "at": [222.2, 337.7], "count": 2, "after": true }]
+   "dots": [{ "at": [2109.3, 351.1], "count": 1, "after": true }, { "at": [981.1, 352], "count": 1, "after": true }, { "at": [505.5, 860.4], "count": 1, "after": true }, { "at": [280.5, 332.1], "count": 1, "after": true }, { "at": [162.2, 343.4], "count": 1, "after": true }]
   },
   "رَمْلْ تُرَابْ": {
    "box": [2686, 1000],
@@ -37004,7 +37004,7 @@ export const WORD_PATHS = {
      [305.6, 243], [322.1, 241], [338.3, 245.5]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [1257, 336.3], "count": 2, "after": true }, { "at": [325.5, 816.5], "count": 1, "after": true }]
+   "dots": [{ "at": [1313.2, 330.8], "count": 1, "after": true }, { "at": [1199.2, 341.8], "count": 1, "after": true }, { "at": [325.5, 816.5], "count": 1, "after": true }]
   },
   "شَلَّالْ جَزِيرَةْ": {
    "box": [2712, 1000],
@@ -37105,7 +37105,7 @@ export const WORD_PATHS = {
      [166.3, 196.5], [179.5, 194.8], [192.5, 198.5]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2465.1, 438.7], "count": 3, "after": true }, { "at": [1217.5, 749.3], "count": 1, "after": true }, { "at": [881.9, 399.3], "count": 1, "after": true }, { "at": [657.8, 756.2], "count": 2, "after": true }, { "at": [177.5, 363.6], "count": 2, "after": true }]
+   "dots": [{ "at": [2464.8, 404.7], "count": 1, "after": true }, { "at": [2508.6, 449.5], "count": 1, "after": true }, { "at": [2422.3, 457.3], "count": 1, "after": true }, { "at": [1217.5, 749.3], "count": 1, "after": true }, { "at": [881.9, 399.3], "count": 1, "after": true }, { "at": [702.8, 751.8], "count": 1, "after": true }, { "at": [612, 760.6], "count": 1, "after": true }, { "at": [222.3, 359.2], "count": 1, "after": true }, { "at": [131.7, 368.2], "count": 1, "after": true }]
   },
   "عَاصِفَةْ ضَبَابْ": {
    "box": [3770, 1000],
@@ -37211,7 +37211,7 @@ export const WORD_PATHS = {
      [320.4, 261.4], [337.2, 259.3], [353.7, 263.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2349.4, 353.1], "count": 1, "after": true }, { "at": [2024.9, 333.1], "count": 2, "after": true }, { "at": [1368.4, 340.1], "count": 1, "after": true }, { "at": [963.7, 846], "count": 1, "after": true }, { "at": [339.2, 845.8], "count": 1, "after": true }]
+   "dots": [{ "at": [2349.4, 353.1], "count": 1, "after": true }, { "at": [2082.3, 327.7], "count": 1, "after": true }, { "at": [1965.9, 338.8], "count": 1, "after": true }, { "at": [1368.4, 340.1], "count": 1, "after": true }, { "at": [963.7, 846], "count": 1, "after": true }, { "at": [339.2, 845.8], "count": 1, "after": true }]
   },
   "شُرُوقْ وَادِي": {
    "box": [2974, 1000],
@@ -37300,7 +37300,7 @@ export const WORD_PATHS = {
      [577.1, 747.2], [568.6, 750.3], [560, 753.3]
     ] }
    ],
-   "dots": [{ "at": [2708.9, 339.2], "count": 3, "after": true }, { "at": [1682.9, 303.5], "count": 2, "after": true }, { "at": [235.6, 869.7], "count": 2, "after": true }]
+   "dots": [{ "at": [2708.7, 299.7], "count": 1, "after": true }, { "at": [2758.8, 351.8], "count": 1, "after": true }, { "at": [2659.1, 361], "count": 1, "after": true }, { "at": [1734.6, 298.5], "count": 1, "after": true }, { "at": [1630, 308.6], "count": 1, "after": true }, { "at": [287, 864.6], "count": 1, "after": true }, { "at": [182.7, 875], "count": 1, "after": true }]
   },
   "غُرُوبْ قَطْرَةْ": {
    "box": [3460, 1000],
@@ -37405,7 +37405,7 @@ export const WORD_PATHS = {
      [177.2, 119.7], [194.2, 117.5], [211, 122.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3151.6, 351.9], "count": 1, "after": true }, { "at": [1984, 860.5], "count": 1, "after": true }, { "at": [1326.4, 297.5], "count": 2, "after": true }, { "at": [192.3, 337.7], "count": 2, "after": true }]
+   "dots": [{ "at": [3151.6, 351.9], "count": 1, "after": true }, { "at": [1984, 860.5], "count": 1, "after": true }, { "at": [1384.5, 292], "count": 1, "after": true }, { "at": [1266.4, 303.2], "count": 1, "after": true }, { "at": [250.6, 332.2], "count": 1, "after": true }, { "at": [132.3, 343.4], "count": 1, "after": true }]
   },
   "بُرْكَانْ غَيْمَةْ": {
    "box": [2998, 1000],
@@ -37508,7 +37508,7 @@ export const WORD_PATHS = {
      [201, 118.1], [217, 116], [232.8, 120.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2836.7, 818.4], "count": 1, "after": true }, { "at": [1700.8, 491.1], "count": 1, "after": true }, { "at": [1115.4, 337.4], "count": 1, "after": true }, { "at": [832.9, 809.5], "count": 2, "after": true }, { "at": [215.5, 324.3], "count": 2, "after": true }]
+   "dots": [{ "at": [2836.7, 818.4], "count": 1, "after": true }, { "at": [1700.8, 491.1], "count": 1, "after": true }, { "at": [1115.4, 337.4], "count": 1, "after": true }, { "at": [887.9, 804.2], "count": 1, "after": true }, { "at": [776, 815], "count": 1, "after": true }, { "at": [270.7, 319], "count": 1, "after": true }, { "at": [158.7, 329.6], "count": 1, "after": true }]
   },
   "بَادِيَةْ بُسْتَانْ": {
    "box": [3176, 1000],
@@ -37614,7 +37614,7 @@ export const WORD_PATHS = {
      [228.9, 296.7], [245.1, 294.7], [261, 299.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2989.1, 818.4], "count": 1, "after": true }, { "at": [2260.7, 809.4], "count": 2, "after": true }, { "at": [1968.6, 324.3], "count": 2, "after": true }, { "at": [1530, 818.3], "count": 1, "after": true }, { "at": [808.4, 436], "count": 2, "after": true }, { "at": [241.8, 491.2], "count": 1, "after": true }]
+   "dots": [{ "at": [2989.1, 818.4], "count": 1, "after": true }, { "at": [2315.9, 804.2], "count": 1, "after": true }, { "at": [2204, 814.8], "count": 1, "after": true }, { "at": [2024, 319], "count": 1, "after": true }, { "at": [1911.9, 329.7], "count": 1, "after": true }, { "at": [1530, 818.3], "count": 1, "after": true }, { "at": [863.4, 430.8], "count": 1, "after": true }, { "at": [751.6, 441.3], "count": 1, "after": true }, { "at": [241.8, 491.2], "count": 1, "after": true }]
   },
   "تَلّْ غُصْنْ": {
    "box": [2272, 1000],
@@ -37685,7 +37685,7 @@ export const WORD_PATHS = {
      [233.5, 327.5], [248.9, 325.5], [264.1, 329.7]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2080.7, 375.7], "count": 2, "after": true }, { "at": [1167.1, 367.2], "count": 1, "after": true }, { "at": [245.3, 512.7], "count": 1, "after": true }]
+   "dots": [{ "at": [2133, 370.8], "count": 1, "after": true }, { "at": [2026.9, 380.6], "count": 1, "after": true }, { "at": [1167.1, 367.2], "count": 1, "after": true }, { "at": [245.3, 512.7], "count": 1, "after": true }]
   },
   "مَدْرَسَةْ مُعَلِّمْ": {
    "box": [2858, 1000],
@@ -37805,7 +37805,7 @@ export const WORD_PATHS = {
      [217.8, 269.2], [231.6, 267.4], [245.2, 271.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [1389.8, 380.9], "count": 2, "after": true }]
+   "dots": [{ "at": [1437.4, 376.3], "count": 1, "after": true }, { "at": [1341.2, 385.6], "count": 1, "after": true }]
   },
   "مِسْطَرَةْ حَقِيبَةْ": {
    "box": [3908, 1000],
@@ -37933,7 +37933,7 @@ export const WORD_PATHS = {
      [212.4, 119.4], [229.2, 117.3], [245.7, 121.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2007.4, 333], "count": 2, "after": true }, { "at": [1054.6, 363.3], "count": 2, "after": true }, { "at": [773.5, 836.6], "count": 2, "after": true }, { "at": [519.8, 845.7], "count": 1, "after": true }, { "at": [226.5, 333.2], "count": 2, "after": true }]
+   "dots": [{ "at": [2064.8, 327.5], "count": 1, "after": true }, { "at": [1948.6, 338.6], "count": 1, "after": true }, { "at": [1112.1, 357.8], "count": 1, "after": true }, { "at": [995.8, 369], "count": 1, "after": true }, { "at": [830.4, 831.1], "count": 1, "after": true }, { "at": [714.4, 842.2], "count": 1, "after": true }, { "at": [519.8, 845.7], "count": 1, "after": true }, { "at": [283.7, 327.7], "count": 1, "after": true }, { "at": [167.5, 338.9], "count": 1, "after": true }]
   },
   "مَكْتَبَةْ جَرَسْ": {
    "box": [3296, 1000],
@@ -38036,7 +38036,7 @@ export const WORD_PATHS = {
      [558.9, 256.7], [575.1, 254.7], [591, 259.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2433.4, 436.1], "count": 2, "after": true }, { "at": [2190.1, 818.3], "count": 1, "after": true }, { "at": [1907.1, 324.3], "count": 2, "after": true }, { "at": [1357.8, 801.2], "count": 1, "after": true }]
+   "dots": [{ "at": [2488.7, 430.9], "count": 1, "after": true }, { "at": [2376.8, 441.4], "count": 1, "after": true }, { "at": [2190.1, 818.3], "count": 1, "after": true }, { "at": [1962.4, 319], "count": 1, "after": true }, { "at": [1850.5, 329.7], "count": 1, "after": true }, { "at": [1357.8, 801.2], "count": 1, "after": true }]
   },
   "صَمْغْ خَرِيطَةْ": {
    "box": [3030, 1000],
@@ -38136,7 +38136,7 @@ export const WORD_PATHS = {
      [191.3, 115.8], [205.7, 113.9], [219.9, 117.9]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2018.5, 313.1], "count": 1, "after": true }, { "at": [1474.2, 327.2], "count": 1, "after": true }, { "at": [890.2, 738.7], "count": 2, "after": true }, { "at": [203.9, 301.1], "count": 2, "after": true }]
+   "dots": [{ "at": [2018.5, 313.1], "count": 1, "after": true }, { "at": [1474.2, 327.2], "count": 1, "after": true }, { "at": [940.1, 734], "count": 1, "after": true }, { "at": [839.2, 743.6], "count": 1, "after": true }, { "at": [254, 296.4], "count": 1, "after": true }, { "at": [152.7, 306], "count": 1, "after": true }]
   },
   "حِسَابْ عَدَدْ": {
    "box": [3362, 1000],
@@ -38332,7 +38332,7 @@ export const WORD_PATHS = {
      [244, 248], [261.3, 245.8], [278.4, 250.6]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3081.7, 302.5], "count": 2, "after": true }, { "at": [2599.7, 811.2], "count": 1, "after": true }, { "at": [1403, 399], "count": 2, "after": true }, { "at": [256.9, 458.4], "count": 1, "after": true }]
+   "dots": [{ "at": [3141.4, 296.8], "count": 1, "after": true }, { "at": [3020.6, 308.3], "count": 1, "after": true }, { "at": [2599.7, 811.2], "count": 1, "after": true }, { "at": [1462.5, 393.2], "count": 1, "after": true }, { "at": [1341.8, 404.8], "count": 1, "after": true }, { "at": [256.9, 458.4], "count": 1, "after": true }]
   },
   "مَكْتُوبْ مِلَفّْ": {
    "box": [3106, 1000],
@@ -38435,7 +38435,7 @@ export const WORD_PATHS = {
      [472.7, 117.1], [487.9, 115.2], [502.8, 119.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2283.9, 488.9], "count": 2, "after": true }, { "at": [1537, 851.3], "count": 1, "after": true }, { "at": [487, 394.5], "count": 1, "after": true }]
+   "dots": [{ "at": [2336.3, 484], "count": 1, "after": true }, { "at": [2230.3, 494], "count": 1, "after": true }, { "at": [1537, 851.3], "count": 1, "after": true }, { "at": [487, 394.5], "count": 1, "after": true }]
   },
   "مُدَرِّسَةْ وَرَقَةْ": {
    "box": [3538, 1000],
@@ -38557,7 +38557,7 @@ export const WORD_PATHS = {
      [205.2, 119.7], [222.2, 117.5], [239, 122.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [1754, 337.9], "count": 2, "after": true }, { "at": [537.5, 297.7], "count": 2, "after": true }, { "at": [218.6, 337.8], "count": 2, "after": true }]
+   "dots": [{ "at": [1812.4, 332.3], "count": 1, "after": true }, { "at": [1693.9, 343.7], "count": 1, "after": true }, { "at": [596, 292.2], "count": 1, "after": true }, { "at": [477.5, 303.5], "count": 1, "after": true }, { "at": [277.6, 332.1], "count": 1, "after": true }, { "at": [158.9, 343.6], "count": 1, "after": true }]
   },
   "عَالِمْ رِسَالَةْ": {
    "box": [2600, 1000],
@@ -38659,7 +38659,7 @@ export const WORD_PATHS = {
      [192.2, 115.4], [206.8, 113.5], [221.1, 117.6]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [204.6, 301], "count": 2, "after": true }]
+   "dots": [{ "at": [254.3, 296.2], "count": 1, "after": true }, { "at": [153.2, 306], "count": 1, "after": true }]
   },
   "مَقَالْ مُغَلَّفْ": {
    "box": [2654, 1000],
@@ -38761,7 +38761,7 @@ export const WORD_PATHS = {
      [454.4, 228.1], [468.7, 226.3], [482.7, 230.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2164, 416.1], "count": 2, "after": true }, { "at": [889.3, 402], "count": 1, "after": true }, { "at": [465.1, 401.3], "count": 1, "after": true }]
+   "dots": [{ "at": [2213.2, 411.5], "count": 1, "after": true }, { "at": [2113.8, 420.7], "count": 1, "after": true }, { "at": [889.3, 402], "count": 1, "after": true }, { "at": [465.1, 401.3], "count": 1, "after": true }]
   },
   "قَمِيصْ بَنْطَالْ": {
    "box": [3504, 1000],
@@ -38867,7 +38867,7 @@ export const WORD_PATHS = {
      [205, 170.1], [221, 168], [236.8, 172.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3265.7, 286.3], "count": 2, "after": true }, { "at": [2697.5, 809.5], "count": 2, "after": true }, { "at": [1467.3, 818.5], "count": 1, "after": true }, { "at": [1260.7, 426.3], "count": 1, "after": true }]
+   "dots": [{ "at": [3320.7, 280.9], "count": 1, "after": true }, { "at": [3208.8, 291.8], "count": 1, "after": true }, { "at": [2752.9, 804.2], "count": 1, "after": true }, { "at": [2640.8, 814.8], "count": 1, "after": true }, { "at": [1467.3, 818.5], "count": 1, "after": true }, { "at": [1260.7, 426.3], "count": 1, "after": true }]
   },
   "وِشَاحْ قُفَّازْ": {
    "box": [2488, 1000],
@@ -38968,7 +38968,7 @@ export const WORD_PATHS = {
      [217.1, 210.8], [230.6, 209.1], [243.9, 212.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [1939.7, 417.2], "count": 3, "after": true }, { "at": [863.5, 306.3], "count": 2, "after": true }, { "at": [629.4, 354.9], "count": 1, "after": true }, { "at": [227, 375.7], "count": 1, "after": true }]
+   "dots": [{ "at": [1939.5, 381.4], "count": 1, "after": true }, { "at": [1985, 428.9], "count": 1, "after": true }, { "at": [1894.9, 436.8], "count": 1, "after": true }, { "at": [910.6, 301.8], "count": 1, "after": true }, { "at": [815.7, 310.8], "count": 1, "after": true }, { "at": [629.4, 354.9], "count": 1, "after": true }, { "at": [227, 375.7], "count": 1, "after": true }]
   },
   "خَاتَمْ صَنْدَلْ": {
    "box": [3232, 1000],
@@ -39061,7 +39061,7 @@ export const WORD_PATHS = {
      [203.6, 125], [220.1, 123], [236.3, 127.5]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2913.8, 312.4], "count": 1, "after": true }, { "at": [2382.6, 305.9], "count": 2, "after": true }, { "at": [968.7, 387], "count": 1, "after": true }]
+   "dots": [{ "at": [2913.8, 312.4], "count": 1, "after": true }, { "at": [2439.2, 300.4], "count": 1, "after": true }, { "at": [2325.1, 311.5], "count": 1, "after": true }, { "at": [968.7, 387], "count": 1, "after": true }]
   },
   "خَيْطْ إِبْرَةْ": {
    "box": [2344, 1000],
@@ -39154,7 +39154,7 @@ export const WORD_PATHS = {
      [163.3, 115.8], [177.7, 113.9], [191.9, 117.9]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2048.4, 327.2], "count": 1, "after": true }, { "at": [1740.3, 738.7], "count": 2, "after": true }, { "at": [688.7, 746.7], "count": 1, "after": true }, { "at": [175.1, 301], "count": 2, "after": true }]
+   "dots": [{ "at": [2048.4, 327.2], "count": 1, "after": true }, { "at": [1790, 734], "count": 1, "after": true }, { "at": [1689.1, 743.6], "count": 1, "after": true }, { "at": [688.7, 746.7], "count": 1, "after": true }, { "at": [224.7, 296.2], "count": 1, "after": true }, { "at": [124, 306], "count": 1, "after": true }]
   },
   "جَيْبْ نَعْلْ": {
    "box": [2718, 1000],
@@ -39230,7 +39230,7 @@ export const WORD_PATHS = {
      [213.2, 127.7], [230.2, 125.5], [247, 130.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2432.4, 795], "count": 1, "after": true }, { "at": [2024.5, 803.6], "count": 2, "after": true }, { "at": [1548.1, 813.1], "count": 1, "after": true }, { "at": [941.6, 303.9], "count": 1, "after": true }]
+   "dots": [{ "at": [2432.4, 795], "count": 1, "after": true }, { "at": [2082.8, 798.1], "count": 1, "after": true }, { "at": [1964.5, 809.3], "count": 1, "after": true }, { "at": [1548.1, 813.1], "count": 1, "after": true }, { "at": [941.6, 303.9], "count": 1, "after": true }]
   },
   "ثَوْبْ عِمَامَةْ": {
    "box": [3120, 1000],
@@ -39326,7 +39326,7 @@ export const WORD_PATHS = {
      [206.4, 119.4], [223.2, 117.3], [239.7, 121.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2931.7, 342.8], "count": 3, "after": true }, { "at": [2112.5, 846], "count": 1, "after": true }, { "at": [220.7, 333.2], "count": 2, "after": true }]
+   "dots": [{ "at": [2931.4, 298.8], "count": 1, "after": true }, { "at": [2987.2, 356.7], "count": 1, "after": true }, { "at": [2876.4, 367], "count": 1, "after": true }, { "at": [2112.5, 846], "count": 1, "after": true }, { "at": [278.1, 327.6], "count": 1, "after": true }, { "at": [161.9, 338.8], "count": 1, "after": true }]
   },
   "عَبَاءَةْ طَرْحَةْ": {
    "box": [3492, 1000],
@@ -39442,7 +39442,7 @@ export const WORD_PATHS = {
      [215.2, 119.7], [232.2, 117.5], [249, 122.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2908.7, 860.5], "count": 1, "after": true }, { "at": [2064.6, 337.8], "count": 2, "after": true }, { "at": [229, 337.9], "count": 2, "after": true }]
+   "dots": [{ "at": [2908.7, 860.5], "count": 1, "after": true }, { "at": [2123.1, 332.3], "count": 1, "after": true }, { "at": [2004.7, 343.5], "count": 1, "after": true }, { "at": [287.7, 332.2], "count": 1, "after": true }, { "at": [169.1, 343.7], "count": 1, "after": true }]
   },
   "سُتْرَةْ زِرّْ": {
    "box": [2032, 1000],
@@ -39520,7 +39520,7 @@ export const WORD_PATHS = {
      [230.4, 116.1], [244.7, 114.3], [258.7, 118.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [1429.6, 410], "count": 2, "after": true }, { "at": [888, 311], "count": 2, "after": true }, { "at": [495.4, 349.6], "count": 1, "after": true }]
+   "dots": [{ "at": [1478.6, 405.3], "count": 1, "after": true }, { "at": [1379.3, 414.9], "count": 1, "after": true }, { "at": [937.1, 306.1], "count": 1, "after": true }, { "at": [837.7, 315.9], "count": 1, "after": true }, { "at": [495.4, 349.6], "count": 1, "after": true }]
   },
   "خُفّْ قِلَادَةْ": {
    "box": [2612, 1000],
@@ -39609,7 +39609,7 @@ export const WORD_PATHS = {
      [177.5, 187.5], [192.9, 185.5], [208.1, 189.7]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2308.7, 410.2], "count": 1, "after": true }, { "at": [1969.3, 394.6], "count": 1, "after": true }, { "at": [1200.7, 346.7], "count": 2, "after": true }, { "at": [190.5, 382.8], "count": 2, "after": true }]
+   "dots": [{ "at": [2308.7, 410.2], "count": 1, "after": true }, { "at": [1969.3, 394.6], "count": 1, "after": true }, { "at": [1253.2, 341.6], "count": 1, "after": true }, { "at": [1146.9, 351.9], "count": 1, "after": true }, { "at": [243.1, 377.7], "count": 1, "after": true }, { "at": [136.7, 388], "count": 1, "after": true }]
   },
   "سِلْسِلَةْ مِشْجَبْ": {
    "box": [3826, 1000],
@@ -39723,7 +39723,7 @@ export const WORD_PATHS = {
      [308.1, 296.4], [324, 294.4], [339.6, 298.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2278.9, 364], "count": 2, "after": true }, { "at": [1392.2, 455.1], "count": 3, "after": true }, { "at": [898.6, 832.5], "count": 1, "after": true }, { "at": [340.7, 849.3], "count": 1, "after": true }]
+   "dots": [{ "at": [2333.4, 358.9], "count": 1, "after": true }, { "at": [2223.5, 369.1], "count": 1, "after": true }, { "at": [1392.3, 413.6], "count": 1, "after": true }, { "at": [1444.7, 468.6], "count": 1, "after": true }, { "at": [1339.9, 477.9], "count": 1, "after": true }, { "at": [898.6, 832.5], "count": 1, "after": true }, { "at": [340.7, 849.3], "count": 1, "after": true }]
   },
   "سَيَّارَةْ حَافِلَةْ": {
    "box": [3414, 1000],
@@ -39840,7 +39840,7 @@ export const WORD_PATHS = {
      [202.4, 119.4], [219.2, 117.3], [235.7, 121.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2721.5, 836.6], "count": 2, "after": true }, { "at": [1905, 333], "count": 2, "after": true }, { "at": [719.5, 283.4], "count": 1, "after": true }, { "at": [217, 333], "count": 2, "after": true }]
+   "dots": [{ "at": [2778.5, 831.2], "count": 1, "after": true }, { "at": [2662.6, 842.3], "count": 1, "after": true }, { "at": [1962.5, 327.6], "count": 1, "after": true }, { "at": [1846.2, 338.5], "count": 1, "after": true }, { "at": [719.5, 283.4], "count": 1, "after": true }, { "at": [274.5, 327.6], "count": 1, "after": true }, { "at": [158.2, 338.5], "count": 1, "after": true }]
   },
   "قَارِبْ شَارِعْ": {
    "box": [2774, 1000],
@@ -39934,7 +39934,7 @@ export const WORD_PATHS = {
      [195.2, 108.5], [209.8, 106.6], [224.1, 110.6]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2548.4, 266.8], "count": 2, "after": true }, { "at": [1730.4, 746.8], "count": 1, "after": true }, { "at": [1128.4, 384.8], "count": 3, "after": true }]
+   "dots": [{ "at": [2598.4, 262.1], "count": 1, "after": true }, { "at": [2497.4, 271.7], "count": 1, "after": true }, { "at": [1730.4, 746.8], "count": 1, "after": true }, { "at": [1128.4, 346.6], "count": 1, "after": true }, { "at": [1176.4, 397.2], "count": 1, "after": true }, { "at": [1080.6, 405.4], "count": 1, "after": true }]
   },
   "مَسْجِدْ مَطَارْ": {
    "box": [3240, 1000],
@@ -40154,7 +40154,7 @@ export const WORD_PATHS = {
      [206.3, 117.7], [222, 115.7], [237.5, 120.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2286.8, 420.2], "count": 1, "after": true }, { "at": [1179.8, 363.2], "count": 1, "after": true }, { "at": [219.2, 320], "count": 2, "after": true }]
+   "dots": [{ "at": [2286.8, 420.2], "count": 1, "after": true }, { "at": [1179.8, 363.2], "count": 1, "after": true }, { "at": [273.9, 314.9], "count": 1, "after": true }, { "at": [163.6, 325.2], "count": 1, "after": true }]
   },
   "مَخْبَزْ صَيْدَلِيَّةْ": {
    "box": [3724, 1000],
@@ -40278,7 +40278,7 @@ export const WORD_PATHS = {
      [206.4, 119.4], [223.2, 117.3], [239.7, 121.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3023.3, 363.2], "count": 1, "after": true }, { "at": [2693.7, 846], "count": 1, "after": true }, { "at": [2412.9, 378.7], "count": 1, "after": true }, { "at": [1351.5, 836.6], "count": 2, "after": true }, { "at": [541.8, 836.8], "count": 2, "after": true }, { "at": [220.8, 333], "count": 2, "after": true }]
+   "dots": [{ "at": [3023.3, 363.2], "count": 1, "after": true }, { "at": [2693.7, 846], "count": 1, "after": true }, { "at": [2412.9, 378.7], "count": 1, "after": true }, { "at": [1408.5, 831.1], "count": 1, "after": true }, { "at": [1292.5, 842.3], "count": 1, "after": true }, { "at": [599.5, 831.2], "count": 1, "after": true }, { "at": [483, 842.4], "count": 1, "after": true }, { "at": [278.4, 327.6], "count": 1, "after": true }, { "at": [162.1, 338.5], "count": 1, "after": true }]
   },
   "قَاطِرَةْ مِرْكَبْ": {
    "box": [3538, 1000],
@@ -40391,7 +40391,7 @@ export const WORD_PATHS = {
      [315.6, 261.7], [332.2, 259.6], [348.5, 264.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3301.7, 293.7], "count": 2, "after": true }, { "at": [1969.4, 333], "count": 2, "after": true }, { "at": [350.6, 846.1], "count": 1, "after": true }]
+   "dots": [{ "at": [3359.1, 288.2], "count": 1, "after": true }, { "at": [3242.8, 299.2], "count": 1, "after": true }, { "at": [2026.8, 327.5], "count": 1, "after": true }, { "at": [1910.6, 338.7], "count": 1, "after": true }, { "at": [350.6, 846.1], "count": 1, "after": true }]
   },
   "شَاحِنَةْ عَرَبَةْ": {
    "box": [3306, 1000],
@@ -40498,7 +40498,7 @@ export const WORD_PATHS = {
      [212.4, 119.4], [229.2, 117.3], [245.7, 121.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3025.8, 429.6], "count": 3, "after": true }, { "at": [1953, 439.1], "count": 1, "after": true }, { "at": [1663, 333], "count": 2, "after": true }, { "at": [504.6, 846.1], "count": 1, "after": true }, { "at": [226.8, 333.1], "count": 2, "after": true }]
+   "dots": [{ "at": [3025.9, 385.5], "count": 1, "after": true }, { "at": [3081.1, 443.9], "count": 1, "after": true }, { "at": [2970.7, 453.6], "count": 1, "after": true }, { "at": [1953, 439.1], "count": 1, "after": true }, { "at": [1720.6, 327.6], "count": 1, "after": true }, { "at": [1604.2, 338.5], "count": 1, "after": true }, { "at": [504.6, 846.1], "count": 1, "after": true }, { "at": [284.1, 327.6], "count": 1, "after": true }, { "at": [167.8, 338.8], "count": 1, "after": true }]
   },
   "مِرْوَحِيَّةْ فُنْدُقْ": {
    "box": [3530, 1000],
@@ -40630,7 +40630,7 @@ export const WORD_PATHS = {
      [321.5, 210.8], [336.9, 208.8], [351.9, 213]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [1958.9, 814.5], "count": 2, "after": true }, { "at": [1665.3, 354.4], "count": 2, "after": true }, { "at": [1178.8, 309.3], "count": 1, "after": true }, { "at": [951, 451.3], "count": 1, "after": true }, { "at": [334.8, 406.2], "count": 2, "after": true }]
+   "dots": [{ "at": [2011.2, 809.3], "count": 1, "after": true }, { "at": [1905, 819.9], "count": 1, "after": true }, { "at": [1717.8, 349.6], "count": 1, "after": true }, { "at": [1611.6, 359.4], "count": 1, "after": true }, { "at": [1178.8, 309.3], "count": 1, "after": true }, { "at": [951, 451.3], "count": 1, "after": true }, { "at": [387.1, 401.1], "count": 1, "after": true }, { "at": [281.1, 411.4], "count": 1, "after": true }]
   },
   "مِيكْرُوبَاصْ مَتْجَرْ": {
    "box": [4000, 1000],
@@ -40762,7 +40762,7 @@ export const WORD_PATHS = {
      [224.4, 234.1], [238.7, 232.3], [252.7, 236.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3529.2, 764], "count": 2, "after": true }, { "at": [2446.2, 771.6], "count": 1, "after": true }, { "at": [926.4, 437.5], "count": 2, "after": true }, { "at": [595.3, 756.8], "count": 1, "after": true }]
+   "dots": [{ "at": [3577.7, 759.4], "count": 1, "after": true }, { "at": [3479.7, 768.8], "count": 1, "after": true }, { "at": [2446.2, 771.6], "count": 1, "after": true }, { "at": [974.7, 432.9], "count": 1, "after": true }, { "at": [876.8, 442.2], "count": 1, "after": true }, { "at": [595.3, 756.8], "count": 1, "after": true }]
   },
   "رَافِعَةْ مَشْرَبْ": {
    "box": [3506, 1000],
@@ -40869,7 +40869,7 @@ export const WORD_PATHS = {
      [304.4, 261.4], [321.2, 259.3], [337.7, 263.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2790.6, 283.6], "count": 1, "after": true }, { "at": [2157.6, 333.1], "count": 2, "after": true }, { "at": [1220.8, 429.6], "count": 3, "after": true }, { "at": [324.1, 845.9], "count": 1, "after": true }]
+   "dots": [{ "at": [2790.6, 283.6], "count": 1, "after": true }, { "at": [2215, 327.5], "count": 1, "after": true }, { "at": [2098.9, 338.8], "count": 1, "after": true }, { "at": [1220.6, 385.6], "count": 1, "after": true }, { "at": [1276.4, 443.4], "count": 1, "after": true }, { "at": [1165.2, 453.7], "count": 1, "after": true }, { "at": [324.1, 845.9], "count": 1, "after": true }]
   },
   "كُرَةْ لُعْبَةْ": {
    "box": [2186, 1000],
@@ -40957,7 +40957,7 @@ export const WORD_PATHS = {
      [194.1, 176.4], [210, 174.4], [225.6, 178.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [1339.7, 378.6], "count": 2, "after": true }, { "at": [485.7, 864], "count": 1, "after": true }, { "at": [207.9, 378.7], "count": 2, "after": true }]
+   "dots": [{ "at": [1394.1, 373.5], "count": 1, "after": true }, { "at": [1284.2, 383.8], "count": 1, "after": true }, { "at": [485.7, 864], "count": 1, "after": true }, { "at": [262.3, 373.6], "count": 1, "after": true }, { "at": [152.3, 383.9], "count": 1, "after": true }]
   },
   "مُكَعَّبْ أَحْمَرْ": {
    "box": [2810, 1000],
@@ -41173,7 +41173,7 @@ export const WORD_PATHS = {
      [201.1, 290.8], [214.6, 289.1], [227.9, 292.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2307.8, 833.4], "count": 1, "after": true }, { "at": [2118.6, 826.1], "count": 2, "after": true }, { "at": [1764.9, 427.3], "count": 1, "after": true }]
+   "dots": [{ "at": [2307.8, 833.4], "count": 1, "after": true }, { "at": [2164.7, 821.5], "count": 1, "after": true }, { "at": [2071.2, 830.8], "count": 1, "after": true }, { "at": [1764.9, 427.3], "count": 1, "after": true }]
   },
   "نَشِيدْ رَقْصْ": {
    "box": [2866, 1000],
@@ -41259,7 +41259,7 @@ export const WORD_PATHS = {
      [540.7, 207.1], [555.9, 205.2], [570.8, 209.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2695.8, 366.5], "count": 1, "after": true }, { "at": [2386.9, 442.6], "count": 3, "after": true }, { "at": [2015.3, 814.5], "count": 2, "after": true }, { "at": [946.7, 318.4], "count": 2, "after": true }]
+   "dots": [{ "at": [2695.8, 366.5], "count": 1, "after": true }, { "at": [2386.6, 402.4], "count": 1, "after": true }, { "at": [2437.7, 455.1], "count": 1, "after": true }, { "at": [2336.2, 464.7], "count": 1, "after": true }, { "at": [2067.8, 809.6], "count": 1, "after": true }, { "at": [1961.6, 819.4], "count": 1, "after": true }, { "at": [999.3, 313.2], "count": 1, "after": true }, { "at": [893, 323.7], "count": 1, "after": true }]
   },
   "بَالُونْ حَاسُوبْ": {
    "box": [3460, 1000],
@@ -41548,7 +41548,7 @@ export const WORD_PATHS = {
      [193.5, 117.5], [208.9, 115.5], [224.1, 119.7]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [206.8, 316.1], "count": 2, "after": true }]
+   "dots": [{ "at": [260, 311], "count": 1, "after": true }, { "at": [152.1, 321.3], "count": 1, "after": true }]
   },
   "وَرَقِيَّةْ مِلْصَقْ": {
    "box": [3234, 1000],
@@ -41669,7 +41669,7 @@ export const WORD_PATHS = {
      [322.6, 203.8], [337.9, 201.8], [352.9, 206]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2410.2, 318.6], "count": 2, "after": true }, { "at": [2163.2, 814.5], "count": 2, "after": true }, { "at": [1870.2, 354.7], "count": 2, "after": true }, { "at": [335.7, 399.1], "count": 2, "after": true }]
+   "dots": [{ "at": [2462.7, 313.6], "count": 1, "after": true }, { "at": [2356.4, 323.7], "count": 1, "after": true }, { "at": [2215.9, 809.7], "count": 1, "after": true }, { "at": [2109.6, 819.4], "count": 1, "after": true }, { "at": [1922.6, 349.7], "count": 1, "after": true }, { "at": [1816.4, 359.8], "count": 1, "after": true }, { "at": [387.9, 394], "count": 1, "after": true }, { "at": [281.8, 404.4], "count": 1, "after": true }]
   },
   "مِضْرَبْ وَرْدِي": {
    "box": [3102, 1000],
@@ -41768,7 +41768,7 @@ export const WORD_PATHS = {
      [559.2, 754.4], [551.1, 757.3], [543, 760.2]
     ] }
    ],
-   "dots": [{ "at": [2478.6, 290.3], "count": 1, "after": true }, { "at": [1692.4, 722.6], "count": 1, "after": true }, { "at": [234.3, 871.4], "count": 2, "after": true }]
+   "dots": [{ "at": [2478.6, 290.3], "count": 1, "after": true }, { "at": [1692.4, 722.6], "count": 1, "after": true }, { "at": [283.4, 866.6], "count": 1, "after": true }, { "at": [183.9, 876.3], "count": 1, "after": true }]
   },
   "زَحْلُوقَةْ بُنِّي": {
    "box": [2616, 1000],
@@ -41871,7 +41871,7 @@ export const WORD_PATHS = {
      [514, 255], [513.4, 239], [516.8, 223.1]
     ] }
    ],
-   "dots": [{ "at": [2436.3, 367], "count": 1, "after": true }, { "at": [1343.2, 299.9], "count": 2, "after": true }, { "at": [1096, 331.1], "count": 2, "after": true }, { "at": [735.8, 736.5], "count": 1, "after": true }, { "at": [566.4, 414.9], "count": 1, "after": true }, { "at": [234.9, 874.5], "count": 2, "after": true }]
+   "dots": [{ "at": [2436.3, 367], "count": 1, "after": true }, { "at": [1389, 295.6], "count": 1, "after": true }, { "at": [1296.6, 304.2], "count": 1, "after": true }, { "at": [1141.5, 326.9], "count": 1, "after": true }, { "at": [1049.6, 335.3], "count": 1, "after": true }, { "at": [735.8, 736.5], "count": 1, "after": true }, { "at": [566.4, 414.9], "count": 1, "after": true }, { "at": [279.9, 870.2], "count": 1, "after": true }, { "at": [188.1, 878.9], "count": 1, "after": true }]
   },
   "فِي فَوْقَ": {
    "box": [1976, 1000],
@@ -41935,7 +41935,7 @@ export const WORD_PATHS = {
      [266.9, 225.9], [260.8, 231.3], [254.9, 236.8]
     ] }
    ],
-   "dots": [{ "at": [1764.9, 239.7], "count": 1, "after": true }, { "at": [1392.4, 859.2], "count": 2, "after": true }, { "at": [900.8, 239.6], "count": 1, "after": true }, { "at": [317.4, 328.9], "count": 2, "after": true }]
+   "dots": [{ "at": [1764.9, 239.7], "count": 1, "after": true }, { "at": [1440.7, 854.6], "count": 1, "after": true }, { "at": [1342.9, 864], "count": 1, "after": true }, { "at": [900.8, 239.6], "count": 1, "after": true }, { "at": [365.7, 324.2], "count": 1, "after": true }, { "at": [267.8, 333.7], "count": 1, "after": true }]
   },
   "صَغِيرَةْ تَغْسِلْ": {
    "box": [3520, 1000],
@@ -42040,7 +42040,7 @@ export const WORD_PATHS = {
      [203, 170.1], [219, 168], [234.8, 172.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2737, 337.4], "count": 1, "after": true }, { "at": [2456.9, 809.6], "count": 2, "after": true }, { "at": [1845.8, 324.1], "count": 2, "after": true }, { "at": [1427.6, 346.5], "count": 2, "after": true }, { "at": [1134.3, 337.8], "count": 1, "after": true }]
+   "dots": [{ "at": [2737, 337.4], "count": 1, "after": true }, { "at": [2512.4, 804.3], "count": 1, "after": true }, { "at": [2400.3, 814.9], "count": 1, "after": true }, { "at": [1901.3, 318.9], "count": 1, "after": true }, { "at": [1789.1, 329.4], "count": 1, "after": true }, { "at": [1482.7, 341.3], "count": 1, "after": true }, { "at": [1370.9, 352], "count": 1, "after": true }, { "at": [1134.3, 337.8], "count": 1, "after": true }]
   },
   "يُسَاعِدْ يَجْلِسْ": {
    "box": [3838, 1000],
@@ -42149,7 +42149,7 @@ export const WORD_PATHS = {
      [587.2, 219.7], [604.2, 217.5], [621, 222.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3631.6, 803.8], "count": 2, "after": true }, { "at": [1692.7, 803.8], "count": 2, "after": true }, { "at": [1310.2, 795], "count": 1, "after": true }]
+   "dots": [{ "at": [3690, 798.2], "count": 1, "after": true }, { "at": [3571.6, 809.6], "count": 1, "after": true }, { "at": [1751.4, 798.1], "count": 1, "after": true }, { "at": [1632.8, 809.5], "count": 1, "after": true }, { "at": [1310.2, 795], "count": 1, "after": true }]
   },
   "يَفْتَحْ يُعَالِجْ": {
    "box": [2998, 1000],
@@ -42256,7 +42256,7 @@ export const WORD_PATHS = {
      [294.9, 156.7], [311.1, 154.7], [327, 159.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2802.9, 779.7], "count": 2, "after": true }, { "at": [2535.2, 313.6], "count": 1, "after": true }, { "at": [2262.8, 406.3], "count": 2, "after": true }, { "at": [1329.1, 779.7], "count": 2, "after": true }, { "at": [298.1, 712.5], "count": 1, "after": true }]
+   "dots": [{ "at": [2858.8, 774.4], "count": 1, "after": true }, { "at": [2746.4, 785], "count": 1, "after": true }, { "at": [2535.2, 313.6], "count": 1, "after": true }, { "at": [2318.2, 401], "count": 1, "after": true }, { "at": [2206, 411.7], "count": 1, "after": true }, { "at": [1385, 774.5], "count": 1, "after": true }, { "at": [1272.6, 785], "count": 1, "after": true }, { "at": [298.1, 712.5], "count": 1, "after": true }]
   },
   "صُلْبْ تَطْبُخْ": {
    "box": [2876, 1000],
@@ -42349,7 +42349,7 @@ export const WORD_PATHS = {
      [270.7, 199.1], [285.9, 197.2], [300.8, 201.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [1824.9, 810.8], "count": 1, "after": true }, { "at": [1282.1, 370.9], "count": 2, "after": true }, { "at": [620.7, 810.8], "count": 1, "after": true }, { "at": [281.8, 380.4], "count": 1, "after": true }]
+   "dots": [{ "at": [1824.9, 810.8], "count": 1, "after": true }, { "at": [1333.6, 366], "count": 1, "after": true }, { "at": [1229.3, 376], "count": 1, "after": true }, { "at": [620.7, 810.8], "count": 1, "after": true }, { "at": [281.8, 380.4], "count": 1, "after": true }]
   },
   "حَمْرَاءْ سَاخِنَةْ": {
    "box": [3692, 1000],
@@ -42461,7 +42461,7 @@ export const WORD_PATHS = {
      [207.6, 119.7], [224.2, 117.6], [240.5, 122.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [844.8, 363.3], "count": 1, "after": true }, { "at": [511.4, 439], "count": 1, "after": true }, { "at": [221.4, 333], "count": 2, "after": true }]
+   "dots": [{ "at": [844.8, 363.3], "count": 1, "after": true }, { "at": [511.4, 439], "count": 1, "after": true }, { "at": [279, 327.5], "count": 1, "after": true }, { "at": [162.8, 338.7], "count": 1, "after": true }]
   },
   "تَنْظُرْ مِنَ": {
    "box": [2312, 1000],
@@ -42543,7 +42543,7 @@ export const WORD_PATHS = {
      [186.8, 384.7], [179.8, 390.9], [173.1, 397.2]
     ] }
    ],
-   "dots": [{ "at": [2109.9, 346.7], "count": 2, "after": true }, { "at": [1866.1, 426.3], "count": 1, "after": true }, { "at": [1595.6, 323.3], "count": 1, "after": true }, { "at": [243.8, 491.2], "count": 1, "after": true }]
+   "dots": [{ "at": [2165.7, 341.5], "count": 1, "after": true }, { "at": [2053.4, 352], "count": 1, "after": true }, { "at": [1866.1, 426.3], "count": 1, "after": true }, { "at": [1595.6, 323.3], "count": 1, "after": true }, { "at": [243.8, 491.2], "count": 1, "after": true }]
   },
   "جَمِيلْ يَنْزِلْ": {
    "box": [2838, 1000],
@@ -42633,7 +42633,7 @@ export const WORD_PATHS = {
      [192.7, 123.1], [207.9, 121.2], [222.8, 125.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2565.7, 722.1], "count": 1, "after": true }, { "at": [1907.8, 729.7], "count": 2, "after": true }, { "at": [1075.1, 729.9], "count": 2, "after": true }, { "at": [856.1, 366.5], "count": 1, "after": true }, { "at": [603.1, 311.3], "count": 1, "after": true }]
+   "dots": [{ "at": [2565.7, 722.1], "count": 1, "after": true }, { "at": [1960.3, 724.5], "count": 1, "after": true }, { "at": [1853.9, 735], "count": 1, "after": true }, { "at": [1127.5, 724.9], "count": 1, "after": true }, { "at": [1021.4, 735], "count": 1, "after": true }, { "at": [856.1, 366.5], "count": 1, "after": true }, { "at": [603.1, 311.3], "count": 1, "after": true }]
   },
   "طَوِيلَةْ ثَقِيلَةْ": {
    "box": [2954, 1000],
@@ -42749,7 +42749,7 @@ export const WORD_PATHS = {
      [188.1, 116.1], [202.8, 114.2], [217.3, 118.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2007.8, 749.5], "count": 2, "after": true }, { "at": [1572.6, 304.7], "count": 2, "after": true }, { "at": [1163, 313.3], "count": 3, "after": true }, { "at": [900.8, 331.3], "count": 2, "after": true }, { "at": [651, 749.4], "count": 2, "after": true }, { "at": [200.6, 304.7], "count": 2, "after": true }]
+   "dots": [{ "at": [2058.6, 744.7], "count": 1, "after": true }, { "at": [1956, 754.3], "count": 1, "after": true }, { "at": [1623.2, 299.8], "count": 1, "after": true }, { "at": [1520.6, 309.8], "count": 1, "after": true }, { "at": [1162.9, 274.5], "count": 1, "after": true }, { "at": [1211.8, 325.5], "count": 1, "after": true }, { "at": [1114.4, 334.2], "count": 1, "after": true }, { "at": [951.2, 326.4], "count": 1, "after": true }, { "at": [848.5, 336.2], "count": 1, "after": true }, { "at": [702.2, 744.5], "count": 1, "after": true }, { "at": [599.4, 754.4], "count": 1, "after": true }, { "at": [251.2, 299.8], "count": 1, "after": true }, { "at": [148.6, 309.8], "count": 1, "after": true }]
   },
   "طَوِيلْ يَلْبَسْ": {
    "box": [2822, 1000],
@@ -42851,7 +42851,7 @@ export const WORD_PATHS = {
      [496.6, 275.5], [510.7, 273.7], [524.6, 277.5]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [1917.8, 757.1], "count": 2, "after": true }, { "at": [1166.4, 757.2], "count": 2, "after": true }, { "at": [808.6, 764.8], "count": 1, "after": true }]
+   "dots": [{ "at": [1966.1, 752.4], "count": 1, "after": true }, { "at": [1868.4, 761.9], "count": 1, "after": true }, { "at": [1214.6, 752.5], "count": 1, "after": true }, { "at": [1116.9, 761.9], "count": 1, "after": true }, { "at": [808.6, 764.8], "count": 1, "after": true }]
   },
   "يَزْرَعْ تَقِفْ": {
    "box": [2640, 1000],
@@ -42939,7 +42939,7 @@ export const WORD_PATHS = {
      [492.3, 139.7], [508, 137.7], [523.5, 142.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2449, 784.2], "count": 2, "after": true }, { "at": [2178.8, 358.4], "count": 1, "after": true }, { "at": [1053.6, 337.6], "count": 2, "after": true }, { "at": [781.5, 344], "count": 2, "after": true }, { "at": [504.4, 328.2], "count": 1, "after": true }]
+   "dots": [{ "at": [2502.3, 779.1], "count": 1, "after": true }, { "at": [2394.3, 789.5], "count": 1, "after": true }, { "at": [2178.8, 358.4], "count": 1, "after": true }, { "at": [1107.1, 332.4], "count": 1, "after": true }, { "at": [998.9, 342.9], "count": 1, "after": true }, { "at": [835, 338.9], "count": 1, "after": true }, { "at": [726.7, 349.2], "count": 1, "after": true }, { "at": [504.4, 328.2], "count": 1, "after": true }]
   },
   "كَاتِبْ كِتَابَةْ": {
    "box": [3074, 1000],
@@ -43036,7 +43036,7 @@ export const WORD_PATHS = {
      [206.4, 119.4], [223.2, 117.3], [239.7, 121.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2348.1, 356.2], "count": 2, "after": true }, { "at": [1884.7, 846], "count": 1, "after": true }, { "at": [949, 449], "count": 2, "after": true }, { "at": [498.6, 846.1], "count": 1, "after": true }, { "at": [220.6, 333.2], "count": 2, "after": true }]
+   "dots": [{ "at": [2405.9, 350.6], "count": 1, "after": true }, { "at": [2289.6, 361.9], "count": 1, "after": true }, { "at": [1884.7, 846], "count": 1, "after": true }, { "at": [1006.6, 443.6], "count": 1, "after": true }, { "at": [890.2, 454.6], "count": 1, "after": true }, { "at": [498.6, 846.1], "count": 1, "after": true }, { "at": [278, 327.7], "count": 1, "after": true }, { "at": [161.7, 338.9], "count": 1, "after": true }]
   },
   "دَرَسْ دِرَاسَةْ": {
    "box": [3236, 1000],
@@ -43131,7 +43131,7 @@ export const WORD_PATHS = {
      [209, 118.1], [225, 116], [240.8, 120.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [223.6, 324.2], "count": 2, "after": true }]
+   "dots": [{ "at": [278.9, 319], "count": 1, "after": true }, { "at": [166.9, 329.6], "count": 1, "after": true }]
   },
   "عِلْمْ عَالِمْ": {
    "box": [2176, 1000],
@@ -43400,7 +43400,7 @@ export const WORD_PATHS = {
      [309.4, 308.1], [325, 306.1], [340.3, 310.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [1970.6, 850.2], "count": 1, "after": true }, { "at": [1697.9, 373.5], "count": 2, "after": true }, { "at": [341.7, 850.2], "count": 1, "after": true }]
+   "dots": [{ "at": [1970.6, 850.2], "count": 1, "after": true }, { "at": [1751.2, 368.4], "count": 1, "after": true }, { "at": [1643.1, 378.8], "count": 1, "after": true }, { "at": [341.7, 850.2], "count": 1, "after": true }]
   },
   "طَيَّارَةْ طَيَّارْ": {
    "box": [3286, 1000],
@@ -43521,7 +43521,7 @@ export const WORD_PATHS = {
      [257.2, 209.7], [274.2, 207.5], [291, 212.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2570.7, 851.1], "count": 2, "after": true }, { "at": [1738.6, 337.8], "count": 2, "after": true }, { "at": [767.1, 850.9], "count": 2, "after": true }]
+   "dots": [{ "at": [2629.2, 845.5], "count": 1, "after": true }, { "at": [2510.7, 856.9], "count": 1, "after": true }, { "at": [1797.5, 332.1], "count": 1, "after": true }, { "at": [1678.9, 343.6], "count": 1, "after": true }, { "at": [825.5, 845.3], "count": 1, "after": true }, { "at": [706.9, 856.7], "count": 1, "after": true }]
   },
   "مَرَضْ مَرِيضْ": {
    "box": [3174, 1000],
@@ -43606,7 +43606,7 @@ export const WORD_PATHS = {
      [532, 118.8], [546.8, 116.9], [561.4, 121]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2267.5, 297.2], "count": 1, "after": true }, { "at": [916.8, 735.8], "count": 2, "after": true }, { "at": [543.4, 297.1], "count": 1, "after": true }]
+   "dots": [{ "at": [2267.5, 297.2], "count": 1, "after": true }, { "at": [967.7, 730.9], "count": 1, "after": true }, { "at": [864.9, 740.8], "count": 1, "after": true }, { "at": [543.4, 297.1], "count": 1, "after": true }]
   },
   "ثَلْجْ ثَلَّاجَةْ": {
    "box": [2384, 1000],
@@ -43703,7 +43703,7 @@ export const WORD_PATHS = {
      [188.6, 203.5], [202.7, 201.7], [216.6, 205.5]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2210.1, 389], "count": 3, "after": true }, { "at": [1714.1, 740.2], "count": 1, "after": true }, { "at": [1265.3, 388.8], "count": 3, "after": true }, { "at": [566.9, 791], "count": 1, "after": true }, { "at": [200.2, 380.8], "count": 2, "after": true }]
+   "dots": [{ "at": [2210.3, 352.4], "count": 1, "after": true }, { "at": [2255.9, 400.6], "count": 1, "after": true }, { "at": [2164.1, 408.9], "count": 1, "after": true }, { "at": [1714.1, 740.2], "count": 1, "after": true }, { "at": [1264.9, 352.5], "count": 1, "after": true }, { "at": [1311.5, 400.4], "count": 1, "after": true }, { "at": [1219.8, 408.8], "count": 1, "after": true }, { "at": [566.9, 791], "count": 1, "after": true }, { "at": [248, 376.4], "count": 1, "after": true }, { "at": [151.5, 385.4], "count": 1, "after": true }]
   },
   "رَسْمْ رَسَّامْ": {
    "box": [2908, 1000],
@@ -43897,7 +43897,7 @@ export const WORD_PATHS = {
      [308.4, 231.4], [325.2, 229.3], [341.7, 233.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3715.8, 398.7], "count": 3, "after": true }, { "at": [2635.4, 814.9], "count": 1, "after": true }, { "at": [1586.1, 398.6], "count": 3, "after": true }, { "at": [327.7, 814.9], "count": 1, "after": true }]
+   "dots": [{ "at": [3715.5, 354.7], "count": 1, "after": true }, { "at": [3771.3, 412.4], "count": 1, "after": true }, { "at": [3660.4, 422.8], "count": 1, "after": true }, { "at": [2635.4, 814.9], "count": 1, "after": true }, { "at": [1585.8, 354.7], "count": 1, "after": true }, { "at": [1641.5, 412.4], "count": 1, "after": true }, { "at": [1531, 422.6], "count": 1, "after": true }, { "at": [327.7, 814.9], "count": 1, "after": true }]
   },
   "جَمَاعَةْ مَجْمُوعَةْ": {
    "box": [4000, 1000],
@@ -44026,7 +44026,7 @@ export const WORD_PATHS = {
      [199.5, 155.5], [214.9, 153.5], [230.1, 157.7]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3734.5, 810.3], "count": 1, "after": true }, { "at": [2487.4, 352.7], "count": 2, "after": true }, { "at": [1612.6, 810.3], "count": 1, "after": true }, { "at": [211.4, 352.6], "count": 2, "after": true }]
+   "dots": [{ "at": [3734.5, 810.3], "count": 1, "after": true }, { "at": [2540.3, 347.7], "count": 1, "after": true }, { "at": [2432.9, 357.9], "count": 1, "after": true }, { "at": [1612.6, 810.3], "count": 1, "after": true }, { "at": [264.6, 347.4], "count": 1, "after": true }, { "at": [157.2, 357.9], "count": 1, "after": true }]
   },
   "رِيحْ مِرْوَحَةْ": {
    "box": [2828, 1000],
@@ -44126,7 +44126,7 @@ export const WORD_PATHS = {
      [195.3, 115.8], [209.7, 113.9], [223.9, 117.9]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2386.3, 738.7], "count": 2, "after": true }, { "at": [207, 301], "count": 2, "after": true }]
+   "dots": [{ "at": [2436.3, 734], "count": 1, "after": true }, { "at": [2335.4, 743.5], "count": 1, "after": true }, { "at": [256.6, 296.2], "count": 1, "after": true }, { "at": [155.9, 306], "count": 1, "after": true }]
   },
   "رَاكِبْ مَرْكَبَةْ": {
    "box": [3258, 1000],
@@ -44230,7 +44230,7 @@ export const WORD_PATHS = {
      [200.4, 119.4], [217.2, 117.3], [233.7, 121.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2083.3, 845.5], "count": 1, "after": true }, { "at": [508.7, 845.8], "count": 1, "after": true }, { "at": [215.4, 333], "count": 2, "after": true }]
+   "dots": [{ "at": [2083.3, 845.5], "count": 1, "after": true }, { "at": [508.7, 845.8], "count": 1, "after": true }, { "at": [272.8, 327.5], "count": 1, "after": true }, { "at": [156.5, 338.6], "count": 1, "after": true }]
   },
   "الْغُرْفَةُ وَاسِعَةْ": {
    "box": [3460, 1000],
@@ -44353,7 +44353,7 @@ export const WORD_PATHS = {
      [204.3, 161.7], [220, 159.7], [235.5, 164.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2930.7, 377.1], "count": 1, "after": true }, { "at": [2308.5, 317.1], "count": 1, "after": true }, { "at": [2012.6, 363.8], "count": 2, "after": true }, { "at": [217.8, 363.9], "count": 2, "after": true }]
+   "dots": [{ "at": [2930.7, 377.1], "count": 1, "after": true }, { "at": [2308.5, 317.1], "count": 1, "after": true }, { "at": [2066.6, 358.4], "count": 1, "after": true }, { "at": [1956.7, 369.4], "count": 1, "after": true }, { "at": [272.1, 358.7], "count": 1, "after": true }, { "at": [162.1, 369.2], "count": 1, "after": true }]
   },
   "السَّرِيرُ نَظِيفْ": {
    "box": [3266, 1000],
@@ -44459,7 +44459,7 @@ export const WORD_PATHS = {
      [472, 110.8], [486.8, 108.9], [501.4, 113]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2045.1, 732.9], "count": 2, "after": true }, { "at": [1393.5, 292.2], "count": 1, "after": true }, { "at": [1155.2, 279.7], "count": 1, "after": true }, { "at": [748.6, 732.9], "count": 2, "after": true }, { "at": [483.3, 292.1], "count": 1, "after": true }]
+   "dots": [{ "at": [2096.7, 727.9], "count": 1, "after": true }, { "at": [1992.1, 737.9], "count": 1, "after": true }, { "at": [1393.5, 292.2], "count": 1, "after": true }, { "at": [1155.2, 279.7], "count": 1, "after": true }, { "at": [800, 727.8], "count": 1, "after": true }, { "at": [695.6, 738], "count": 1, "after": true }, { "at": [483.3, 292.1], "count": 1, "after": true }]
   },
   "النَّافِذَةُ مَفْتُوحَةْ": {
    "box": [4000, 1000],
@@ -44598,7 +44598,7 @@ export const WORD_PATHS = {
      [202.9, 142.7], [219.1, 140.7], [235, 145.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3517.1, 448.8], "count": 1, "after": true }, { "at": [3040.7, 300.2], "count": 1, "after": true }, { "at": [2718.2, 346], "count": 1, "after": true }, { "at": [2389.8, 347.7], "count": 2, "after": true }, { "at": [1611.3, 366.9], "count": 1, "after": true }, { "at": [1341, 458.7], "count": 2, "after": true }, { "at": [216.8, 347.6], "count": 2, "after": true }]
+   "dots": [{ "at": [3517.1, 448.8], "count": 1, "after": true }, { "at": [3040.7, 300.2], "count": 1, "after": true }, { "at": [2718.2, 346], "count": 1, "after": true }, { "at": [2444.8, 342.4], "count": 1, "after": true }, { "at": [2333.6, 353.1], "count": 1, "after": true }, { "at": [1611.3, 366.9], "count": 1, "after": true }, { "at": [1395.8, 453.5], "count": 1, "after": true }, { "at": [1284.6, 464.1], "count": 1, "after": true }, { "at": [271.8, 342.4], "count": 1, "after": true }, { "at": [160.8, 352.9], "count": 1, "after": true }]
   },
   "الْمَقْعَدُ صَغِيرْ": {
    "box": [3314, 1000],
@@ -44710,7 +44710,7 @@ export const WORD_PATHS = {
      [240.3, 245.7], [256, 243.7], [271.5, 248.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2497.7, 392.5], "count": 2, "after": true }, { "at": [815.8, 377.1], "count": 1, "after": true }, { "at": [541.2, 840.5], "count": 2, "after": true }]
+   "dots": [{ "at": [2552.2, 387.3], "count": 1, "after": true }, { "at": [2442.3, 397.8], "count": 1, "after": true }, { "at": [815.8, 377.1], "count": 1, "after": true }, { "at": [595.4, 835.3], "count": 1, "after": true }, { "at": [485.3, 846], "count": 1, "after": true }]
   },
   "السَّاعَةُ جَمِيلَةْ": {
    "box": [3612, 1000],
@@ -44827,7 +44827,7 @@ export const WORD_PATHS = {
      [201.6, 133], [218.1, 131], [234.3, 135.5]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [1982.6, 343.7], "count": 2, "after": true }, { "at": [1423.1, 829.8], "count": 1, "after": true }, { "at": [716.5, 838], "count": 2, "after": true }, { "at": [215.3, 343.8], "count": 2, "after": true }]
+   "dots": [{ "at": [2038.6, 338.3], "count": 1, "after": true }, { "at": [1924.6, 349.2], "count": 1, "after": true }, { "at": [1423.1, 829.8], "count": 1, "after": true }, { "at": [772.8, 832.5], "count": 1, "after": true }, { "at": [658.8, 843.6], "count": 1, "after": true }, { "at": [271.9, 338.5], "count": 1, "after": true }, { "at": [157.8, 349.2], "count": 1, "after": true }]
   },
   "الْمِصْبَاحُ مُنِيرْ": {
    "box": [3268, 1000],
@@ -44945,7 +44945,7 @@ export const WORD_PATHS = {
      [232, 234.8], [246.8, 232.9], [261.4, 237]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2004.3, 798.5], "count": 1, "after": true }, { "at": [731.4, 439.1], "count": 1, "after": true }, { "at": [513.4, 790.4], "count": 2, "after": true }]
+   "dots": [{ "at": [2004.3, 798.5], "count": 1, "after": true }, { "at": [731.4, 439.1], "count": 1, "after": true }, { "at": [564, 785.6], "count": 1, "after": true }, { "at": [461.4, 795.3], "count": 1, "after": true }]
   },
   "الصَّحْنُ كَبِيرْ": {
    "box": [2996, 1000],
@@ -45042,7 +45042,7 @@ export const WORD_PATHS = {
      [228, 194.8], [242.8, 192.9], [257.4, 197]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [1442, 457.5], "count": 1, "after": true }, { "at": [729.9, 757.4], "count": 1, "after": true }, { "at": [508.3, 749.5], "count": 2, "after": true }]
+   "dots": [{ "at": [1442, 457.5], "count": 1, "after": true }, { "at": [729.9, 757.4], "count": 1, "after": true }, { "at": [559.1, 744.7], "count": 1, "after": true }, { "at": [456.3, 754.4], "count": 1, "after": true }]
   },
   "الْكُوبُ صَغِيرْ": {
    "box": [3328, 1000],
@@ -45136,7 +45136,7 @@ export const WORD_PATHS = {
      [236.3, 245.7], [252, 243.7], [267.5, 248.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [1974.1, 849.3], "count": 1, "after": true }, { "at": [811.3, 376.9], "count": 1, "after": true }, { "at": [536.8, 840.5], "count": 2, "after": true }]
+   "dots": [{ "at": [1974.1, 849.3], "count": 1, "after": true }, { "at": [811.3, 376.9], "count": 1, "after": true }, { "at": [591.2, 835.4], "count": 1, "after": true }, { "at": [481, 845.8], "count": 1, "after": true }]
   },
   "السِّكِّينُ حَادَّةْ": {
    "box": [3248, 1000],
@@ -45250,7 +45250,7 @@ export const WORD_PATHS = {
      [176.7, 159.1], [191.9, 157.2], [206.8, 161.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [1974.4, 814.8], "count": 2, "after": true }, { "at": [1616.2, 512.9], "count": 1, "after": true }, { "at": [189.1, 354.3], "count": 2, "after": true }]
+   "dots": [{ "at": [2026.9, 809.7], "count": 1, "after": true }, { "at": [1920.6, 819.9], "count": 1, "after": true }, { "at": [1616.2, 512.9], "count": 1, "after": true }, { "at": [241.7, 349.3], "count": 1, "after": true }, { "at": [135.6, 359.3], "count": 1, "after": true }]
   },
   "الْحَمَّامُ نَظِيفْ": {
    "box": [3228, 1000],
@@ -45365,7 +45365,7 @@ export const WORD_PATHS = {
      [462, 178.8], [476.8, 176.9], [491.4, 181]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [1369.4, 357.1], "count": 1, "after": true }, { "at": [1135.1, 344.6], "count": 1, "after": true }, { "at": [734.8, 790.5], "count": 2, "after": true }, { "at": [473.8, 357.3], "count": 1, "after": true }]
+   "dots": [{ "at": [1369.4, 357.1], "count": 1, "after": true }, { "at": [1135.1, 344.6], "count": 1, "after": true }, { "at": [785.6, 785.8], "count": 1, "after": true }, { "at": [682.9, 795.3], "count": 1, "after": true }, { "at": [473.8, 357.3], "count": 1, "after": true }]
   },
   "السَّلَّةُ كَبِيرَةْ": {
    "box": [2506, 1000],
@@ -45477,7 +45477,7 @@ export const WORD_PATHS = {
      [158.3, 198.5], [171.5, 196.8], [184.5, 200.5]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [1482.5, 367.7], "count": 2, "after": true }, { "at": [870.2, 773.4], "count": 1, "after": true }, { "at": [671.4, 766], "count": 2, "after": true }, { "at": [170, 367.6], "count": 2, "after": true }]
+   "dots": [{ "at": [1527.6, 363.2], "count": 1, "after": true }, { "at": [1436, 372.4], "count": 1, "after": true }, { "at": [870.2, 773.4], "count": 1, "after": true }, { "at": [717.1, 761.8], "count": 1, "after": true }, { "at": [624.8, 770.3], "count": 1, "after": true }, { "at": [215.3, 363.2], "count": 1, "after": true }, { "at": [123.2, 372.1], "count": 1, "after": true }]
   },
   "التِّلْفَازُ كَبِيرْ": {
    "box": [2600, 1000],
@@ -45588,7 +45588,7 @@ export const WORD_PATHS = {
      [219.6, 228.5], [233.7, 226.7], [247.5, 230.6]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2151.5, 430.9], "count": 2, "after": true }, { "at": [1743.7, 350.2], "count": 1, "after": true }, { "at": [1328.4, 371.9], "count": 1, "after": true }, { "at": [698, 764.9], "count": 1, "after": true }, { "at": [487.3, 756.8], "count": 2, "after": true }]
+   "dots": [{ "at": [2199.5, 426.4], "count": 1, "after": true }, { "at": [2101.8, 435.7], "count": 1, "after": true }, { "at": [1743.7, 350.2], "count": 1, "after": true }, { "at": [1328.4, 371.9], "count": 1, "after": true }, { "at": [698, 764.9], "count": 1, "after": true }, { "at": [535.4, 752.4], "count": 1, "after": true }, { "at": [437.7, 761.5], "count": 1, "after": true }]
   },
   "الْهَاتِفُ صَغِيرْ": {
    "box": [3402, 1000],
@@ -45692,7 +45692,7 @@ export const WORD_PATHS = {
      [245.1, 245.4], [261, 243.3], [276.6, 247.7]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2444.6, 385.9], "count": 2, "after": true }, { "at": [2168.9, 376.3], "count": 1, "after": true }, { "at": [820.8, 377], "count": 1, "after": true }, { "at": [545.9, 840.7], "count": 2, "after": true }]
+   "dots": [{ "at": [2498.8, 380.7], "count": 1, "after": true }, { "at": [2389, 391.4], "count": 1, "after": true }, { "at": [2168.9, 376.3], "count": 1, "after": true }, { "at": [820.8, 377], "count": 1, "after": true }, { "at": [600.5, 835.6], "count": 1, "after": true }, { "at": [490.4, 846], "count": 1, "after": true }]
   },
   "الْحَدِيقَةُ جَمِيلَةْ": {
    "box": [3826, 1000],
@@ -45816,7 +45816,7 @@ export const WORD_PATHS = {
      [194.3, 161.7], [210, 159.7], [225.5, 164.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2481.6, 840.5], "count": 2, "after": true }, { "at": [2217.7, 392.5], "count": 2, "after": true }, { "at": [1911, 364], "count": 2, "after": true }, { "at": [1371.9, 832.5], "count": 1, "after": true }, { "at": [690.8, 840.6], "count": 2, "after": true }, { "at": [207.2, 363.9], "count": 2, "after": true }]
+   "dots": [{ "at": [2535.8, 835.3], "count": 1, "after": true }, { "at": [2426, 845.9], "count": 1, "after": true }, { "at": [2272.2, 387.3], "count": 1, "after": true }, { "at": [2162.3, 397.8], "count": 1, "after": true }, { "at": [1965.5, 358.9], "count": 1, "after": true }, { "at": [1855.5, 369.1], "count": 1, "after": true }, { "at": [1371.9, 832.5], "count": 1, "after": true }, { "at": [745.3, 835.3], "count": 1, "after": true }, { "at": [635.1, 845.9], "count": 1, "after": true }, { "at": [261.8, 358.8], "count": 1, "after": true }, { "at": [151.6, 369.2], "count": 1, "after": true }]
   },
   "الْوِسَادَةُ نَاعِمَةْ": {
    "box": [3152, 1000],
@@ -45942,7 +45942,7 @@ export const WORD_PATHS = {
      [183.8, 153.2], [197.6, 151.4], [211.2, 155.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [1524.2, 329.6], "count": 2, "after": true }, { "at": [1172.8, 340.5], "count": 1, "after": true }, { "at": [195.5, 329.5], "count": 2, "after": true }]
+   "dots": [{ "at": [1571.5, 325], "count": 1, "after": true }, { "at": [1475.4, 334.3], "count": 1, "after": true }, { "at": [1172.8, 340.5], "count": 1, "after": true }, { "at": [243.1, 325], "count": 1, "after": true }, { "at": [146.7, 334.2], "count": 1, "after": true }]
   },
   "الْمِرْوَحَةُ تَدُورْ": {
    "box": [3606, 1000],
@@ -46066,7 +46066,7 @@ export const WORD_PATHS = {
      [242.3, 245.7], [258, 243.7], [273.5, 248.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [1660.1, 363.9], "count": 2, "after": true }, { "at": [1216.6, 385.8], "count": 2, "after": true }]
+   "dots": [{ "at": [1714.3, 358.6], "count": 1, "after": true }, { "at": [1604.3, 369.3], "count": 1, "after": true }, { "at": [1270.6, 380.4], "count": 1, "after": true }, { "at": [1160.7, 391.3], "count": 1, "after": true }]
   },
   "الْخِزَانَةُ كَبِيرَةْ": {
    "box": [3096, 1000],
@@ -46186,7 +46186,7 @@ export const WORD_PATHS = {
      [164.6, 153.5], [178.7, 151.7], [192.6, 155.5]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2503.3, 358.7], "count": 1, "after": true }, { "at": [2180, 371.6], "count": 1, "after": true }, { "at": [1803, 344.3], "count": 1, "after": true }, { "at": [1572.5, 333.4], "count": 2, "after": true }, { "at": [921.2, 764.6], "count": 1, "after": true }, { "at": [709.9, 757.1], "count": 2, "after": true }, { "at": [176.5, 333.4], "count": 2, "after": true }]
+   "dots": [{ "at": [2503.3, 358.7], "count": 1, "after": true }, { "at": [2180, 371.6], "count": 1, "after": true }, { "at": [1803, 344.3], "count": 1, "after": true }, { "at": [1620.7, 328.8], "count": 1, "after": true }, { "at": [1522.8, 338.2], "count": 1, "after": true }, { "at": [921.2, 764.6], "count": 1, "after": true }, { "at": [758.3, 752.4], "count": 1, "after": true }, { "at": [660.6, 761.9], "count": 1, "after": true }, { "at": [224.7, 328.8], "count": 1, "after": true }, { "at": [126.8, 338.2], "count": 1, "after": true }]
   },
   "الْمِظَلَّةُ مَفْتُوحَةْ": {
    "box": [3624, 1000],
@@ -46331,7 +46331,7 @@ export const WORD_PATHS = {
      [190, 210.8], [204.8, 208.9], [219.4, 213]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2844.5, 399.7], "count": 1, "after": true }, { "at": [2240, 400.2], "count": 2, "after": true }, { "at": [1490.2, 417.9], "count": 1, "after": true }, { "at": [1240.3, 502.8], "count": 2, "after": true }, { "at": [203.3, 400.3], "count": 2, "after": true }]
+   "dots": [{ "at": [2844.5, 399.7], "count": 1, "after": true }, { "at": [2290.3, 395.5], "count": 1, "after": true }, { "at": [2187.6, 405.2], "count": 1, "after": true }, { "at": [1490.2, 417.9], "count": 1, "after": true }, { "at": [1291.1, 497.9], "count": 1, "after": true }, { "at": [1188.2, 507.8], "count": 1, "after": true }, { "at": [254, 395.5], "count": 1, "after": true }, { "at": [151.2, 405.2], "count": 1, "after": true }]
   },
   "الْقِدْرُ سَاخِنْ": {
    "box": [2952, 1000],
@@ -46428,7 +46428,7 @@ export const WORD_PATHS = {
      [224.6, 327.8], [239.9, 325.8], [254.9, 330]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2455.1, 382], "count": 2, "after": true }, { "at": [664.2, 381.7], "count": 1, "after": true }, { "at": [236.5, 512.9], "count": 1, "after": true }]
+   "dots": [{ "at": [2507.6, 377], "count": 1, "after": true }, { "at": [2401.4, 387.2], "count": 1, "after": true }, { "at": [664.2, 381.7], "count": 1, "after": true }, { "at": [236.5, 512.9], "count": 1, "after": true }]
   },
   "الصُّنْبُورُ نَظِيفْ": {
    "box": [3662, 1000],
@@ -46550,7 +46550,7 @@ export const WORD_PATHS = {
      [484.3, 197.7], [500, 195.7], [515.5, 200.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2634.3, 472.1], "count": 1, "after": true }, { "at": [2427.8, 850.3], "count": 1, "after": true }, { "at": [1438.7, 385.7], "count": 1, "after": true }, { "at": [1191.9, 372.7], "count": 1, "after": true }, { "at": [770.9, 841.8], "count": 2, "after": true }, { "at": [496.4, 385.8], "count": 1, "after": true }]
+   "dots": [{ "at": [2634.3, 472.1], "count": 1, "after": true }, { "at": [2427.8, 850.3], "count": 1, "after": true }, { "at": [1438.7, 385.7], "count": 1, "after": true }, { "at": [1191.9, 372.7], "count": 1, "after": true }, { "at": [824.1, 836.8], "count": 1, "after": true }, { "at": [716.2, 846.9], "count": 1, "after": true }, { "at": [496.4, 385.8], "count": 1, "after": true }]
   },
   "الصَّابُونُ فِي الْحَمَّامْ": {
    "box": [4000, 1000],
@@ -46700,7 +46700,7 @@ export const WORD_PATHS = {
      [186.7, 229.9], [199.4, 228.3], [211.8, 231.7]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2993.7, 720.5], "count": 1, "after": true }, { "at": [2454.7, 463.4], "count": 1, "after": true }, { "at": [2027.1, 294.8], "count": 1, "after": true }, { "at": [1691.3, 852.7], "count": 2, "after": true }]
+   "dots": [{ "at": [2993.7, 720.5], "count": 1, "after": true }, { "at": [2454.7, 463.4], "count": 1, "after": true }, { "at": [2027.1, 294.8], "count": 1, "after": true }, { "at": [1735.1, 848.5], "count": 1, "after": true }, { "at": [1646.9, 856.8], "count": 1, "after": true }]
   },
   "الْوِسَادَةُ فَوْقَ السَّرِيرْ": {
    "box": [4000, 1000],
@@ -46864,7 +46864,7 @@ export const WORD_PATHS = {
      [201.2, 261.2], [213.3, 259.7], [225.1, 263]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2569.2, 351.2], "count": 2, "after": true }, { "at": [2210.2, 315.5], "count": 1, "after": true }, { "at": [1709.5, 392.1], "count": 2, "after": true }, { "at": [418.3, 715], "count": 2, "after": true }]
+   "dots": [{ "at": [2610.9, 347.2], "count": 1, "after": true }, { "at": [2527.1, 355.2], "count": 1, "after": true }, { "at": [2210.2, 315.5], "count": 1, "after": true }, { "at": [1750.8, 388], "count": 1, "after": true }, { "at": [1666.9, 396.2], "count": 1, "after": true }, { "at": [459.6, 711], "count": 1, "after": true }, { "at": [375.8, 719.1], "count": 1, "after": true }]
   },
   "السَّاعَةُ فَوْقَ الْجِدَارْ": {
    "box": [4000, 1000],
@@ -47019,7 +47019,7 @@ export const WORD_PATHS = {
      [213.6, 259.5], [226.4, 257.9], [239, 261.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2709.6, 354.9], "count": 2, "after": true }, { "at": [2303.8, 317], "count": 1, "after": true }, { "at": [1775.4, 397.9], "count": 2, "after": true }, { "at": [957.4, 732.1], "count": 1, "after": true }]
+   "dots": [{ "at": [2753.4, 350.8], "count": 1, "after": true }, { "at": [2664.9, 359], "count": 1, "after": true }, { "at": [2303.8, 317], "count": 1, "after": true }, { "at": [1819, 393.6], "count": 1, "after": true }, { "at": [1730.5, 402.3], "count": 1, "after": true }, { "at": [957.4, 732.1], "count": 1, "after": true }]
   },
   "الْمِكْنَسَةُ خَلْفَ الْبَابْ": {
    "box": [4000, 1000],
@@ -47178,7 +47178,7 @@ export const WORD_PATHS = {
      [260.7, 337.9], [273.4, 336.3], [285.8, 339.7]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3087.5, 471], "count": 1, "after": true }, { "at": [2479.6, 391], "count": 2, "after": true }, { "at": [2013.6, 413.9], "count": 1, "after": true }, { "at": [1588.8, 401], "count": 1, "after": true }, { "at": [748.6, 779.3], "count": 1, "after": true }, { "at": [276, 779.3], "count": 1, "after": true }]
+   "dots": [{ "at": [3087.5, 471], "count": 1, "after": true }, { "at": [2523.1, 386.9], "count": 1, "after": true }, { "at": [2435.3, 395.1], "count": 1, "after": true }, { "at": [2013.6, 413.9], "count": 1, "after": true }, { "at": [1588.8, 401], "count": 1, "after": true }, { "at": [748.6, 779.3], "count": 1, "after": true }, { "at": [276, 779.3], "count": 1, "after": true }]
   },
   "الْقِدْرُ فِي الْمَطْبَخْ": {
    "box": [3646, 1000],
@@ -47322,7 +47322,7 @@ export const WORD_PATHS = {
      [245.1, 186.8], [258.6, 185.1], [271.9, 188.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3187.9, 346.6], "count": 2, "after": true }, { "at": [2246.7, 282.4], "count": 1, "after": true }, { "at": [1890.9, 873.8], "count": 2, "after": true }, { "at": [558.9, 734.1], "count": 1, "after": true }, { "at": [256, 349.5], "count": 1, "after": true }]
+   "dots": [{ "at": [3234.3, 342.2], "count": 1, "after": true }, { "at": [3140.9, 351], "count": 1, "after": true }, { "at": [2246.7, 282.4], "count": 1, "after": true }, { "at": [1937.2, 869.4], "count": 1, "after": true }, { "at": [1844.1, 878.3], "count": 1, "after": true }, { "at": [558.9, 734.1], "count": 1, "after": true }, { "at": [256, 349.5], "count": 1, "after": true }]
   },
   "الْمِفْتَاحُ تَحْتَ الْوِسَادَةْ": {
    "box": [4000, 1000],
@@ -47493,7 +47493,7 @@ export const WORD_PATHS = {
      [151.8, 221.9], [163.2, 220.5], [174.3, 223.6]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3386.1, 379.9], "count": 1, "after": true }, { "at": [3195.4, 444.5], "count": 2, "after": true }, { "at": [2435.1, 381.9], "count": 2, "after": true }, { "at": [1754.8, 439.1], "count": 2, "after": true }, { "at": [160.8, 366.4], "count": 2, "after": true }]
+   "dots": [{ "at": [3386.1, 379.9], "count": 1, "after": true }, { "at": [3234.2, 440.6], "count": 1, "after": true }, { "at": [3155.5, 448.5], "count": 1, "after": true }, { "at": [2473.9, 378.3], "count": 1, "after": true }, { "at": [2395.4, 385.7], "count": 1, "after": true }, { "at": [1793.7, 435.4], "count": 1, "after": true }, { "at": [1715.3, 443], "count": 1, "after": true }, { "at": [199.4, 362.7], "count": 1, "after": true }, { "at": [121, 370.1], "count": 1, "after": true }]
   },
   "التِّلْفَازُ أَمَامَ الْمَقْعَدْ": {
    "box": [3810, 1000],
@@ -47671,7 +47671,7 @@ export const WORD_PATHS = {
      [200.3, 284.5], [213.5, 282.8], [226.5, 286.5]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3376.2, 502.4], "count": 2, "after": true }, { "at": [2998.4, 427.6], "count": 1, "after": true }, { "at": [2613.8, 447.4], "count": 1, "after": true }, { "at": [726.8, 435.4], "count": 2, "after": true }]
+   "dots": [{ "at": [3421.1, 498], "count": 1, "after": true }, { "at": [3330.4, 506.8], "count": 1, "after": true }, { "at": [2998.4, 427.6], "count": 1, "after": true }, { "at": [2613.8, 447.4], "count": 1, "after": true }, { "at": [771.9, 431], "count": 1, "after": true }, { "at": [680.9, 439.8], "count": 1, "after": true }]
   },
   "الْمِلْعَقَةُ الصَّغِيرَةُ فِي الصَّحْنْ": {
    "box": [4000, 1000],
@@ -47881,7 +47881,7 @@ export const WORD_PATHS = {
      [172.7, 362.4], [181.7, 361.1], [190.5, 363.6]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3228.9, 394.5], "count": 2, "after": true }, { "at": [3057.4, 378.4], "count": 2, "after": true }, { "at": [2284.9, 385.5], "count": 1, "after": true }, { "at": [2131.5, 645], "count": 2, "after": true }, { "at": [1794.5, 378.4], "count": 2, "after": true }, { "at": [1531.3, 351.8], "count": 1, "after": true }, { "at": [1296.5, 742.2], "count": 2, "after": true }, { "at": [179.6, 469.9], "count": 1, "after": true }]
+   "dots": [{ "at": [3259.5, 391.6], "count": 1, "after": true }, { "at": [3198, 397.5], "count": 1, "after": true }, { "at": [3087.8, 375.7], "count": 1, "after": true }, { "at": [3026.5, 381.3], "count": 1, "after": true }, { "at": [2284.9, 385.5], "count": 1, "after": true }, { "at": [2161.6, 642], "count": 1, "after": true }, { "at": [2100.1, 648.1], "count": 1, "after": true }, { "at": [1825.4, 375.5], "count": 1, "after": true }, { "at": [1763.6, 381.3], "count": 1, "after": true }, { "at": [1531.3, 351.8], "count": 1, "after": true }, { "at": [1327.2, 739.1], "count": 1, "after": true }, { "at": [1265.3, 745.3], "count": 1, "after": true }, { "at": [179.6, 469.9], "count": 1, "after": true }]
   },
   "الْمِصْبَاحُ الْمُنِيرُ فَوْقَ الْخِزَانَةْ": {
    "box": [4000, 1000],
@@ -48102,7 +48102,7 @@ export const WORD_PATHS = {
      [154.7, 294.4], [163.7, 293.1], [172.5, 295.6]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3203.2, 678.9], "count": 1, "after": true }, { "at": [2272.8, 463.1], "count": 1, "after": true }, { "at": [2142.2, 673.8], "count": 2, "after": true }, { "at": [1709.2, 380.9], "count": 1, "after": true }, { "at": [1341.7, 437], "count": 2, "after": true }, { "at": [748.9, 423], "count": 1, "after": true }, { "at": [545.1, 431.2], "count": 1, "after": true }, { "at": [308, 413.8], "count": 1, "after": true }, { "at": [162.2, 406.9], "count": 2, "after": true }]
+   "dots": [{ "at": [3203.2, 678.9], "count": 1, "after": true }, { "at": [2272.8, 463.1], "count": 1, "after": true }, { "at": [2172.2, 671], "count": 1, "after": true }, { "at": [2110.8, 676.8], "count": 1, "after": true }, { "at": [1709.2, 380.9], "count": 1, "after": true }, { "at": [1372.2, 434], "count": 1, "after": true }, { "at": [1310.4, 440], "count": 1, "after": true }, { "at": [748.9, 423], "count": 1, "after": true }, { "at": [545.1, 431.2], "count": 1, "after": true }, { "at": [308, 413.8], "count": 1, "after": true }, { "at": [192.9, 404.1], "count": 1, "after": true }, { "at": [131.3, 409.7], "count": 1, "after": true }]
   },
   "الْمِرْوَحَةُ تَدُورُ فِي الْغُرْفَةْ": {
    "box": [4000, 1000],
@@ -48302,7 +48302,7 @@ export const WORD_PATHS = {
      [158.9, 240], [168.9, 238.7], [178.7, 241.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2742, 367.7], "count": 2, "after": true }, { "at": [2461.9, 381.6], "count": 2, "after": true }, { "at": [1551.4, 338.2], "count": 1, "after": true }, { "at": [1287.7, 777.5], "count": 2, "after": true }, { "at": [746, 376.1], "count": 1, "after": true }, { "at": [353.9, 338.2], "count": 1, "after": true }, { "at": [167.5, 367.8], "count": 2, "after": true }]
+   "dots": [{ "at": [2776.2, 364.2], "count": 1, "after": true }, { "at": [2706.9, 371.2], "count": 1, "after": true }, { "at": [2496.6, 378.2], "count": 1, "after": true }, { "at": [2427, 384.9], "count": 1, "after": true }, { "at": [1551.4, 338.2], "count": 1, "after": true }, { "at": [1321.8, 774.3], "count": 1, "after": true }, { "at": [1252.4, 780.9], "count": 1, "after": true }, { "at": [746, 376.1], "count": 1, "after": true }, { "at": [353.9, 338.2], "count": 1, "after": true }, { "at": [201.3, 364.7], "count": 1, "after": true }, { "at": [132.2, 371.1], "count": 1, "after": true }]
   },
   "السَّلَّةُ الْكَبِيرَةُ تَحْتَ الْمَقْعَدْ": {
    "box": [4000, 1000],
@@ -48512,7 +48512,7 @@ export const WORD_PATHS = {
      [171.4, 313.4], [180.8, 312.1], [190, 314.7]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3245.7, 405.1], "count": 2, "after": true }, { "at": [2591.3, 695.3], "count": 1, "after": true }, { "at": [2448.9, 690.3], "count": 2, "after": true }, { "at": [2089.6, 405.1], "count": 2, "after": true }, { "at": [1844.3, 418], "count": 2, "after": true }, { "at": [1273.4, 466.5], "count": 2, "after": true }, { "at": [554.2, 422], "count": 2, "after": true }]
+   "dots": [{ "at": [3278.5, 402.1], "count": 1, "after": true }, { "at": [3212.4, 408.2], "count": 1, "after": true }, { "at": [2591.3, 695.3], "count": 1, "after": true }, { "at": [2481.5, 687.3], "count": 1, "after": true }, { "at": [2415.6, 693.4], "count": 1, "after": true }, { "at": [2122.4, 402], "count": 1, "after": true }, { "at": [2056.3, 408.2], "count": 1, "after": true }, { "at": [1876.8, 414.9], "count": 1, "after": true }, { "at": [1811, 421.1], "count": 1, "after": true }, { "at": [1305.7, 463.3], "count": 1, "after": true }, { "at": [1240, 469.7], "count": 1, "after": true }, { "at": [586.4, 419], "count": 1, "after": true }, { "at": [520.9, 425.1], "count": 1, "after": true }]
   },
   "الْحَدِيقَةُ الْوَاسِعَةُ خَلْفَ الْبَيْتْ": {
    "box": [4000, 1000],
@@ -48722,7 +48722,7 @@ export const WORD_PATHS = {
      [202, 372], [210.7, 370.9], [219.2, 373.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3228, 684.2], "count": 2, "after": true }, { "at": [3085.1, 441.1], "count": 2, "after": true }, { "at": [2918.4, 425.8], "count": 2, "after": true }, { "at": [1766.4, 425.8], "count": 2, "after": true }, { "at": [1450.4, 441.3], "count": 1, "after": true }, { "at": [1162.8, 432.4], "count": 1, "after": true }, { "at": [593, 688.8], "count": 1, "after": true }, { "at": [464.7, 684.1], "count": 2, "after": true }, { "at": [209.6, 481.2], "count": 2, "after": true }]
+   "dots": [{ "at": [3257.2, 681.5], "count": 1, "after": true }, { "at": [3197.8, 687.1], "count": 1, "after": true }, { "at": [3114.2, 438.3], "count": 1, "after": true }, { "at": [3054.9, 444.1], "count": 1, "after": true }, { "at": [2947.7, 422.9], "count": 1, "after": true }, { "at": [2888.4, 428.9], "count": 1, "after": true }, { "at": [1795.7, 422.9], "count": 1, "after": true }, { "at": [1736.4, 428.9], "count": 1, "after": true }, { "at": [1450.4, 441.3], "count": 1, "after": true }, { "at": [1162.8, 432.4], "count": 1, "after": true }, { "at": [593, 688.8], "count": 1, "after": true }, { "at": [493.8, 681.3], "count": 1, "after": true }, { "at": [434.2, 687.1], "count": 1, "after": true }, { "at": [238.9, 478.3], "count": 1, "after": true }, { "at": [179.3, 484.2], "count": 1, "after": true }]
   },
   "الدَّلْوُ تَحْتَ الصُّنْبُورِ فِي الْمَطْبَخْ": {
    "box": [4000, 1000],
@@ -48948,7 +48948,7 @@ export const WORD_PATHS = {
      [109.2, 311.7], [117.6, 310.6], [125.8, 312.9]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3261.8, 405.6], "count": 2, "after": true }, { "at": [2763.8, 447.3], "count": 2, "after": true }, { "at": [2014.3, 446.3], "count": 1, "after": true }, { "at": [1904.7, 647.7], "count": 1, "after": true }, { "at": [1341.7, 369.6], "count": 1, "after": true }, { "at": [1122.5, 733.7], "count": 2, "after": true }, { "at": [301.8, 647.7], "count": 1, "after": true }, { "at": [115.1, 411], "count": 1, "after": true }]
+   "dots": [{ "at": [3290.7, 402.9], "count": 1, "after": true }, { "at": [3233, 408.3], "count": 1, "after": true }, { "at": [2791.8, 444.5], "count": 1, "after": true }, { "at": [2734.3, 450.2], "count": 1, "after": true }, { "at": [2014.3, 446.3], "count": 1, "after": true }, { "at": [1904.7, 647.7], "count": 1, "after": true }, { "at": [1341.7, 369.6], "count": 1, "after": true }, { "at": [1151.2, 731], "count": 1, "after": true }, { "at": [1093.8, 736.4], "count": 1, "after": true }, { "at": [301.8, 647.7], "count": 1, "after": true }, { "at": [115.1, 411], "count": 1, "after": true }]
   },
   "أُمِّي تَغْسِلُ الصَّحْنْ": {
    "box": [3450, 1000],
@@ -49086,7 +49086,7 @@ export const WORD_PATHS = {
      [194.7, 393.6], [206.2, 392.1], [217.5, 395.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2808.6, 879.3], "count": 2, "after": true }, { "at": [2455.3, 428.1], "count": 2, "after": true }, { "at": [2248.3, 422.1], "count": 1, "after": true }, { "at": [203.1, 530.2], "count": 1, "after": true }]
+   "dots": [{ "at": [2847.8, 875.7], "count": 1, "after": true }, { "at": [2768.9, 883], "count": 1, "after": true }, { "at": [2494.2, 424.3], "count": 1, "after": true }, { "at": [2415.1, 432.1], "count": 1, "after": true }, { "at": [2248.3, 422.1], "count": 1, "after": true }, { "at": [203.1, 530.2], "count": 1, "after": true }]
   },
   "الضَّيْفُ عِنْدَ الْبَابْ": {
    "box": [4000, 1000],
@@ -49224,7 +49224,7 @@ export const WORD_PATHS = {
      [280.4, 316.1], [294.7, 314.3], [308.7, 318.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3394.7, 382.5], "count": 1, "after": true }, { "at": [3026.2, 808.4], "count": 2, "after": true }, { "at": [2773.2, 387.6], "count": 1, "after": true }, { "at": [1782.2, 467.6], "count": 1, "after": true }, { "at": [832.7, 816.3], "count": 1, "after": true }, { "at": [297.3, 816.2], "count": 1, "after": true }]
+   "dots": [{ "at": [3394.7, 382.5], "count": 1, "after": true }, { "at": [3075.5, 803.8], "count": 1, "after": true }, { "at": [2976, 813.1], "count": 1, "after": true }, { "at": [2773.2, 387.6], "count": 1, "after": true }, { "at": [1782.2, 467.6], "count": 1, "after": true }, { "at": [832.7, 816.3], "count": 1, "after": true }, { "at": [297.3, 816.2], "count": 1, "after": true }]
   },
   "الْجَارُ أَمَامَ الدَّارْ": {
    "box": [3292, 1000],
@@ -49537,7 +49537,7 @@ export const WORD_PATHS = {
      [203.6, 241.5], [216.4, 239.9], [229, 243.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3594.9, 447], "count": 1, "after": true }, { "at": [3317.2, 745.6], "count": 1, "after": true }, { "at": [2496.3, 751.9], "count": 2, "after": true }, { "at": [1851.5, 447], "count": 1, "after": true }, { "at": [722.2, 389], "count": 2, "after": true }]
+   "dots": [{ "at": [3594.9, 447], "count": 1, "after": true }, { "at": [3317.2, 745.6], "count": 1, "after": true }, { "at": [2540.6, 747.7], "count": 1, "after": true }, { "at": [2451.5, 756.2], "count": 1, "after": true }, { "at": [1851.5, 447], "count": 1, "after": true }, { "at": [766.4, 384.9], "count": 1, "after": true }, { "at": [677.2, 393.2], "count": 1, "after": true }]
   },
   "الْمُهَنْدِسُ يَبْنِي الْجِدَارْ": {
    "box": [4000, 1000],
@@ -49703,7 +49703,7 @@ export const WORD_PATHS = {
      [194.6, 264.3], [206.2, 262.7], [217.6, 266]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3206.5, 421.3], "count": 1, "after": true }, { "at": [2136.2, 691.9], "count": 2, "after": true }, { "at": [1975.9, 698.2], "count": 1, "after": true }, { "at": [1819.9, 421.5], "count": 1, "after": true }, { "at": [1534.3, 816.7], "count": 2, "after": true }, { "at": [858.9, 685.7], "count": 1, "after": true }]
+   "dots": [{ "at": [3206.5, 421.3], "count": 1, "after": true }, { "at": [2175.5, 688.2], "count": 1, "after": true }, { "at": [2096.1, 695.7], "count": 1, "after": true }, { "at": [1975.9, 698.2], "count": 1, "after": true }, { "at": [1819.9, 421.5], "count": 1, "after": true }, { "at": [1573.4, 813.1], "count": 1, "after": true }, { "at": [1494.5, 820.3], "count": 1, "after": true }, { "at": [858.9, 685.7], "count": 1, "after": true }]
   },
   "الْحَفِيدُ يُسَاعِدُ الْجَدَّةْ": {
    "box": [4000, 1000],
@@ -49868,7 +49868,7 @@ export const WORD_PATHS = {
      [155.4, 244.6], [167.3, 243], [179, 246.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3215.2, 411.4], "count": 1, "after": true }, { "at": [3014.1, 756.7], "count": 2, "after": true }, { "at": [2428.2, 756.6], "count": 2, "after": true }, { "at": [743.8, 750.4], "count": 1, "after": true }, { "at": [165.6, 397.3], "count": 2, "after": true }]
+   "dots": [{ "at": [3215.2, 411.4], "count": 1, "after": true }, { "at": [3055, 752.8], "count": 1, "after": true }, { "at": [2972.3, 760.7], "count": 1, "after": true }, { "at": [2469.3, 752.8], "count": 1, "after": true }, { "at": [2386.6, 760.4], "count": 1, "after": true }, { "at": [743.8, 750.4], "count": 1, "after": true }, { "at": [206.8, 393.5], "count": 1, "after": true }, { "at": [123.7, 401.1], "count": 1, "after": true }]
   },
   "جَدِّي يَجْلِسُ فِي الْحَدِيقَةْ": {
    "box": [4000, 1000],
@@ -50036,7 +50036,7 @@ export const WORD_PATHS = {
      [154.2, 245.6], [163.9, 244.4], [173.4, 247.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3794, 659.7], "count": 1, "after": true }, { "at": [3266.4, 772.1], "count": 2, "after": true }, { "at": [2963.2, 664.9], "count": 2, "after": true }, { "at": [2743.2, 660.1], "count": 1, "after": true }, { "at": [1805.8, 341.2], "count": 1, "after": true }, { "at": [1546.5, 772.1], "count": 2, "after": true }, { "at": [514.5, 664.8], "count": 2, "after": true }, { "at": [351.7, 387.8], "count": 2, "after": true }, { "at": [161.9, 370.3], "count": 2, "after": true }]
+   "dots": [{ "at": [3794, 659.7], "count": 1, "after": true }, { "at": [3300.2, 769], "count": 1, "after": true }, { "at": [3232.2, 775.2], "count": 1, "after": true }, { "at": [2996.6, 661.7], "count": 1, "after": true }, { "at": [2928.9, 668.1], "count": 1, "after": true }, { "at": [2743.2, 660.1], "count": 1, "after": true }, { "at": [1805.8, 341.2], "count": 1, "after": true }, { "at": [1580.4, 769], "count": 1, "after": true }, { "at": [1512.2, 775.2], "count": 1, "after": true }, { "at": [548, 661.5], "count": 1, "after": true }, { "at": [479.9, 668.2], "count": 1, "after": true }, { "at": [385.1, 384.5], "count": 1, "after": true }, { "at": [317, 391.2], "count": 1, "after": true }, { "at": [195.5, 366.8], "count": 1, "after": true }, { "at": [127.3, 373.8], "count": 1, "after": true }]
   },
   "الطِّفْلُ يَنَامُ فِي السَّرِيرْ": {
    "box": [4000, 1000],
@@ -50206,7 +50206,7 @@ export const WORD_PATHS = {
      [199, 259.6], [210.1, 258.2], [220.9, 261.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3286.3, 355.9], "count": 1, "after": true }, { "at": [2679.2, 677], "count": 2, "after": true }, { "at": [2520.2, 413.1], "count": 1, "after": true }, { "at": [1825.5, 309.6], "count": 1, "after": true }, { "at": [1531.5, 798.6], "count": 2, "after": true }, { "at": [397.5, 676.9], "count": 2, "after": true }]
+   "dots": [{ "at": [3286.3, 355.9], "count": 1, "after": true }, { "at": [2717.2, 673.4], "count": 1, "after": true }, { "at": [2640, 680.7], "count": 1, "after": true }, { "at": [2520.2, 413.1], "count": 1, "after": true }, { "at": [1825.5, 309.6], "count": 1, "after": true }, { "at": [1569.7, 794.8], "count": 1, "after": true }, { "at": [1492.4, 802.5], "count": 1, "after": true }, { "at": [436.1, 673.1], "count": 1, "after": true }, { "at": [358.4, 680.8], "count": 1, "after": true }]
   },
   "أُخْتِي تَجْلِسُ فَوْقَ الْمَقْعَدْ": {
    "box": [4000, 1000],
@@ -50394,7 +50394,7 @@ export const WORD_PATHS = {
      [174.2, 325.6], [183.9, 324.4], [193.4, 327.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3666.7, 437.7], "count": 1, "after": true }, { "at": [3459, 488.1], "count": 2, "after": true }, { "at": [3196.2, 821.2], "count": 2, "after": true }, { "at": [2892.1, 433.8], "count": 2, "after": true }, { "at": [2664.9, 709], "count": 1, "after": true }, { "at": [1729.8, 391.2], "count": 1, "after": true }, { "at": [1325.3, 453.1], "count": 2, "after": true }, { "at": [568.7, 437.9], "count": 2, "after": true }]
+   "dots": [{ "at": [3666.7, 437.7], "count": 1, "after": true }, { "at": [3492.6, 485], "count": 1, "after": true }, { "at": [3424.5, 491.3], "count": 1, "after": true }, { "at": [3229.6, 818.1], "count": 1, "after": true }, { "at": [3161.9, 824.4], "count": 1, "after": true }, { "at": [2925.6, 430.6], "count": 1, "after": true }, { "at": [2858.1, 437], "count": 1, "after": true }, { "at": [2664.9, 709], "count": 1, "after": true }, { "at": [1729.8, 391.2], "count": 1, "after": true }, { "at": [1358.8, 449.8], "count": 1, "after": true }, { "at": [1290.7, 456.6], "count": 1, "after": true }, { "at": [602.2, 434.8], "count": 1, "after": true }, { "at": [534.2, 441.1], "count": 1, "after": true }]
   },
   "الرَّجُلُ الْكَبِيرُ يَفْتَحُ الْبَابْ": {
    "box": [4000, 1000],
@@ -50583,7 +50583,7 @@ export const WORD_PATHS = {
      [227.7, 336.3], [238, 334.9], [248.1, 337.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3399.8, 680.3], "count": 1, "after": true }, { "at": [2362.3, 691], "count": 1, "after": true }, { "at": [2208.9, 685.7], "count": 2, "after": true }, { "at": [1743, 685.6], "count": 2, "after": true }, { "at": [1574.4, 391.4], "count": 1, "after": true }, { "at": [1402.4, 450], "count": 2, "after": true }, { "at": [619.5, 691.2], "count": 1, "after": true }, { "at": [239.8, 691], "count": 1, "after": true }]
+   "dots": [{ "at": [3399.8, 680.3], "count": 1, "after": true }, { "at": [2362.3, 691], "count": 1, "after": true }, { "at": [2244.3, 682.3], "count": 1, "after": true }, { "at": [2173.6, 689.1], "count": 1, "after": true }, { "at": [1778.3, 682.1], "count": 1, "after": true }, { "at": [1707.4, 689.1], "count": 1, "after": true }, { "at": [1574.4, 391.4], "count": 1, "after": true }, { "at": [1437.2, 446.6], "count": 1, "after": true }, { "at": [1366.5, 453.4], "count": 1, "after": true }, { "at": [619.5, 691.2], "count": 1, "after": true }, { "at": [239.8, 691], "count": 1, "after": true }]
   },
   "جَدَّةُ الطِّفْلِ تَجْلِسُ فَوْقَ الْمَقْعَدْ": {
    "box": [4000, 1000],
@@ -50816,7 +50816,7 @@ export const WORD_PATHS = {
      [93.2, 305.7], [101.6, 304.6], [109.8, 306.9]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3877.4, 631.3], "count": 1, "after": true }, { "at": [3476.7, 386.5], "count": 2, "after": true }, { "at": [2837.8, 396.3], "count": 1, "after": true }, { "at": [2392.4, 397.8], "count": 2, "after": true }, { "at": [2200.5, 630.9], "count": 1, "after": true }, { "at": [1409.1, 361.9], "count": 1, "after": true }, { "at": [1066.9, 414.6], "count": 2, "after": true }, { "at": [427.3, 401.3], "count": 2, "after": true }]
+   "dots": [{ "at": [3877.4, 631.3], "count": 1, "after": true }, { "at": [3505.7, 383.9], "count": 1, "after": true }, { "at": [3448.1, 389.2], "count": 1, "after": true }, { "at": [2837.8, 396.3], "count": 1, "after": true }, { "at": [2421.3, 395.1], "count": 1, "after": true }, { "at": [2363.9, 400.4], "count": 1, "after": true }, { "at": [2200.5, 630.9], "count": 1, "after": true }, { "at": [1409.1, 361.9], "count": 1, "after": true }, { "at": [1095.3, 411.9], "count": 1, "after": true }, { "at": [1037.6, 417.3], "count": 1, "after": true }, { "at": [455.4, 398.7], "count": 1, "after": true }, { "at": [398.2, 404], "count": 1, "after": true }]
   },
   "الشَّعْرُ فَوْقَ الرَّأْسْ": {
    "box": [3686, 1000],
@@ -50960,7 +50960,7 @@ export const WORD_PATHS = {
      [463.5, 390.2], [476.5, 388.5], [489.2, 392.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3174.9, 517], "count": 3, "after": true }, { "at": [2203.5, 404.8], "count": 1, "after": true }, { "at": [1670.6, 486.3], "count": 2, "after": true }]
+   "dots": [{ "at": [3175, 483.1], "count": 1, "after": true }, { "at": [3217.9, 527.8], "count": 1, "after": true }, { "at": [3132.7, 535.2], "count": 1, "after": true }, { "at": [2203.5, 404.8], "count": 1, "after": true }, { "at": [1714.9, 482.1], "count": 1, "after": true }, { "at": [1625.5, 490.4], "count": 1, "after": true }]
   },
   "الْعَرَقُ فِي الْوَجْهْ": {
    "box": [3510, 1000],
@@ -51089,7 +51089,7 @@ export const WORD_PATHS = {
      [193.1, 178.8], [206.6, 177.1], [219.9, 180.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2513.2, 367.7], "count": 2, "after": true }, { "at": [1979.6, 282.3], "count": 1, "after": true }, { "at": [1624.1, 873.9], "count": 2, "after": true }, { "at": [554.3, 719.6], "count": 1, "after": true }]
+   "dots": [{ "at": [2559.5, 363.2], "count": 1, "after": true }, { "at": [2466.3, 372.2], "count": 1, "after": true }, { "at": [1979.6, 282.3], "count": 1, "after": true }, { "at": [1670, 869.6], "count": 1, "after": true }, { "at": [1576.6, 878.4], "count": 1, "after": true }, { "at": [554.3, 719.6], "count": 1, "after": true }]
   },
   "الدَّمْعُ فِي الْعَيْنْ": {
    "box": [3348, 1000],
@@ -51216,7 +51216,7 @@ export const WORD_PATHS = {
      [207.1, 298.8], [220.6, 297.1], [233.9, 300.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [1849.1, 282.4], "count": 1, "after": true }, { "at": [1493.4, 873.8], "count": 2, "after": true }, { "at": [531.5, 726.8], "count": 2, "after": true }, { "at": [216.7, 461.3], "count": 1, "after": true }]
+   "dots": [{ "at": [1849.1, 282.4], "count": 1, "after": true }, { "at": [1539.5, 869.3], "count": 1, "after": true }, { "at": [1446.4, 878.3], "count": 1, "after": true }, { "at": [577.4, 722.4], "count": 1, "after": true }, { "at": [484, 731.3], "count": 1, "after": true }, { "at": [216.7, 461.3], "count": 1, "after": true }]
   },
   "الْحُقْنَةُ فِي الذِّرَاعْ": {
    "box": [3796, 1000],
@@ -51360,7 +51360,7 @@ export const WORD_PATHS = {
      [177.1, 144.8], [190.6, 143.1], [203.9, 146.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2927.5, 346.5], "count": 2, "after": true }, { "at": [2718.8, 407.3], "count": 1, "after": true }, { "at": [2486.2, 322.3], "count": 2, "after": true }, { "at": [2058.3, 282.5], "count": 1, "after": true }, { "at": [1702.5, 873.9], "count": 2, "after": true }, { "at": [943.9, 321], "count": 1, "after": true }]
+   "dots": [{ "at": [2974.1, 342.1], "count": 1, "after": true }, { "at": [2880.7, 351], "count": 1, "after": true }, { "at": [2718.8, 407.3], "count": 1, "after": true }, { "at": [2532.4, 318], "count": 1, "after": true }, { "at": [2438.9, 326.8], "count": 1, "after": true }, { "at": [2058.3, 282.5], "count": 1, "after": true }, { "at": [1748.8, 869.4], "count": 1, "after": true }, { "at": [1655.4, 878.5], "count": 1, "after": true }, { "at": [943.9, 321], "count": 1, "after": true }]
   },
   "الطَّبِيبُ يُعَالِجُ الْمَرَضْ": {
    "box": [4000, 1000],
@@ -51528,7 +51528,7 @@ export const WORD_PATHS = {
      [436.5, 226.9], [448.3, 225.4], [459.8, 228.7]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3291.1, 718.1], "count": 1, "after": true }, { "at": [3117.3, 711.7], "count": 2, "after": true }, { "at": [2792.7, 718.1], "count": 1, "after": true }, { "at": [2363.5, 711.6], "count": 2, "after": true }, { "at": [1621.6, 663.2], "count": 1, "after": true }, { "at": [444.8, 367.3], "count": 1, "after": true }]
+   "dots": [{ "at": [3291.1, 718.1], "count": 1, "after": true }, { "at": [3156.9, 707.9], "count": 1, "after": true }, { "at": [3076.4, 715.7], "count": 1, "after": true }, { "at": [2792.7, 718.1], "count": 1, "after": true }, { "at": [2403.5, 708], "count": 1, "after": true }, { "at": [2322.8, 715.4], "count": 1, "after": true }, { "at": [1621.6, 663.2], "count": 1, "after": true }, { "at": [444.8, 367.3], "count": 1, "after": true }]
   },
   "الدَّمُ فِي الْقَلْبْ": {
    "box": [3124, 1000],
@@ -51642,7 +51642,7 @@ export const WORD_PATHS = {
      [269.1, 264.8], [282.6, 263.1], [295.9, 266.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [1902.9, 282.4], "count": 1, "after": true }, { "at": [1547.3, 873.8], "count": 2, "after": true }, { "at": [827.9, 346.5], "count": 2, "after": true }, { "at": [297.9, 734], "count": 1, "after": true }]
+   "dots": [{ "at": [1902.9, 282.4], "count": 1, "after": true }, { "at": [1593.4, 869.3], "count": 1, "after": true }, { "at": [1500.3, 878.3], "count": 1, "after": true }, { "at": [874.2, 342.1], "count": 1, "after": true }, { "at": [780.9, 350.9], "count": 1, "after": true }, { "at": [297.9, 734], "count": 1, "after": true }]
   },
   "أُذُنِي تَسْمَعُ صَوْتَ أُمِّي": {
    "box": [4000, 1000],
@@ -51809,7 +51809,7 @@ export const WORD_PATHS = {
      [491.7, 326.5], [491.2, 313], [494, 299.7]
     ] }
    ],
-   "dots": [{ "at": [3701.2, 414.1], "count": 1, "after": true }, { "at": [3519.3, 423.8], "count": 1, "after": true }, { "at": [3252.4, 868.6], "count": 2, "after": true }, { "at": [2908.9, 430.4], "count": 2, "after": true }, { "at": [1054.8, 486.5], "count": 2, "after": true }, { "at": [205.5, 868.3], "count": 2, "after": true }]
+   "dots": [{ "at": [3701.2, 414.1], "count": 1, "after": true }, { "at": [3519.3, 423.8], "count": 1, "after": true }, { "at": [3290.3, 865.1], "count": 1, "after": true }, { "at": [3213.6, 872.2], "count": 1, "after": true }, { "at": [2946.7, 426.9], "count": 1, "after": true }, { "at": [2869.9, 434.1], "count": 1, "after": true }, { "at": [1092.6, 483], "count": 1, "after": true }, { "at": [1015.9, 490.2], "count": 1, "after": true }, { "at": [243.7, 864.6], "count": 1, "after": true }, { "at": [166.9, 872], "count": 1, "after": true }]
   },
   "الْحُقْنَةُ السَّرِيعَةُ فِي الذِّرَاعْ": {
    "box": [4000, 1000],
@@ -52011,7 +52011,7 @@ export const WORD_PATHS = {
      [153.4, 247.4], [162.8, 246.1], [172, 248.7]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3361.9, 387.7], "count": 2, "after": true }, { "at": [3215.7, 430.5], "count": 1, "after": true }, { "at": [3052.9, 370.7], "count": 2, "after": true }, { "at": [2121.2, 654.2], "count": 2, "after": true }, { "at": [1770.8, 371], "count": 2, "after": true }, { "at": [1471.1, 343.1], "count": 1, "after": true }, { "at": [1222, 757.2], "count": 2, "after": true }, { "at": [690.2, 370.1], "count": 1, "after": true }]
+   "dots": [{ "at": [3394.3, 384.4], "count": 1, "after": true }, { "at": [3329.1, 391.1], "count": 1, "after": true }, { "at": [3215.7, 430.5], "count": 1, "after": true }, { "at": [3085.1, 367.5], "count": 1, "after": true }, { "at": [3020, 373.9], "count": 1, "after": true }, { "at": [2153.2, 651.2], "count": 1, "after": true }, { "at": [2088, 657.3], "count": 1, "after": true }, { "at": [1802.8, 368], "count": 1, "after": true }, { "at": [1737.7, 374.1], "count": 1, "after": true }, { "at": [1471.1, 343.1], "count": 1, "after": true }, { "at": [1254.2, 754.3], "count": 1, "after": true }, { "at": [1188.8, 760.3], "count": 1, "after": true }, { "at": [690.2, 370.1], "count": 1, "after": true }]
   },
   "الْعَظْمُ الصُّلْبُ تَحْتَ الْكَتِفْ": {
    "box": [4000, 1000],
@@ -52200,7 +52200,7 @@ export const WORD_PATHS = {
      [329.4, 299.4], [338.8, 298.1], [348, 300.7]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3468.9, 404.9], "count": 1, "after": true }, { "at": [2137.5, 694.6], "count": 1, "after": true }, { "at": [1796.7, 418.5], "count": 2, "after": true }, { "at": [1228.8, 466.4], "count": 2, "after": true }, { "at": [502, 471], "count": 2, "after": true }, { "at": [336.1, 412.5], "count": 1, "after": true }]
+   "dots": [{ "at": [3468.9, 404.9], "count": 1, "after": true }, { "at": [2137.5, 694.6], "count": 1, "after": true }, { "at": [1829.2, 415.3], "count": 1, "after": true }, { "at": [1763.9, 421.7], "count": 1, "after": true }, { "at": [1261.2, 463.4], "count": 1, "after": true }, { "at": [1195.7, 469.4], "count": 1, "after": true }, { "at": [534.4, 468], "count": 1, "after": true }, { "at": [468.7, 474.1], "count": 1, "after": true }, { "at": [336.1, 412.5], "count": 1, "after": true }]
   },
   "الْخُبْزُ فِي السَّلَّةْ": {
    "box": [3090, 1000],
@@ -52325,7 +52325,7 @@ export const WORD_PATHS = {
      [174.9, 193.2], [187.4, 191.6], [199.7, 195]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2561.4, 374.6], "count": 1, "after": true }, { "at": [2315.7, 735], "count": 1, "after": true }, { "at": [2106, 386.1], "count": 1, "after": true }, { "at": [1726.8, 315], "count": 1, "after": true }, { "at": [1395.9, 864.8], "count": 2, "after": true }, { "at": [184.6, 352.1], "count": 2, "after": true }]
+   "dots": [{ "at": [2561.4, 374.6], "count": 1, "after": true }, { "at": [2315.7, 735], "count": 1, "after": true }, { "at": [2106, 386.1], "count": 1, "after": true }, { "at": [1726.8, 315], "count": 1, "after": true }, { "at": [1438.9, 860.6], "count": 1, "after": true }, { "at": [1352.1, 869], "count": 1, "after": true }, { "at": [227.6, 348], "count": 1, "after": true }, { "at": [140.9, 356.2], "count": 1, "after": true }]
   },
   "الْعَصِيرُ فِي الْكُوبْ": {
    "box": [3894, 1000],
@@ -52454,7 +52454,7 @@ export const WORD_PATHS = {
      [263.1, 264.8], [276.6, 263.1], [289.9, 266.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2712.9, 726.6], "count": 2, "after": true }, { "at": [2057.2, 282.3], "count": 1, "after": true }, { "at": [1701.9, 873.8], "count": 2, "after": true }, { "at": [278.3, 733.9], "count": 1, "after": true }]
+   "dots": [{ "at": [2758.8, 722.3], "count": 1, "after": true }, { "at": [2665.6, 731.2], "count": 1, "after": true }, { "at": [2057.2, 282.3], "count": 1, "after": true }, { "at": [1747.8, 869.5], "count": 1, "after": true }, { "at": [1654.5, 878.3], "count": 1, "after": true }, { "at": [278.3, 733.9], "count": 1, "after": true }]
   },
   "اللَّحْمُ فِي الْقِدْرْ": {
    "box": [3168, 1000],
@@ -52581,7 +52581,7 @@ export const WORD_PATHS = {
      [206.7, 261.9], [219.4, 260.3], [231.8, 263.7]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [1730, 318.4], "count": 1, "after": true }, { "at": [1395, 876.1], "count": 2, "after": true }, { "at": [716.9, 378.5], "count": 2, "after": true }]
+   "dots": [{ "at": [1730, 318.4], "count": 1, "after": true }, { "at": [1438.3, 872], "count": 1, "after": true }, { "at": [1350.5, 880.2], "count": 1, "after": true }, { "at": [760.3, 374.3], "count": 1, "after": true }, { "at": [672.3, 382.9], "count": 1, "after": true }]
   },
   "الزُّبْدَةُ فَوْقَ الْخُبْزْ": {
    "box": [4000, 1000],
@@ -52728,7 +52728,7 @@ export const WORD_PATHS = {
      [223.3, 235.8], [237.7, 233.9], [251.9, 237.9]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3514.9, 409.1], "count": 1, "after": true }, { "at": [3292.1, 809.8], "count": 1, "after": true }, { "at": [2738.9, 370.1], "count": 2, "after": true }, { "at": [2311.9, 327.6], "count": 1, "after": true }, { "at": [1717.4, 418.4], "count": 2, "after": true }, { "at": [757.9, 395.9], "count": 1, "after": true }, { "at": [475.6, 809.6], "count": 1, "after": true }, { "at": [234.6, 409], "count": 1, "after": true }]
+   "dots": [{ "at": [3514.9, 409.1], "count": 1, "after": true }, { "at": [3292.1, 809.8], "count": 1, "after": true }, { "at": [2788, 365.3], "count": 1, "after": true }, { "at": [2688.4, 375], "count": 1, "after": true }, { "at": [2311.9, 327.6], "count": 1, "after": true }, { "at": [1766.6, 413.6], "count": 1, "after": true }, { "at": [1666.8, 423.3], "count": 1, "after": true }, { "at": [757.9, 395.9], "count": 1, "after": true }, { "at": [475.6, 809.6], "count": 1, "after": true }, { "at": [234.6, 409], "count": 1, "after": true }]
   },
   "الْمِلْحُ فِي الشُّورْبَةْ": {
    "box": [3790, 1000],
@@ -52871,7 +52871,7 @@ export const WORD_PATHS = {
      [178.3, 150.5], [191.5, 148.8], [204.5, 152.5]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2363.5, 279.8], "count": 1, "after": true }, { "at": [2013, 862.1], "count": 2, "after": true }, { "at": [1235, 395.2], "count": 3, "after": true }, { "at": [408.6, 724.6], "count": 1, "after": true }, { "at": [188.6, 318.8], "count": 2, "after": true }]
+   "dots": [{ "at": [2363.5, 279.8], "count": 1, "after": true }, { "at": [2058.6, 857.9], "count": 1, "after": true }, { "at": [1966.6, 866.4], "count": 1, "after": true }, { "at": [1234.7, 360.4], "count": 1, "after": true }, { "at": [1278.6, 406.2], "count": 1, "after": true }, { "at": [1191.1, 414], "count": 1, "after": true }, { "at": [408.6, 724.6], "count": 1, "after": true }, { "at": [234.3, 314.4], "count": 1, "after": true }, { "at": [141.8, 323.2], "count": 1, "after": true }]
   },
   "أُمِّي تَطْبُخُ السَّمَكْ": {
    "box": [3252, 1000],
@@ -53022,7 +53022,7 @@ export const WORD_PATHS = {
      [233.9, 377.2], [245.1, 375.8], [256.1, 378.9]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2613.5, 869.2], "count": 2, "after": true }, { "at": [2264.4, 424], "count": 2, "after": true }, { "at": [1770.6, 752.3], "count": 1, "after": true }, { "at": [1517.2, 431.1], "count": 1, "after": true }]
+   "dots": [{ "at": [2651.8, 865.4], "count": 1, "after": true }, { "at": [2574.1, 873.1], "count": 1, "after": true }, { "at": [2302.8, 420.2], "count": 1, "after": true }, { "at": [2225, 427.9], "count": 1, "after": true }, { "at": [1770.6, 752.3], "count": 1, "after": true }, { "at": [1517.2, 431.1], "count": 1, "after": true }]
   },
   "أَخِي يَأْكُلُ الْمَوْزْ": {
    "box": [3012, 1000],
@@ -53158,7 +53158,7 @@ export const WORD_PATHS = {
      [196.6, 298.3], [208.2, 296.7], [219.6, 300]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2622.8, 426.9], "count": 1, "after": true }, { "at": [2259.8, 878.9], "count": 2, "after": true }, { "at": [1892, 752.5], "count": 2, "after": true }, { "at": [205.3, 437.7], "count": 1, "after": true }]
+   "dots": [{ "at": [2622.8, 426.9], "count": 1, "after": true }, { "at": [2299.6, 875.2], "count": 1, "after": true }, { "at": [2219.5, 882.8], "count": 1, "after": true }, { "at": [1931.8, 748.8], "count": 1, "after": true }, { "at": [1851.8, 756.3], "count": 1, "after": true }, { "at": [205.3, 437.7], "count": 1, "after": true }]
   },
   "جَدِّي يَشْرَبُ الْقَهْوَةْ": {
    "box": [4000, 1000],
@@ -53305,7 +53305,7 @@ export const WORD_PATHS = {
      [164.4, 161.8], [177.5, 160.1], [190.4, 163.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3764.5, 712.3], "count": 1, "after": true }, { "at": [3064.1, 861.3], "count": 2, "after": true }, { "at": [2661, 719.2], "count": 2, "after": true }, { "at": [2376.3, 403.1], "count": 3, "after": true }, { "at": [1680.3, 726.1], "count": 1, "after": true }, { "at": [937.5, 351.6], "count": 2, "after": true }, { "at": [175.1, 328.1], "count": 2, "after": true }]
+   "dots": [{ "at": [3764.5, 712.3], "count": 1, "after": true }, { "at": [3108.7, 857.2], "count": 1, "after": true }, { "at": [3018.6, 865.6], "count": 1, "after": true }, { "at": [2705.8, 714.8], "count": 1, "after": true }, { "at": [2615.2, 723.6], "count": 1, "after": true }, { "at": [2376.4, 368.8], "count": 1, "after": true }, { "at": [2419, 414], "count": 1, "after": true }, { "at": [2333.1, 421.7], "count": 1, "after": true }, { "at": [1680.3, 726.1], "count": 1, "after": true }, { "at": [982, 347.2], "count": 1, "after": true }, { "at": [891.7, 356], "count": 1, "after": true }, { "at": [219.7, 324], "count": 1, "after": true }, { "at": [129.5, 332.4], "count": 1, "after": true }]
   },
   "التُّفَّاحَةُ الْحَمْرَاءُ فِي الصَّحْنْ": {
    "box": [4000, 1000],
@@ -53515,7 +53515,7 @@ export const WORD_PATHS = {
      [170.7, 366.4], [179.7, 365.1], [188.5, 367.6]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3678.9, 443.6], "count": 2, "after": true }, { "at": [3521.8, 392.4], "count": 1, "after": true }, { "at": [2983, 381.7], "count": 2, "after": true }, { "at": [1535.2, 355.4], "count": 1, "after": true }, { "at": [1299.5, 747.2], "count": 2, "after": true }, { "at": [177.8, 474], "count": 1, "after": true }]
+   "dots": [{ "at": [3709.6, 440.7], "count": 1, "after": true }, { "at": [3647.7, 446.5], "count": 1, "after": true }, { "at": [3521.8, 392.4], "count": 1, "after": true }, { "at": [3013.8, 378.9], "count": 1, "after": true }, { "at": [2952, 384.6], "count": 1, "after": true }, { "at": [1535.2, 355.4], "count": 1, "after": true }, { "at": [1330.1, 744.3], "count": 1, "after": true }, { "at": [1268.3, 750.3], "count": 1, "after": true }, { "at": [177.8, 474], "count": 1, "after": true }]
   },
   "الشُّورْبَةُ السَّاخِنَةُ فِي الْقِدْرْ": {
    "box": [4000, 1000],
@@ -53715,7 +53715,7 @@ export const WORD_PATHS = {
      [181.4, 303.4], [190.8, 302.1], [200, 304.7]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3608.2, 426], "count": 3, "after": true }, { "at": [3027.6, 657.4], "count": 1, "after": true }, { "at": [2872.8, 372.3], "count": 2, "after": true }, { "at": [1942.9, 389], "count": 1, "after": true }, { "at": [1757.5, 431.1], "count": 1, "after": true }, { "at": [1596, 372.3], "count": 2, "after": true }, { "at": [1300.3, 344.9], "count": 1, "after": true }, { "at": [1053.8, 754.4], "count": 2, "after": true }, { "at": [555.8, 389.2], "count": 2, "after": true }]
+   "dots": [{ "at": [3608, 401.6], "count": 1, "after": true }, { "at": [3638.9, 433.5], "count": 1, "after": true }, { "at": [3577.5, 439.5], "count": 1, "after": true }, { "at": [3027.6, 657.4], "count": 1, "after": true }, { "at": [2904.9, 369.4], "count": 1, "after": true }, { "at": [2839.9, 375.3], "count": 1, "after": true }, { "at": [1942.9, 389], "count": 1, "after": true }, { "at": [1757.5, 431.1], "count": 1, "after": true }, { "at": [1628, 369.2], "count": 1, "after": true }, { "at": [1563.8, 375.4], "count": 1, "after": true }, { "at": [1300.3, 344.9], "count": 1, "after": true }, { "at": [1085.5, 751.2], "count": 1, "after": true }, { "at": [1021.1, 757.6], "count": 1, "after": true }, { "at": [587.8, 386.1], "count": 1, "after": true }, { "at": [522.9, 392.2], "count": 1, "after": true }]
   },
   "الْبَطِّيخُ الْكَبِيرُ فَوْقَ الْمَقْعَدْ": {
    "box": [4000, 1000],
@@ -53933,7 +53933,7 @@ export const WORD_PATHS = {
      [170.2, 293.6], [179.9, 292.4], [189.4, 295.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3672.4, 680], "count": 1, "after": true }, { "at": [3250.2, 674.6], "count": 2, "after": true }, { "at": [3017.7, 405.7], "count": 1, "after": true }, { "at": [2308.9, 679.8], "count": 1, "after": true }, { "at": [2164.4, 674.8], "count": 2, "after": true }, { "at": [1697, 357.9], "count": 1, "after": true }, { "at": [1300.1, 418.6], "count": 2, "after": true }, { "at": [557.1, 403.5], "count": 2, "after": true }]
+   "dots": [{ "at": [3672.4, 680], "count": 1, "after": true }, { "at": [3282.7, 671.3], "count": 1, "after": true }, { "at": [3216.2, 678], "count": 1, "after": true }, { "at": [3017.7, 405.7], "count": 1, "after": true }, { "at": [2308.9, 679.8], "count": 1, "after": true }, { "at": [2197.7, 671.7], "count": 1, "after": true }, { "at": [2131.1, 677.8], "count": 1, "after": true }, { "at": [1697, 357.9], "count": 1, "after": true }, { "at": [1332.7, 415.3], "count": 1, "after": true }, { "at": [1266.2, 422], "count": 1, "after": true }, { "at": [590.5, 400.4], "count": 1, "after": true }, { "at": [523.9, 406.5], "count": 1, "after": true }]
   },
   "أُخْتِي تَأْكُلُ الْكَعْكَ اللَّذِيذْ": {
    "box": [4000, 1000],
@@ -54134,7 +54134,7 @@ export const WORD_PATHS = {
      [177.7, 299.6], [187.9, 298.3], [197.9, 301.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3654.3, 440.3], "count": 1, "after": true }, { "at": [3439.8, 492.2], "count": 2, "after": true }, { "at": [3167.7, 836.8], "count": 2, "after": true }, { "at": [2853.6, 436], "count": 2, "after": true }, { "at": [566.8, 421.3], "count": 1, "after": true }, { "at": [383, 726.2], "count": 2, "after": true }, { "at": [185.2, 421.3], "count": 1, "after": true }]
+   "dots": [{ "at": [3654.3, 440.3], "count": 1, "after": true }, { "at": [3474.6, 488.7], "count": 1, "after": true }, { "at": [3404.1, 495.8], "count": 1, "after": true }, { "at": [3202.7, 833.5], "count": 1, "after": true }, { "at": [3132.2, 840.2], "count": 1, "after": true }, { "at": [2888.3, 432.5], "count": 1, "after": true }, { "at": [2818, 439.7], "count": 1, "after": true }, { "at": [566.8, 421.3], "count": 1, "after": true }, { "at": [417.6, 723], "count": 1, "after": true }, { "at": [347.7, 729.4], "count": 1, "after": true }, { "at": [185.2, 421.3], "count": 1, "after": true }]
   },
   "أُمِّي تَطْبُخُ الْفُولَ السَّاخِنْ": {
    "box": [4000, 1000],
@@ -54325,7 +54325,7 @@ export const WORD_PATHS = {
      [183, 407.3], [192.9, 406], [202.6, 408.7]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3429.7, 828.7], "count": 2, "after": true }, { "at": [3123, 437.6], "count": 2, "after": true }, { "at": [2688.9, 726.2], "count": 1, "after": true }, { "at": [2466.5, 444], "count": 1, "after": true }, { "at": [1921.3, 436], "count": 1, "after": true }, { "at": [465.9, 441.6], "count": 1, "after": true }, { "at": [190.4, 526.1], "count": 1, "after": true }]
+   "dots": [{ "at": [3463.4, 825.5], "count": 1, "after": true }, { "at": [3395, 832], "count": 1, "after": true }, { "at": [3156.7, 434.4], "count": 1, "after": true }, { "at": [3088.1, 441], "count": 1, "after": true }, { "at": [2688.9, 726.2], "count": 1, "after": true }, { "at": [2466.5, 444], "count": 1, "after": true }, { "at": [1921.3, 436], "count": 1, "after": true }, { "at": [465.9, 441.6], "count": 1, "after": true }, { "at": [190.4, 526.1], "count": 1, "after": true }]
   },
   "الْقِطَّةُ تَشْرَبُ الْحَلِيبْ": {
    "box": [4000, 1000],
@@ -54489,7 +54489,7 @@ export const WORD_PATHS = {
      [255.4, 348.6], [267.3, 347], [279, 350.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3591.3, 419], "count": 2, "after": true }, { "at": [3016.4, 397.8], "count": 2, "after": true }, { "at": [2684.1, 414.2], "count": 2, "after": true }, { "at": [2413.7, 466], "count": 3, "after": true }, { "at": [1777.3, 761.4], "count": 1, "after": true }, { "at": [610.9, 755], "count": 2, "after": true }, { "at": [279.5, 761.4], "count": 1, "after": true }]
+   "dots": [{ "at": [3632.3, 415], "count": 1, "after": true }, { "at": [3549.8, 423], "count": 1, "after": true }, { "at": [3057.2, 393.8], "count": 1, "after": true }, { "at": [2974.7, 401.8], "count": 1, "after": true }, { "at": [2724.5, 410.1], "count": 1, "after": true }, { "at": [2642, 418.4], "count": 1, "after": true }, { "at": [2413.4, 434.9], "count": 1, "after": true }, { "at": [2452.8, 476.2], "count": 1, "after": true }, { "at": [2374.2, 483], "count": 1, "after": true }, { "at": [1777.3, 761.4], "count": 1, "after": true }, { "at": [651.8, 751], "count": 1, "after": true }, { "at": [569.5, 759], "count": 1, "after": true }, { "at": [279.5, 761.4], "count": 1, "after": true }]
   },
   "الْقِرْدُ يَأْكُلُ الْمَوْزْ": {
    "box": [3376, 1000],
@@ -54641,7 +54641,7 @@ export const WORD_PATHS = {
      [205.5, 322.2], [218.5, 320.5], [231.2, 324.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2934.3, 466.1], "count": 2, "after": true }, { "at": [2096.8, 829.6], "count": 2, "after": true }, { "at": [214.7, 478], "count": 1, "after": true }]
+   "dots": [{ "at": [2978.4, 461.8], "count": 1, "after": true }, { "at": [2889.2, 470.6], "count": 1, "after": true }, { "at": [2141, 825.3], "count": 1, "after": true }, { "at": [2052, 834], "count": 1, "after": true }, { "at": [214.7, 478], "count": 1, "after": true }]
   },
   "الْمَاعِزُ يَأْكُلُ التِّينْ": {
    "box": [3578, 1000],
@@ -54793,7 +54793,7 @@ export const WORD_PATHS = {
      [210.6, 420.5], [223.4, 418.9], [236, 422.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2433.6, 477.9], "count": 1, "after": true }, { "at": [2081.6, 829.6], "count": 2, "after": true }, { "at": [734.5, 532], "count": 2, "after": true }, { "at": [520.8, 829.6], "count": 2, "after": true }, { "at": [220.2, 575.7], "count": 1, "after": true }]
+   "dots": [{ "at": [2433.6, 477.9], "count": 1, "after": true }, { "at": [2125.9, 825.5], "count": 1, "after": true }, { "at": [2036.4, 833.9], "count": 1, "after": true }, { "at": [778.6, 527.7], "count": 1, "after": true }, { "at": [689.2, 536.4], "count": 1, "after": true }, { "at": [565, 825.4], "count": 1, "after": true }, { "at": [476, 834], "count": 1, "after": true }, { "at": [220.2, 575.7], "count": 1, "after": true }]
   },
   "الْحِصَانُ أَمَامَ الدَّارْ": {
    "box": [3870, 1000],
@@ -55096,7 +55096,7 @@ export const WORD_PATHS = {
      [209.1, 328.8], [222.6, 327.1], [235.9, 330.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3333.8, 475.1], "count": 1, "after": true }, { "at": [2580.6, 477.5], "count": 2, "after": true }, { "at": [1771.4, 545.9], "count": 2, "after": true }, { "at": [751.2, 483.3], "count": 2, "after": true }]
+   "dots": [{ "at": [3333.8, 475.1], "count": 1, "after": true }, { "at": [2626.8, 473.2], "count": 1, "after": true }, { "at": [2533.6, 481.9], "count": 1, "after": true }, { "at": [1817.5, 541.5], "count": 1, "after": true }, { "at": [1724.4, 550.4], "count": 1, "after": true }, { "at": [797.4, 478.8], "count": 1, "after": true }, { "at": [704, 487.8], "count": 1, "after": true }]
   },
   "الْعُصْفُورُ فَوْقَ النَّافِذَةْ": {
    "box": [4000, 1000],
@@ -55274,7 +55274,7 @@ export const WORD_PATHS = {
      [148.6, 238.3], [160.2, 236.7], [171.6, 240]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2947.7, 402], "count": 1, "after": true }, { "at": [2128.1, 353.4], "count": 1, "after": true }, { "at": [1642, 427.5], "count": 2, "after": true }, { "at": [984.6, 462.2], "count": 1, "after": true }, { "at": [635.6, 353.2], "count": 1, "after": true }, { "at": [398.9, 386.8], "count": 1, "after": true }, { "at": [158.5, 388], "count": 2, "after": true }]
+   "dots": [{ "at": [2947.7, 402], "count": 1, "after": true }, { "at": [2128.1, 353.4], "count": 1, "after": true }, { "at": [1682.1, 423.5], "count": 1, "after": true }, { "at": [1600.7, 431.5], "count": 1, "after": true }, { "at": [984.6, 462.2], "count": 1, "after": true }, { "at": [635.6, 353.2], "count": 1, "after": true }, { "at": [398.9, 386.8], "count": 1, "after": true }, { "at": [198.8, 384.1], "count": 1, "after": true }, { "at": [117, 391.9], "count": 1, "after": true }]
   },
   "الْقِطَّةُ الصَّغِيرَةُ فِي السَّلَّةْ": {
    "box": [4000, 1000],
@@ -55477,7 +55477,7 @@ export const WORD_PATHS = {
      [162.8, 256.7], [172.9, 255.3], [182.9, 258.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3637.8, 403.2], "count": 2, "after": true }, { "at": [3149.3, 385], "count": 2, "after": true }, { "at": [2271.6, 393.3], "count": 1, "after": true }, { "at": [2096.7, 688.3], "count": 2, "after": true }, { "at": [1714.5, 385], "count": 2, "after": true }, { "at": [1414.8, 355.3], "count": 1, "after": true }, { "at": [1148.2, 798.8], "count": 2, "after": true }, { "at": [170.7, 385], "count": 2, "after": true }]
+   "dots": [{ "at": [3672.2, 400.1], "count": 1, "after": true }, { "at": [3602.6, 406.4], "count": 1, "after": true }, { "at": [3183.9, 381.8], "count": 1, "after": true }, { "at": [3114.1, 388.2], "count": 1, "after": true }, { "at": [2271.6, 393.3], "count": 1, "after": true }, { "at": [2131.1, 685.1], "count": 1, "after": true }, { "at": [2061.3, 691.5], "count": 1, "after": true }, { "at": [1749.2, 381.5], "count": 1, "after": true }, { "at": [1679, 388.7], "count": 1, "after": true }, { "at": [1414.8, 355.3], "count": 1, "after": true }, { "at": [1182.7, 795.6], "count": 1, "after": true }, { "at": [1112.5, 802.2], "count": 1, "after": true }, { "at": [205.3, 381.4], "count": 1, "after": true }, { "at": [135.1, 388.6], "count": 1, "after": true }]
   },
   "الْبُومَةُ الْكَبِيرَةُ تَنْظُرُ مِنَ النَّافِذَةْ": {
    "box": [4000, 1000],
@@ -55725,7 +55725,7 @@ export const WORD_PATHS = {
      [81.2, 293.7], [89.6, 292.6], [97.8, 294.9]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3796, 656.7], "count": 1, "after": true }, { "at": [3293, 400.9], "count": 2, "after": true }, { "at": [2716.5, 656.7], "count": 1, "after": true }, { "at": [2591.2, 652], "count": 2, "after": true }, { "at": [2275, 400.9], "count": 2, "after": true }, { "at": [2058.9, 412.4], "count": 2, "after": true }, { "at": [1932, 453.8], "count": 1, "after": true }, { "at": [1792, 400.3], "count": 1, "after": true }, { "at": [1092.3, 487.2], "count": 1, "after": true }, { "at": [674.9, 453.5], "count": 1, "after": true }, { "at": [426.8, 376.1], "count": 1, "after": true }, { "at": [258.5, 400], "count": 1, "after": true }, { "at": [87, 400.8], "count": 2, "after": true }]
+   "dots": [{ "at": [3796, 656.7], "count": 1, "after": true }, { "at": [3321.5, 398.1], "count": 1, "after": true }, { "at": [3263.8, 403.7], "count": 1, "after": true }, { "at": [2716.5, 656.7], "count": 1, "after": true }, { "at": [2620.1, 649.3], "count": 1, "after": true }, { "at": [2562, 654.8], "count": 1, "after": true }, { "at": [2303.3, 398.2], "count": 1, "after": true }, { "at": [2245.6, 403.8], "count": 1, "after": true }, { "at": [2087, 409.8], "count": 1, "after": true }, { "at": [2029.2, 415.1], "count": 1, "after": true }, { "at": [1932, 453.8], "count": 1, "after": true }, { "at": [1792, 400.3], "count": 1, "after": true }, { "at": [1092.3, 487.2], "count": 1, "after": true }, { "at": [674.9, 453.5], "count": 1, "after": true }, { "at": [426.8, 376.1], "count": 1, "after": true }, { "at": [258.5, 400], "count": 1, "after": true }, { "at": [115.9, 397.9], "count": 1, "after": true }, { "at": [57.9, 403.7], "count": 1, "after": true }]
   },
   "الْقَمَرُ فَوْقَ الْجَبَلْ": {
    "box": [4000, 1000],
@@ -55868,7 +55868,7 @@ export const WORD_PATHS = {
      [198.8, 214.4], [213.8, 212.5], [228.6, 216.6]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3505, 384.3], "count": 2, "after": true }, { "at": [2486.1, 313.2], "count": 1, "after": true }, { "at": [1865.7, 407.9], "count": 2, "after": true }, { "at": [905.4, 800.1], "count": 1, "after": true }, { "at": [569.8, 816.2], "count": 1, "after": true }]
+   "dots": [{ "at": [3556.5, 379.3], "count": 1, "after": true }, { "at": [3452.6, 389.3], "count": 1, "after": true }, { "at": [2486.1, 313.2], "count": 1, "after": true }, { "at": [1917.1, 402.9], "count": 1, "after": true }, { "at": [1812.9, 413.1], "count": 1, "after": true }, { "at": [905.4, 800.1], "count": 1, "after": true }, { "at": [569.8, 816.2], "count": 1, "after": true }]
   },
   "الزَّهْرَةُ فِي الْحَدِيقَةْ": {
    "box": [4000, 1000],
@@ -56021,7 +56021,7 @@ export const WORD_PATHS = {
      [176.4, 157.8], [189.5, 156.1], [202.4, 159.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3546, 357.8], "count": 1, "after": true }, { "at": [2747.2, 322.7], "count": 2, "after": true }, { "at": [2362.3, 284.3], "count": 1, "after": true }, { "at": [2019, 854.2], "count": 2, "after": true }, { "at": [653.2, 712.4], "count": 2, "after": true }, { "at": [437.9, 345.9], "count": 2, "after": true }, { "at": [187.1, 322.6], "count": 2, "after": true }]
+   "dots": [{ "at": [3546, 357.8], "count": 1, "after": true }, { "at": [2791.7, 318.3], "count": 1, "after": true }, { "at": [2702, 327.1], "count": 1, "after": true }, { "at": [2362.3, 284.3], "count": 1, "after": true }, { "at": [2063.7, 850.1], "count": 1, "after": true }, { "at": [1973.7, 858.4], "count": 1, "after": true }, { "at": [698, 708.1], "count": 1, "after": true }, { "at": [607.8, 716.7], "count": 1, "after": true }, { "at": [482.6, 341.4], "count": 1, "after": true }, { "at": [392.2, 350.5], "count": 1, "after": true }, { "at": [231.5, 318.3], "count": 1, "after": true }, { "at": [141.6, 327.1], "count": 1, "after": true }]
   },
   "الثَّلْجُ فَوْقَ الْجَبَلْ": {
    "box": [3994, 1000],
@@ -56165,7 +56165,7 @@ export const WORD_PATHS = {
      [190.1, 204.1], [204.8, 202.2], [219.3, 206.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3518.4, 436.2], "count": 3, "after": true }, { "at": [2987.2, 728.9], "count": 1, "after": true }, { "at": [2447.3, 301.8], "count": 1, "after": true }, { "at": [1834.9, 395.5], "count": 2, "after": true }, { "at": [886.5, 782.9], "count": 1, "after": true }, { "at": [555.1, 798.4], "count": 1, "after": true }]
+   "dots": [{ "at": [3518.5, 397.3], "count": 1, "after": true }, { "at": [3567.9, 448.7], "count": 1, "after": true }, { "at": [3469.8, 457.5], "count": 1, "after": true }, { "at": [2987.2, 728.9], "count": 1, "after": true }, { "at": [2447.3, 301.8], "count": 1, "after": true }, { "at": [1885.5, 390.6], "count": 1, "after": true }, { "at": [1782.8, 400.5], "count": 1, "after": true }, { "at": [886.5, 782.9], "count": 1, "after": true }, { "at": [555.1, 798.4], "count": 1, "after": true }]
   },
   "النَّخْلَةُ فِي الْجَزِيرَةْ": {
    "box": [4000, 1000],
@@ -56315,7 +56315,7 @@ export const WORD_PATHS = {
      [165.1, 154.1], [178.5, 152.4], [191.7, 156.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3587.6, 408.4], "count": 1, "after": true }, { "at": [3263.7, 348.2], "count": 1, "after": true }, { "at": [2798, 324.2], "count": 2, "after": true }, { "at": [2375.1, 285.1], "count": 1, "after": true }, { "at": [2023.6, 869.6], "count": 2, "after": true }, { "at": [1235, 717.3], "count": 1, "after": true }, { "at": [893.7, 360.4], "count": 1, "after": true }, { "at": [665.5, 723.9], "count": 2, "after": true }, { "at": [176.2, 324.3], "count": 2, "after": true }]
+   "dots": [{ "at": [3587.6, 408.4], "count": 1, "after": true }, { "at": [3263.7, 348.2], "count": 1, "after": true }, { "at": [2843.7, 319.7], "count": 1, "after": true }, { "at": [2751.2, 328.8], "count": 1, "after": true }, { "at": [2375.1, 285.1], "count": 1, "after": true }, { "at": [2069.2, 865.2], "count": 1, "after": true }, { "at": [1976.7, 874.1], "count": 1, "after": true }, { "at": [1235, 717.3], "count": 1, "after": true }, { "at": [893.7, 360.4], "count": 1, "after": true }, { "at": [711.4, 719.5], "count": 1, "after": true }, { "at": [618.8, 728.4], "count": 1, "after": true }, { "at": [221.8, 319.9], "count": 1, "after": true }, { "at": [129.3, 328.8], "count": 1, "after": true }]
   },
   "الْكَهْفُ فِي الْجَبَلْ": {
    "box": [3622, 1000],
@@ -56442,7 +56442,7 @@ export const WORD_PATHS = {
      [181.1, 192.8], [194.6, 191.1], [207.9, 194.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2642.7, 332.8], "count": 1, "after": true }, { "at": [1967.6, 282.3], "count": 1, "after": true }, { "at": [1612, 873.9], "count": 2, "after": true }, { "at": [814.3, 719.7], "count": 1, "after": true }, { "at": [513, 734.1], "count": 1, "after": true }]
+   "dots": [{ "at": [2642.7, 332.8], "count": 1, "after": true }, { "at": [1967.6, 282.3], "count": 1, "after": true }, { "at": [1658, 869.6], "count": 1, "after": true }, { "at": [1564.6, 878.4], "count": 1, "after": true }, { "at": [814.3, 719.7], "count": 1, "after": true }, { "at": [513, 734.1], "count": 1, "after": true }]
   },
   "الْجَذْرُ تَحْتَ الرَّمْلْ": {
    "box": [4000, 1000],
@@ -56580,7 +56580,7 @@ export const WORD_PATHS = {
      [191.1, 238.8], [204.6, 237.1], [217.9, 240.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3458.9, 774.4], "count": 1, "after": true }, { "at": [3076.8, 368.4], "count": 1, "after": true }, { "at": [2455.6, 388.7], "count": 2, "after": true }, { "at": [1631.5, 457.9], "count": 2, "after": true }]
+   "dots": [{ "at": [3458.9, 774.4], "count": 1, "after": true }, { "at": [3076.8, 368.4], "count": 1, "after": true }, { "at": [2502.6, 384.1], "count": 1, "after": true }, { "at": [2407.3, 393.4], "count": 1, "after": true }, { "at": [1678.4, 453.4], "count": 1, "after": true }, { "at": [1583.6, 462.6], "count": 1, "after": true }]
   },
   "الْوَرَقُ فَوْقَ الْعُشْبْ": {
    "box": [4000, 1000],
@@ -56727,7 +56727,7 @@ export const WORD_PATHS = {
      [279.1, 314.8], [292.6, 313.1], [305.9, 316.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2983.1, 417.6], "count": 2, "after": true }, { "at": [2450.2, 332.6], "count": 1, "after": true }, { "at": [1894.6, 417.4], "count": 2, "after": true }, { "at": [784.4, 449.3], "count": 3, "after": true }, { "at": [306.7, 783.2], "count": 1, "after": true }]
+   "dots": [{ "at": [3029.4, 413.1], "count": 1, "after": true }, { "at": [2936.1, 422.1], "count": 1, "after": true }, { "at": [2450.2, 332.6], "count": 1, "after": true }, { "at": [1940.5, 413], "count": 1, "after": true }, { "at": [1847.4, 421.9], "count": 1, "after": true }, { "at": [784, 414.2], "count": 1, "after": true }, { "at": [828.7, 460.5], "count": 1, "after": true }, { "at": [740.3, 468.7], "count": 1, "after": true }, { "at": [306.7, 783.2], "count": 1, "after": true }]
   },
   "الْعُشْبُ النَّاعِمُ فِي الْحَقْلْ": {
    "box": [4000, 1000],
@@ -56906,7 +56906,7 @@ export const WORD_PATHS = {
      [162.8, 268.7], [172.9, 267.3], [182.9, 270.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3387.3, 423.8], "count": 3, "after": true }, { "at": [3025, 677.2], "count": 1, "after": true }, { "at": [2452.8, 429.5], "count": 1, "after": true }, { "at": [1560.5, 335], "count": 1, "after": true }, { "at": [1291.3, 783.1], "count": 2, "after": true }, { "at": [432.9, 383.5], "count": 2, "after": true }]
+   "dots": [{ "at": [3387.4, 397.1], "count": 1, "after": true }, { "at": [3421.2, 432.2], "count": 1, "after": true }, { "at": [3353.4, 438.4], "count": 1, "after": true }, { "at": [3025, 677.2], "count": 1, "after": true }, { "at": [2452.8, 429.5], "count": 1, "after": true }, { "at": [1560.5, 335], "count": 1, "after": true }, { "at": [1326.1, 779.7], "count": 1, "after": true }, { "at": [1255.5, 786.5], "count": 1, "after": true }, { "at": [468.1, 380.1], "count": 1, "after": true }, { "at": [397.1, 387], "count": 1, "after": true }]
   },
   "النَّخْلَةُ الْعَالِيَةُ فِي الْجَزِيرَةْ": {
    "box": [4000, 1000],
@@ -57115,7 +57115,7 @@ export const WORD_PATHS = {
      [144.2, 249.6], [153.9, 248.4], [163.4, 251.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3676.3, 433.2], "count": 1, "after": true }, { "at": [3441.6, 389.8], "count": 1, "after": true }, { "at": [3104.1, 372.3], "count": 2, "after": true }, { "at": [2237.4, 662.1], "count": 2, "after": true }, { "at": [2052.1, 372.2], "count": 2, "after": true }, { "at": [1745.5, 343.9], "count": 1, "after": true }, { "at": [1491.1, 767.6], "count": 2, "after": true }, { "at": [919.3, 657.6], "count": 1, "after": true }, { "at": [671.9, 398.5], "count": 1, "after": true }, { "at": [506.4, 662.1], "count": 2, "after": true }, { "at": [151.5, 372.3], "count": 2, "after": true }]
+   "dots": [{ "at": [3676.3, 433.2], "count": 1, "after": true }, { "at": [3441.6, 389.8], "count": 1, "after": true }, { "at": [3137, 369.1], "count": 1, "after": true }, { "at": [3070.4, 375.7], "count": 1, "after": true }, { "at": [2270.1, 659.2], "count": 1, "after": true }, { "at": [2203.2, 665.2], "count": 1, "after": true }, { "at": [2085.5, 369], "count": 1, "after": true }, { "at": [2018.7, 375.4], "count": 1, "after": true }, { "at": [1745.5, 343.9], "count": 1, "after": true }, { "at": [1523.9, 764.3], "count": 1, "after": true }, { "at": [1457.2, 771], "count": 1, "after": true }, { "at": [919.3, 657.6], "count": 1, "after": true }, { "at": [671.9, 398.5], "count": 1, "after": true }, { "at": [539.7, 658.9], "count": 1, "after": true }, { "at": [472.7, 665.3], "count": 1, "after": true }, { "at": [184.4, 369.2], "count": 1, "after": true }, { "at": [117.7, 375.6], "count": 1, "after": true }]
   },
   "الْكَهْفُ الْمُظْلِمُ فِي الْجَبَلْ": {
    "box": [4000, 1000],
@@ -57304,7 +57304,7 @@ export const WORD_PATHS = {
      [157.5, 265], [168, 263.6], [178.2, 266.5]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3229.3, 371.8], "count": 1, "after": true }, { "at": [2313.8, 362.8], "count": 1, "after": true }, { "at": [1527.9, 332.9], "count": 1, "after": true }, { "at": [1254.9, 786.3], "count": 2, "after": true }, { "at": [643.6, 668.2], "count": 1, "after": true }, { "at": [412.6, 679.2], "count": 1, "after": true }]
+   "dots": [{ "at": [3229.3, 371.8], "count": 1, "after": true }, { "at": [2313.8, 362.8], "count": 1, "after": true }, { "at": [1527.9, 332.9], "count": 1, "after": true }, { "at": [1290.2, 783.2], "count": 1, "after": true }, { "at": [1218.8, 789.6], "count": 1, "after": true }, { "at": [643.6, 668.2], "count": 1, "after": true }, { "at": [412.6, 679.2], "count": 1, "after": true }]
   },
   "الْحَجَرُ الصُّلْبُ تَحْتَ التُّرَابْ": {
    "box": [4000, 1000],
@@ -57489,7 +57489,7 @@ export const WORD_PATHS = {
      [214.7, 391], [223.8, 389.8], [232.7, 392.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3330.2, 699.2], "count": 1, "after": true }, { "at": [2127, 708.5], "count": 1, "after": true }, { "at": [1798.2, 442.4], "count": 2, "after": true }, { "at": [1249.9, 488.7], "count": 2, "after": true }, { "at": [742.4, 493], "count": 2, "after": true }, { "at": [224.4, 708.9], "count": 1, "after": true }]
+   "dots": [{ "at": [3330.2, 699.2], "count": 1, "after": true }, { "at": [2127, 708.5], "count": 1, "after": true }, { "at": [1829.7, 439.6], "count": 1, "after": true }, { "at": [1766.2, 445.2], "count": 1, "after": true }, { "at": [1281.2, 485.9], "count": 1, "after": true }, { "at": [1218.1, 491.5], "count": 1, "after": true }, { "at": [773.3, 490.2], "count": 1, "after": true }, { "at": [710.6, 495.8], "count": 1, "after": true }, { "at": [224.4, 708.9], "count": 1, "after": true }]
   },
   "الشَّلَّالُ الْجَمِيلُ يَنْزِلُ فِي النَّهْرْ": {
    "box": [4000, 1000],
@@ -57705,7 +57705,7 @@ export const WORD_PATHS = {
      [171.2, 343.7], [179.6, 342.6], [187.8, 344.9]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3640.3, 453.1], "count": 3, "after": true }, { "at": [2658.1, 651.1], "count": 1, "after": true }, { "at": [2299.9, 655.8], "count": 2, "after": true }, { "at": [1845.9, 655.7], "count": 2, "after": true }, { "at": [1727, 457.5], "count": 1, "after": true }, { "at": [1589.1, 427.5], "count": 1, "after": true }, { "at": [1107, 380], "count": 1, "after": true }, { "at": [886.6, 746.9], "count": 2, "after": true }, { "at": [460.1, 457.6], "count": 1, "after": true }]
+   "dots": [{ "at": [3640.3, 431.1], "count": 1, "after": true }, { "at": [3668, 459.8], "count": 1, "after": true }, { "at": [3612.9, 464.8], "count": 1, "after": true }, { "at": [2658.1, 651.1], "count": 1, "after": true }, { "at": [2328.4, 653.1], "count": 1, "after": true }, { "at": [2270.6, 658.6], "count": 1, "after": true }, { "at": [1874.9, 652.9], "count": 1, "after": true }, { "at": [1817, 658.5], "count": 1, "after": true }, { "at": [1727, 457.5], "count": 1, "after": true }, { "at": [1589.1, 427.5], "count": 1, "after": true }, { "at": [1107, 380], "count": 1, "after": true }, { "at": [915.2, 744.2], "count": 1, "after": true }, { "at": [857.2, 749.7], "count": 1, "after": true }, { "at": [460.1, 457.6], "count": 1, "after": true }]
   },
   "الظَّلَامُ الْحَالِكُ فِي كَهْفِ الْجَبَلْ": {
    "box": [4000, 1000],
@@ -57926,7 +57926,7 @@ export const WORD_PATHS = {
      [145.2, 307.7], [153.6, 306.6], [161.8, 308.9]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3675.5, 385.7], "count": 1, "after": true }, { "at": [1947.9, 361.7], "count": 1, "after": true }, { "at": [1728.7, 726.1], "count": 2, "after": true }, { "at": [1153.5, 392.9], "count": 1, "after": true }, { "at": [535.3, 631.3], "count": 1, "after": true }, { "at": [349.7, 640], "count": 1, "after": true }]
+   "dots": [{ "at": [3675.5, 385.7], "count": 1, "after": true }, { "at": [1947.9, 361.7], "count": 1, "after": true }, { "at": [1757, 723.3], "count": 1, "after": true }, { "at": [1699.5, 729.1], "count": 1, "after": true }, { "at": [1153.5, 392.9], "count": 1, "after": true }, { "at": [535.3, 631.3], "count": 1, "after": true }, { "at": [349.7, 640], "count": 1, "after": true }]
   },
   "الدَّفْتَرُ فِي الْحَقِيبَةْ": {
    "box": [4000, 1000],
@@ -58077,7 +58077,7 @@ export const WORD_PATHS = {
      [189.1, 150.8], [202.6, 149.1], [215.9, 152.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3221.9, 282.9], "count": 1, "after": true }, { "at": [3004.5, 415.7], "count": 2, "after": true }, { "at": [2350.6, 283.1], "count": 1, "after": true }, { "at": [1995.3, 873.4], "count": 2, "after": true }, { "at": [864.4, 346.7], "count": 2, "after": true }, { "at": [638.9, 726.4], "count": 2, "after": true }, { "at": [435.6, 733.8], "count": 1, "after": true }, { "at": [200.1, 322.6], "count": 2, "after": true }]
+   "dots": [{ "at": [3221.9, 282.9], "count": 1, "after": true }, { "at": [3050.6, 411.2], "count": 1, "after": true }, { "at": [2957.3, 420.2], "count": 1, "after": true }, { "at": [2350.6, 283.1], "count": 1, "after": true }, { "at": [2041.6, 869], "count": 1, "after": true }, { "at": [1948.2, 877.9], "count": 1, "after": true }, { "at": [910.4, 342.3], "count": 1, "after": true }, { "at": [817.5, 351.3], "count": 1, "after": true }, { "at": [684.7, 721.9], "count": 1, "after": true }, { "at": [591.5, 731], "count": 1, "after": true }, { "at": [435.6, 733.8], "count": 1, "after": true }, { "at": [246.3, 318.2], "count": 1, "after": true }, { "at": [153.1, 327], "count": 1, "after": true }]
   },
   "أُخْتِي تَقْرَأُ الْقِصَّةْ": {
    "box": [3176, 1000],
@@ -58229,7 +58229,7 @@ export const WORD_PATHS = {
      [169.8, 267.9], [181.2, 266.5], [192.3, 269.6]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2801.2, 433.1], "count": 1, "after": true }, { "at": [2559.8, 491.4], "count": 2, "after": true }, { "at": [2253.8, 879.4], "count": 2, "after": true }, { "at": [1899.7, 428.4], "count": 2, "after": true }, { "at": [1701.1, 433.2], "count": 2, "after": true }, { "at": [807.9, 433.1], "count": 2, "after": true }, { "at": [178.5, 412.6], "count": 2, "after": true }]
+   "dots": [{ "at": [2801.2, 433.1], "count": 1, "after": true }, { "at": [2598.7, 487.8], "count": 1, "after": true }, { "at": [2519.7, 495.2], "count": 1, "after": true }, { "at": [2292.7, 875.8], "count": 1, "after": true }, { "at": [2213.8, 883.1], "count": 1, "after": true }, { "at": [1938.9, 424.7], "count": 1, "after": true }, { "at": [1860, 432], "count": 1, "after": true }, { "at": [1740.3, 429.5], "count": 1, "after": true }, { "at": [1661.1, 436.9], "count": 1, "after": true }, { "at": [846.8, 429.5], "count": 1, "after": true }, { "at": [767.7, 436.9], "count": 1, "after": true }, { "at": [217.4, 409], "count": 1, "after": true }, { "at": [138.6, 416.3], "count": 1, "after": true }]
   },
   "الْمِمْحَاةُ فِي الْمَقْلَمَةْ": {
    "box": [4000, 1000],
@@ -58392,7 +58392,7 @@ export const WORD_PATHS = {
      [183.5, 158.2], [196.5, 156.5], [209.2, 160.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2499.9, 323.2], "count": 2, "after": true }, { "at": [2115.8, 285.1], "count": 1, "after": true }, { "at": [1774, 853.1], "count": 2, "after": true }, { "at": [836.8, 346.6], "count": 2, "after": true }, { "at": [193.8, 323.3], "count": 2, "after": true }]
+   "dots": [{ "at": [2544.2, 319.1], "count": 1, "after": true }, { "at": [2454.7, 327.3], "count": 1, "after": true }, { "at": [2115.8, 285.1], "count": 1, "after": true }, { "at": [1818.4, 849], "count": 1, "after": true }, { "at": [1728.7, 857.3], "count": 1, "after": true }, { "at": [880.9, 342.4], "count": 1, "after": true }, { "at": [791.2, 350.9], "count": 1, "after": true }, { "at": [237.9, 319.1], "count": 1, "after": true }, { "at": [148.3, 327.6], "count": 1, "after": true }]
   },
   "الْخَرِيطَةُ فَوْقَ الْجِدَارْ": {
    "box": [4000, 1000],
@@ -58560,7 +58560,7 @@ export const WORD_PATHS = {
      [196.6, 270.3], [208.2, 268.7], [219.6, 272]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3491.7, 377.5], "count": 1, "after": true }, { "at": [3024.5, 706.9], "count": 2, "after": true }, { "at": [2474.8, 356.6], "count": 2, "after": true }, { "at": [2104.7, 322.2], "count": 1, "after": true }, { "at": [1622.2, 395.9], "count": 2, "after": true }, { "at": [875.9, 701], "count": 1, "after": true }]
+   "dots": [{ "at": [3491.7, 377.5], "count": 1, "after": true }, { "at": [3064.3, 703.2], "count": 1, "after": true }, { "at": [2983.7, 710.7], "count": 1, "after": true }, { "at": [2515.3, 352.7], "count": 1, "after": true }, { "at": [2434, 360.6], "count": 1, "after": true }, { "at": [2104.7, 322.2], "count": 1, "after": true }, { "at": [1662.4, 391.9], "count": 1, "after": true }, { "at": [1581.4, 399.9], "count": 1, "after": true }, { "at": [875.9, 701], "count": 1, "after": true }]
   },
   "الْجَرَسُ فِي الْمَدْرَسَةْ": {
    "box": [4000, 1000],
@@ -58711,7 +58711,7 @@ export const WORD_PATHS = {
      [176.1, 184.9], [188.3, 183.3], [200.3, 186.7]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3512, 698.8], "count": 1, "after": true }, { "at": [2261.7, 303.1], "count": 1, "after": true }, { "at": [1940.1, 838], "count": 2, "after": true }, { "at": [187.1, 339.2], "count": 2, "after": true }]
+   "dots": [{ "at": [3512, 698.8], "count": 1, "after": true }, { "at": [2261.7, 303.1], "count": 1, "after": true }, { "at": [1981.6, 834], "count": 1, "after": true }, { "at": [1897.3, 842.2], "count": 1, "after": true }, { "at": [228.5, 335.1], "count": 1, "after": true }, { "at": [144, 343.4], "count": 1, "after": true }]
   },
   "الْوَاجِبُ فِي الدَّفْتَرْ": {
    "box": [4000, 1000],
@@ -58851,7 +58851,7 @@ export const WORD_PATHS = {
      [220.3, 226.5], [233.5, 224.8], [246.5, 228.5]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3059.7, 716.5], "count": 1, "after": true }, { "at": [2593.5, 730.5], "count": 1, "after": true }, { "at": [2064.6, 285.4], "count": 1, "after": true }, { "at": [1713.9, 868.5], "count": 2, "after": true }, { "at": [685.9, 285.8], "count": 1, "after": true }, { "at": [471.3, 416.7], "count": 2, "after": true }]
+   "dots": [{ "at": [3059.7, 716.5], "count": 1, "after": true }, { "at": [2593.5, 730.5], "count": 1, "after": true }, { "at": [2064.6, 285.4], "count": 1, "after": true }, { "at": [1759.6, 864], "count": 1, "after": true }, { "at": [1667.6, 873], "count": 1, "after": true }, { "at": [685.9, 285.8], "count": 1, "after": true }, { "at": [516.6, 412.2], "count": 1, "after": true }, { "at": [424.8, 421.2], "count": 1, "after": true }]
   },
   "الطَّبَاشِيرُ فَوْقَ اللَّوْحْ": {
    "box": [4000, 1000],
@@ -59024,7 +59024,7 @@ export const WORD_PATHS = {
      [246.1, 272.9], [258.3, 271.3], [270.3, 274.7]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3249.1, 770.7], "count": 1, "after": true }, { "at": [2845.4, 464.9], "count": 3, "after": true }, { "at": [2546.8, 764.2], "count": 2, "after": true }, { "at": [1946.6, 357.9], "count": 1, "after": true }, { "at": [1437.2, 435.8], "count": 2, "after": true }]
+   "dots": [{ "at": [3249.1, 770.7], "count": 1, "after": true }, { "at": [2845.1, 432.5], "count": 1, "after": true }, { "at": [2886.2, 475.3], "count": 1, "after": true }, { "at": [2805, 482.5], "count": 1, "after": true }, { "at": [2588.9, 760.2], "count": 1, "after": true }, { "at": [2503.6, 768.2], "count": 1, "after": true }, { "at": [1946.6, 357.9], "count": 1, "after": true }, { "at": [1479.1, 431.9], "count": 1, "after": true }, { "at": [1394, 439.9], "count": 1, "after": true }]
   },
   "الشَّهَادَةُ فِي الْحَقِيبَةْ": {
    "box": [4000, 1000],
@@ -59183,7 +59183,7 @@ export const WORD_PATHS = {
      [176.9, 169.2], [189.4, 167.6], [201.7, 171]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3509.5, 400.7], "count": 3, "after": true }, { "at": [2566, 328.6], "count": 2, "after": true }, { "at": [2193.8, 291.4], "count": 1, "after": true }, { "at": [1862.1, 842.6], "count": 2, "after": true }, { "at": [806.9, 351.1], "count": 2, "after": true }, { "at": [595.7, 705.3], "count": 2, "after": true }, { "at": [406.5, 712.2], "count": 1, "after": true }, { "at": [186.6, 328.6], "count": 2, "after": true }]
+   "dots": [{ "at": [3509.2, 367.8], "count": 1, "after": true }, { "at": [3550.6, 410.9], "count": 1, "after": true }, { "at": [3468, 418.9], "count": 1, "after": true }, { "at": [2609, 324.4], "count": 1, "after": true }, { "at": [2522.2, 332.9], "count": 1, "after": true }, { "at": [2193.8, 291.4], "count": 1, "after": true }, { "at": [1905.2, 838.4], "count": 1, "after": true }, { "at": [1818.3, 846.9], "count": 1, "after": true }, { "at": [849.6, 347], "count": 1, "after": true }, { "at": [762.7, 355.4], "count": 1, "after": true }, { "at": [639, 701.2], "count": 1, "after": true }, { "at": [551.8, 709.3], "count": 1, "after": true }, { "at": [406.5, 712.2], "count": 1, "after": true }, { "at": [229.7, 324.6], "count": 1, "after": true }, { "at": [142.5, 332.7], "count": 1, "after": true }]
   },
   "الْمُعَلِّمُ يَكْتُبُ فَوْقَ اللَّوْحْ": {
    "box": [4000, 1000],
@@ -59382,7 +59382,7 @@ export const WORD_PATHS = {
      [222.4, 306.6], [233, 305.2], [243.4, 308.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2756.6, 724.1], "count": 2, "after": true }, { "at": [2372, 482.4], "count": 2, "after": true }, { "at": [2081, 729.9], "count": 1, "after": true }, { "at": [1664.2, 379.3], "count": 1, "after": true }, { "at": [1231.7, 445.2], "count": 2, "after": true }]
+   "dots": [{ "at": [2792.3, 720.7], "count": 1, "after": true }, { "at": [2719.9, 727.5], "count": 1, "after": true }, { "at": [2408, 478.9], "count": 1, "after": true }, { "at": [2335.2, 486], "count": 1, "after": true }, { "at": [2081, 729.9], "count": 1, "after": true }, { "at": [1664.2, 379.3], "count": 1, "after": true }, { "at": [1267.6, 442], "count": 1, "after": true }, { "at": [1195.4, 448.4], "count": 1, "after": true }]
   },
   "التِّلْمِيذُ يَجْلِسُ فِي الْمَكْتَبَةْ": {
    "box": [4000, 1000],
@@ -59577,7 +59577,7 @@ export const WORD_PATHS = {
      [155.4, 251.4], [164.8, 250.1], [174, 252.7]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3665.2, 439.6], "count": 2, "after": true }, { "at": [3215.1, 661], "count": 2, "after": true }, { "at": [3017.8, 372.3], "count": 1, "after": true }, { "at": [2746.5, 661.1], "count": 2, "after": true }, { "at": [2531.5, 656.1], "count": 1, "after": true }, { "at": [1615.8, 344.7], "count": 1, "after": true }, { "at": [1363.2, 765.7], "count": 2, "after": true }, { "at": [475.2, 439.6], "count": 2, "after": true }, { "at": [330.5, 666.5], "count": 1, "after": true }, { "at": [163, 373.2], "count": 2, "after": true }]
+   "dots": [{ "at": [3697.8, 436.2], "count": 1, "after": true }, { "at": [3631.3, 443], "count": 1, "after": true }, { "at": [3248.2, 657.9], "count": 1, "after": true }, { "at": [3181.7, 664.2], "count": 1, "after": true }, { "at": [3017.8, 372.3], "count": 1, "after": true }, { "at": [2779, 658], "count": 1, "after": true }, { "at": [2712.4, 664.3], "count": 1, "after": true }, { "at": [2531.5, 656.1], "count": 1, "after": true }, { "at": [1615.8, 344.7], "count": 1, "after": true }, { "at": [1395.7, 762.5], "count": 1, "after": true }, { "at": [1329.2, 769.1], "count": 1, "after": true }, { "at": [507.8, 436.3], "count": 1, "after": true }, { "at": [441.3, 443], "count": 1, "after": true }, { "at": [330.5, 666.5], "count": 1, "after": true }, { "at": [195.5, 370], "count": 1, "after": true }, { "at": [129.3, 376.6], "count": 1, "after": true }]
   },
   "الْمِسْطَرَةُ الطَّوِيلَةُ فِي الْمَقْلَمَةْ": {
    "box": [4000, 1000],
@@ -59818,7 +59818,7 @@ export const WORD_PATHS = {
      [150, 276], [158.7, 274.9], [167.2, 277.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2822.5, 385.1], "count": 2, "after": true }, { "at": [1973.1, 645.3], "count": 2, "after": true }, { "at": [1718.5, 385.2], "count": 2, "after": true }, { "at": [1443.7, 359.5], "count": 1, "after": true }, { "at": [1215, 740.3], "count": 2, "after": true }, { "at": [586.9, 401], "count": 2, "after": true }, { "at": [156.5, 385.2], "count": 2, "after": true }]
+   "dots": [{ "at": [2852.3, 382.3], "count": 1, "after": true }, { "at": [2792.3, 388.1], "count": 1, "after": true }, { "at": [2002.9, 642.4], "count": 1, "after": true }, { "at": [1942.8, 648.3], "count": 1, "after": true }, { "at": [1748.3, 382.3], "count": 1, "after": true }, { "at": [1688.2, 388.1], "count": 1, "after": true }, { "at": [1443.7, 359.5], "count": 1, "after": true }, { "at": [1244.7, 737.5], "count": 1, "after": true }, { "at": [1184.5, 743.1], "count": 1, "after": true }, { "at": [616.4, 398.1], "count": 1, "after": true }, { "at": [556.5, 403.9], "count": 1, "after": true }, { "at": [186.3, 382.3], "count": 1, "after": true }, { "at": [126.2, 388.1], "count": 1, "after": true }]
   },
   "الْحَقِيبَةُ الثَّقِيلَةُ فَوْقَ الْمَقْعَدْ": {
    "box": [4000, 1000],
@@ -60039,7 +60039,7 @@ export const WORD_PATHS = {
      [170.7, 325], [179.8, 323.8], [188.7, 326.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3387.4, 429.7], "count": 2, "after": true }, { "at": [3234.8, 685.9], "count": 2, "after": true }, { "at": [3097.8, 690.6], "count": 1, "after": true }, { "at": [2938.5, 413.3], "count": 2, "after": true }, { "at": [2493.3, 469], "count": 3, "after": true }, { "at": [2330.9, 429.7], "count": 2, "after": true }, { "at": [2178, 686], "count": 2, "after": true }, { "at": [1902.1, 413.2], "count": 2, "after": true }, { "at": [1613.6, 386.4], "count": 1, "after": true }, { "at": [1237.7, 444], "count": 2, "after": true }, { "at": [536.2, 429.6], "count": 2, "after": true }]
+   "dots": [{ "at": [3418.1, 426.8], "count": 1, "after": true }, { "at": [3355.5, 432.8], "count": 1, "after": true }, { "at": [3265.9, 682.8], "count": 1, "after": true }, { "at": [3202.6, 689.2], "count": 1, "after": true }, { "at": [3097.8, 690.6], "count": 1, "after": true }, { "at": [2969.3, 410.3], "count": 1, "after": true }, { "at": [2906.8, 416.5], "count": 1, "after": true }, { "at": [2493.5, 444.9], "count": 1, "after": true }, { "at": [2523.3, 476.8], "count": 1, "after": true }, { "at": [2463.9, 481.8], "count": 1, "after": true }, { "at": [2361.8, 426.6], "count": 1, "after": true }, { "at": [2298.8, 432.9], "count": 1, "after": true }, { "at": [2209.6, 683], "count": 1, "after": true }, { "at": [2146.2, 689.1], "count": 1, "after": true }, { "at": [1933.2, 410.4], "count": 1, "after": true }, { "at": [1869.9, 416.2], "count": 1, "after": true }, { "at": [1613.6, 386.4], "count": 1, "after": true }, { "at": [1268.9, 441], "count": 1, "after": true }, { "at": [1206, 447], "count": 1, "after": true }, { "at": [567.4, 426.3], "count": 1, "after": true }, { "at": [504.1, 433], "count": 1, "after": true }]
   },
   "التِّلْمِيذُ الْمَاهِرُ يَرْسُمُ النَّخْلَةْ": {
    "box": [4000, 1000],
@@ -60261,7 +60261,7 @@ export const WORD_PATHS = {
      [157.5, 284.7], [166.8, 283.4], [175.9, 286]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3668.5, 467.1], "count": 2, "after": true }, { "at": [3233, 681.5], "count": 2, "after": true }, { "at": [3042, 402], "count": 1, "after": true }, { "at": [1815.2, 681.7], "count": 2, "after": true }, { "at": [714.6, 461.7], "count": 1, "after": true }, { "at": [489.2, 419.5], "count": 1, "after": true }, { "at": [164.4, 402.9], "count": 2, "after": true }]
+   "dots": [{ "at": [3700.4, 464.1], "count": 1, "after": true }, { "at": [3636.3, 470.2], "count": 1, "after": true }, { "at": [3265, 678.4], "count": 1, "after": true }, { "at": [3200.8, 684.6], "count": 1, "after": true }, { "at": [3042, 402], "count": 1, "after": true }, { "at": [1847.4, 678.8], "count": 1, "after": true }, { "at": [1782.9, 684.5], "count": 1, "after": true }, { "at": [714.6, 461.7], "count": 1, "after": true }, { "at": [489.2, 419.5], "count": 1, "after": true }, { "at": [196, 399.9], "count": 1, "after": true }, { "at": [131.6, 406], "count": 1, "after": true }]
   },
   "الْقَمِيصُ فِي الْخِزَانَةْ": {
    "box": [4000, 1000],
@@ -60407,7 +60407,7 @@ export const WORD_PATHS = {
      [182.9, 177.2], [195.4, 175.6], [207.7, 179]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3571.3, 357.7], "count": 2, "after": true }, { "at": [3124.4, 709.8], "count": 2, "after": true }, { "at": [2117, 298.7], "count": 1, "after": true }, { "at": [1788, 846.2], "count": 2, "after": true }, { "at": [1015.6, 357.5], "count": 1, "after": true }, { "at": [729.6, 369.3], "count": 1, "after": true }, { "at": [396.4, 344.9], "count": 1, "after": true }, { "at": [192.9, 335.3], "count": 2, "after": true }]
+   "dots": [{ "at": [3613.9, 353.5], "count": 1, "after": true }, { "at": [3527.5, 362], "count": 1, "after": true }, { "at": [3167.1, 705.9], "count": 1, "after": true }, { "at": [3080.8, 713.9], "count": 1, "after": true }, { "at": [2117, 298.7], "count": 1, "after": true }, { "at": [1830.6, 842], "count": 1, "after": true }, { "at": [1744, 850.5], "count": 1, "after": true }, { "at": [1015.6, 357.5], "count": 1, "after": true }, { "at": [729.6, 369.3], "count": 1, "after": true }, { "at": [396.4, 344.9], "count": 1, "after": true }, { "at": [235.2, 331.3], "count": 1, "after": true }, { "at": [148.7, 339.5], "count": 1, "after": true }]
   },
   "الْجَزْمَةُ تَحْتَ السَّرِيرْ": {
    "box": [4000, 1000],
@@ -60554,7 +60554,7 @@ export const WORD_PATHS = {
      [203.4, 264.6], [215.3, 263], [227, 266.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3520.1, 706.3], "count": 1, "after": true }, { "at": [3213.4, 385.5], "count": 1, "after": true }, { "at": [2729.6, 353.1], "count": 2, "after": true }, { "at": [2395.3, 369.7], "count": 2, "after": true }, { "at": [1675.7, 430.3], "count": 2, "after": true }, { "at": [417.6, 712.3], "count": 2, "after": true }]
+   "dots": [{ "at": [3520.1, 706.3], "count": 1, "after": true }, { "at": [3213.4, 385.5], "count": 1, "after": true }, { "at": [2770.7, 349.1], "count": 1, "after": true }, { "at": [2687.6, 357.1], "count": 1, "after": true }, { "at": [2435.9, 365.8], "count": 1, "after": true }, { "at": [2353.2, 373.8], "count": 1, "after": true }, { "at": [1716.6, 426.2], "count": 1, "after": true }, { "at": [1633.9, 434.5], "count": 1, "after": true }, { "at": [458.6, 708.3], "count": 1, "after": true }, { "at": [375.5, 716.5], "count": 1, "after": true }]
   },
   "الْخَاتَمُ فِي الْمِحْفَظَةْ": {
    "box": [4000, 1000],
@@ -60715,7 +60715,7 @@ export const WORD_PATHS = {
      [180.9, 173.2], [193.4, 171.6], [205.7, 175]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3468.7, 352.6], "count": 1, "after": true }, { "at": [3068.4, 347.8], "count": 2, "after": true }, { "at": [2396.8, 294.2], "count": 1, "after": true }, { "at": [2069.5, 838.5], "count": 2, "after": true }, { "at": [790.4, 345.7], "count": 1, "after": true }, { "at": [557.2, 330], "count": 1, "after": true }, { "at": [190.9, 330.4], "count": 2, "after": true }]
+   "dots": [{ "at": [3468.7, 352.6], "count": 1, "after": true }, { "at": [3111, 343.8], "count": 1, "after": true }, { "at": [3025, 351.9], "count": 1, "after": true }, { "at": [2396.8, 294.2], "count": 1, "after": true }, { "at": [2112, 834.5], "count": 1, "after": true }, { "at": [2025.9, 842.6], "count": 1, "after": true }, { "at": [790.4, 345.7], "count": 1, "after": true }, { "at": [557.2, 330], "count": 1, "after": true }, { "at": [233.4, 326.3], "count": 1, "after": true }, { "at": [147.7, 334.5], "count": 1, "after": true }]
   },
   "الْقُبَّعَةُ فَوْقَ الرَّأْسْ": {
    "box": [3722, 1000],
@@ -60880,7 +60880,7 @@ export const WORD_PATHS = {
      [469.5, 390.2], [482.5, 388.5], [495.2, 392.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3286.2, 466.1], "count": 2, "after": true }, { "at": [3089.2, 836.6], "count": 1, "after": true }, { "at": [2617.5, 442.7], "count": 2, "after": true }, { "at": [2208.3, 404.9], "count": 1, "after": true }, { "at": [1676, 486.3], "count": 2, "after": true }]
+   "dots": [{ "at": [3330.4, 461.8], "count": 1, "after": true }, { "at": [3241, 470.6], "count": 1, "after": true }, { "at": [3089.2, 836.6], "count": 1, "after": true }, { "at": [2661.7, 438.4], "count": 1, "after": true }, { "at": [2572.5, 447.1], "count": 1, "after": true }, { "at": [2208.3, 404.9], "count": 1, "after": true }, { "at": [1719.8, 482], "count": 1, "after": true }, { "at": [1630.8, 490.6], "count": 1, "after": true }]
   },
   "الصُّوفُ فِي الصُّنْدُوقْ": {
    "box": [4000, 1000],
@@ -61024,7 +61024,7 @@ export const WORD_PATHS = {
      [263.4, 240.6], [275.3, 239], [287, 242.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2900.4, 307.2], "count": 1, "after": true }, { "at": [2322.7, 316.3], "count": 1, "after": true }, { "at": [2013.5, 829.9], "count": 2, "after": true }, { "at": [996.4, 424.8], "count": 1, "after": true }, { "at": [273.2, 390.2], "count": 2, "after": true }]
+   "dots": [{ "at": [2900.4, 307.2], "count": 1, "after": true }, { "at": [2322.7, 316.3], "count": 1, "after": true }, { "at": [2053.8, 826.2], "count": 1, "after": true }, { "at": [1972.8, 833.7], "count": 1, "after": true }, { "at": [996.4, 424.8], "count": 1, "after": true }, { "at": [313.3, 386.3], "count": 1, "after": true }, { "at": [232, 394.2], "count": 1, "after": true }]
   },
   "النَّعْلُ تَحْتَ الْمَقْعَدْ": {
    "box": [4000, 1000],
@@ -61177,7 +61177,7 @@ export const WORD_PATHS = {
      [212, 238.5], [225.7, 236.7], [239.1, 240.5]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3574.7, 456.5], "count": 1, "after": true }, { "at": [2611.4, 389.5], "count": 2, "after": true }, { "at": [1792.8, 458.5], "count": 2, "after": true }, { "at": [761.2, 395.1], "count": 2, "after": true }]
+   "dots": [{ "at": [3574.7, 456.5], "count": 1, "after": true }, { "at": [2658, 385.1], "count": 1, "after": true }, { "at": [2563.7, 394], "count": 1, "after": true }, { "at": [1839.4, 454.1], "count": 1, "after": true }, { "at": [1745, 463.1], "count": 1, "after": true }, { "at": [807.8, 390.5], "count": 1, "after": true }, { "at": [713.4, 399.8], "count": 1, "after": true }]
   },
   "الرَّبْطَةُ فَوْقَ الْقَمِيصْ": {
    "box": [4000, 1000],
@@ -61344,7 +61344,7 @@ export const WORD_PATHS = {
      [450, 265.6], [462.4, 264], [474.5, 267.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3378.4, 757.2], "count": 1, "after": true }, { "at": [2821.3, 383.8], "count": 2, "after": true }, { "at": [2433.2, 347.8], "count": 1, "after": true }, { "at": [1928.3, 424.9], "count": 2, "after": true }, { "at": [1217, 405.7], "count": 2, "after": true }, { "at": [779.6, 750.6], "count": 2, "after": true }]
+   "dots": [{ "at": [3378.4, 757.2], "count": 1, "after": true }, { "at": [2863, 379.7], "count": 1, "after": true }, { "at": [2778.4, 387.9], "count": 1, "after": true }, { "at": [2433.2, 347.8], "count": 1, "after": true }, { "at": [1969.9, 420.9], "count": 1, "after": true }, { "at": [1885.3, 429], "count": 1, "after": true }, { "at": [1258.8, 401.6], "count": 1, "after": true }, { "at": [1174.3, 409.9], "count": 1, "after": true }, { "at": [821.3, 746.6], "count": 1, "after": true }, { "at": [736.6, 754.8], "count": 1, "after": true }]
   },
   "الْجَوْرَبُ الصَّغِيرُ فِي الْحَقِيبَةْ": {
    "box": [4000, 1000],
@@ -61545,7 +61545,7 @@ export const WORD_PATHS = {
      [150.7, 266.4], [159.7, 265.1], [168.5, 267.6]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3623.8, 639.3], "count": 1, "after": true }, { "at": [2973.1, 648.9], "count": 1, "after": true }, { "at": [2148.3, 386.3], "count": 1, "after": true }, { "at": [1995.6, 644], "count": 2, "after": true }, { "at": [1567, 353.2], "count": 1, "after": true }, { "at": [1334.1, 740.3], "count": 2, "after": true }, { "at": [592.8, 395.2], "count": 2, "after": true }, { "at": [444.8, 643.9], "count": 2, "after": true }, { "at": [311.7, 648.7], "count": 1, "after": true }, { "at": [157.6, 379.1], "count": 2, "after": true }]
+   "dots": [{ "at": [3623.8, 639.3], "count": 1, "after": true }, { "at": [2973.1, 648.9], "count": 1, "after": true }, { "at": [2148.3, 386.3], "count": 1, "after": true }, { "at": [2025.8, 641.1], "count": 1, "after": true }, { "at": [1964.9, 646.9], "count": 1, "after": true }, { "at": [1567, 353.2], "count": 1, "after": true }, { "at": [1364.3, 737.4], "count": 1, "after": true }, { "at": [1303.1, 743.2], "count": 1, "after": true }, { "at": [622.7, 392.3], "count": 1, "after": true }, { "at": [562.1, 398.1], "count": 1, "after": true }, { "at": [475.1, 641], "count": 1, "after": true }, { "at": [414, 646.8], "count": 1, "after": true }, { "at": [311.7, 648.7], "count": 1, "after": true }, { "at": [188.1, 376.1], "count": 1, "after": true }, { "at": [126.4, 382.1], "count": 1, "after": true }]
   },
   "الصُّنْدُوقُ الثَّقِيلُ فَوْقَ الْخِزَانَةْ": {
    "box": [4000, 1000],
@@ -61764,7 +61764,7 @@ export const WORD_PATHS = {
      [145.2, 315.7], [153.6, 314.6], [161.8, 316.9]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3397.1, 476.5], "count": 1, "after": true }, { "at": [2875.4, 451.9], "count": 2, "after": true }, { "at": [2395.6, 474.9], "count": 3, "after": true }, { "at": [2244.5, 438.7], "count": 2, "after": true }, { "at": [2103.4, 676.6], "count": 2, "after": true }, { "at": [1619.6, 398.3], "count": 1, "after": true }, { "at": [1270.7, 451.5], "count": 2, "after": true }, { "at": [708, 438.5], "count": 1, "after": true }, { "at": [515, 446.2], "count": 1, "after": true }, { "at": [289.3, 430.1], "count": 1, "after": true }, { "at": [152, 423.5], "count": 2, "after": true }]
+   "dots": [{ "at": [3397.1, 476.5], "count": 1, "after": true }, { "at": [2904.4, 449.1], "count": 1, "after": true }, { "at": [2846, 454.7], "count": 1, "after": true }, { "at": [2395.4, 453], "count": 1, "after": true }, { "at": [2423.8, 481.9], "count": 1, "after": true }, { "at": [2368, 487], "count": 1, "after": true }, { "at": [2273.4, 436.1], "count": 1, "after": true }, { "at": [2214.9, 441.4], "count": 1, "after": true }, { "at": [2132, 673.8], "count": 1, "after": true }, { "at": [2073.7, 679.5], "count": 1, "after": true }, { "at": [1619.6, 398.3], "count": 1, "after": true }, { "at": [1299.8, 448.8], "count": 1, "after": true }, { "at": [1241.3, 454.2], "count": 1, "after": true }, { "at": [708, 438.5], "count": 1, "after": true }, { "at": [515, 446.2], "count": 1, "after": true }, { "at": [289.3, 430.1], "count": 1, "after": true }, { "at": [180.7, 421], "count": 1, "after": true }, { "at": [122.2, 426.1], "count": 1, "after": true }]
   },
   "الْوِشَاحُ الطَّوِيلُ فَوْقَ الْمَقْعَدْ": {
    "box": [4000, 1000],
@@ -61984,7 +61984,7 @@ export const WORD_PATHS = {
      [168.7, 302.4], [177.7, 301.1], [186.5, 303.6]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3429.1, 441], "count": 3, "after": true }, { "at": [2105.4, 659.5], "count": 2, "after": true }, { "at": [1599.1, 362.5], "count": 1, "after": true }, { "at": [1227.1, 419.4], "count": 2, "after": true }, { "at": [531.1, 405.3], "count": 2, "after": true }]
+   "dots": [{ "at": [3429.2, 417.3], "count": 1, "after": true }, { "at": [3459, 448.4], "count": 1, "after": true }, { "at": [3399.9, 453.8], "count": 1, "after": true }, { "at": [2136.2, 656.7], "count": 1, "after": true }, { "at": [2073.9, 662.4], "count": 1, "after": true }, { "at": [1599.1, 362.5], "count": 1, "after": true }, { "at": [1257.6, 416.3], "count": 1, "after": true }, { "at": [1195.5, 422.5], "count": 1, "after": true }, { "at": [562.1, 402.4], "count": 1, "after": true }, { "at": [499.8, 408.3], "count": 1, "after": true }]
   },
   "الْقُفَّازُ النَّاعِمُ فِي الْجَيْبْ": {
    "box": [4000, 1000],
@@ -62168,7 +62168,7 @@ export const WORD_PATHS = {
      [237.5, 317], [248, 315.6], [258.2, 318.5]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3625.6, 379.3], "count": 2, "after": true }, { "at": [3437, 373], "count": 1, "after": true }, { "at": [3126.6, 388.9], "count": 1, "after": true }, { "at": [2634.9, 427], "count": 1, "after": true }, { "at": [1710.4, 329], "count": 1, "after": true }, { "at": [1431.7, 793], "count": 2, "after": true }, { "at": [806.1, 672.1], "count": 1, "after": true }, { "at": [554, 677.6], "count": 2, "after": true }, { "at": [259.6, 683.3], "count": 1, "after": true }]
+   "dots": [{ "at": [3661.8, 375.7], "count": 1, "after": true }, { "at": [3588.5, 383], "count": 1, "after": true }, { "at": [3437, 373], "count": 1, "after": true }, { "at": [3126.6, 388.9], "count": 1, "after": true }, { "at": [2634.9, 427], "count": 1, "after": true }, { "at": [1710.4, 329], "count": 1, "after": true }, { "at": [1467.8, 789.4], "count": 1, "after": true }, { "at": [1394.5, 796.7], "count": 1, "after": true }, { "at": [806.1, 672.1], "count": 1, "after": true }, { "at": [590.1, 674.1], "count": 1, "after": true }, { "at": [516.7, 681.2], "count": 1, "after": true }, { "at": [259.6, 683.3], "count": 1, "after": true }]
   },
   "جَدِّي يَلْبَسُ النَّظَّارَةَ الْجَدِيدَةْ": {
    "box": [4000, 1000],
@@ -62390,7 +62390,7 @@ export const WORD_PATHS = {
      [140.7, 272.4], [149.7, 271.1], [158.5, 273.6]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3810.7, 642.5], "count": 1, "after": true }, { "at": [3338.6, 743.3], "count": 2, "after": true }, { "at": [3067.2, 647.4], "count": 2, "after": true }, { "at": [2844.7, 652.1], "count": 1, "after": true }, { "at": [2041.4, 439.1], "count": 1, "after": true }, { "at": [1894.7, 383.6], "count": 1, "after": true }, { "at": [1376.6, 383.8], "count": 2, "after": true }, { "at": [902.7, 642.5], "count": 1, "after": true }, { "at": [498.7, 647.4], "count": 2, "after": true }, { "at": [147.9, 383.9], "count": 2, "after": true }]
+   "dots": [{ "at": [3810.7, 642.5], "count": 1, "after": true }, { "at": [3368.5, 740.4], "count": 1, "after": true }, { "at": [3308.2, 746.1], "count": 1, "after": true }, { "at": [3097.5, 644.6], "count": 1, "after": true }, { "at": [3036.4, 650.1], "count": 1, "after": true }, { "at": [2844.7, 652.1], "count": 1, "after": true }, { "at": [2041.4, 439.1], "count": 1, "after": true }, { "at": [1894.7, 383.6], "count": 1, "after": true }, { "at": [1406.8, 380.8], "count": 1, "after": true }, { "at": [1345.6, 386.9], "count": 1, "after": true }, { "at": [902.7, 642.5], "count": 1, "after": true }, { "at": [528.7, 644.6], "count": 1, "after": true }, { "at": [468.1, 650.2], "count": 1, "after": true }, { "at": [177.9, 381], "count": 1, "after": true }, { "at": [117.1, 387], "count": 1, "after": true }]
   },
   "مِحْفَظَةُ أُمِّي فَوْقَ خِزَانَةِ الْغُرْفَةْ": {
    "box": [4000, 1000],
@@ -62632,7 +62632,7 @@ export const WORD_PATHS = {
      [69.3, 331], [77.6, 329.9], [85.7, 332.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3510.6, 446.2], "count": 1, "after": true }, { "at": [3354.9, 435.6], "count": 1, "after": true }, { "at": [3110.7, 436.1], "count": 2, "after": true }, { "at": [2523.7, 775.6], "count": 2, "after": true }, { "at": [2235.1, 411.5], "count": 1, "after": true }, { "at": [1892.5, 463.9], "count": 2, "after": true }, { "at": [1523.4, 451.3], "count": 1, "after": true }, { "at": [1333.8, 458.5], "count": 1, "after": true }, { "at": [1112.4, 442.6], "count": 1, "after": true }, { "at": [976.7, 436.2], "count": 2, "after": true }, { "at": [554.3, 442.9], "count": 1, "after": true }, { "at": [229.5, 411.6], "count": 1, "after": true }, { "at": [74.5, 436.3], "count": 2, "after": true }]
+   "dots": [{ "at": [3510.6, 446.2], "count": 1, "after": true }, { "at": [3354.9, 435.6], "count": 1, "after": true }, { "at": [3138.7, 433.2], "count": 1, "after": true }, { "at": [3081.3, 439], "count": 1, "after": true }, { "at": [2552.2, 772.9], "count": 1, "after": true }, { "at": [2494.7, 778.4], "count": 1, "after": true }, { "at": [2235.1, 411.5], "count": 1, "after": true }, { "at": [1921.2, 461.1], "count": 1, "after": true }, { "at": [1863.7, 466.8], "count": 1, "after": true }, { "at": [1523.4, 451.3], "count": 1, "after": true }, { "at": [1333.8, 458.5], "count": 1, "after": true }, { "at": [1112.4, 442.6], "count": 1, "after": true }, { "at": [1005.5, 433.7], "count": 1, "after": true }, { "at": [948, 438.6], "count": 1, "after": true }, { "at": [554.3, 442.9], "count": 1, "after": true }, { "at": [229.5, 411.6], "count": 1, "after": true }, { "at": [103.5, 433.7], "count": 1, "after": true }, { "at": [46.1, 438.9], "count": 1, "after": true }]
   },
   "الْحَافِلَةُ فِي الْمَحَطَّةْ": {
    "box": [4000, 1000],
@@ -62797,7 +62797,7 @@ export const WORD_PATHS = {
      [177.6, 169.5], [190.4, 167.9], [203, 171.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3005.2, 294.8], "count": 1, "after": true }, { "at": [2624.8, 332.3], "count": 2, "after": true }, { "at": [2221.3, 294.7], "count": 1, "after": true }, { "at": [1885.6, 852.7], "count": 2, "after": true }, { "at": [187.8, 332.4], "count": 2, "after": true }]
+   "dots": [{ "at": [3005.2, 294.8], "count": 1, "after": true }, { "at": [2668.1, 328.2], "count": 1, "after": true }, { "at": [2580.3, 336.6], "count": 1, "after": true }, { "at": [2221.3, 294.7], "count": 1, "after": true }, { "at": [1929.4, 848.6], "count": 1, "after": true }, { "at": [1841, 856.9], "count": 1, "after": true }, { "at": [231.5, 328.2], "count": 1, "after": true }, { "at": [143.1, 336.7], "count": 1, "after": true }]
   },
   "الْجِسْرُ فَوْقَ النَّهْرْ": {
    "box": [3910, 1000],
@@ -62940,7 +62940,7 @@ export const WORD_PATHS = {
      [224.4, 230.1], [238.7, 228.3], [252.7, 232.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3355.5, 760.6], "count": 1, "after": true }, { "at": [2114.9, 295], "count": 1, "after": true }, { "at": [1522.1, 385.5], "count": 2, "after": true }, { "at": [720.9, 427.9], "count": 1, "after": true }]
+   "dots": [{ "at": [3355.5, 760.6], "count": 1, "after": true }, { "at": [2114.9, 295], "count": 1, "after": true }, { "at": [1571.2, 380.8], "count": 1, "after": true }, { "at": [1471.6, 390.3], "count": 1, "after": true }, { "at": [720.9, 427.9], "count": 1, "after": true }]
   },
   "الطَّيَّارَةُ فَوْقَ السَّحَابْ": {
    "box": [4000, 1000],
@@ -63115,7 +63115,7 @@ export const WORD_PATHS = {
      [248.6, 330.3], [260.2, 328.7], [271.6, 332]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3273.7, 726.6], "count": 2, "after": true }, { "at": [2711, 379.1], "count": 2, "after": true }, { "at": [2367.3, 344.9], "count": 1, "after": true }, { "at": [1889, 418.3], "count": 2, "after": true }, { "at": [261.7, 732.8], "count": 1, "after": true }]
+   "dots": [{ "at": [3313.3, 722.7], "count": 1, "after": true }, { "at": [3233.1, 730.6], "count": 1, "after": true }, { "at": [2750.3, 375.3], "count": 1, "after": true }, { "at": [2670.2, 383.1], "count": 1, "after": true }, { "at": [2367.3, 344.9], "count": 1, "after": true }, { "at": [1928.7, 414.7], "count": 1, "after": true }, { "at": [1848.3, 422.1], "count": 1, "after": true }, { "at": [261.7, 732.8], "count": 1, "after": true }]
   },
   "الْقَارِبُ فِي النَّهْرْ": {
    "box": [3412, 1000],
@@ -63248,7 +63248,7 @@ export const WORD_PATHS = {
      [215.1, 220.1], [228.5, 218.4], [241.7, 222.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2967.5, 342.6], "count": 2, "after": true }, { "at": [2213.6, 724.3], "count": 1, "after": true }, { "at": [1703, 279.5], "count": 1, "after": true }, { "at": [1352.9, 862.3], "count": 2, "after": true }, { "at": [675.1, 402.7], "count": 1, "after": true }]
+   "dots": [{ "at": [3013, 338.3], "count": 1, "after": true }, { "at": [2921.4, 347], "count": 1, "after": true }, { "at": [2213.6, 724.3], "count": 1, "after": true }, { "at": [1703, 279.5], "count": 1, "after": true }, { "at": [1398, 858.1], "count": 1, "after": true }, { "at": [1306.3, 866.7], "count": 1, "after": true }, { "at": [675.1, 402.7], "count": 1, "after": true }]
   },
   "الْمَسْجِدُ أَمَامَ السُّوقْ": {
    "box": [4000, 1000],
@@ -63402,7 +63402,7 @@ export const WORD_PATHS = {
      [272.9, 287.2], [285.4, 285.6], [297.7, 289]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2888.6, 772.4], "count": 1, "after": true }, { "at": [281.9, 446.4], "count": 2, "after": true }]
+   "dots": [{ "at": [2888.6, 772.4], "count": 1, "after": true }, { "at": [325.2, 442.3], "count": 1, "after": true }, { "at": [238.5, 450.5], "count": 1, "after": true }]
   },
   "الْخَبَّازُ فِي الْمَخْبَزْ": {
    "box": [3784, 1000],
@@ -63546,7 +63546,7 @@ export const WORD_PATHS = {
      [221.1, 196.8], [234.6, 195.1], [247.9, 198.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3212.5, 346.4], "count": 1, "after": true }, { "at": [2947.9, 734], "count": 1, "after": true }, { "at": [2576.5, 359], "count": 1, "after": true }, { "at": [2168.1, 282.6], "count": 1, "after": true }, { "at": [1812.6, 873.9], "count": 2, "after": true }, { "at": [722, 346.7], "count": 1, "after": true }, { "at": [457.5, 734.1], "count": 1, "after": true }, { "at": [231.9, 359], "count": 1, "after": true }]
+   "dots": [{ "at": [3212.5, 346.4], "count": 1, "after": true }, { "at": [2947.9, 734], "count": 1, "after": true }, { "at": [2576.5, 359], "count": 1, "after": true }, { "at": [2168.1, 282.6], "count": 1, "after": true }, { "at": [1858.8, 869.3], "count": 1, "after": true }, { "at": [1765.2, 878.6], "count": 1, "after": true }, { "at": [722, 346.7], "count": 1, "after": true }, { "at": [457.5, 734.1], "count": 1, "after": true }, { "at": [231.9, 359], "count": 1, "after": true }]
   },
   "النَّفَقُ تَحْتَ الْجِسْرْ": {
    "box": [4000, 1000],
@@ -63684,7 +63684,7 @@ export const WORD_PATHS = {
      [222.2, 249.2], [235.6, 247.5], [248.7, 251.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3577.9, 432.8], "count": 1, "after": true }, { "at": [3367.6, 364.3], "count": 1, "after": true }, { "at": [3096.9, 387.3], "count": 2, "after": true }, { "at": [2618.5, 366.7], "count": 2, "after": true }, { "at": [1815.6, 434.7], "count": 2, "after": true }, { "at": [981.1, 742.6], "count": 1, "after": true }]
+   "dots": [{ "at": [3577.9, 432.8], "count": 1, "after": true }, { "at": [3367.6, 364.3], "count": 1, "after": true }, { "at": [3142.9, 382.9], "count": 1, "after": true }, { "at": [3050.1, 391.8], "count": 1, "after": true }, { "at": [2664.4, 362.3], "count": 1, "after": true }, { "at": [2571.6, 371.3], "count": 1, "after": true }, { "at": [1861.4, 430.5], "count": 1, "after": true }, { "at": [1768.7, 439.1], "count": 1, "after": true }, { "at": [981.1, 742.6], "count": 1, "after": true }]
   },
   "أُمِّي تَشْتَرِي مِنَ السُّوقْ": {
    "box": [4000, 1000],
@@ -63842,7 +63842,7 @@ export const WORD_PATHS = {
      [247.2, 314.9], [258.1, 313.5], [268.8, 316.5]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3380, 862.6], "count": 2, "after": true }, { "at": [3041.9, 431.4], "count": 2, "after": true }, { "at": [2794.6, 478.9], "count": 3, "after": true }, { "at": [2530.2, 491.6], "count": 2, "after": true }, { "at": [2059, 862.6], "count": 2, "after": true }, { "at": [1421.8, 528.6], "count": 1, "after": true }, { "at": [255.6, 453], "count": 2, "after": true }]
+   "dots": [{ "at": [3417.6, 859.2], "count": 1, "after": true }, { "at": [3342, 866.2], "count": 1, "after": true }, { "at": [3079.1, 427.9], "count": 1, "after": true }, { "at": [3003.5, 435], "count": 1, "after": true }, { "at": [2794.5, 450.3], "count": 1, "after": true }, { "at": [2830.8, 487.7], "count": 1, "after": true }, { "at": [2758.4, 494.7], "count": 1, "after": true }, { "at": [2567.1, 488.1], "count": 1, "after": true }, { "at": [2491.4, 495.4], "count": 1, "after": true }, { "at": [2096.1, 859.1], "count": 1, "after": true }, { "at": [2020.3, 866.2], "count": 1, "after": true }, { "at": [1421.8, 528.6], "count": 1, "after": true }, { "at": [292.9, 449.3], "count": 1, "after": true }, { "at": [217.5, 456.7], "count": 1, "after": true }]
   },
   "أَخِي يَرْكَبُ الدَّرَّاجَةَ الْجَدِيدَةْ": {
    "box": [4000, 1000],
@@ -64055,7 +64055,7 @@ export const WORD_PATHS = {
      [138, 304], [146.7, 302.9], [155.2, 305.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3680.5, 429.3], "count": 1, "after": true }, { "at": [3409.6, 767], "count": 2, "after": true }, { "at": [3134.7, 672.6], "count": 2, "after": true }, { "at": [2577.2, 677.6], "count": 1, "after": true }, { "at": [1598.4, 668.1], "count": 1, "after": true }, { "at": [1370.4, 413.7], "count": 2, "after": true }, { "at": [886.5, 668.2], "count": 1, "after": true }, { "at": [489.5, 672.8], "count": 2, "after": true }, { "at": [144.4, 413.7], "count": 2, "after": true }]
+   "dots": [{ "at": [3680.5, 429.3], "count": 1, "after": true }, { "at": [3439.1, 764], "count": 1, "after": true }, { "at": [3379.3, 770], "count": 1, "after": true }, { "at": [3164, 669.9], "count": 1, "after": true }, { "at": [3104.1, 675.5], "count": 1, "after": true }, { "at": [2577.2, 677.6], "count": 1, "after": true }, { "at": [1598.4, 668.1], "count": 1, "after": true }, { "at": [1399.9, 410.8], "count": 1, "after": true }, { "at": [1340.4, 416.6], "count": 1, "after": true }, { "at": [886.5, 668.2], "count": 1, "after": true }, { "at": [518.9, 669.9], "count": 1, "after": true }, { "at": [459.2, 675.8], "count": 1, "after": true }, { "at": [173.9, 410.8], "count": 1, "after": true }, { "at": [114.4, 416.6], "count": 1, "after": true }]
   },
   "الْمَتْحَفُ الْجَمِيلُ أَمَامَ الْمَلْعَبْ": {
    "box": [4000, 1000],
@@ -64272,7 +64272,7 @@ export const WORD_PATHS = {
      [206, 404], [214.7, 402.9], [223.2, 405.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3516.6, 501.2], "count": 2, "after": true }, { "at": [3095.3, 447.7], "count": 1, "after": true }, { "at": [2445.8, 698.4], "count": 1, "after": true }, { "at": [2071.7, 702.6], "count": 2, "after": true }, { "at": [223.7, 707.3], "count": 1, "after": true }]
+   "dots": [{ "at": [3546.1, 498.4], "count": 1, "after": true }, { "at": [3485.6, 504.2], "count": 1, "after": true }, { "at": [3095.3, 447.7], "count": 1, "after": true }, { "at": [2445.8, 698.4], "count": 1, "after": true }, { "at": [2101.5, 699.5], "count": 1, "after": true }, { "at": [2040.9, 705.7], "count": 1, "after": true }, { "at": [223.7, 707.3], "count": 1, "after": true }]
   },
   "الْفَلَّاحُ يَزْرَعُ فِي الْمَزْرَعَةْ": {
    "box": [4000, 1000],
@@ -64474,7 +64474,7 @@ export const WORD_PATHS = {
      [161.7, 252.3], [172, 250.9], [182.1, 253.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3635.5, 395.8], "count": 1, "after": true }, { "at": [2767.2, 691.3], "count": 2, "after": true }, { "at": [2589.4, 411.5], "count": 1, "after": true }, { "at": [1810.7, 353.2], "count": 1, "after": true }, { "at": [1540, 803.1], "count": 2, "after": true }, { "at": [790, 411.1], "count": 1, "after": true }, { "at": [169.8, 383.3], "count": 2, "after": true }]
+   "dots": [{ "at": [3635.5, 395.8], "count": 1, "after": true }, { "at": [2802.3, 687.8], "count": 1, "after": true }, { "at": [2731.1, 694.8], "count": 1, "after": true }, { "at": [2589.4, 411.5], "count": 1, "after": true }, { "at": [1810.7, 353.2], "count": 1, "after": true }, { "at": [1575.1, 799.9], "count": 1, "after": true }, { "at": [1504, 806.4], "count": 1, "after": true }, { "at": [790, 411.1], "count": 1, "after": true }, { "at": [205, 380.1], "count": 1, "after": true }, { "at": [133.8, 386.6], "count": 1, "after": true }]
   },
   "السَّيَّارَةُ تَقِفُ أَمَامَ الْمَطْعَمْ": {
    "box": [4000, 1000],
@@ -64694,7 +64694,7 @@ export const WORD_PATHS = {
      [182.2, 355.6], [191.9, 354.4], [201.4, 357.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3360, 727.3], "count": 2, "after": true }, { "at": [2884.8, 434], "count": 2, "after": true }, { "at": [2631.9, 447.4], "count": 2, "after": true }, { "at": [2461.8, 451.4], "count": 2, "after": true }, { "at": [2288, 441.4], "count": 1, "after": true }]
+   "dots": [{ "at": [3393.3, 724.2], "count": 1, "after": true }, { "at": [3325.8, 730.4], "count": 1, "after": true }, { "at": [2918.2, 430.9], "count": 1, "after": true }, { "at": [2850.5, 437.2], "count": 1, "after": true }, { "at": [2665.3, 444.2], "count": 1, "after": true }, { "at": [2597.9, 450.7], "count": 1, "after": true }, { "at": [2495.2, 448.3], "count": 1, "after": true }, { "at": [2427.7, 454.5], "count": 1, "after": true }, { "at": [2288, 441.4], "count": 1, "after": true }]
   },
   "الْكُرَةُ فِي الْمَلْعَبْ": {
    "box": [3584, 1000],
@@ -64831,7 +64831,7 @@ export const WORD_PATHS = {
      [273.1, 264.8], [286.6, 263.1], [299.9, 266.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2579.9, 322.2], "count": 2, "after": true }, { "at": [2180, 282.6], "count": 1, "after": true }, { "at": [1824.6, 873.8], "count": 2, "after": true }, { "at": [301.7, 734.1], "count": 1, "after": true }]
+   "dots": [{ "at": [2626.1, 317.9], "count": 1, "after": true }, { "at": [2532.7, 326.7], "count": 1, "after": true }, { "at": [2180, 282.6], "count": 1, "after": true }, { "at": [1870.6, 869.3], "count": 1, "after": true }, { "at": [1777.2, 878.5], "count": 1, "after": true }, { "at": [301.7, 734.1], "count": 1, "after": true }]
   },
   "الدُّمْيَةُ فَوْقَ السَّرِيرْ": {
    "box": [4000, 1000],
@@ -64987,7 +64987,7 @@ export const WORD_PATHS = {
      [215.5, 250.2], [228.5, 248.5], [241.2, 252.1]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3020.2, 735.6], "count": 2, "after": true }, { "at": [2772.4, 347.1], "count": 2, "after": true }, { "at": [2361.4, 309], "count": 1, "after": true }, { "at": [1826.7, 390.7], "count": 2, "after": true }, { "at": [446.3, 735.6], "count": 2, "after": true }]
+   "dots": [{ "at": [3064.5, 731.3], "count": 1, "after": true }, { "at": [2975, 740], "count": 1, "after": true }, { "at": [2816.9, 343], "count": 1, "after": true }, { "at": [2726.8, 351.3], "count": 1, "after": true }, { "at": [2361.4, 309], "count": 1, "after": true }, { "at": [1870.9, 386.6], "count": 1, "after": true }, { "at": [1781.1, 395], "count": 1, "after": true }, { "at": [490.7, 731.3], "count": 1, "after": true }, { "at": [401.2, 740], "count": 1, "after": true }]
   },
   "الطَّبْلُ فِي الْمَلْعَبْ": {
    "box": [3734, 1000],
@@ -65128,7 +65128,7 @@ export const WORD_PATHS = {
      [273.1, 264.8], [286.6, 263.1], [299.9, 266.8]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2930, 733.9], "count": 1, "after": true }, { "at": [2180.1, 282.6], "count": 1, "after": true }, { "at": [1824.6, 873.9], "count": 2, "after": true }, { "at": [301.7, 734.1], "count": 1, "after": true }]
+   "dots": [{ "at": [2930, 733.9], "count": 1, "after": true }, { "at": [2180.1, 282.6], "count": 1, "after": true }, { "at": [1870.7, 869.4], "count": 1, "after": true }, { "at": [1777.2, 878.6], "count": 1, "after": true }, { "at": [301.7, 734.1], "count": 1, "after": true }]
   },
   "النَّرْدُ فَوْقَ الْمَقْعَدْ": {
    "box": [4000, 1000],
@@ -65283,7 +65283,7 @@ export const WORD_PATHS = {
      [222.1, 216.1], [236.8, 214.2], [251.3, 218.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3547.2, 452.9], "count": 1, "after": true }, { "at": [2572.3, 315.9], "count": 1, "after": true }, { "at": [1961, 409.3], "count": 2, "after": true }, { "at": [818.1, 386.2], "count": 2, "after": true }]
+   "dots": [{ "at": [3547.2, 452.9], "count": 1, "after": true }, { "at": [2572.3, 315.9], "count": 1, "after": true }, { "at": [2011.4, 404.4], "count": 1, "after": true }, { "at": [1908.8, 414.4], "count": 1, "after": true }, { "at": [868.7, 381.3], "count": 1, "after": true }, { "at": [766.2, 391.2], "count": 1, "after": true }]
   },
   "الْهَدِيَّةُ فِي الصُّنْدُوقْ": {
    "box": [4000, 1000],
@@ -65448,7 +65448,7 @@ export const WORD_PATHS = {
      [276.7, 223.9], [289.4, 222.3], [301.8, 225.7]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3093.3, 715.6], "count": 2, "after": true }, { "at": [2867.7, 341], "count": 2, "after": true }, { "at": [2471.8, 304.1], "count": 1, "after": true }, { "at": [2142.5, 852], "count": 2, "after": true }, { "at": [1057.8, 419.7], "count": 1, "after": true }, { "at": [286.9, 382.9], "count": 2, "after": true }]
+   "dots": [{ "at": [3136, 711.4], "count": 1, "after": true }, { "at": [3049.6, 719.9], "count": 1, "after": true }, { "at": [2910.6, 337], "count": 1, "after": true }, { "at": [2824.1, 345.1], "count": 1, "after": true }, { "at": [2471.8, 304.1], "count": 1, "after": true }, { "at": [2185.3, 848], "count": 1, "after": true }, { "at": [2098.9, 856.1], "count": 1, "after": true }, { "at": [1057.8, 419.7], "count": 1, "after": true }, { "at": [329.2, 378.8], "count": 1, "after": true }, { "at": [242.8, 387.3], "count": 1, "after": true }]
   },
   "الصُّورَةُ فَوْقَ الْجِدَارْ": {
    "box": [4000, 1000],
@@ -65603,7 +65603,7 @@ export const WORD_PATHS = {
      [208, 271.6], [220.4, 270], [232.5, 273.4]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2618.5, 364], "count": 2, "after": true }, { "at": [2248.1, 327.4], "count": 1, "after": true }, { "at": [1732.5, 406], "count": 2, "after": true }, { "at": [934.5, 732.2], "count": 1, "after": true }]
+   "dots": [{ "at": [2661.3, 360.1], "count": 1, "after": true }, { "at": [2575, 368.1], "count": 1, "after": true }, { "at": [2248.1, 327.4], "count": 1, "after": true }, { "at": [1775.2, 402.1], "count": 1, "after": true }, { "at": [1689, 410.1], "count": 1, "after": true }, { "at": [934.5, 732.2], "count": 1, "after": true }]
   },
   "الشَّمْعَةُ فِي الْغُرْفَةْ": {
    "box": [3882, 1000],
@@ -65752,7 +65752,7 @@ export const WORD_PATHS = {
      [184.2, 151.2], [197.6, 149.5], [210.7, 153.2]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3360.8, 399.9], "count": 3, "after": true }, { "at": [2486.4, 322.4], "count": 2, "after": true }, { "at": [2058.9, 282.4], "count": 1, "after": true }, { "at": [1703.3, 873.8], "count": 2, "after": true }, { "at": [974.5, 333.4], "count": 1, "after": true }, { "at": [446.1, 282.6], "count": 1, "after": true }, { "at": [195.5, 322.3], "count": 2, "after": true }]
+   "dots": [{ "at": [3360.8, 364.1], "count": 1, "after": true }, { "at": [3405.3, 411.2], "count": 1, "after": true }, { "at": [3316.8, 418.9], "count": 1, "after": true }, { "at": [2532.7, 317.9], "count": 1, "after": true }, { "at": [2439.2, 326.9], "count": 1, "after": true }, { "at": [2058.9, 282.4], "count": 1, "after": true }, { "at": [1749.4, 869.3], "count": 1, "after": true }, { "at": [1656.3, 878.3], "count": 1, "after": true }, { "at": [974.5, 333.4], "count": 1, "after": true }, { "at": [446.1, 282.6], "count": 1, "after": true }, { "at": [241.2, 317.9], "count": 1, "after": true }, { "at": [148, 326.9], "count": 1, "after": true }]
   },
   "الْحَاسُوبُ فَوْقَ الْمَكْتَبْ": {
    "box": [4000, 1000],
@@ -65915,7 +65915,7 @@ export const WORD_PATHS = {
      [235.2, 350.9], [246.1, 349.5], [256.8, 352.5]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2485.9, 728.9], "count": 1, "after": true }, { "at": [2067.8, 364.3], "count": 1, "after": true }, { "at": [1618.5, 433], "count": 2, "after": true }, { "at": [560, 471.8], "count": 2, "after": true }, { "at": [257.3, 728.8], "count": 1, "after": true }]
+   "dots": [{ "at": [2485.9, 728.9], "count": 1, "after": true }, { "at": [2067.8, 364.3], "count": 1, "after": true }, { "at": [1655.5, 429.6], "count": 1, "after": true }, { "at": [1580.5, 436.5], "count": 1, "after": true }, { "at": [596.9, 468.4], "count": 1, "after": true }, { "at": [521.5, 475.3], "count": 1, "after": true }, { "at": [257.3, 728.8], "count": 1, "after": true }]
   },
   "الْكَأْسُ اللَّامِعَةُ فَوْقَ الْخِزَانَةْ": {
    "box": [4000, 1000],
@@ -66141,7 +66141,7 @@ export const WORD_PATHS = {
      [153.6, 344], [162.7, 342.7], [171.7, 345.3]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [2029.9, 459.4], "count": 2, "after": true }, { "at": [1741.5, 432.3], "count": 1, "after": true }, { "at": [1365.5, 490], "count": 2, "after": true }, { "at": [759.8, 475.6], "count": 1, "after": true }, { "at": [551.6, 484.1], "count": 1, "after": true }, { "at": [309.3, 466.3], "count": 1, "after": true }, { "at": [160.7, 459.5], "count": 2, "after": true }]
+   "dots": [{ "at": [2061.1, 456.5], "count": 1, "after": true }, { "at": [1997.9, 462.4], "count": 1, "after": true }, { "at": [1741.5, 432.3], "count": 1, "after": true }, { "at": [1396.7, 487.1], "count": 1, "after": true }, { "at": [1334, 492.9], "count": 1, "after": true }, { "at": [759.8, 475.6], "count": 1, "after": true }, { "at": [551.6, 484.1], "count": 1, "after": true }, { "at": [309.3, 466.3], "count": 1, "after": true }, { "at": [191.7, 456.4], "count": 1, "after": true }, { "at": [128.9, 462.7], "count": 1, "after": true }]
   },
   "الْحَبْلُ الطَّوِيلُ فِي الصُّنْدُوقْ": {
    "box": [4000, 1000],
@@ -66343,7 +66343,7 @@ export const WORD_PATHS = {
      [222.7, 302.4], [231.7, 301.1], [240.5, 303.6]
     ], "folds": [{ "from": 0, "apex": 8, "to": 16 }] }
    ],
-   "dots": [{ "at": [3417, 659.6], "count": 1, "after": true }, { "at": [2305.2, 654.7], "count": 2, "after": true }, { "at": [1801.3, 359.1], "count": 1, "after": true }, { "at": [1564.3, 752.7], "count": 2, "after": true }, { "at": [785, 442], "count": 1, "after": true }, { "at": [230.9, 415.7], "count": 2, "after": true }]
+   "dots": [{ "at": [3417, 659.6], "count": 1, "after": true }, { "at": [2336, 651.7], "count": 1, "after": true }, { "at": [2273.7, 657.7], "count": 1, "after": true }, { "at": [1801.3, 359.1], "count": 1, "after": true }, { "at": [1595.1, 750], "count": 1, "after": true }, { "at": [1532.9, 755.5], "count": 1, "after": true }, { "at": [785, 442], "count": 1, "after": true }, { "at": [261.4, 412.7], "count": 1, "after": true }, { "at": [199.4, 418.9], "count": 1, "after": true }]
   },
   "جَدِّي يَضَعُ الْعُودَ فِي الْخِزَانَةْ": {
    "box": [4000, 1000],
@@ -66547,7 +66547,7 @@ export const WORD_PATHS = {
      [153.8, 268.7], [162.7, 267.5], [171.3, 270]
     ], "folds": [{ "from": 0, "apex": 9, "to": 16 }] }
    ],
-   "dots": [{ "at": [3808.2, 638.3], "count": 1, "after": true }, { "at": [3337.8, 738.5], "count": 2, "after": true }, { "at": [3066.2, 643], "count": 2, "after": true }, { "at": [2840.3, 384], "count": 1, "after": true }, { "at": [1511.7, 354.3], "count": 1, "after": true }, { "at": [1280.2, 738.7], "count": 2, "after": true }, { "at": [738.1, 396], "count": 1, "after": true }, { "at": [537.9, 403.6], "count": 1, "after": true }, { "at": [303.3, 387.1], "count": 1, "after": true }, { "at": [160.6, 379.9], "count": 2, "after": true }]
+   "dots": [{ "at": [3808.2, 638.3], "count": 1, "after": true }, { "at": [3367.4, 735.4], "count": 1, "after": true }, { "at": [3306.8, 741.8], "count": 1, "after": true }, { "at": [3096.3, 640.2], "count": 1, "after": true }, { "at": [3035.9, 645.8], "count": 1, "after": true }, { "at": [2840.3, 384], "count": 1, "after": true }, { "at": [1511.7, 354.3], "count": 1, "after": true }, { "at": [1310.2, 736.1], "count": 1, "after": true }, { "at": [1249.8, 741.4], "count": 1, "after": true }, { "at": [738.1, 396], "count": 1, "after": true }, { "at": [537.9, 403.6], "count": 1, "after": true }, { "at": [303.3, 387.1], "count": 1, "after": true }, { "at": [190.9, 377], "count": 1, "after": true }, { "at": [129.5, 383], "count": 1, "after": true }]
   }
 };
 
@@ -66622,4 +66622,4 @@ export const MARK_PATHS = {
 };
 
 /** نسبُ الوحدة وبصمةُ كتلتها — يفحصهما `make_paths.py --self-test`. */
-export const WORD_PATHS_SOURCE = {"tool": "tools/make_paths.html §٧ج", "gesture": "tools/path_anchors.json", "sha": "71e8b383f43a", "curriculum": "33fdc7eaecab", "grid": 1000, "font": "NotoNaskhArabic — نسخٌ مدرسيّ (ق٢)", "body": "d15ddd73d463"};
+export const WORD_PATHS_SOURCE = {"tool": "tools/make_paths.html §٧ج", "gesture": "tools/path_anchors.json", "sha": "71e8b383f43a", "curriculum": "33fdc7eaecab", "grid": 1000, "font": "NotoNaskhArabic — نسخٌ مدرسيّ (ق٢)", "body": "a5c4f7f9396c"};
