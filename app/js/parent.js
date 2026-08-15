@@ -19,7 +19,8 @@ import * as progress from './progress.js';
 import { FAULTS, FAULT_TEXT } from './pen.js';
 import { nameGap } from './lesson.js';
 import {
-  h, fill, go, toast, arNum, arCount, topbar, letterTitle, nodeTitle, nodeWhere, shake,
+  h, fill, go, toast, arNum, arCount, topbar, letterTitle, nodeTitle, nodeWhere, stageTitle,
+  shake,
 } from './ui.js';
 
 const ACCENT = 'var(--accent-skills)';
@@ -605,7 +606,10 @@ function backupSection(rerender) {
 
 /** اسم المحطة كما يقرؤه وليّ الأمر في قائمة الاختيار. */
 function sectionLabel(section, index) {
-  const name = section.kind === 'gate' ? section.gate.title : nodeWhere(section.nodes[0]);
+  // **واسمُ الشطر لا اسمُ مرحلته** (الجلسة ش): `nodeWhere` تقول مرحلةَ العقدة، فلمّا
+  // شُقّت المرحلةُ محطاتٍ صارت عشرُ محطاتٍ في هذه القائمة باسمٍ واحد — ووليُّ الأمر
+  // يصفّر منها بالاسم، فاسمان متطابقان يعنيان تصفيرَ ما لم يقصد.
+  const name = section.kind === 'gate' ? section.gate.title : stageTitle(section.stage);
   // شرطةٌ لا نقطةٌ فاصلة: النقطة تجاور الرقم المشرقيّ في الاتجاهين فتُقرأ صفراً ملتصقاً به
   return `${arNum(index + 1)} — ${name}`;
 }

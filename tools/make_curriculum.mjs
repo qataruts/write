@@ -656,19 +656,28 @@ for (const { form, title, sub } of FORM_STAGES) {
 // ترتيبُها: وصلتان، ثم كلماتُ كلِّ مجموعةٍ محطةً (عينُ عقدة «لعبة الكلمات» عند اقرأ
 // في موضعها من رحلته)، ثم كلماتُ العلامات بمهاراتها فالهمزة، ثم ما تحتاجه جملُ
 // المرحلة ١٤ من كلماتٍ مساندة.
+// **و`sect` مفصلُ المحتوى الطبيعيّ** (الجلسة ش): اسمُ المحطة التي تجمع العقدَ
+// المتجاورة حين تُشقّ المرحلةُ — يقوله محتواها لا نصٌّ يُكتب للعرض (وصلُ الحروف ·
+// كلماتُ المجموعات · كلماتُ العلامات · كلماتٌ للجمل). **والحدُّ ليس هنا**: هذا
+// يُعلن المفاصل، و`MAX_NODES` في `progress.js` يفرض السقفَ فوقها.
 const joinNodes = [
-  { part: 'pair', title: 'وَصْلُ حَرْفَيْن', joins: ligatures(2) },
-  { part: 'triple', title: 'وَصْلُ ثَلَاثَة', joins: ligatures(3) },
+  { part: 'pair', sect: 'وَصْلُ الحُرُوف', title: 'وَصْلُ حَرْفَيْن', joins: ligatures(2) },
+  { part: 'triple', sect: 'وَصْلُ الحُرُوف', title: 'وَصْلُ ثَلَاثَة', joins: ligatures(3) },
 ];
 for (const { group, words } of groupWords) {
-  joinNodes.push({ part: `w-${group.id}`, title: `كَلِمَاتُ ${group.title}`, words });
+  joinNodes.push({ part: `w-${group.id}`, sect: 'كَلِمَاتُ المَجْمُوعَات', title: `كَلِمَاتُ ${group.title}`, words });
 }
 for (const sign of skillSigns) {
-  joinNodes.push({ part: `sign-${sign.id}`, title: sign.title, words: sign.words });
+  joinNodes.push({ part: `sign-${sign.id}`, sect: 'كَلِمَاتُ العَلَامَات', title: sign.title, words: sign.words });
 }
-if (hamzaWords.length) joinNodes.push({ part: 'sign-hamza', title: 'الهَمْزَة', words: hamzaWords });
+if (hamzaWords.length) {
+  joinNodes.push({ part: 'sign-hamza', sect: 'كَلِمَاتُ العَلَامَات', title: 'الهَمْزَة', words: hamzaWords });
+}
 for (const [i, words] of batches(supports).entries()) {
-  joinNodes.push({ part: `prep-${i + 1}`, title: `كَلِمَاتٌ لِلْجُمَل ${arNum(i + 1)}`, words });
+  joinNodes.push({
+    part: `prep-${i + 1}`, sect: 'كَلِمَاتٌ لِلْجُمَلِ القَصِيرَة',
+    title: `كَلِمَاتٌ لِلْجُمَل ${arNum(i + 1)}`, words,
+  });
 }
 stages.push({
   id: 'join',
@@ -702,6 +711,9 @@ for (const garden of GARDENS) {
   for (const [i, words] of batches(fresh, BUNDLE).entries()) {
     orchardNodes.push({
       part: `${garden.id}-${i + 1}`,
+      // **ومفصلُها بستانُها باسمه** (الجلسة ش): مئةٌ وإحدى عشرة عقدةً تحت عنوانٍ
+      // واحد كتلةٌ بلا مفاصل — فبستانٌ محطةٌ، كما شُقّت المرحلةُ القرآنية في اقرأ.
+      sect: `بُسْتَانُ ${garden.title}`,
       title: `بُسْتَانُ ${garden.title} ${arNum(i + 1)}`,
       words,
       garden: garden.id,
@@ -713,7 +725,12 @@ for (const garden of GARDENS) {
 const gardenNodeCount = orchardNodes.length;
 for (const [i, words] of batches(ladderSupports.filter((w) => !copied.has(w))).entries()) {
   for (const text of words) copied.add(text);
-  orchardNodes.push({ part: `prep-${i + 1}`, title: `كَلِمَاتٌ لِلْجُمَل ${arNum(i + 1)}`, words });
+  orchardNodes.push({
+    // **ومفصلُها ما تخدمه**: هنا كلماتُ سلّم الجمل، وفي «الوصل والنسخ» كلماتُ الجمل
+    // القصيرة — واسمان متطابقان في قائمة وليّ الأمر يعنيان تصفيرَ ما لم يُقصَد.
+    part: `prep-${i + 1}`, sect: 'كَلِمَاتٌ لِسُلَّمِ الجُمَل',
+    title: `كَلِمَاتٌ لِلْجُمَل ${arNum(i + 1)}`, words,
+  });
 }
 stages.push({
   id: 'orchard',
@@ -769,6 +786,9 @@ stages.push({
   nodes: orchardNodes.slice(0, gardenNodeCount)
     .map((node) => ({
       part: node.part,
+      // **ومفصلُها بستانُها كذلك** — ويُميَّز عن نسخته لفظاً: المحطتان تجتمعان في
+      // قائمة وليّ الأمر، فاسمان متطابقان يُخفيان أيَّهما يُصفَّر.
+      sect: `إِمْلَاءُ بُسْتَانِ ${GARDENS.find((g) => g.id === node.garden).title}`,
       title: node.title,
       words: node.words.filter((text) => SPOKEN.has(bank.get(text)?.say ?? text)),
     }))
@@ -799,6 +819,10 @@ stages.push({
     ladder.filter((s) => s.garden.id === garden.id).map((s) => s.text), BUNDLE)
     .map((texts, i) => ({
       part: `${garden.id}-${i + 1}`,
+      // **ومفصلُ السلّم سلّمُ بستانه** — درجاتُه بمداها من ثلاث كلماتٍ إلى خمس،
+      // وهو المفصلُ الوحيد الذي **لا يقلب ترتيبَ العقد**: جملُ اقرأ مرتَّبةٌ
+      // بستاناً بستاناً، فقسمةٌ بالدرجة عبر البساتين إعادةُ بناءٍ لا شقّ.
+      sect: `سُلَّمُ ${garden.title}`,
       title: `سُلَّمُ ${garden.title} ${arNum(i + 1)}`,
       sentences: texts,
     }))),
@@ -986,6 +1010,11 @@ function render() {
  *   · \`nodes\` — عقدُ المحطة بترتيبها؛ لكلٍّ \`part\` يُبنى منه معرّفُها، ثم ما تدرّسه:
  *     \`letter\` حرفاً معزولاً · \`letters\` مع \`form\` شكلَ موقع · \`joins\` وصلاتٍ ·
  *     \`words\` كلماتٍ · \`sentences\` جملاً · و\`marks\` العلاماتِ التي تُفتَح بطاقتُها عندها.
+ *   · \`sect\` — **مفصلُ المحتوى الطبيعيّ** (الجلسة ش): اسمُ الشطر الذي تنتمي إليه
+ *     العقدة حين تُشقّ مرحلتُها محطاتٍ متتالية، **يقوله محتواها** (بستانٌ باسمه ·
+ *     سلّمُ بستانٍ · وصلُ الحروف). وهو **إعلانُ مفصلٍ لا حدُّ عدد**: السقفُ
+ *     \`MAX_NODES\` في \`progress.js\` وحدَه، يقسم ما تجاوزه من الشُّطور ويُسمّي ما
+ *     لا مفصلَ له من مادّته — فمرحلةٌ تكبر غداً تنشقّ من نفسها بلا سطرٍ يُعدَّل.
  */
 export const STAGES = [
 ${list(stages)}

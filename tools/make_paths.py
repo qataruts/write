@@ -130,6 +130,19 @@ def word_material() -> list:
     return sorted(set(out))
 
 
+def material_sha() -> str:
+    """بصمةُ **مادّة النسخ** لا بصمةُ ملفِّ المنهج.
+
+    العهدُ المعلَن: «تبديلُ مادّة النسخ بلا إعادة بناءٍ يحمرّ» — فموضوعُه ما يُنسَخ،
+    لا كلُّ محرفٍ في `curriculum.js`. وكانت البصمةُ بصمةَ الملفّ كلِّه، فلمّا أضافت
+    الجلسةُ ش حقلَ **مفاصل الشقّ** (`sect`، بيانُ عرضٍ لا يمسّ مساراً) احمرّت ثلاثةُ
+    حرّاسٍ دفعةً وطُلبت إعادةُ بناءٍ لا تغيّر بايتاً في المسارات. **وإنذارٌ كاذبٌ
+    مكرّر يُعلِّم الناسَ تجاهلَ الحارس** — فصارت البصمةُ على `word_material()` نفسِها:
+    تحمرّ يومَ تتبدّل كلمةٌ تُنسَخ، وتسكت لِما لا يمسّها.
+    """
+    return hashlib.sha1("\n".join(word_material()).encode("utf-8")).hexdigest()[:12]
+
+
 def paths_module() -> tuple:
     """يقرأ `PATHS` و`PATHS_SOURCE` من الوحدة المولَّدة (قراءةٌ نصّية بلا جافاسكربت)."""
     if not OUT.exists():
@@ -559,7 +572,7 @@ def build(port: int, timeout: int) -> int:
     if words:
         # بصمةُ المنهج تدخل النسب: قائمةُ الكلمات قُرئت منه، فتبديلُه بلا إعادة بناءٍ
         # يحمرّ في الفحص الذاتي (نظيرُ بصمة الإيماءات).
-        cur_sha = hashlib.sha1(CURRICULUM.read_bytes()).hexdigest()[:12]
+        cur_sha = material_sha()
         WORD_OUT.write_text(write_words(words, payload.get("markGlyphs") or {}, {
             "tool": "tools/make_paths.html §٧ج",
             "gesture": "tools/path_anchors.json",
@@ -698,7 +711,7 @@ def self_test() -> int:
         ok(bool(wmeta2 and wmeta2.get("sha") == sha()),
            f"وبصمةُ الإيماءة في وحدة النسخ عينُ الملفّ ({wmeta2.get('sha') if wmeta2 else '—'}"
            f" = {sha()})")
-        cur_sha = hashlib.sha1(CURRICULUM.read_bytes()).hexdigest()[:12]
+        cur_sha = material_sha()
         ok(bool(wmeta2 and wmeta2.get("curriculum") == cur_sha),
            f"وبصمةُ المنهج فيها عينُ الملفّ ({wmeta2.get('curriculum') if wmeta2 else '—'}"
            f" = {cur_sha}) — فتبديلُ مادّة النسخ بلا إعادة بناءٍ يحمرّ")

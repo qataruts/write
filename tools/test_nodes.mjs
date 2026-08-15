@@ -39,6 +39,52 @@ globalThis.localStorage = {
   removeItem: (k) => store.delete(k),
 };
 
+// ————— قبل الاستيراد: التسلسلُ المسطَّح **قبل الشقّ**، وحالُ طفلٍ في منتصفه —————
+//
+// **الشقُّ بلا أثر لا يُدّعى بل يُقاس** (الجلسة ش): يُبنى هنا تسلسلُ العقد **من
+// المنهج نفسِه** — بوّابةٌ قبل مرحلتها ثم عقدُها بترتيبها — بلا مرورٍ بكود الشقّ،
+// فيصير مقياساً مستقلاً يُقابَل به ما تبنيه `journey()` بعد الشقّ.
+//
+// **وموضعُه قبل استيراد `progress.js` مقصود**: `migrateJourney()` تعمل وقتَ تحميل
+// الوحدة، فلا سبيلَ إلى قياس الترحيل إلا بزرع حال الطفل قبلها.
+
+const curriculum = await import(new URL('curriculum.js', APP));
+
+const flatBefore = [];
+for (const stage of curriculum.STAGES) {
+  const gate = curriculum.gateBefore(stage.id);
+  if (gate) flatBefore.push(`gate:${gate.id}`);
+  for (const node of stage.nodes) flatBefore.push(`${stage.id}:${node.part}`);
+}
+const endGate = curriculum.gateBefore('end');
+if (endGate) flatBefore.push(`gate:${endGate.id}`);
+
+/** بصمةُ البنية بصيغة `journeyStamp` — تُقرأ من الوحدة نصّاً فلا تفترق نسختان. */
+function stampOf(ids) {
+  const text = ids.join('|');
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < text.length; i++) {
+    hash ^= text.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193) >>> 0;
+  }
+  return `${ids.length}:${hash.toString(36)}`;
+}
+
+// مفتاحُ التخزين ورقمُ النسخة **يُقرآن من الوحدة** لا يُكتبان هنا — فلا يشيخ الحارس
+// يومَ يتبدّلان.
+const progressSrc = read('progress.js');
+const STORE_KEY = /const STORE_KEY = '([^']+)'/.exec(progressSrc)[1];
+const VERSION = +/export const VERSION = (\d+)/.exec(progressSrc)[1];
+
+// طفلٌ في منتصف الرحلة: نجمتان على عقدةٍ في وسطها، والوسمُ وسمُ البنية **قبل الشقّ**.
+const MIDDLE = flatBefore.slice(Math.floor(flatBefore.length / 2))
+  .find((id) => !id.startsWith('gate:'));
+store.set(STORE_KEY, JSON.stringify({
+  v: VERSION,
+  stars: { [MIDDLE]: 2 },
+  journey: stampOf(flatBefore),
+}));
+
 const progress = await import(new URL('progress.js', APP));
 
 console.log('\n١. لكل نوعِ عقدةٍ شاشةٌ تكتب نجمتَها');
@@ -110,6 +156,52 @@ ok(/const nodeId = `gate:\$\{gate\.id\}`/.test(read('gate.js')),
   'شاشةُ البوابة تشتقّ معرّفَها من معرّف بوابتها');
 ok(/id: `gate:\$\{gate\.id\}`/.test(read('progress.js')),
   'والرحلةُ تنشئه بالصيغة نفسِها — مصدرٌ واحد لا مصدران يفترقان');
+
+console.log('\n٤. ولا محطةَ فوق السقف — والشقُّ بلا أثر');
+
+// **بابُ السقف** (الجلسة ش — أمرُ المالك، ١٣ أغسطس ٢٠٢٦، على سنّة «مفاصل المرحلة
+// القرآنية» في اقرأ). والمحروسُ ثلاثةٌ لا رابعَ لها:
+//   (أ) **لا محطةَ فوق `MAX_NODES`** — والحدُّ يُقرأ من الوحدة لا يُكتب هنا، فلو
+//       تحرّك تحرّك الحارسُ معه.
+//   (ب) **الشقُّ بلا أثر**: التسلسلُ المسطَّح بعد الشقّ = ما بُني من المنهج قبله
+//       **حرفاً بحرف** — ومنه يتبع أنّ الترتيبَ والقفلَ والنجومَ ومفاتيحَ ليتنر لم
+//       تُمَسّ، فمعرّفُ العقدة `<المرحلة>:<الجزء>` هو مفتاحُها كلِّها.
+//   (ج) **والترحيلُ بلا أثر لمن في منتصف الرحلة**: طفلٌ زُرعت حالُه قبل الاستيراد
+//       بوسم البنية القديم — فإن لم تتحرّك البنيةُ لم يجرِ الترحيل، ونجمتُه كما هي
+//       وحدَها. ولو تحرّك معرّفٌ واحد لاختلف الوسمُ ولملأ الترحيلُ ما خلفه بنجمة.
+const arNum = (n) => String(n).replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[+d]);
+const sections = progress.journey();
+const split = sections.filter((s) => s.parts > 1);
+
+console.log(`  · ${arNum(sections.length)} محطة، أكبرها ${arNum(Math.max(...sections.map((s) => s.nodes.length)))} عقدة`
+  + ` (السقف ${arNum(progress.MAX_NODES)})`);
+for (const section of sections.filter((s) => s.parts > 1)) {
+  console.log(`      ${String(section.nodes.length).padStart(3)} عقدة   ${section.stage.title}`);
+}
+
+const over = sections.filter((s) => s.nodes.length > progress.MAX_NODES);
+ok(over.length === 0,
+  `لا محطةَ فوق ${arNum(progress.MAX_NODES)} عقدة`
+  + (over.length ? ` — متجاوزة: ${over.map((s) => `${s.id} (${s.nodes.length})`).join('، ')}` : ''));
+
+// **ولا اسمَ يتكرّر في الرحلة كلِّها** لا في المشقوقة وحدَها: وليُّ الأمر يصفّر محطةً
+// **بالاسم** من قائمةٍ واحدة، فاسمان متطابقان يعنيان تصفيرَ ما لم يقصد.
+const names = sections.filter((s) => s.kind !== 'gate').map((s) => s.stage.title);
+const twice = names.filter((name, i) => names.indexOf(name) !== i);
+ok(split.length > 0 && twice.length === 0,
+  `والمشقوقةُ ${arNum(split.length)} محطةً لكلٍّ عنوانٌ يقوله محتواها — ولا اسمَ يتكرّر `
+  + `في الرحلة (${arNum(names.length)} اسماً)`
+  + (twice.length ? ` — مكرَّر: ${[...new Set(twice)].join('، ')}` : ''));
+
+const flatAfter = sections.flatMap((s) => s.nodes).map((n) => n.id);
+ok(flatAfter.join('|') === flatBefore.join('|'),
+  '**والشقُّ بلا أثر**: التسلسلُ المسطَّح هو هو حرفاً بحرف — قسمةُ العقد لا إعادةُ '
+  + `بنائها (${arNum(flatBefore.length)} عقدة)`);
+
+const starred = progress.allNodes().filter((n) => progress.getStars(n.id) > 0);
+ok(starred.length === 1 && starred[0].id === MIDDLE && progress.getStars(MIDDLE) === 2,
+  '**والترحيلُ بلا أثر**: طفلٌ في منتصف الرحلة بقيت نجمتاه وحدَهما — لا وسمَ تحرّك '
+  + `ولا نجمةَ زُرعت خلفه (${starred.length === 1 ? MIDDLE : `${starred.length} عقدةً موسومة`})`);
 
 console.log(fails ? `\n${fails} فشل` : '\nكل اختبارات عقد الرحلة ناجحة');
 process.exit(fails ? 1 : 0);

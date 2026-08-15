@@ -185,7 +185,10 @@ function stationEl(section, order, next, folded) {
     folded,
     className: `station station--${section.kind}${unlocked ? '' : ' station--locked'}${complete ? ' station--done' : ''}`,
     accent: accentForKind(section.kind),
-    mark: MARKS[section.kind],
+    // **والمعلَمُ يقع مرّةً عند مفصل المرحلة** (الجلسة ش): المعلَمُ زخرفةٌ صامتة
+    // تقول «بدأت مرحلةٌ»، ومرحلةٌ مشقوقةٌ إلى إحدى عشرة محطة تُعيده إحدى عشرة مرّةً
+    // فيصير ضجيجاً لا علامة. فيُرسم على أوّل شُطورها وحدَه.
+    mark: section.part === 1 ? MARKS[section.kind] : null,
     label: `${stageTitle(stage)}${unlocked ? '' : ' — مقفلة'}`,
     badge: stage.face || arNum(order),
     title: stageTitle(stage),

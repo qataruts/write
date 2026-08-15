@@ -179,7 +179,11 @@ const q3 = {
 };
 
 const STATS = {
-  sections: journey.length,
+  // **«القسم» في هذه الصفحات مرحلةٌ من المنهج لا محطةٌ على الخريطة** (الجلسة ش):
+  // جدولُ «الرحلة بترتيبها» يعدّ مراحلَ `METHOD §٤` وبواباتِها الثلاث، وقد صارت
+  // المرحلةُ الكبيرة تُعرَض محطاتٍ متتالية (`stageSections`) — **شقٌّ في العرض لا في
+  // المنهج**. فيُقرأ العددُ من المنهج نفسِه كما يقرؤه الجدول، ولو تبدّل شكلُ عرضه.
+  sections: STAGES.length + GATES.length,
   nodes: progress.allNodes().length,
   letters: Object.keys(LETTERS).length,
   pathForms,
@@ -247,7 +251,9 @@ ok(shots.length >= [...new Set(journey.map((s) => s.kind))].length,
 
 console.log('\n٧. أسماءُ الأقسام مقروءةٌ من المنهج');
 
-const titles = journey.map((s) => s.stage?.title || s.gate?.title);
+// **وأسماءُ المراحل لا أسماءُ شُطورها** (الجلسة ش): الجدولُ يعدّ مراحلَ المنهج، وشقُّ
+// المرحلة الكبيرة محطاتٍ عرضٌ يقع في الخريطة — تحرسه مقايسةُ `test_nodes` لا هذه.
+const titles = [...STAGES.map((s) => s.title), ...GATES.map((g) => g.title)];
 const absent = titles.filter((t) => !cur.includes(t));
 ok(absent.length === 0,
   `الأقسامُ ${ar(titles.length)} كلُّها في جدول الرحلة${absent.length ? ` — الغائب: ${absent.join('، ')}` : ''}`);

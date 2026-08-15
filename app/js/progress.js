@@ -36,6 +36,27 @@ export const starsForReview = (errors, items) => (errors === 0 ? 3 : errors <= i
 const arNumeral = (n) => String(n).replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[+d]);
 
 /**
+ * **سقفُ المحطة الواحدة** (أمر المالك، ١٣ أغسطس ٢٠٢٦ — على سنّة «مفاصل المرحلة
+ * القرآنية» في اقرأ): «قسّم أيَّ مجموعةٍ فيها أكثرُ من ١٠ أو ١٢ حلقة إلى مجموعاتٍ
+ * متتالية». **والعلّةُ كتلةٌ بلا مفاصل لا عددٌ كثير**: البساتينُ مئةٌ في عشر محطاتٍ
+ * مسمّاة فلا تثقل، وإحدى عشرة ومئةٌ تحت عنوانٍ واحد تثقل.
+ *
+ * **وهو حدٌّ واحد يُقرأ من موضعٍ واحد** — لا رقمَ محطاتٍ يُكتب في المنهج ولا في
+ * حارس: مرحلةٌ تكبر غداً تنشقّ من نفسها بلا سطرٍ يُعدَّل (يفرضه `stageSections`
+ * أدناه ويقيسه `tools/test_nodes.mjs`).
+ *
+ * **وهو سقفٌ لا هدف** (توضيحُ المالك، `FAMILY §١٠ب`): الأقلُّ من عشرٍ صحّيٌّ مقصود،
+ * فالقسمةُ تقع أوّلاً على **مفاصل المحتوى** (`sect` في المنهج: بستانٌ باسمه · سلّمُ
+ * بستان · وصلُ الحروف)، ولا تُنفَخ صغيرةٌ لتبلغ الحدّ.
+ *
+ * **وموضعُه فوق كموضع `arNumeral`**: `migrateJourney()` تعمل وقتَ تحميل الوحدة
+ * فتبني الرحلة — فتعريفٌ تحتها يقع في منطقة الموت الزمنيّ ويُسقِط الوحدة كلَّها عند
+ * أوّل استيراد. (وقعت هذه بعينها في اقرأ يومَ شُقّت مرحلتُه، وأسقطت ستةَ حرّاسٍ
+ * دفعة — ووقعت هنا مرّةً أخرى، فبقي القيدُ حيث يُقرأ.)
+ */
+export const MAX_NODES = 12;
+
+/**
  * أنواع التمارين المقيسة — أسماؤها ثابتة لأنها تُخزَّن في مفاتيح المهارات،
  * **وهي أنواعُ `METHOD.md §٦` بأعيانها**: `م|معزول|تتبع` · `م|وسطي|حر` ·
  * `بابا|كلمة|نسخ` · `بابا|كلمة|إملاء`.
@@ -273,6 +294,78 @@ export function stageNodes(stage) {
   }));
 }
 
+/** قسمةُ قائمةٍ بالسواء إلى شُطورٍ لا يتجاوز شطرٌ منها الحدَّ — فلا شطرٌ ببقيّةٍ يتيمة. */
+function evenParts(items, max) {
+  const count = Math.ceil(items.length / max);
+  const out = [];
+  let at = 0;
+  for (let i = 0; i < count; i++) {
+    const take = Math.ceil((items.length - at) / (count - i));
+    out.push(items.slice(at, at + take));
+    at += take;
+  }
+  return out;
+}
+
+/**
+ * **شقُّ المحطة الكبيرة محطاتٍ متتالية** (الجلسة ش) — نظيرُ `quranSections` في اقرأ.
+ *
+ * **والشقُّ قسمةُ العقد نفسِها بترتيبها**: تُوزَّع عقدُ `stageNodes()` على شُطورها
+ * بلا فرزٍ ولا إعادةِ بناء — **فالتسلسلُ المسطَّح هو هو حرفاً بحرف** (يثبته
+ * `test_nodes.mjs` بمقايسة الاثنين). فلا ترتيبَ تغيّر ولا قفلٌ ولا نجمةٌ ولا مفتاحُ
+ * ليتنر: معرّفُ العقدة `<المحطة>:<الجزء>` مبنيٌّ من **معرّف المرحلة** لا من الشطر،
+ * فبصمةُ البنية (`journeyStamp`) لا تتحرّك و**الترحيلُ بلا أثر** لمن هو في منتصف
+ * الرحلة اليوم. وإنما تبدّل العنوانُ فوق العقد والصندوقُ حولها.
+ *
+ * وترتيبُ الحكم: **المفصلُ أوّلاً** (`sect` — يقوله محتواها)، ثم **السقفُ فوقه**
+ * (مفصلٌ يتجاوز `MAX_NODES` يُقسَم بالسواء ويُرقَّم)، ثم **الاسمُ من المادّة** لما
+ * لا مفصلَ له: جوامعُ جذوره إن كانت (كما تُسمّى محطةُ الحروف بحروفها)، وإلا اسمُ
+ * مرحلته وعددُه.
+ */
+export function stageSections(stage) {
+  const nodes = stageNodes(stage);
+
+  const joints = [];
+  for (const node of nodes) {
+    const key = node.sect ?? null;
+    const last = joints[joints.length - 1];
+    if (last && last.key === key) last.nodes.push(node);
+    else joints.push({ key, nodes: [node] });
+  }
+
+  const parts = joints.flatMap((joint) => {
+    const split = evenParts(joint.nodes, MAX_NODES);
+    return split.map((chunk, i) => ({
+      nodes: chunk,
+      title: joint.key && split.length > 1 ? `${joint.key} ${arNumeral(i + 1)}` : joint.key,
+    }));
+  });
+
+  // مرحلةٌ لا تتجاوز السقفَ ولا مفصلَ فيها تبقى محطةً واحدة بمعرّفها وعنوانها كما كانت
+  if (parts.length <= 1) {
+    return [{ kind: stage.kind, id: stage.id, stage, nodes, part: 1, parts: 1 }];
+  }
+  return parts.map((chunk, i) => ({
+    kind: stage.kind,
+    id: `${stage.id}#${i + 1}`,
+    stage: { ...stage, nodes: chunk.nodes, title: chunk.title || partName(stage, chunk.nodes, i) },
+    nodes: chunk.nodes,
+    part: i + 1,
+    parts: parts.length,
+  }));
+}
+
+/**
+ * اسمُ شطرٍ لا مفصلَ له في المنهج — **من مادّته**: جوامعُ جذوره إن كانت كلُّها
+ * أسراً (`جُذُورُ كتب درس علم` كما تُسمّى محطةُ الحروف `حُرُوفُ ا ب م ل`، فالجذرُ
+ * جامعُ أسرته كما الحرفُ مادّةُ درسه)، وإلا اسمُ مرحلته وعددُه.
+ */
+function partName(stage, nodes, index) {
+  const roots = nodes.map((node) => node.root).filter(Boolean);
+  if (roots.length === nodes.length && roots.length) return `جُذُورُ ${roots.join(' ')}`;
+  return `${stage.title} ${arNumeral(index + 1)}`;
+}
+
 /**
  * عقدة «البوابة» (`METHOD.md §٤`): عقدةٌ واحدة تقف قبل مفصلٍ كبير، لا تُجتاز
  * بالإتمام بل بالإصابة — وحدها في محطتها كي يراها الطفل بوّابةً لا درساً.
@@ -301,7 +394,9 @@ export function journey() {
 
   for (const stage of STAGES) {
     pushGate(stage.id);
-    out.push({ kind: stage.kind, id: stage.id, stage, nodes: stageNodes(stage) });
+    // **والمرحلةُ الكبيرة تنشقّ محطاتٍ متتالية** (الجلسة ش) — شقٌّ في العرض لا في
+    // المنهج: عقدُها هي هي بمعرّفاتها وترتيبها، وإنما تُوزَّع على صناديقَ مسمّاة.
+    out.push(...stageSections(stage));
   }
   pushGate('end');
 

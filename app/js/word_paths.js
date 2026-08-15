@@ -66622,4 +66622,4 @@ export const MARK_PATHS = {
 };
 
 /** نسبُ الوحدة وبصمةُ كتلتها — يفحصهما `make_paths.py --self-test`. */
-export const WORD_PATHS_SOURCE = {"tool": "tools/make_paths.html §٧ج", "gesture": "tools/path_anchors.json", "sha": "71e8b383f43a", "curriculum": "c288e22b2de1", "grid": 1000, "font": "NotoNaskhArabic — نسخٌ مدرسيّ (ق٢)", "body": "d15ddd73d463"};
+export const WORD_PATHS_SOURCE = {"tool": "tools/make_paths.html §٧ج", "gesture": "tools/path_anchors.json", "sha": "71e8b383f43a", "curriculum": "33fdc7eaecab", "grid": 1000, "font": "NotoNaskhArabic — نسخٌ مدرسيّ (ق٢)", "body": "d15ddd73d463"};
