@@ -25,8 +25,18 @@ import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 const OUT = new URL('./pen_traces.json', import.meta.url);
 const OLD_WARNING = 'مساراتٌ مصنوعة لا مساراتُ أطفال';
 
-/** حكمٌ منتظَرٌ لأثرٍ ميدانيّ — **من حكم المحرّك ساعةَ الالتقاط لا من ظنّ المستورِد**. */
+/**
+ * حكمٌ منتظَرٌ لأثرٍ ميدانيّ — **من حكم المحرّك ساعةَ الالتقاط لا من ظنّ المستورِد**.
+ *
+ * **إلا أن تحكم عينُ بالغٍ حاضرٍ بخلافه** (حقل `eye` يضعه `field_rates.mjs` وحدَه من
+ * كشفٍ كُتب في الميدان): فحينئذٍ **المنتظَرُ حكمُ العين** — أثرٌ رُدَّ ظلماً يُنتظَر
+ * قبولُه، وأثرٌ قُبل خطأً يُنتظَر ردُّه (بلا تسميةِ شكوى: العينُ تحكم ولا تسمّي علّةَ
+ * محرّك). وهي **تدخل حمراءَ عمداً** وتبقى كذلك حتى تُعايَر السماحةُ — فالخلافُ
+ * حارسٌ دائم لا حكايةٌ تُروى (بلاغُ قياس الرفض الكاذب، ١٧ أغسطس ٢٠٢٦).
+ */
 function expectOf(item) {
+  if (item.eye === 'accept') return { accept: true };
+  if (item.eye === 'reject') return { accept: false };
   // أثرٌ رُدَّ بشكوى: المنتظَرُ ردُّه بشكواها هي. وأثرٌ قُبل: المنتظَرُ قبولُه.
   if (item.kind === 'fault') return { accept: false, fault: item.code };
   return { accept: Boolean(item.accepted) };
@@ -35,6 +45,13 @@ function expectOf(item) {
 /** وصفُ الحالة بعبارةٍ تُقرأ — فالعدّةُ تُقرأ كما تُشغَّل. */
 function noteOf(item, i) {
   const where = `${item.ch || '؟'} ${item.form || ''}`.trim();
+  if (item.eye) {
+    return `ميدان ${i}: «${where}» في نمط ${item.mode || '؟'}${item.tool ? ` بـ${item.tool}` : ''} — `
+      + (item.eye === 'accept'
+        ? `**كتبه الطفلُ صحيحاً وردَّه المحرّك** (${item.code || 'بلا شكوى'}): المنتظَرُ قبولُه`
+        : '**كتبه الطفلُ خطأً وقبله المحرّك**: المنتظَرُ ردُّه')
+      + ' — حكمُ عينِ بالغٍ حاضر';
+  }
   return item.kind === 'fault'
     ? `ميدان ${i}: «${where}» في نمط ${item.mode || '؟'} — ردَّه المحرّكُ بشكوى ${item.code}`
     : `ميدان ${i}: «${where}» في نمط ${item.mode || '؟'} — `
