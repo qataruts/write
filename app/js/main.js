@@ -22,6 +22,10 @@ import { renderNode, releaseLesson, nodeReady, nameGap } from './lesson.js';
 import { renderCopy, releaseCopy, nodeReady as copyReady } from './copy.js';
 import { renderFade, releaseFade, nodeReady as fadeReady } from './fade.js';
 import { renderSentence, releaseSentence, nodeReady as sentenceReady } from './sentence.js';
+// **بوابةُ اللحاق** (`FAMILY §١٠/هـ`): بابُها لوحةُ وليّ الأمر وحدَها — ويُستورَد هنا
+// لأنّ الموجّه يملك الشاشات كلَّها ويطلق ألواحَها؛ **ولا زرَّ لها في شاشة طفل**، وهي
+// تردّ `null` لمن بلغ عنوانَها بلا مرورٍ باللوحة (القيد ١، ويجرده `test_catchup.mjs`).
+import { renderCatchup, releaseCatchup, ROUTE as CATCHUP } from './catchup.js';
 import {
   h, icon, faceEl, toast, go, arNum, starsRow, topbar, brandMark, shake,
   nodeTitle, nodeFace, nodeWhere, accentForKind, landmark, stageTitle, DEV,
@@ -451,6 +455,7 @@ async function render() {
   releaseFade();
   releaseSentence();
   releaseReview();
+  releaseCatchup();
   const token = ++renderToken;
   const [name, arg1, arg2] = location.hash.replace(/^#\/?/, '').split('/');
 
@@ -487,6 +492,14 @@ async function render() {
     }
   } else if (name === 'parent') {
     screen = renderParent(render);
+  } else if (`#/${name}` === CATCHUP) {
+    // **ولا يُفتَح إلا من اللوحة** (القيد ١): `renderCatchup` تردّ `null` لمن لم يمرّ
+    // ببوابة وليّ الأمر الحسابية في هذه الجلسة — فيعود إلى خريطته بلا شاشةٍ بيضاء.
+    screen = renderCatchup(render);
+    if (!screen) {
+      location.replace('#/');
+      return;
+    }
   } else if (name === 'warmup' && arg1) {
     // محطةُ تهيئةٍ حركية (الجلسة ٤): القفلُ يُحرس هنا كما يُحرس في أزرار الخريطة،
     // ومحطةٌ لا أشكالَ لها تردّ `null` فيعود الطفلُ إلى خريطته بلا شاشةٍ بيضاء.

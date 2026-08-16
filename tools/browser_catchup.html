@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>بوابةُ اللحاق على الشاشة — «اُكْتُبْ» جلسة ل</title>
+<!--
+  **قيودُ `FAMILY §١٠/هـ` الخمسة مقيسةً في متصفّحٍ حقيقي** — وما لا يقوله `test_catchup.mjs`:
+
+    · أنّ **بابَه لوحةُ وليّ الأمر حصراً**: شاشةُ الطفل خاليةٌ من ذكره، وعنوانُه
+      المكتوبُ بيدٍ **يردّه الموجّهُ إلى الخريطة** ما لم يُمَرّ باللوحة — فالحمايةُ
+      بالبناء لا بإخفاء زرّ.
+    · وأنّ **الامتحانَ يدٌ لا اختيار**: على الشاشة **لوحُ كتابةٍ** لا بطاقاتُ صورٍ
+      تُنقَر، ويدُ الطفل هي التي تُنهي التمرين.
+    · وأنّ **الفتحَ يقع بعد الإثبات**: تُكتب عيّنةُ الوحدة صحيحةً فتُفتَح عقدُها
+      **في المخزن** (والتهيئةُ معها — القدرةُ الأعلى تشهد للأدنى).
+    · وأنّ **الشرخَ يوقف الصعود**: وحدةٌ تُكتب خطأً ⇒ «وَقَفْنَا هُنَا»، ولا عقدةَ
+      تُفتَح بعدها، **ولا يُغلق ما فُتح قبلها**.
+    · وأنّ **الزرعَ يقع في ليتنر** بمفاتيحَ حقيقية يقرؤها المخزنُ نفسُه.
+    · 🔒 وأنّ الدورة كلَّها **بصفر طلباتٍ شبكية** — امتحانٌ يمرّ به قلمُ الطفل.
+-->
+<style>
+  body { font: 15px/1.7 system-ui, sans-serif; margin: 0; background: #111; color: #eee; }
+  #log { padding: 1rem; white-space: pre-wrap; }
+  iframe { width: 460px; height: 900px; border: 0; position: fixed; inset-inline-end: 0; top: 0; }
+  .ok { color: #7ec97e; } .bad { color: #e08a80; }
+</style>
+</head>
+<body>
+<div id="log"></div>
+<iframe id="app" src="/"></iframe>
+<script type="module">
+const results = [];
+const log = document.getElementById('log');
+const frame = document.getElementById('app');
+
+function ok(cond, msg) {
+  results.push({ ok: !!cond, msg });
+  const line = document.createElement('div');
+  line.className = cond ? 'ok' : 'bad';
+  line.textContent = (cond ? '✓ ' : '✗ ') + msg;
+  log.append(line);
+}
+
+const errors = [];
+window.addEventListener('error', (e) => errors.push(String(e.message)));
+window.addEventListener('unhandledrejection', (e) => errors.push(String(e.reason)));
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const send = () => fetch('/result', {
+  method: 'POST', body: JSON.stringify({ from: 'write', rows: results }),
+});
+
+// عدّادُ أبواب الخروج من الجهاز (نظيرُ `browser_gate.html`) — والامتحانُ يمرّ به قلمُ
+// الطفل، فحراستُه حراسةُ لوحٍ لا حراسةُ شاشةِ عرض.
+const netCalls = [];
+function watchNetwork(win) {
+  const mark = (what) => (...args) => { netCalls.push(`${what}:${args[0]}`); throw new Error('محجوب'); };
+  win.fetch = mark('fetch');
+  win.XMLHttpRequest = function () { netCalls.push('xhr'); throw new Error('محجوب'); };
+  if (win.navigator.sendBeacon) win.navigator.sendBeacon = mark('beacon');
+}
+
+(async () => {
+  try {
+    const catchup = await import('/js/catchup.js');
+    const progress = await import('/js/progress.js');
+    const { PATHS, FORMS } = await import('/js/curriculum.js');
+    const ui = await import('/js/ui.js');
+    const ISO = FORMS.ISOLATED;
+
+    // ————— جهازٌ نظيف: طفلٌ لم يبدأ الرحلة —————
+    localStorage.removeItem('uktub.progress.v1');
+    frame.src = '/';
+    await new Promise((r) => frame.addEventListener('load', r, { once: true }));
+    await wait(600);
+    const win = frame.contentWindow;
+    const doc = frame.contentDocument;
+    win.addEventListener('error', (e) => errors.push(String(e.message)));
+    win.addEventListener('unhandledrejection', (e) => errors.push(String(e.reason)));
+    watchNetwork(win);
+    const netMark = netCalls.length;
+
+    const stored = () => {
+      try { return JSON.parse(win.localStorage.getItem('uktub.progress.v1') || '{}'); }
+      catch { return {}; }
+    };
+    const doneNodes = () => Object.keys(stored().stars || {}).length;
+    const skillCount = () => Object.keys(stored().skills || {}).length;
+
+    // ————— (١) لا أثرَ للامتحان في شاشة الطفل —————
+    ok(!/لحاق/.test(doc.body.textContent),
+      'خريطةُ الطفل خاليةٌ من ذكر الامتحان — لا زرَّ ولا سطر');
+    win.location.hash = catchup.ROUTE;
+    await wait(500);
+    ok(win.location.hash === '#/' || win.location.hash === '',
+      `وعنوانُه المكتوبُ بيدٍ يردّه الموجّهُ إلى الخريطة (${win.location.hash || '#/'})`);
+    ok(!doc.querySelector('.pen-surface'),
+      'ولا لوحَ امتحانٍ فُتح لمن لم يمرّ باللوحة');
+
+    // ————— البابُ: لوحةُ وليّ الأمر خلف بوابتها الحسابية —————
+    win.location.hash = '#/parent';
+    await wait(400);
+    const gateBox = doc.querySelector('.gate');
+    ok(Boolean(gateBox), 'ولوحةُ وليّ الأمر تقف خلف بوابتها الحسابية');
+    const [a, b] = gateBox.querySelector('.giant').textContent.split('×')
+      .map((s) => Number(s.trim().replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d))));
+    gateBox.querySelector('input').value = String(a * b);
+    gateBox.querySelector('.gate-go').click();
+    await wait(400);
+
+    const openBtn = doc.querySelector('.catchup-open');
+    ok(Boolean(openBtn) && !openBtn.disabled,
+      'وفي اللوحة زرُّ «افتح بوابة اللحاق» — بابُه الوحيد');
+    const panel = doc.body.textContent;
+    ok(/٨٠٪/.test(panel) && /مجموعة الأولى|حُرُوفُ/.test(panel),
+      'ويقول ما يقع: عتبةُ ٨٠٪ وأوّلُ وحدةٍ يُمتحَن فيها — محسوبةً من الرحلة');
+
+    openBtn.click();
+    await wait(700);
+    ok(doc.querySelector('.pill')?.textContent === 'بوابةُ اللحاق',
+      'فتُفتَح شاشةُ الامتحان بشارتها');
+
+    // ————— (٢) امتحانُ يدٍ لا اختيار —————
+    ok(Boolean(doc.querySelector('.pen-surface')),
+      'وعلى الشاشة **لوحُ كتابة** — لا بطاقةَ صورةٍ تُنقَر');
+    ok(doc.querySelectorAll('.exercise .btn, .celebrate .btn').length < 4,
+      'ولا قائمةَ خياراتٍ يُنتقى منها الجواب');
+    const dots = doc.querySelectorAll('.dots .dot').length;
+    const head = catchup.ladder()[0];
+    ok(dots === head.sample.length && dots >= 2,
+      `ومؤشّرُها عيّنةُ الوحدة المحسوبة (${dots} من ${head.materials.length} مادّة)`);
+
+    // ————— إصبعٌ على اللوح (نظيرُ `browser_gate.html`) —————
+    let pointerId = 1;
+    const surfaceEl = () => doc.querySelector('.pen-surface');
+    const toClient = ([x, y]) => {
+      const rect = surfaceEl().getBoundingClientRect();
+      const size = Math.min(rect.width, rect.height);
+      return {
+        clientX: rect.left + (rect.width - size) / 2 + (x / 1000) * size,
+        clientY: rect.top + (rect.height - size) / 2 + (y / 1000) * size,
+      };
+    };
+    const fire = (type, point, id) => {
+      surfaceEl().dispatchEvent(new win.PointerEvent(type, {
+        bubbles: true, cancelable: true, composed: true,
+        pointerId: id, pointerType: 'touch', isPrimary: true, ...toClient(point),
+      }));
+    };
+    async function writeStroke(points) {
+      const id = ++pointerId;
+      fire('pointerdown', points[0], id);
+      for (const p of points.slice(1)) fire('pointermove', p, id);
+      await wait(30);
+      fire('pointerup', points[points.length - 1], id);
+      await wait(40);
+    }
+    const stepNow = () => [...doc.querySelectorAll('.dots .dot')]
+      .findIndex((d) => d.classList.contains('dot--now'));
+    /**
+     * **حرفُ التمرين المعروض يُقرأ من لوحه الحيّ** (`لوحُ مراجعة: <اسم الحرف>`) لا من
+     * نسختنا من المنهج: هذه الصفحةُ تستورد `progress.js` في عالمها هي والتطبيقُ في
+     * إطاره يستورد نسختَه، **فحالُنا تشيخ بأوّل كتابةٍ يكتبها الطفل** — والمخزنُ
+     * والشاشةُ هما الجسرُ الصادق (سنّةُ `browser_gate.html`).
+     */
+    const names = Object.keys(PATHS).map((ch) => [ch, ui.letterName(ch)])
+      .sort((x, y) => y[1].length - x[1].length);
+    const letterNow = () => {
+      const label = surfaceEl()?.getAttribute('aria-label') || '';
+      return (names.find(([, name]) => label.includes(name)) || [null])[0];
+    };
+    /** عنوانُ الوحدة الجارية كما يقرؤه الطفل — من رأس الشاشة الحيّ. */
+    const unitNow = () => doc.querySelector('.gate-head h2')?.textContent?.trim() || '';
+
+    /**
+     * يكتب التمرينَ الحاليّ ثم ينتظر انتقالَ الجلسة. **والخطأُ لا يُنهي التمرين**
+     * (إرشادٌ لا رفض): مَن أردناه خاطئاً يُكتب معكوساً أوّلاً ثم مستقيماً — وذاك ما
+     * يفعله طفلٌ حقيقيّ، ويُحسَب خطؤه.
+     */
+    async function answer(right) {
+      const at = stepNow();
+      const ch = letterNow();
+      if (!ch) return null;
+      const ref = PATHS[ch][ISO];
+      const trace = async (back) => {
+        for (const stroke of ref.strokes) {
+          await writeStroke(back ? [...stroke.points].reverse() : stroke.points);
+        }
+        if (back) return;
+        for (const dot of ref.dots || []) {
+          for (let i = 0; i < (dot.count || 1); i++) await writeStroke([dot.at, dot.at, dot.at]);
+        }
+      };
+      if (!right) await trace(true);
+      await trace(false);
+      for (let i = 0; i < 40 && stepNow() === at && !doc.querySelector('.celebrate'); i++) {
+        await wait(120);
+      }
+      return ch;
+    }
+
+    /** يمشي وحدةً كاملةً كتابةً — والخروجُ ببلوغ شاشة حكمها. */
+    async function playUnit(right) {
+      const seen = [];
+      for (let i = 0; i < dots + 2 && !doc.querySelector('.celebrate'); i++) {
+        seen.push(await answer(right));
+      }
+      await wait(500);
+      return seen.filter(Boolean);
+    }
+
+    // ————— (٤) الوحدةُ الأولى تُثبَت بيده ⇒ تُفتَح عقدُها —————
+    const firstName = unitNow();
+    const beforeNodes = doneNodes();
+    const wrote = await playUnit(true);
+    ok(wrote.length === dots,
+      `كتب الطفلُ عيّنةَ الوحدة بيده حرفاً حرفاً (${wrote.join('، ')})`);
+    const card = doc.querySelector('.celebrate');
+    ok(Boolean(card) && /أَثْبَتَّهَا/.test(card.textContent),
+      `وحدةٌ كُتبت صحيحةً بيده ⇒ «${card?.querySelector('h2')?.textContent?.trim() || '—'}»`);
+    const afterOne = doneNodes();
+    ok(afterOne > beforeNodes,
+      `ففُتحت له ${afterOne - beforeNodes} عقدة في المخزن (كانت ${beforeNodes})`);
+    ok((stored().stars || {})['warm:lines-h'] > 0,
+      'ومعها التهيئةُ الحركية — القدرةُ الأعلى تشهد للأدنى (استنتاجٌ معلَنٌ بعلّته)');
+    ok(skillCount() >= head.sample.length,
+      `والزرعُ في ليتنر: ${skillCount()} مهارةً بمفاتيحَ حقيقية`);
+    ok(Object.keys(stored().skills || {}).every((k) => k.split('|').length === 3
+      && !/catchup|placement|امتحان/.test(k)),
+      'ولا وسمَ «امتحان» في مفتاح — تلتقطها المراجعةُ اليومية كأيّ كتابة');
+
+    // ————— (٢) الصعودُ إلى الوحدة التالية —————
+    const nextBtn = [...card.querySelectorAll('.btn')]
+      .find((el) => /التالية/.test(el.textContent));
+    ok(Boolean(nextBtn), 'وزرُّ «الوحدةُ التالية» يصعد به سلّمياً');
+    nextBtn.click();
+    await wait(700);
+    ok(Boolean(unitNow()) && unitNow() !== firstName && Boolean(surfaceEl()),
+      `فصعد إلى الوحدة التالية بترتيب الرحلة («${firstName}» ⇐ «${unitNow()}»)`);
+
+    // ————— (٢+٥) الشرخُ يوقف الصعود، ولا يغلق ما فُتح —————
+    const beforeCrack = { nodes: doneNodes(), stars: { ...(stored().stars || {}) } };
+    await playUnit(false);
+    const stop = doc.querySelector('.celebrate');
+    ok(Boolean(stop) && /وَقَفْنَا هُنَا/.test(stop.textContent),
+      `ووحدةٌ دون العتبة توقف الامتحان: «${stop?.querySelector('h2')?.textContent?.trim() || '—'}»`);
+    ok(!/رسوب|فشل|خسر/.test(doc.body.textContent), 'ولا كلمةَ رسوبٍ في الشاشة كلِّها');
+    ok(doneNodes() === beforeCrack.nodes,
+      `ولا عقدةَ فُتحت بعد الشرخ (${doneNodes()} كما كانت)`);
+    const kept = Object.keys(beforeCrack.stars)
+      .every((id) => (stored().stars || {})[id] >= beforeCrack.stars[id]);
+    ok(kept, 'و**لم يُغلق ما فُتح**: كلُّ نجمةٍ كُسبت باقيةٌ كما هي');
+    ok(/ولا يُغلق ما فُتح|لم يُغلق/.test(stop.textContent) || /يفتح ولا يقفل/.test(stop.textContent),
+      'ويُقال ذلك للوالد في الشاشة نفسِها');
+
+    // ————— والعودةُ تستأنف من آخر وحدةٍ حُسمت —————
+    const back = [...stop.querySelectorAll('.btn')].find((el) => /الخريطة/.test(el.textContent));
+    back.click();
+    await wait(500);
+    ok(win.location.hash === '#/' || win.location.hash === '',
+      'والخروجُ يعيده إلى خريطته');
+    win.location.hash = catchup.ROUTE;
+    await wait(400);
+    ok(!doc.querySelector('.pen-surface'),
+      'والبابُ يُغلَق بالخروج: عنوانُه بعده لا يفتح شيئاً حتى يُعاد من اللوحة');
+
+    ok(netCalls.length === netMark,
+      `ودورةُ الامتحان كلُّها بصفر طلباتٍ شبكية (${netCalls.length - netMark})`);
+    ok(errors.length === 0, `ولا خطأ جافاسكربت واحد${errors.length ? ` — ${errors[0]}` : ''}`);
+  } catch (e) {
+    ok(false, `انهار الفحص: ${e && e.stack ? e.stack.split('\n')[0] : e}`);
+  }
+  await send();
+})();
+</script>
+</body>
+</html>

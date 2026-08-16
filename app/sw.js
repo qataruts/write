@@ -107,7 +107,12 @@
 //   درجةَ النسخ الحر، و`HITS_PER_STEP=1` بحكم المالك، ومحطةُ الاسم في موضعها
 //   المعلَّل، و٣ جملٍ سقفاً — ولقطاتُ التعريف أُعيدت من الحاضر (أحفورتا
 //   التاءِ بنقطةٍ و`false` زالتا).
-const VERSION = 'v25';
+// v26: **بوابةُ اللحاق** (`FAMILY §١٠/هـ`) — امتحانُ تحديد مستوىً اختياريّ من لوحة
+//   وليّ الأمر: ملفٌّ جديد في القشرة (`js/catchup.js`) وبابُه في `js/parent.js`
+//   ومنفذُه في `js/main.js`، ومحرّكُ الجلسة كسب مُصيِّراتٍ تُبدَّل (`js/review.js`).
+//   **وبلا الرفعة يبقى جهازٌ مثبَّتٌ على قشرةٍ لا تعرف الملفَّ الجديد**: يفتح وليُّ
+//   الأمر لوحتَه فيقع على شاشةٍ بيضاء — استيرادٌ لملفٍّ ليس في مخزونه.
+const VERSION = 'v26';
 const SHELL_CACHE = `uktub-shell-${VERSION}`;
 const AUDIO_CACHE = 'uktub-audio';          // ثابتٌ عمداً — لا يحمل VERSION
 const KEEP = [SHELL_CACHE, AUDIO_CACHE];
@@ -126,6 +131,7 @@ const SHELL = [
   'audio/manifest.json',
   'audio/versions.json',
   'js/audio.js',
+  'js/catchup.js',
   'js/copy.js',
   'js/curriculum.js',
   'js/fade.js',

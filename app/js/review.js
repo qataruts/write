@@ -100,8 +100,12 @@ export function releaseReview() {
  *
  * وهي **للبوابة** (`assist`) لا لمراجعة اليوم: البوابةُ وحدَها هي الحائطُ الذي يقف
  * قبل المفصل، ومراجعةُ اليوم بابُها مفتوحٌ إلى الخريطة بلا كلفة.
+ *
+ * **وتُصدَّر لمن يركّب تمريناً على هذا المحرّك** (جلسة ل — بوابة اللحاق): امتحانُ
+ * اللحاق يعرض الكلمةَ في صندوقٍ فارغ ونموذجُها فوقه، فيحتاج العدّةَ نفسَها —
+ * **ونسخةٌ ثانية منها تفترق يوماً في عدّ الكشف** (`shown`) فتُنضج كلمةً كُشف نموذجُها.
  */
-function assistFoot({ surface, mode, skip }) {
+export function assistFoot({ surface, mode, skip }) {
   const foot = h('div', { class: 'row foot assist' });
   let watching = false;
   /** **أرأى النموذجَ في هذا التمرين؟** — إنتاجٌ كُشف نموذجُه لا يُنضِج كلمةً (أ١). */
@@ -372,9 +376,17 @@ export function itemTexts(item) {
 // @param {() => object[]} make  بناء تمارين المحاولة — يُستدعى في كل إعادة (لا نمط يُحفظ)
 // @param {(ctx) => Node} verdict  شاشة الختام: تتلقّى {right, errors, items, again}
 // @param {string} pill · accent · leaveAsk  زينة الشاشة وسؤال المغادرة
+// @param {object} views  سجلُّ المُصيِّرات — `VIEWS` لمن لم يبدّل
+//
+// **و`views` بابٌ لا يبدّل شيئاً لمن لم يطلبه** (جلسة ل): صار للمحرّك راكبٌ ثالث —
+// **امتحانُ اللحاق** — يسأل عن الكلمة **بالشكل لا بالأثر** (صندوقٌ فارغ ونموذجٌ فوقه)
+// لا بدرجة خفوتها الحيّة: ادّعاءُ اليد لا يُقبل إلا من اليد، وطفلٌ يُمتحَن أوّلَ مرّة
+// درجةُ كلِّ كلمةٍ عنده صفرٌ فيصير سؤالُه تتبّعاً. **والبديلُ نسخةٌ ثانية من المحرّك**
+// تفترق يوماً في تسجيل الخطأ — وهو عينُ ما تحذّر منه هذه الوحدة أعلاه.
 
 export function renderSession({
   make, verdict, pill, accent = ACCENT, leaveAsk, header = null, assist = false,
+  views = VIEWS,
 }) {
   let items = make();
   if (!items.length) return null;   // لا حصيلة بعدُ: main.js يعيده إلى الخريطة
@@ -401,7 +413,7 @@ export function renderSession({
     paintDots();
     const item = items[state.index];
     audio.preload(itemTexts(item));
-    const view = VIEWS[item.kind];
+    const view = views[item.kind];
     body.replaceChildren(view
       ? view(item, {
         score, wrong, right, next, say, assist, token: () => state.token, root: () => root,

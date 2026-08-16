@@ -55,6 +55,7 @@ PAGES = {
     "/__copy.html": TOOLS / "browser_copy.html",
     "/__journey.html": TOOLS / "browser_journey.html",
     "/__parent.html": TOOLS / "browser_parent.html",
+    "/__catchup.html": TOOLS / "browser_catchup.html",
     "/__welcome.html": TOOLS / "browser_welcome.html",
     "/__device.html": TOOLS / "browser_device.html",
 }
@@ -71,6 +72,7 @@ SUITES = {
     "copy": "/__copy.html",        # الجلسة ٨: الوصلُ والنسخُ وبطاقاتُ ق٣ وبوابةُ النسخ
     "journey": "/__journey.html",  # الجلسة ٩: الرحلةُ كاملةً — من أوّل تهيئةٍ إلى بوابة الختام
     "parent": "/__parent.html",    # الجلسة ١٠: لوحةُ وليّ الأمر — بوابتُها وخرائطُ اتجاهه ونسختُه
+    "catchup": "/__catchup.html",  # الجلسة ل: بوابةُ اللحاق — بابُها من اللوحة، وفتحُها بما أثبتته اليد
     "welcome": "/__welcome.html",  # الجلسة ١١: الصفحاتُ الأربع على مقاسات الجهاز الخمسة
 }
 # نافذة Chrome بلا واجهة تحجز ٨٧ بكسلاً لإطارٍ وهميّ فوق المنظور — فلولا تعويضها لقِسنا

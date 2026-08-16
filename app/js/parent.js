@@ -26,6 +26,9 @@ import {
 // خصوصية القلم يمنع `https://` في حاملي مسار الطفل — **فلا يجمعهما ملفٌ أبداً**،
 // وتبقى هذه اللوحةُ صفرَ عناوين. تُستدعى ولا يُكتب رابطُها هنا.
 import { feedbackSection } from './feedback.js';
+// **بوابةُ اللحاق** (`FAMILY §١٠/هـ`، قرارُ المالك ١٦ أغسطس ٢٠٢٦): امتحانُ تحديد
+// مستوىً اختياريّ — **بابُه هذه اللوحةُ حصراً ولا زرَّ له في شاشة طفل** (القيد ١).
+import { openCatchup, lastResult, ladder, PASS_PERCENT } from './catchup.js';
 
 const ACCENT = 'var(--accent-skills)';
 const GOOD = 'var(--ok)';
@@ -448,6 +451,59 @@ function previewSection() {
   );
 }
 
+/**
+ * **بوابةُ اللحاق** (`FAMILY §١٠/هـ`، و`METHOD.md §١١`): تلميذُ المدرسة والمراكز يصل
+ * بمستوىً قائم — فيُمتحَن **بيده** مرّةً فيُفتح له ما أثبته، ويقف حيث ينكسر.
+ *
+ * **وموضعُها هنا لا في شاشة طفل** (القيد ١، كموضع «افتح الطريق إلى هنا» سواءً بسواء):
+ * فتحُ الرحلة قرارُ بالغٍ، واللوحةُ محميّةٌ سلفاً بمسألة ضربٍ يعجز عنها طفلُ السادسة.
+ *
+ * **وما تقوله هذه البطاقةُ محسوبٌ من الرحلة** لا مكتوبٌ بيد: أوّلُ وحدةٍ يُمتحَن فيها
+ * وحجمُ عيّنتها، وعتبةُ العبور من مصدر البوابات — فلا رقمَ يشيخ.
+ */
+function catchupSection() {
+  const steps = ladder();
+  const head = steps[0];
+  const result = lastResult();
+  const where = !head
+    ? 'أتمّ الرحلةَ كلَّها — لا شيءَ بعدُ يُمتحَن فيه.'
+    : head.gate
+      ? `يقف الآن عند «${head.gate.title}» — والبوّاباتُ لا تُقفَز: يعبرها بيده من`
+        + ' الخريطة، ثم يستأنف الامتحانُ ما بعدها.'
+      : `يبدأ من «${sectionLabelOf(head)}» بعيّنةِ ${arNum(head.sample.length)} كتابة`
+        + ` من ${arNum(head.materials.length)} في الوحدة.`;
+
+  return h('div', {},
+    h('p', { class: 'hint' },
+      'إن كان طفلك يعرف بعضَ ما في الرحلة أصلاً — من مدرسةٍ أو مركز — فامتحنه هنا:'
+      + ' يصعد وحدةً وحدة بترتيب الرحلة، **يكتب بيده** عيّنةً من كل وحدة (لا يختار'
+      .replace(/\*\*/g, '')
+      + ' صورةً ولا يلمسها)، فما أثبته يُفتح له وعند أوّل وحدةٍ ينكسر فيها يقف.'),
+    h('p', { class: 'hint' }, where),
+    h('div', { class: 'row', css: { 'justify-content': 'flex-start' } },
+      h('button', {
+        class: 'btn btn--primary catchup-open',
+        disabled: !head || Boolean(head.gate),
+        onclick: openCatchup,
+      }, 'افتح بوابة اللحاق')),
+    result && h('p', { class: 'note' },
+      `آخرُ امتحان: ${whenText(result.at)} — أثبت ${arNum(result.units)} وحدةً`
+      + ` ففُتحت ${nodesText(result.opened)}.`),
+    h('p', { class: 'note' },
+      `والعبورُ بإصابة ${arNum(PASS_PERCENT)}٪ فأكثر — صرامةُ بوّابات الإتقان نفسُها.`
+      + ' وكلُّ كتابةٍ في الامتحان تُسجَّل في صناديق مراجعته كأيّ كتابةٍ أخرى، فمراجعةُ'
+      + ' اليوم تلتقط ما سخا به الفتح. **ولا يُغلق ما فُتح أبداً**: أعِده متى شئت'
+      .replace(/\*\*/g, '')
+      + ' فيستأنف من آخر وحدةٍ حُسمت.'),
+  );
+}
+
+/** اسمُ وحدة السلّم كما يقرؤه وليُّ الأمر — من موضعها في الرحلة لا من قائمةٍ تُكتب. */
+function sectionLabelOf(step) {
+  const sections = progress.journey();
+  return sectionLabel(step.section, sections.indexOf(step.section));
+}
+
 function backupSection(rerender) {
   const slot = h('div', { class: 'confirm-slot' });
   const storage = h('p', { class: 'hint' }, 'التخزين على هذا الجهاز: جارٍ الفحص…');
@@ -834,6 +890,10 @@ function dashboard(rerender = () => {}) {
         `بانتظار التثبيت الآن: ${arNum(due.length)} من ${arNum(progress.skills().length)} مهارة سُجّلت.`)),
 
     ...section('نسخة احتياطية من تقدّمه', backupSection(rerender)),
+
+    // **بوابةُ اللحاق قبل التحكّم اليدويّ عمداً**: كلاهما يفتح الرحلة، لكنّ هذا يفتح
+    // **بما أثبتته يدُ الطفل** وذاك بتقدير الوالد — فيُعرض المقيسُ أوّلاً.
+    ...section('بوابةُ اللحاق — امتحانُ تحديد المستوى', catchupSection()),
 
     ...section('تحكّم في الرحلة', journeySection(rerender)),
 
