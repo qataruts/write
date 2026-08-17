@@ -120,6 +120,31 @@
 /* ولونُ الفعل الرئيس يبقى لأصله في `app.css` — لذلك يُستثنى هنا */
 .w-wrap a.btn:not(.btn--primary) { color: var(--ink); }
 
+/* **شريطُ الإنصاف** — تحت الصدر مباشرة (أمر المالك، ١٧ أغسطس ٢٠٢٦): سطران بارزان
+   يقولان إنّ للتطبيق بابين لمن لا يبدأ من الصفر ولمن يحتاج مهلة، ورابطٌ ينزل إلى
+   تفصيلهما. **لونُه من لوح التطبيق** (`--accent` يمرّره العنصرُ نفسُه) لا قيمةٌ
+   منسوخة، **ولا صورةَ فيه ولا جافاسكربت** — فوزنُه صفرٌ على الصفحة. */
+.w-band {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: .5rem 1rem;
+  margin: 1.75rem 0 0;
+  padding: 1rem 1.15rem;
+  border: 1px solid color-mix(in oklab, var(--accent) 35%, transparent);
+  border-inline-start: 4px solid var(--accent);
+  border-radius: var(--radius-card, 14px);
+  background: color-mix(in oklab, var(--accent) 7%, var(--paper));
+}
+
+.w-band p { margin: 0; flex: 1 1 22rem; line-height: 1.75; }
+
+.w-band a {
+  white-space: nowrap;
+  font-weight: 700;
+  color: color-mix(in oklab, var(--accent) 75%, var(--ink));
+}
+
 .w-section {
   margin: 3.5rem 0 0;
   scroll-margin-top: 1.5rem;
