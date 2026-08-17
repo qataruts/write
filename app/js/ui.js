@@ -6,6 +6,8 @@
 // على أنواع محطات اكتب لا محطات اقرأ.
 
 import { FORM_NAMES, LETTERS, DIGITS, stageById } from './curriculum.js';
+// **مؤشّرُ وضع الدعم** (جلسة د): اسمُه من مالكه لا مكتوباً هنا — انظر `topbar` أدناه.
+import { MARK, modeOn as supportOn } from './support.js';
 
 export const DEV = typeof location !== 'undefined'
   && new URLSearchParams(location.search).get('dev') === '1';
@@ -197,8 +199,20 @@ export function go(hash) {
   location.hash = hash;
 }
 
+/**
+ * **الشريطُ اللاصق — وحاملُ مؤشّر وضع الدعم** (جلسة د، بندُ العقد ٦): يعرفه البالغُ
+ * بنظرة ولا يَسِمُ الطفل — **بلا كلمة بطءٍ ولا رمزِه**، واسمُ العلامة في `title`
+ * وحدَه (نصُّ بالغٍ لا يُقرأ على الشاشة)، وخطُّها ظلٌّ داخليٌّ في التنسيق **لا يزحزح
+ * تخطيطاً**. وموضعُها هنا لا أعلى الصفحة: العائمُ **يُبتلَع في الجوّال** (بلاغُ ميدان
+ * المالك عند اقرأ)، والشريطُ يمشي مع الطفل في كل شاشة.
+ *
+ * **ومطفأً لا فرقَ ببايت**: `null` تسقطها `h` فلا سمةَ تُكتب.
+ */
 export function topbar(...extra) {
-  return h('header', { class: 'topbar' }, extra);
+  return h('header', {
+    class: 'topbar',
+    title: supportOn() ? MARK.label : null,
+  }, extra);
 }
 
 export function starsRow(count, className = 'node-stars') {

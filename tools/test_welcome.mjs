@@ -55,6 +55,8 @@ const {
   STAGES, GATES, MARKS, WORDS, SENTENCES, LETTERS, DIGITS, PATHS, Q3_RULING,
 } = await import(new URL('curriculum.js', JS));
 const { FAULT_TEXT } = await import(new URL('pen.js', JS));
+const { PASS_PERCENT } = await import(new URL('catchup.js', JS));
+const support = await import(new URL('support.js', JS));
 
 // **الاستثناءان المعلَنان** — رابطان يُشار إليهما ولا يُجلبان (انظر ٢ أعلاه).
 const FAMILY = 'https://learn.mishkat.qa/';
@@ -207,6 +209,9 @@ const STATS = {
   joinNodes: nodesOfKind('join'),
   fadeNodes: nodesOfKind('fade'),
   sentenceNodes: nodesOfKind('sentence'),
+  // **وعتبةُ اللحاق من `gate.js` بعينها** (جلسة د): الصفحةُ تَعِد بصرامة بوّابات
+  // الإتقان، فيُقرأ الرقمُ من مالكه لا يُكتب في نصٍّ تعريفيّ يشيخ.
+  passPercent: PASS_PERCENT,
   q3Total: q3.total,
   q3Station: q3.station,
   q3Hosted: q3.hosted,
@@ -323,6 +328,49 @@ const titles = [...STAGES.map((s) => s.title), ...GATES.map((g) => g.title)];
 const absent = titles.filter((t) => !cur.includes(t));
 ok(absent.length === 0,
   `الأقسامُ ${ar(titles.length)} كلُّها في جدول الرحلة${absent.length ? ` — الغائب: ${absent.join('، ')}` : ''}`);
+
+// ————— ٧ب. قسمُ الميزتين: جردُ المقابض وفقرةُ الحدّ (جلسة د) —————
+//
+// **أمرُ المالك** (`2026-08-17-features-need-their-own-sections.md`): الميزتان
+// **قسمان مستقلان بعنوانهما** لا سطرٌ في نصّ — بطاقةُ اللحاق وبطاقةُ الدعم، ولكلٍّ
+// **مقابضُ تطبيقنا بأسمائها**. فيُجرَد ذلك **آلياً من جدول `support.js` نفسِه**:
+// مقبضٌ يُضاف أو يُعاد تسميتُه ولا تذكره الصفحةُ يحمرّ هنا — كما تحمرّ أرقامُها.
+//
+// **وفقرةُ الحدّ تُقابَل بمصدرها** (`support.PROMISE`) لا بعينٍ تقرأ: أمسك حارسُ اقرأ
+// سقوطَ «ولا يَعِد بحجم أثر» ساعةَ نُقل النصّ — **فالحدُّ يُحرَس كالوعد**.
+
+console.log('\n٧ب. قسمُ اللحاق والدعم في الرئيسة');
+
+const home = PAGES['index.html'];
+const section = home.match(/<section class="w-section" id="pace"[\s\S]*?<\/section>/)?.[0] || '';
+const flat = (t) => t.replace(/\s+/g, ' ').trim();
+
+ok(Boolean(section) && /<h2>[^<]+<\/h2>/.test(section),
+  'قسمٌ مستقلٌّ بعنوانه في الرئيسة — لا سطرٌ داخل بطاقةٍ أخرى');
+ok((section.match(/<article class="w-card">/g) || []).length === 2
+  && /بوابةُ اللحاق/.test(section) && /وضعُ الدعم/.test(section),
+  'وفيه بطاقتان: امتحانُ اللحاق ووضعُ الدعم');
+ok(/لوحة وليّ الأمر/.test(section) && /لا في شاشة الطفل/.test(section),
+  'ومقدّمتُه تقول: بابان اختياريان في لوحة وليّ الأمر لا في شاشة الطفل');
+ok(/يفتح ما أُثبت لا ما ادُّعي/.test(section) && /لا يُغلق/.test(section)
+  && /صناديقَ\s+مراجعته|صناديق مراجعته/.test(flat(section)),
+  'وبطاقةُ اللحاق بقيودها: يفتح ما أُثبت · ويدخل ليتنر قياساً · وما فُتح لا يُغلق');
+ok(/لا يُحتسب ما أُعين عليه إتقاناً/.test(section),
+  'وبطاقةُ الدعم تقول صريحاً: **لا يُحتسب ما أُعين عليه إتقاناً**');
+
+// **جردُ المقابض آلياً** — من الجدول لا من قائمةٍ تُكتب هنا
+const shown = support.KEYS.filter((k) => flat(section).includes(flat(support.KNOBS[k].title)));
+ok(shown.length === support.KEYS.length,
+  `ومقابضُ الدعم الخمسة بأسمائها من جدولها (${shown.length}/${support.KEYS.length}`
+  + `${shown.length < support.KEYS.length
+    ? ` — ناقص: ${support.KEYS.filter((k) => !shown.includes(k)).map((k) => support.KNOBS[k].title).join('، ')}`
+    : ''})`);
+
+// **وفقرةُ الحدّ من مصدرها** — لا منسوخةً بيدٍ تسقط منها كلمة
+const limit = section.match(/<p[^>]*data-promise[^>]*>([\s\S]*?)<\/p>/)?.[1] || '';
+ok(Boolean(limit), 'وتحتهما فقرةُ الحدّ موسومةً `data-promise`');
+ok(flat(limit) === flat(support.PROMISE),
+  'ونصُّها **عينُ `support.PROMISE`** حرفاً — فحدٌّ يسقط في نقلٍ يحمرّ هنا');
 
 // ————— ٨. لا وعدَ بما ليس في التطبيق —————
 

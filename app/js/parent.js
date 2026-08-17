@@ -29,6 +29,9 @@ import { feedbackSection } from './feedback.js';
 // **بوابةُ اللحاق** (`FAMILY §١٠/هـ`، قرارُ المالك ١٦ أغسطس ٢٠٢٦): امتحانُ تحديد
 // مستوىً اختياريّ — **بابُه هذه اللوحةُ حصراً ولا زرَّ له في شاشة طفل** (القيد ١).
 import { openCatchup, lastResult, ladder, PASS_PERCENT } from './catchup.js';
+// **وضعُ الدعم — بابُه هذه اللوحة وحدَها** (جلسة د): مفاتيحُه من جدوله المعلَن لا
+// مكتوبةً بيد، وسطرُ وعده وعلامتُه من مالكهما — فلا يفترق ما يقرؤه الوالدُ عمّا يقع.
+import * as support from './support.js';
 
 const ACCENT = 'var(--accent-skills)';
 const GOOD = 'var(--ok)';
@@ -498,6 +501,65 @@ function catchupSection() {
   );
 }
 
+/**
+ * ————— **وضعُ الدعم** (جلسة د، بلاغ `2026-08-17-support-mode-contract-for-siblings`) —————
+ *
+ * **قسمُ اللوحة كلُّه مبنيٌّ من جدول `support.js` المعلَن**: العنوانُ والسطرُ لكل
+ * مفتاحٍ من `KNOBS` نفسِها، فلا يفترق ما يقرؤه الوالدُ عمّا يفعله المحرّك، ومقبضٌ
+ * يُضاف غداً يظهر هنا بلا سطرٍ يُكتب.
+ *
+ * **والعونُ يُسجَّل**: عددُ المحاولات المعانة يُقرأ من سجلّ المهارات نفسِه
+ * (`progress.helpedAttempts`) — فما أُعين عليه معلومٌ لوليّه، ولا يدخل «الحروف
+ * المتقنة» ألبتّة.
+ */
+function supportSection(rerender) {
+  const on = support.modeOn();
+  const helped = progress.helpedAttempts();
+
+  const knob = (key) => {
+    const k = support.KNOBS[key];
+    const live = support.isOn(key);
+    return h('div', { class: 'note', css: { 'text-align': 'start', 'margin-bottom': '.5rem' } },
+      h('div', { class: 'row', css: { 'justify-content': 'space-between', gap: '.75rem' } },
+        h('b', {}, k.title),
+        h('button', {
+          class: `btn ${live ? 'btn--primary' : ''}`,
+          disabled: !on,
+          'aria-pressed': live ? 'true' : 'false',
+          onclick: () => { support.set(key, !live); rerender(); },
+        }, live ? 'مشتغل' : 'مطفأ')),
+      h('p', { class: 'hint', css: { margin: '.25rem 0 0' } }, k.line),
+      // **ما يمسّ القياسَ يُقال بلفظه** (مسطرةُ الامتحان الواحدة): مقبضُ الصعوبة
+      // يُعطَّل في بوابة اللحاق قطعاً، ومقبضُ الراحة يسري فيها — والوالدُ يقرأ أيَّهما.
+      k.measures
+        ? h('p', { class: 'note', css: { margin: '.35rem 0 0' } },
+          'يمسّ ما يُقاس: يُعطَّل داخل بوابة اللحاق، وما أُعين عليه لا يُحتسب إتقاناً.')
+        : h('p', { class: 'note', css: { margin: '.35rem 0 0' } },
+          'راحةٌ لا تمسّ القياس: تسري في بوابة اللحاق كما تسري خارجها.'),
+    );
+  };
+
+  return h('div', {},
+    h('p', { class: 'hint' },
+      'لطفلٍ يحتاج وتيرةً أهدأ — صعوبةَ تعلّمٍ أو فرطَ حركة أو يداً لم تنضج بعد.'
+      + ' **المنهجُ نفسُه والمقياسُ نفسُه**، وإنما يتغيّر الإيقاع.'.replace(/\*\*/g, '')),
+    h('div', { class: 'row', css: { 'justify-content': 'flex-start' } },
+      h('button', {
+        class: 'btn btn--primary support-toggle',
+        onclick: () => { support.setMode(!on); rerender(); },
+      }, on ? 'أطفئ وضع الدعم' : 'شغّل وضع الدعم')),
+    on ? support.PANEL_KEYS.map(knob) : null,
+    // **علامتُه بنصّها من مالكها** — فلا يفترق ما يقرؤه الوالدُ عمّا يراه على الشاشة.
+    h('p', { class: 'hint' }, support.MARK.note),
+    h('p', { class: 'note' },
+      `والعونُ يُسجَّل ولا يُزوَّر القياس: ${arNum(helped)} محاولةً وقعت بعونٍ`
+      + ' — لا ترفع صندوقاً ولا تدخل «الحروف المتقنة»، وتعود في المراجعة كما هي.'),
+    // **سطرُ الوعد الصادق من مصدره الواحد** (`support.PROMISE`) — يُكتب هنا وفي
+    // صفحة التعريف من الموضع نفسِه، فلا يسقط حدٌّ منه في نقلٍ.
+    h('p', { class: 'note' }, support.PROMISE),
+  );
+}
+
 /** اسمُ وحدة السلّم كما يقرؤه وليُّ الأمر — من موضعها في الرحلة لا من قائمةٍ تُكتب. */
 function sectionLabelOf(step) {
   const sections = progress.journey();
@@ -894,6 +956,11 @@ function dashboard(rerender = () => {}) {
     // **بوابةُ اللحاق قبل التحكّم اليدويّ عمداً**: كلاهما يفتح الرحلة، لكنّ هذا يفتح
     // **بما أثبتته يدُ الطفل** وذاك بتقدير الوالد — فيُعرض المقيسُ أوّلاً.
     ...section('بوابةُ اللحاق — امتحانُ تحديد المستوى', catchupSection()),
+
+    // **واللحاقُ والدعمُ متعامدان** (بلاغ `2026-08-17-support-and-placement-coexist`):
+    // **اللحاقُ يحدّد أين يبدأ · والدعمُ يحدّد كيف يمشي** — فيجتمعان لطفلٍ يصل
+    // بمستوىً قائم ويحتاج إيقاعاً معايَراً، وهو الحالُ الغالب في المراكز.
+    ...section('وضعُ الدعم — لطفلٍ يحتاج إيقاعاً أهدأ', supportSection(rerender)),
 
     ...section('تحكّم في الرحلة', journeySection(rerender)),
 

@@ -11,6 +11,7 @@
 
 import * as progress from './progress.js';
 import * as audio from './audio.js';
+import * as support from './support.js';
 import * as install from './install.js';
 import * as probe from './probe.js';
 import { renderReview, releaseReview } from './review.js';
@@ -719,6 +720,27 @@ window.addEventListener('pageshow', resetZoom);
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') resetZoom();
 });
+
+/**
+ * ————— **وضعُ الدعم على الجذر** (جلسة د) —————
+ *
+ * الوحدةُ لا تعرف DOM، فمن يصبغ أثرَها الموجّهُ: صنفُ `calm` يستدعي قواعدَ خفض
+ * الحركة القائمة، وصنفُ `support-on` يُظهر **مؤشّرَ الشريط اللاصق**، وخاصّيةُ
+ * `--ink-weight` تغلظ حبرَ الطفل ونموذجَه.
+ *
+ * **ومطفأً لا فرقَ ببايت**: صنفٌ لا يُضاف وخاصّيةٌ **تُحذَف** لا تُكتب بقيمتها
+ * القائمة — فشجرةُ العناصر وقيمُ التنسيق كما كانت حرفاً قبل هذه الجلسة.
+ */
+function paintSupport() {
+  const root = document.documentElement;
+  root.classList.toggle('calm', support.calm());
+  root.classList.toggle('support-on', support.modeOn());
+  const ink = support.inkWeight();
+  if (ink === support.KNOBS.ink.standing) root.style.removeProperty('--ink-weight');
+  else root.style.setProperty('--ink-weight', String(ink));
+}
+support.onChange(paintSupport);
+paintSupport();
 
 window.addEventListener('hashchange', render);
 audio.ready();

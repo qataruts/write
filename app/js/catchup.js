@@ -45,6 +45,10 @@ import { VIEWS, renderSession, assistFoot } from './review.js';
 import { WORD_PATHS } from './word_paths.js';
 import { SPOKEN_WORDS, SPOKEN_SENTENCES } from './curriculum.js';
 import { penSurface, refGlyph, MODES, FREE } from './pen.js';
+// **مسطرةُ الامتحان الواحدة** (بلاغ `2026-08-17-support-and-placement-coexist.md`):
+// يستورد **النطاقَ** ومقبضَ راحةٍ واحداً — **ولا يقرأ مقداراً من مقادير الصعوبة بيده**
+// ولا يعرف `easeFor` ولا `mayEase` أصلاً (حصانةٌ بنيوية يجردها الحارس على المصدر).
+import { duringExam, demoPace } from './support.js';
 import {
   h, icon, go, arNum, arCount, topbar, mascot, cheer, starsRow, stageTitle, letterName,
   PAUSE_ACCENT,
@@ -279,7 +283,10 @@ function wordExam(item, api) {
     ref,
     mode: MODES.FREE,
     // **السماحةُ والمسطرةُ من المسار نفسِه** — «النموذجُ هو المقياس» (`METHOD.md §٣.٢`)
+    // **ولا توسيعَ لها في الامتحان**: العونُ الذي يجيب يُمنع (وطبقتاه: لا استيرادَ
+    // هنا، ونطاقُ `duringExam` أدناه يردّ ما يمسّ القياسَ إلى القائم ولو استُدعي).
     tolerance: ref.tolerance,
+    pace: demoPace(),
     baseline: ref.line,
     label: `لوحُ لحاق: ${item.unit}`,
     onFault: (fault) => {
@@ -325,9 +332,21 @@ function wordExam(item, api) {
  * بعينه** — هو نمطُ خطوة «اكتبه وحدك» بشروط المسار — والكلمةُ والجملةُ بتمرين الشكل.
  * **فلا حَكَمَ جديدٌ في الامتحان، وإنما اختيارُ درجةٍ قائمة.**
  */
+/**
+ * **ونطاقُ المسطرة الواحدة يلفّ بناءَ كل تمرين** (بلاغ `support-and-placement-coexist`):
+ * `duringExam` نداءٌ **متزامن** يردّ الحالَ في `finally` — فمقابضُ الصعوبة (الجرعةُ
+ * والسماحةُ الموسَّعة) تعود إلى القائم ما دام التمرينُ يُبنى، وتسري مقابضُ الراحة
+ * (نموذجٌ أبطأ وخطٌّ أغلظ وهدوءٌ حسّيّ) كما تسري خارجَه: **طفلٌ يُمتحَن بشاشةٍ تُربكه
+ * يُقاس إرباكُه لا معرفتُه**، وطفلٌ يُفتَح له بسماحةٍ أوسع يُفتَح له ما لم يُثبته.
+ *
+ * **ولا عَلَمَ يُخزَّن**: مدّةُ بناءٍ لا حالٌ تعبر إعادةَ التحميل (العَلَمُ المخزَّن
+ * يعلق مفتوحاً — عيبُ حالةٍ صامت). والسماحةُ تُقرأ **لحظةَ بناء اللوح** فيكفيه النطاق.
+ */
+const examView = (view) => (item, api) => duringExam(() => view(item, api));
+
 const EXAM_VIEWS = {
-  [progress.KINDS.FREE]: VIEWS[progress.KINDS.FREE],
-  [progress.KINDS.COPY]: wordExam,
+  [progress.KINDS.FREE]: examView(VIEWS[progress.KINDS.FREE]),
+  [progress.KINDS.COPY]: examView(wordExam),
 };
 
 /**

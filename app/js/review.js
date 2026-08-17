@@ -19,6 +19,10 @@ import * as audio from './audio.js';
 import { pathOf, WORDS, SENTENCES, SPOKEN_WORDS, SPOKEN_SENTENCES } from './curriculum.js';
 import { WORD_PATHS } from './word_paths.js';
 import { penSurface, MODES, FREE } from './pen.js';
+// **وضعُ الدعم — والمراجعةُ ليست اكتساباً**: تقرأ الجرعةَ ومعاملَ بطء العرض،
+// **ولا تستورد `easeFor` ولا `mayEase`** — «لا عونَ في المراجعة ولا في البوابات»
+// (بندُ العقد ٥)، وحصانتُها بنيوية يجردها `tools/test_support.mjs` على المصدر.
+import { sessionSize, demoPace } from './support.js';
 // **درجةُ الخفوت تُستورد من مصدرها بأعيانها** (الجلسة ح — أ١): `fade.js` يملك
 // الدرجةَ ونمطَها وحجابَها ونوعَ قياسها وتعليمتَها، **ولا نسخةَ ثانية هنا تشيخ**.
 import { levelOf, modeOf, veilOf, kindOf, sayOf, VEIL_STEPS, SAY as FADE_SAY } from './fade.js';
@@ -26,7 +30,12 @@ import {
   h, icon, toast, go, arNum, arCount, starsRow, topbar, mascot, cheer, letterName, DEV,
 } from './ui.js';
 
-export const SESSION_SIZE = 6;    // جلسة قصيرة تُنجَز في دقائق (لا تُرهق طفل الخامسة)
+/**
+ * جلسة قصيرة تُنجَز في دقائق (لا تُرهق طفل الخامسة). **وهو القائمُ لا المقروء**: من
+ * تبنى الجلسةُ به `support.sessionSize()` تُقرأ عند كل بناء — وهذا وجهُ القائم يُقرأ
+ * في الشاشات وفي الفحص، ويحرس `test_support.mjs` أنّهما رقمٌ واحد لا رقمان يفترقان.
+ */
+export const SESSION_SIZE = 6;
 const ACCENT = 'var(--accent-skills)';   // المراجعة تثبيت مهارات — لونها لون المهارات
 
 /** نجومُ الجلسة — **قاعدتُها في `progress.js`** مع سائر النجوم (الجلسة ٨)، وتُصدَّر
@@ -169,6 +178,7 @@ function penExercise(item, api, mode) {
   const surface = penSurface({
     ref,
     mode,
+    pace: demoPace(),
     label: `لوحُ مراجعة: ${letterName(item.unit)}`,
     onFault: (fault) => {
       faults++;
@@ -271,6 +281,7 @@ function wordExercise(item, api, mode) {
     // **والحجابُ من مسار الكلمة نفسِه** (`veilOf`) — أجزاؤها تُحجب من مؤخّرتها
     veil: sentence ? 0 : veilOf(ref, level),
     tolerance: ref.tolerance,
+    pace: demoPace(),
     baseline: ref.line,
     label: `${dictation ? 'لوحُ إملاء' : 'لوحُ نسخ'}: ${item.unit}`,
     onFault: (fault) => {
@@ -343,7 +354,7 @@ export const VIEWS = {
  * @param {object[]} due  المهارات المستحقّة، الأضعف أولاً (من ليتنر)
  * @param {number} size   طول الجلسة
  */
-export function buildSession({ due = [], size = SESSION_SIZE } = {}) {
+export function buildSession({ due = [], size = sessionSize() } = {}) {
   const out = [];
   for (const skill of due) {
     if (out.length >= size) break;

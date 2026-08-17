@@ -123,7 +123,7 @@
 //   تغطيةً لجزئه وحدَه، و`js/pendev.js` يلتقط النقرات (كان يبلع نقطةَ الحرف).
 //   **ثلاثةُ ملفاتِ هيكلٍ تبدّلت تحت أسمائها** — فجهازٌ مثبَّتٌ بلا رفعةٍ يبقى على
 //   كافٍ لا تنضبط في يد طفلته وعلى دفترِ التقاطٍ يُسقِط نقطةَ الباء.
-const VERSION = 'v29';
+const VERSION = 'v30';
 const SHELL_CACHE = `uktub-shell-${VERSION}`;
 const AUDIO_CACHE = 'uktub-audio';          // ثابتٌ عمداً — لا يحمل VERSION
 const KEEP = [SHELL_CACHE, AUDIO_CACHE];
@@ -159,6 +159,7 @@ const SHELL = [
   'js/progress.js',
   'js/review.js',
   'js/sentence.js',
+  'js/support.js',
   'js/ui.js',
   'js/warmup.js',
   'js/warmups.js',

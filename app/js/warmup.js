@@ -23,6 +23,9 @@
 import * as progress from './progress.js';
 import { WARMUPS } from './warmups.js';
 import { penSurface } from './pen.js';
+// **مقابضُ الراحة وحدَها** (وضعُ الدعم، جلسة د): محطةُ التهيئة لا مهارةَ لها في ليتنر
+// ولا صندوق — فلا «أوّلَ لقاءٍ» يُحدّ به إذنُ السماحة، ولا تستورد `easeFor` ألبتّة.
+import { demoPace } from './support.js';
 import { starsForReview } from './review.js';
 import {
   h, icon, go, arNum, starsRow, topbar, brandMark, mascot, cheer, faceEl, nodeTitle,
@@ -93,6 +96,7 @@ export function renderWarmup(part) {
     const surface = penSurface({
       ref: shape.ref,
       tolerance: shape.tolerance,
+      pace: demoPace(),
       bounds: Boolean(shape.bounds),
       label: `لوحُ تهيئة: ${shape.note}`,
       // **كلُّ خطأٍ يُسجَّل باسمه** (`METHOD.md §٦`) — ووحدتُه محطةُ التهيئة،

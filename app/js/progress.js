@@ -661,12 +661,28 @@ export function skills() {
 /**
  * تسجيل محاولة واحدة. الصحيحة ترفع صندوق ليتنر فيتباعد موعدها،
  * والخاطئة تعيده إلى الصفر فتعود المهارة في مراجعة اليوم نفسه (`METHOD.md §٦`).
+ *
+ * **والملقَّنُ لا يُحتسب إتقاناً** (وضعُ الدعم، جلسة د — المبدأ الثاني: «العونُ
+ * يُسجَّل ولا يُزوَّر القياس»): محاولةٌ وقعت **بسماحةٍ موسَّعة** (`support.easeFor`)
+ * تُسجَّل معانةً في `helped` ولا ترفع صندوقاً ولا تُحتسب صواباً ولا خطأً ولا تُبعد
+ * موعداً — فتبقى المهارةُ مستحقّةً للمراجعة، و**ما في «الحروف المتقنة» أثبته الطفلُ
+ * بيده وحدَه**. وموضعُ القاعدة هنا — في وحدة القياس — لا في الشاشة، فلا تُنسى في
+ * شاشةٍ تُكتب غداً؛ ويجرد `tools/test_support.mjs` وسمَ العون في كل موضعٍ يمرّره.
+ *
+ * @param {boolean} [helped] وقعت المحاولةُ بعونٍ يمسّ القياس
  * @returns {object|null} حالة المهارة بعد التسجيل
  */
-export function recordAttempt(unit, form, kind, correct, today = dayNumber()) {
+export function recordAttempt(unit, form, kind, correct, today = dayNumber(), helped = false) {
   if (!unit || !kind) return null;
   const key = skillKey(unit, form, kind);
   const s = state.skills[key] || { right: 0, wrong: 0, box: 0, due: today, seen: today };
+  if (helped) {
+    s.helped = (s.helped || 0) + 1;
+    s.seen = today;
+    state.skills[key] = s;
+    save();
+    return s;
+  }
   if (correct) {
     s.right++;
     s.box = Math.min(MAX_BOX, s.box + 1);
@@ -680,6 +696,17 @@ export function recordAttempt(unit, form, kind, correct, today = dayNumber()) {
   save();
   return s;
 }
+
+/**
+ * **صندوقُ ليتنر لمهارةٍ بعينها** — تقرؤه شاشاتُ الاكتساب لتعرف أهذا **أوّلُ لقاءٍ**
+ * بالمهارة (صفر) فيجوز فيه عونُ وضع الدعم، أم جاوزت الاكتساب فتُكتب بالمسطرة القائمة
+ * (`support.mayEase`). ومهارةٌ لم تُلمس بعدُ صندوقُها صفرٌ بطبعها.
+ */
+export const skillBox = (unit, form, kind) => state.skills[skillKey(unit, form, kind)]?.box ?? 0;
+
+/** مجموعُ المحاولات المعانة في السجلّ — تقرؤه لوحةُ وليّ الأمر: **العونُ يُسجَّل**. */
+export const helpedAttempts = () =>
+  Object.values(state.skills).reduce((sum, s) => sum + (s.helped || 0), 0);
 
 // ————— عدّادُ أخطاء الاتجاه المميَّز (`METHOD.md §٦`) —————
 //

@@ -118,8 +118,11 @@ ok(literals.length === 0,
 // — ولو عُرضت بدرجة خفوتها الحيّة لَصار سؤالُ أوّلِ امتحانٍ تتبّعاً على مسارٍ مرسوم.
 
 console.log('\n— الحكمُ حكمُ اليد: حرٌّ لا تتبّع —');
-ok(/\[progress\.KINDS\.FREE\]: VIEWS\[progress\.KINDS\.FREE\]/.test(code),
-  'تمرينُ الحرف **هو** تمرينُ المراجعة الحرّ بعينه — لا نسخةٌ ثانية منه');
+// **ولافُّ «مسطرة الامتحان الواحدة» يمرّره كما هو** (جلسة د): `examView` يفتح النطاقَ
+// المتزامن ويستدعي المُصيِّرَ نفسَه بمعاملَيه — فلا نسخةَ ثانية ولا تبديلَ حجّة.
+ok(/\[progress\.KINDS\.FREE\]: examView\(VIEWS\[progress\.KINDS\.FREE\]\)/.test(code)
+  && /const examView = \(view\) => \(item, api\) => duringExam\(\(\) => view\(item, api\)\);/.test(code),
+  'تمرينُ الحرف **هو** تمرينُ المراجعة الحرّ بعينه — لا نسخةٌ ثانية منه، ولافُّ المسطرة يمرّره بحاله');
 ok(/mode: MODES\.FREE/.test(code) && !/modeOf\(/.test(code) && !/MODES\.(GUIDED|FAINT)/.test(code),
   'وتمرينُ الكلمة صندوقٌ فارغ (`MODES.FREE` — الشكلُ لا الأثر)، ولا درجةَ خفوتٍ تُقحَم');
 ok(/refGlyph\(ref/.test(code),

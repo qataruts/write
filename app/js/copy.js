@@ -45,6 +45,9 @@ import * as audio from './audio.js';
 import { WORDS, SPOKEN_WORDS, markInfo } from './curriculum.js';
 import { WORD_PATHS, MARK_PATHS } from './word_paths.js';
 import { penSurface, refGlyph, MODES, FREE } from './pen.js';
+// **وضعُ الدعم — شاشةُ اكتساب** (جلسة د): سماحةٌ موسَّعة في أوّل لقاءٍ بالكلمة،
+// **ووسمُ العون يمضي إلى القياس** فلا يُحتسب الملقَّنُ إتقاناً.
+import { easeFor, demoPace } from './support.js';
 // **تعليمةُ الدرجة الحرّة من `fade.js` بنصّها المسجَّل** — لا نصَّ يُؤلَّف بلا صوت
 import { SAY as FADE_SAY } from './fade.js';
 import {
@@ -282,11 +285,17 @@ export function renderNode(node) {
     }
 
     hint.textContent = unit.space ? SAY.space : step.say;
+    // **عونُ وضع الدعم يُقرَّر مرّةً هنا** (جلسة د): السماحةُ ووسمُ عونها من قرارٍ
+    // واحد، وإذنُه أوّلُ لقاءٍ بالمهارة وحدَه — ومطفأً تعود سماحةُ المسار كما هي.
+    const aid = easeFor(unit.ref.tolerance,
+      step.kind ? progress.skillBox(unit.text, progress.WORD_FORM, step.kind) : 0);
+    state.aided = aid.aided;
     const surface = penSurface({
       ref: unit.ref,
       mode: step.mode,
       // **سماحةُ الكلمة من مسارها** — مقياسُ حروفها فيها، لا سماحةُ حرفٍ يملأ صندوقه
-      tolerance: unit.ref.tolerance,
+      tolerance: aid.tolerance,
+      pace: demoPace(),
       // **ومسطرةُ الكرّاسة سطرُ الكلمة نفسُه** — من الخيال المُشكَّل لا من زينة
       baseline: unit.ref.line,
       label: `لوحُ نسخ: ${unit.text}`,
@@ -328,7 +337,8 @@ export function renderNode(node) {
    */
   function score(step, unit, clean) {
     if (step.kind === progress.KINDS.COPY) {
-      progress.recordAttempt(unit.text, progress.WORD_FORM, progress.KINDS.COPY, clean);
+      progress.recordAttempt(unit.text, progress.WORD_FORM, progress.KINDS.COPY, clean,
+        progress.dayNumber(), state.aided);
     }
   }
 

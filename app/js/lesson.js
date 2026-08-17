@@ -37,6 +37,9 @@ import { starsForReview } from './progress.js';
 import * as audio from './audio.js';
 import { pathOf, PATHS, LETTERS, DIGITS, VARIANTS, FORMS, shapeOf } from './curriculum.js';
 import { penSurface, refGlyph, MODES, SIZE_TEXT } from './pen.js';
+// **وضعُ الدعم — شاشةُ اكتساب** (جلسة د): تقرأ الإذنَ بالسماحة الموسَّعة (`easeFor`)
+// ومعاملَ بطء العرض، **وتمرّر وسمَ العون إلى القياس** فلا يُحتسب الملقَّنُ إتقاناً.
+import { easeFor, demoPace } from './support.js';
 import {
   h, icon, go, arNum, starsRow, topbar, brandMark, mascot, cheer, faceEl,
   nodeTitle, traceFace, letterName, formTitle,
@@ -326,9 +329,19 @@ export function renderNode(node) {
     hint.textContent = step.say;
     paintFamily(unit);
 
+    // **عونُ وضع الدعم يُقرَّر مرّةً هنا** (جلسة د): السماحةُ التي يُكتب بها ووسمُ
+    // عونها من قرارٍ واحد — فلا يفترق ما وُسِّع عمّا وُسِم. وإذنُه أوّلُ لقاءٍ
+    // بالمهارة وحدَه (صندوقُ ليتنر صفر)، ومطفأً يعود `tolerance` إلى `undefined`
+    // كما كان حرفاً قبل هذه الجلسة.
+    const aid = easeFor(undefined,
+      step.kind ? progress.skillBox(unit.letter, unit.form, step.kind) : 0);
+    state.aided = aid.aided;
+
     const surface = penSurface({
       ref: unit.ref,
       mode: step.mode,
+      tolerance: aid.tolerance,
+      pace: demoPace(),
       label: `لوحُ كتابة: ${letterName(unit.letter)}${unit.form === FORMS.ISOLATED ? '' : ` ${formTitle(unit.form)}`}`,
       // **كلُّ خطأٍ يُسجَّل باسمه** (`METHOD.md §٦`) — ووحدتُه الحرفُ نفسُه، فتقرأ
       // لوحةُ وليّ الأمر «يبدأ الميمَ من أسفل» لا رقماً مبهماً.
@@ -383,9 +396,11 @@ export function renderNode(node) {
    */
   function score(step, unit, clean) {
     if (step.kind === progress.KINDS.FREE) {
-      progress.recordAttempt(unit.letter, unit.form, progress.KINDS.FREE, clean);
+      progress.recordAttempt(unit.letter, unit.form, progress.KINDS.FREE, clean,
+        progress.dayNumber(), state.aided);
     } else if (step.kind === progress.KINDS.TRACE) {
-      progress.recordAttempt(unit.letter, unit.form, progress.KINDS.TRACE, clean);
+      progress.recordAttempt(unit.letter, unit.form, progress.KINDS.TRACE, clean,
+        progress.dayNumber(), state.aided);
     }
   }
 

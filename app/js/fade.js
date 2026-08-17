@@ -29,6 +29,9 @@ import * as audio from './audio.js';
 import { WORDS, SPOKEN_WORDS } from './curriculum.js';
 import { WORD_PATHS } from './word_paths.js';
 import { penSurface, partsOf, MODES } from './pen.js';
+// **وضعُ الدعم — شاشةُ اكتساب** (جلسة د): سماحةٌ موسَّعة في أوّل لقاءٍ بالمهارة،
+// **ووسمُ العون يمضي إلى القياس** فلا يُحتسب الملقَّنُ إتقاناً.
+import { easeFor, demoPace } from './support.js';
 import {
   h, fill, icon, go, arNum, starsRow, topbar, brandMark, mascot, cheer, faceEl,
   nodeTitle, traceFace,
@@ -197,12 +200,19 @@ export function renderNode(node) {
     state.stepFaults = 0;
 
     hint.textContent = sayOf(levelOf(unit.text));
+    // **عونُ وضع الدعم يُقرَّر مرّةً هنا** (جلسة د): وصندوقُه صندوقُ النوع الذي
+    // سيُكتب (نسخاً دون العري، وإملاءً عنده) — فالإذنُ أوّلُ لقاءٍ بالمهارة وحدَه.
+    const aid = easeFor(unit.ref.tolerance,
+      progress.skillBox(unit.text, progress.WORD_FORM,
+        level >= VEIL_STEPS ? progress.KINDS.DICTATE : progress.KINDS.COPY));
+    state.aided = aid.aided;
     const surface = penSurface({
       ref: unit.ref,
       mode: modeOf(level),
       veil: veilOf(unit.ref, level),
       // **سماحةُ الكلمة ومسطرتُها من مسارها** — كما في محطة النسخ سواءً
-      tolerance: unit.ref.tolerance,
+      tolerance: aid.tolerance,
+      pace: demoPace(),
       baseline: unit.ref.line,
       label: `لوحُ إملاء: ${unit.text}`,
       onFault: (fault) => {
@@ -232,9 +242,11 @@ export function renderNode(node) {
    */
   function score(unit, level, clean) {
     if (level >= VEIL_STEPS) {
-      progress.recordAttempt(unit.text, progress.WORD_FORM, progress.KINDS.DICTATE, clean);
+      progress.recordAttempt(unit.text, progress.WORD_FORM, progress.KINDS.DICTATE, clean,
+        progress.dayNumber(), state.aided);
     } else {
-      progress.recordAttempt(unit.text, progress.WORD_FORM, progress.KINDS.COPY, clean);
+      progress.recordAttempt(unit.text, progress.WORD_FORM, progress.KINDS.COPY, clean,
+        progress.dayNumber(), state.aided);
     }
   }
 

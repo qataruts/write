@@ -1110,6 +1110,26 @@ button {
   }
 }
 
+/* ————— **وضعُ الدعم: الهدوءُ الحسّيّ** (`app/js/support.js`، جلسة د) —————
+   **عينُ ما يفعله تفضيلُ «خفض الحركة» في النظام** — لا قاعدةَ ثانيةً تُخترع: من لم
+   يعلن التفضيلَ في جهازه يعلنه وليُّه بمفتاحٍ في اللوحة، فيصبغ `main.js` صنفَ `calm`
+   على الجذر. */
+.calm *, .calm *::before, .calm *::after {
+  animation-duration: .001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: .001ms !important;
+}
+
+/* **ومؤشّرُ الوضع في الشريط اللاصق** (بندُ العقد ٦): يعرفه البالغ ولا يَسِمُ الطفل —
+   **بلا كلمةِ بطءٍ ولا رمزِه ولا محرفٍ يُرسَم**، ولونُه لونُ لوح التصميم لا لونَ
+   إنذار. **ولا يزحزح تخطيطاً**: ظلٌّ داخليّ لا حدٌّ يزيد ارتفاعَ الشريط ولا حشوٌ
+   يدفع ما تحته — فالشاشةُ في الحالين واحدةٌ بالبكسل.
+   وموضعُه الشريطُ اللاصق لا أعلى الصفحة: العائمُ **يُبتلَع في الجوّال** ويُرى في
+   الحاسوب (بلاغُ ميدان المالك عند اقرأ) — وهذا يمشي مع الطفل في كل شاشة. */
+.support-on .topbar {
+  box-shadow: inset 0 -3px 0 color-mix(in srgb, var(--accent-skills) 60%, transparent);
+}
+
 @media (max-width: 26rem) {
   :root { --node-size: 4.6rem; }
   .station { padding: .85rem .7rem 1rem; }
@@ -1362,10 +1382,13 @@ button {
   user-select: none;
 }
 
+/* **وسُمكُ الخطّ مقبضُ راحةٍ في وضع الدعم** (`--ink-weight`، جلسة د): يغلظ النموذجُ
+   وحبرُ الطفل معاً فيُرى أوضح — **ولا يمسّ ممرَّ السماحة** (`.pen-fence` عرضُه من
+   `trial.tolerance` بيد المحرّك) ولا حكماً من أحكامه. ومطفأً `1` فلا فرقَ ببايت. */
 .pen-stroke {
   fill: none;
   stroke: var(--ink);
-  stroke-width: 26;
+  stroke-width: calc(26 * var(--ink-weight, 1));
   stroke-linecap: round;
   stroke-linejoin: round;
   opacity: .18;
@@ -1397,7 +1420,7 @@ button {
 .pen-line {
   fill: none;
   stroke: var(--pen-accent);
-  stroke-width: 22;
+  stroke-width: calc(22 * var(--ink-weight, 1));
   stroke-linecap: round;
   stroke-linejoin: round;
   transition: opacity .5s ease;
@@ -1492,6 +1515,12 @@ button {
   .pen-box--hint .pen-arrow { animation: none; opacity: .95; }
   .pen-stroke--trail { transition: none; }
 }
+
+/* والهدوءُ الحسّيّ يفعل باللوح ما يفعله التفضيل — ووميضُ البداية يبقى ظاهراً ساكناً:
+   إرشادُ الاتجاه مادّةُ التعليم لا زينةً تُطفأ. */
+.calm .pen-box--hint .pen-start,
+.calm .pen-box--hint .pen-arrow { animation: none; opacity: .95; }
+.calm .pen-stroke--trail { transition: none; }
 
 /* ————— شاشةُ التهيئة الحركية (`app/js/warmup.js` · METHOD §٤ المرحلة ١) —————
    شاشةٌ بفعلٍ رئيسٍ واحد: **اللوح**. فما حوله يتنحّى — عنوانٌ صغير، ونقاطُ الأشكال،

@@ -39,6 +39,9 @@ import * as audio from './audio.js';
 import { SENTENCES, SPOKEN_SENTENCES } from './curriculum.js';
 import { WORD_PATHS } from './word_paths.js';
 import { penSurface, MODES } from './pen.js';
+// **وضعُ الدعم — شاشةُ اكتساب** (جلسة د): سماحةٌ موسَّعة في أوّل لقاءٍ بالمهارة،
+// **ووسمُ العون يمضي إلى القياس** فلا يُحتسب الملقَّنُ إتقاناً.
+import { easeFor, demoPace } from './support.js';
 import {
   h, fill, icon, go, arNum, starsRow, topbar, brandMark, mascot, cheer, faceEl,
   nodeTitle, traceFace,
@@ -175,11 +178,17 @@ export function renderNode(node) {
     state.stepFaults = 0;
 
     hint.textContent = step.say;
+    // **عونُ وضع الدعم يُقرَّر مرّةً هنا** (جلسة د): السماحةُ ووسمُ عونها من قرارٍ
+    // واحد، وإذنُه أوّلُ لقاءٍ بالمهارة وحدَه — ومطفأً تعود سماحةُ المسار كما هي.
+    const aid = easeFor(unit.ref.tolerance,
+      step.kind ? progress.skillBox(unit.text, progress.SENTENCE_FORM, step.kind) : 0);
+    state.aided = aid.aided;
     const surface = penSurface({
       ref: unit.ref,
       mode: step.mode,
       // **سماحةُ الجملة من مسارها** — مقياسُ حروفها فيها (`METHOD.md §٣.٥`)
-      tolerance: unit.ref.tolerance,
+      tolerance: aid.tolerance,
+      pace: demoPace(),
       // **ومسطرةُ الكرّاسة سطرُ الجملة نفسُه** — يبقى في الإملاء ليعرف أين يجلس سطرُه
       baseline: unit.ref.line,
       label: `لوحُ جملة: ${unit.text}`,
@@ -212,9 +221,11 @@ export function renderNode(node) {
    */
   function score(step, unit, clean) {
     if (step.kind === progress.KINDS.COPY) {
-      progress.recordAttempt(unit.text, progress.SENTENCE_FORM, progress.KINDS.COPY, clean);
+      progress.recordAttempt(unit.text, progress.SENTENCE_FORM, progress.KINDS.COPY, clean,
+        progress.dayNumber(), state.aided);
     } else if (step.kind === progress.KINDS.DICTATE) {
-      progress.recordAttempt(unit.text, progress.SENTENCE_FORM, progress.KINDS.DICTATE, clean);
+      progress.recordAttempt(unit.text, progress.SENTENCE_FORM, progress.KINDS.DICTATE, clean,
+        progress.dayNumber(), state.aided);
     }
   }
 

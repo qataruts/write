@@ -1128,7 +1128,7 @@ export function refGlyph(ref, className = 'ref-glyph') {
 export function penSurface(config) {
   const {
     ref, mode = MODES.GUIDED, tolerance, bounds = false, baseline = null, veil = 0,
-    onFault, onPart, onDone, onTry, onStuck, label = 'لوحُ الكتابة',
+    onFault, onPart, onDone, onTry, onStuck, label = 'لوحُ الكتابة', pace = 1,
   } = config;
 
   const [bw, bh] = boxOf(ref);
@@ -1453,7 +1453,12 @@ export function penSurface(config) {
   svg.addEventListener('pointerdown', onDown);
 
   // ————— العرضُ المتحرك: «شاهِد» (`METHOD.md §٥.١`) —————
-  const SPEED = 900;          // وحدةَ شبكةٍ في الثانية — سرعةُ يدٍ تكتب لا تمرّ
+  //
+  // **و`pace` معاملُ عرضٍ لا معاملُ حكم** (وضعُ الدعم، جلسة د): يبطّئ ما **تراه** عينُ
+  // الطفل ولا يمسّ حرفاً من شروط المسار الأربعة ولا حكمَ الشكل — فالمقبضُ يبلغ هذا
+  // الملفَّ **بمعامله المعلَن** ولا تعرف هذه الوحدةُ `support.js` أصلاً (يجرده
+  // `tools/test_support.mjs` نصّاً على المصدر). و`1` سرعتُه القائمة حرفاً.
+  const SPEED = 900 * (pace > 0 ? pace : 1);  // وحدةَ شبكةٍ في الثانية — سرعةُ يدٍ تكتب لا تمرّ
   let playing = 0;
 
   /** يرسم النموذجَ حرفاً كما يُكتب: جزءاً جزءاً، من المسار المرجعيّ نفسِه. */
