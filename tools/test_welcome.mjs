@@ -60,6 +60,10 @@ const support = await import(new URL('support.js', JS));
 
 // **الاستثناءان المعلَنان** — رابطان يُشار إليهما ولا يُجلبان (انظر ٢ أعلاه).
 const FAMILY = 'https://learn.mishkat.qa/';
+// **والرابطُ الخارجيّ الثاني معلَنٌ كأخيه** (بلاغ «بابٌ إلى حقيبة المعلم»، ١٧ أغسطس
+// ٢٠٢٦): حقيبةُ المعلّم العائلية — `<a>` يُفتَح إن نُقر **ولا يُجلَب**، فلا يُنقض
+// عهدُ «صفرِ موردٍ خارجيّ». وما زاد على هذين يحمرّ.
+const TEACHER_KIT = 'https://learn.mishkat.qa/teacher.html';
 const SITE = 'write.mishkat.qa';
 const MAIL = 'info@mishkat.qa';
 
@@ -90,9 +94,9 @@ for (const [name, text] of Object.entries(PAGES)) {
     .map((m) => m[1])
     .filter((u) => !u.startsWith('mailto:') && !u.startsWith('#'));
   const external = fetched.filter((u) => /^(https?:)?\/\//.test(u));
-  const declared = external.filter((u) => u === FAMILY);
+  const declared = external.filter((u) => u === FAMILY || u === TEACHER_KIT);
   ok(external.length === declared.length,
-    `${name}: لا رابطَ خارجيّ سوى الاستثناء المعلَن (${external.length ? external.join('، ') : 'لا شيء'})`);
+    `${name}: لا رابطَ خارجيّ سوى الاستثناءين المعلَنين (${external.length ? external.join('، ') : 'لا شيء'})`);
 
   const missing = fetched.filter((u) => !/^(https?:)?\/\//.test(u)
     && !existsSync(new URL(u.split('?')[0], WELCOME)));
@@ -338,6 +342,23 @@ ok(absent.length === 0,
 //
 // **وفقرةُ الحدّ تُقابَل بمصدرها** (`support.PROMISE`) لا بعينٍ تقرأ: أمسك حارسُ اقرأ
 // سقوطَ «ولا يَعِد بحجم أثر» ساعةَ نُقل النصّ — **فالحدُّ يُحرَس كالوعد**.
+
+console.log('\n٦ج. بابُ حقيبة المعلم من صدر الدليل');
+
+// **بلاغ `teacher-kit-link-and-whatsapp-form`**: معلّمٌ يبلغ دليلَنا لا يعرف أنّ
+// للعائلة حقيبةً — فالإحالةُ في **صدر** الدليل (لا في ذيله) وتدخل جردَ التغطية.
+// **وإحالةٌ لا نسخ**: الحقيبةُ عامّةٌ ودليلُنا خاصٌّ أعمق، والنسخُ يفترق نصفاه.
+{
+  const guide = PAGES['guide.html'];
+  const head = guide.slice(0, guide.indexOf('<section'));
+  ok(/learn\.mishkat\.qa\/teacher\.html/.test(head),
+    'إحالةُ حقيبة المعلم في **صدر** الدليل — قبل أول قسم');
+  ok(/حقيبةُ المعلّم/.test(head) && /للعائلة/.test(head),
+    'وتقول إنها حقيبةٌ **للعائلة** لا صفحةٌ ثانية لنا');
+  const kit = head.match(/<p class="w-lede w-kit">[\s\S]*?<\/p>/)?.[0] || '';
+  ok(kit.length < 700 && !/محطات|مقابض|أزرار/.test(kit),
+    'وهي **إحالةٌ لا نسخ** — لا تُعيد ما في الحقيبة ولا ما في دليلنا');
+}
 
 console.log('\n٧أ. شريطُ الإنصاف تحت الصدر مباشرة');
 
