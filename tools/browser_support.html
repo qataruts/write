@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>وضعُ الدعم على الشاشة — «اُكْتُبْ» جلسة د</title>
+<!--
+  **ما لا يقوله `test_support.mjs`** — لأنّه يقرأ الشيفرة ولا يرى بكسلاً:
+
+    · أنّ **المؤشّرَ يقع على الشاشة نفسِها**: خطٌّ في الشريط اللاصق يظهر بالاشتغال
+      ويغيب بالإطفاء، **ولا كلمةَ تُزاد في نصّ الشاشة** بين الحالين.
+    · وأنّه **لا يزحزح تخطيطاً** مقيساً بالبكسل: ارتفاعُ الشريط وموضعُ ما تحته
+      هما هما في الحالين — لا حرفاً في تعليقٍ بل رقماً من `getBoundingClientRect`.
+    · وأنّ **مطفأً لا فرقَ ببايت** يقع فعلاً في المتصفّح: لا صنفَ على الجذر، ولا
+      خاصّيةَ `--ink-weight` مكتوبة، وسُمكُ النموذج كما هو.
+    · وأنّ **المقابضَ تبلغ اللوحَ**: الخطُّ يغلظ مقيساً بـ`getComputedStyle`،
+      والهدوءُ يطفئ الانتقالات.
+    · 🔒 وأنّ الدورة كلَّها **بصفر طلباتٍ شبكية** — الوضعُ مقاديرُ في الجهاز.
+-->
+<style>
+  body { font: 15px/1.7 system-ui, sans-serif; margin: 0; background: #111; color: #eee; }
+  #log { padding: 1rem; white-space: pre-wrap; }
+  iframe { width: 460px; height: 900px; border: 0; position: fixed; inset-inline-end: 0; top: 0; }
+  .ok { color: #7ec97e; } .bad { color: #e08a80; }
+</style>
+</head>
+<body>
+<div id="log"></div>
+<iframe id="app" src="/"></iframe>
+<script type="module">
+const results = [];
+const log = document.getElementById('log');
+const frame = document.getElementById('app');
+
+function ok(cond, msg) {
+  results.push({ ok: !!cond, msg });
+  const line = document.createElement('div');
+  line.className = cond ? 'ok' : 'bad';
+  line.textContent = (cond ? '✓ ' : '✗ ') + msg;
+  log.append(line);
+}
+
+const errors = [];
+window.addEventListener('error', (e) => errors.push(String(e.message)));
+window.addEventListener('unhandledrejection', (e) => errors.push(String(e.reason)));
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const send = () => fetch('/result', {
+  method: 'POST', body: JSON.stringify({ from: 'write', rows: results }),
+});
+
+// عدّادُ أبواب الخروج من الجهاز — الوضعُ مقاديرُ لا يخرج منها شيء
+const netCalls = [];
+function watchNetwork(win) {
+  const realFetch = win.fetch;
+  win.fetch = (...args) => { netCalls.push(String(args[0])); return realFetch.apply(win, args); };
+  const RealXHR = win.XMLHttpRequest;
+  win.XMLHttpRequest = class extends RealXHR {
+    open(method, url, ...rest) { netCalls.push(String(url)); return super.open(method, url, ...rest); }
+  };
+}
+
+const reload = () => new Promise((resolve) => {
+  frame.addEventListener('load', () => resolve(), { once: true });
+  frame.contentWindow.location.reload();
+});
+
+(async () => {
+  try {
+    await new Promise((r) => (frame.contentWindow?.document.readyState === 'complete'
+      ? r() : frame.addEventListener('load', r, { once: true })));
+    await wait(500);
+    let win = frame.contentWindow;
+    let doc = win.document;
+    watchNetwork(win);
+
+    const { MARK, KNOBS } = await import('/js/support.js');
+    const { WARMUPS } = await import('/js/warmups.js');
+    const part = Object.keys(WARMUPS)[0];
+    const STORE = 'uktub.support.v1';
+
+    const topbarOf = () => doc.querySelector('.topbar');
+    const measure = () => {
+      const bar = topbarOf();
+      const rect = bar.getBoundingClientRect();
+      const model = doc.querySelector('.pen-stroke');
+      return {
+        height: Math.round(rect.height * 100) / 100,
+        below: Math.round((doc.querySelector('main')?.getBoundingClientRect().top ?? 0) * 100) / 100,
+        shadow: win.getComputedStyle(bar).boxShadow,
+        title: bar.getAttribute('title'),
+        text: bar.textContent.replace(/\s+/g, ' ').trim(),
+        mark: doc.documentElement.classList.contains('support-on'),
+        calm: doc.documentElement.classList.contains('calm'),
+        ink: doc.documentElement.style.getPropertyValue('--ink-weight'),
+        stroke: model ? win.getComputedStyle(model).strokeWidth : null,
+        trailTransition: model ? win.getComputedStyle(
+          doc.querySelector('.pen-stroke--trail') || model).transitionDuration : null,
+      };
+    };
+
+    // ————— ١) مطفأً: لا فرقَ ببايت على الشاشة —————
+    win.localStorage.removeItem(STORE);
+    await reload();
+    win = frame.contentWindow; doc = win.document;
+    watchNetwork(win);
+    win.location.hash = `#/warmup/${encodeURIComponent(part)}`;
+    await wait(600);
+
+    ok(Boolean(doc.querySelector('.pen-surface')), `لوحُ محطة التهيئة «${part}» مفتوح`);
+    const off = measure();
+    ok(off.mark === false && off.calm === false,
+      'ومطفأً: لا صنفَ `support-on` ولا `calm` على الجذر');
+    ok(off.ink === '', 'ولا خاصّيةَ `--ink-weight` مكتوبةٌ على الجذر ألبتّة');
+    ok(!off.title, 'ولا سمةَ `title` على الشريط');
+    ok(off.shadow === 'none' || !/inset/.test(off.shadow),
+      `ولا ظلَّ مؤشّرٍ في الشريط (${off.shadow})`);
+
+    // ————— ٢) مشتغلاً: المؤشّرُ يقع، ولا يزحزح بكسلاً —————
+    win.localStorage.setItem(STORE, JSON.stringify({ on: true }));
+    await reload();
+    win = frame.contentWindow; doc = win.document;
+    watchNetwork(win);
+    win.location.hash = `#/warmup/${encodeURIComponent(part)}`;
+    await wait(600);
+    const on = measure();
+
+    ok(on.mark === true, '**والمؤشّرُ يقع على الشاشة**: صنفُ `support-on` على الجذر');
+    ok(/inset/.test(on.shadow), `وخطُّه ظلٌّ داخليّ في الشريط اللاصق (${on.shadow})`);
+    ok(on.title === MARK.label, `واسمُه للبالغ في \`title\` وحدَه («${on.title}»)`);
+    ok(on.text === off.text,
+      `و**لا كلمةَ تُزاد في نصّ الشاشة** — الشريطُ هو هو حرفاً («${on.text || '—'}»)`);
+    ok(!/بطء|بطيء|🐢/.test(doc.body.textContent),
+      'ولا كلمةَ بطءٍ ولا رمزَه في الشاشة كلِّها — العلامةُ لا تَسِمُ الطفل');
+
+    ok(on.height === off.height,
+      `و**لا يزحزح تخطيطاً**: ارتفاعُ الشريط ${on.height}px في الحالين`);
+    ok(on.below === off.below,
+      `وما تحته لم يتحرّك بكسلاً واحداً (${on.below}px)`);
+
+    // ————— ٣) والمقابضُ تبلغ اللوحَ —————
+    ok(on.calm === true, 'والهدوءُ الحسّي صنفٌ على الجذر');
+    // (و`.calm *` تكتب `.001ms !important` كما يكتبها تفضيلُ النظام — فالمقيسُ صفرٌ عملاً)
+    ok(parseFloat(on.trailTransition) < parseFloat(off.trailTransition)
+      && parseFloat(on.trailTransition) <= 0.001,
+      `وانتقالُ أثر القلم مطفأٌ به (${off.trailTransition} ← ${on.trailTransition})`);
+    ok(on.ink === String(KNOBS.ink.supported),
+      `وسُمكُ الخطّ مكتوبٌ على الجذر (${on.ink})`);
+    // (والمتصفّحُ يعيد `calc(26px)` بلا حَلٍّ لسِمة SVG — فيُنتزَع رقمُها)
+    const px = (v) => Number((String(v).match(/-?[\d.]+/) || [NaN])[0]);
+    ok(px(on.stroke) > px(off.stroke),
+      `والنموذجُ أغلظ مقيساً: ${off.stroke} ← ${on.stroke}`);
+    const ratio = px(on.stroke) / px(off.stroke);
+    ok(Math.abs(ratio - KNOBS.ink.supported) < 0.01,
+      `وبنسبة مقبضه بعينها (${ratio.toFixed(2)}× والمعلَن ${KNOBS.ink.supported})`);
+
+    // ————— ٤) والإطفاءُ يردّ الشاشةَ كما كانت —————
+    win.localStorage.setItem(STORE, JSON.stringify({ on: false }));
+    await reload();
+    win = frame.contentWindow; doc = win.document;
+    watchNetwork(win);
+    win.location.hash = `#/warmup/${encodeURIComponent(part)}`;
+    await wait(600);
+    const back = measure();
+    ok(back.mark === false && back.ink === '' && back.stroke === off.stroke && !back.title,
+      `والإطفاءُ يردّ الشاشةَ كما كانت حرفاً (سُمكٌ ${back.stroke} · بلا صنفٍ ولا سمة)`);
+
+    win.localStorage.removeItem(STORE);
+    ok(netCalls.length === 0,
+      `ودورةُ الوضع كلُّها بصفر طلباتٍ شبكية (${netCalls.length})`);
+    ok(errors.length === 0, `ولا خطأ جافاسكربت واحد${errors.length ? ` — ${errors[0]}` : ''}`);
+  } catch (e) {
+    ok(false, `انهار الفحص: ${e && e.stack ? e.stack.split('\n')[0] : e}`);
+  }
+  await send();
+})();
+</script>
+</body>
+</html>
