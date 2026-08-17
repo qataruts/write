@@ -93,6 +93,25 @@ async function open(url, w, h) {
       }
     }
 
+    // ————— ١ب) مرساةُ شريط الإنصاف لا تختفي تحت الشريط اللاصق —————
+    //
+    // **درسُ احسب** (١٧ أغسطس ٢٠٢٦): رابطٌ يعمل ولا يبدو أنّه عمل — يستقرّ هدفُه
+    // تحت `.w-top` اللاصق فتُبتلَع ترويسةُ القسم ويظنّ القارئُ أنّ شيئاً لم يقع.
+    // **والقياسُ في متصفّحٍ لا على القرص**: ارتفاعُ الشريط يتبدّل بالعرض (روابطُه
+    // تلتفّ)، فيُقاس على المقاسات الخمسة ويُشترط أن يعلوه هامشُ المرساة.
+    for (const [dname, w, h] of DEVICES) {
+      const { frame, win, doc } = await open('welcome/', w, h);
+      const bar = doc.querySelector('.w-top').getBoundingClientRect().height;
+      const target = doc.getElementById('pace');
+      const margin = parseFloat(win.getComputedStyle(target).scrollMarginTop);
+      ok(margin >= bar, `${dname}: هامشُ مرساة #pace ${Math.round(margin)}px `
+        + `فوق الشريط اللاصق ${Math.round(bar)}px — فترويسةُ القسم تُرى بعد النقر`);
+      const link = doc.querySelector('.w-band a[href="#pace"]');
+      ok(Boolean(link) && link.getBoundingClientRect().height >= 24,
+        `${dname}: ورابطُ الشريط قائمٌ ملموس`);
+      frame.remove();
+    }
+
     // ————— ٢) وما جُلب فعلاً: من أصلنا وحدَه، وبلا جافاسكربت —————
     for (const [pname, url] of PAGES) {
       const { frame, win, doc } = await open(url, 820, 1180);
