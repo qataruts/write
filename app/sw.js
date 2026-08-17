@@ -127,7 +127,12 @@
 //   `js/pen.js`): شولةٌ بلغت ٧٥٪ باتجاهها وترتيبها تُقبَل — فالكافُ تُعبَر بيد
 //   الخامسة. وحدةُ حكمٍ تبدّلت تحت اسمها، وبلا الرفعة يبقى جهازٌ مثبَّتٌ يردّ
 //   شولةَ طفلته كما كان.
-const VERSION = 'v31';
+// v32: **بطاقةُ أوّل تشغيل** (بلاغ «ثبّت أوّلاً ثم امتحن»، جلسة ط): **ملفٌّ جديدٌ في
+//   القشرة** (`js/firstrun.js`) — ومعه `js/main.js` (موضعُها في صدر الخريطة) و
+//   `js/install.js` (حالُ التثبيت تُصدَّر فتُقرأ من موضعٍ واحد) و`js/progress.js`
+//   (`untouched`) و`css/app.css`. وبلا الرفعة يبقى جهازٌ مثبَّتٌ على مخزونه بلا
+//   البطاقة، **وهي عينُ ما جاء البلاغُ لأجله**: والدٌ يفتح فيمتحن في الباب الخطأ.
+const VERSION = 'v32';
 const SHELL_CACHE = `uktub-shell-${VERSION}`;
 const AUDIO_CACHE = 'uktub-audio';          // ثابتٌ عمداً — لا يحمل VERSION
 const KEEP = [SHELL_CACHE, AUDIO_CACHE];
@@ -151,6 +156,7 @@ const SHELL = [
   'js/curriculum.js',
   'js/fade.js',
   'js/feedback.js',
+  'js/firstrun.js',
   'js/gate.js',
   'js/install.js',
   'js/lesson.js',

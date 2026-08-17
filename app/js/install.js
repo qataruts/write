@@ -48,16 +48,28 @@ export function installState({ standalone, ua, touchPoints, promptReady, memo, n
   return safari ? 'ios' : 'ios-other';
 }
 
+/**
+ * **أمثبَّتٌ هو؟** — كشفُ حال التثبيت **في موضعٍ واحد** يقرؤه الشريطُ وغيرُه.
+ *
+ * وعلّةُ تصديرها بلاغُ «ثبّت أوّلاً ثم امتحن» (١٧ أغسطس ٢٠٢٦): بطاقةُ أوّل تشغيل
+ * (`firstrun.js`) تحتاج الحالَ نفسَه، **وكشفٌ ثانٍ يفترق عن هذا** — سطرٌ يقرأ
+ * `standalone` وحدَه دون `navigator.standalone` مثلاً — يجعل الشريطَ والبطاقةَ
+ * يقولان لجهازٍ واحدٍ قولين. فالمصدرُ واحد، ويجرده حارسٌ نصّيّ.
+ *
+ * (وهي **قراءةٌ حيّةٌ لا لقطةٌ عند التحميل**: مَن أضاف التطبيقَ إلى شاشته ثم فتحه من
+ * أيقونته فتحَ نافذةً أخرى تُسأل من جديد.)
+ */
+export const installed = () => matchMedia('(display-mode: standalone)').matches
+  || navigator.standalone === true;
+
 const memo = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch { return {}; } };
 const remember = (patch) => {
   try { localStorage.setItem(KEY, JSON.stringify({ ...memo(), ...patch })); } catch { /* تخزينٌ ممتلئ: يظهر الشريط أكثر، ولا يضرّ */ }
 };
 
 function state() {
-  const standalone = matchMedia('(display-mode: standalone)').matches
-    || navigator.standalone === true;
   return installState({
-    standalone,
+    standalone: installed(),
     ua: navigator.userAgent,
     touchPoints: navigator.maxTouchPoints || 0,
     promptReady: Boolean(deferredPrompt),

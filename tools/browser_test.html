@@ -336,6 +336,97 @@ const send = () => fetch('/result', {
       if (node) { /* عقدةُ الخريطة قُرئت للتوثيق لا للنقر */ }
     }
 
+    // ————— ٨ب) بطاقةُ أوّل تشغيل: «ثبّت أوّلاً ثم امتحن» (جلسة ط) —————
+    //
+    // **العطبُ الذي جاءت له**: على iOS للتطبيق المثبَّت مخزنٌ مستقلٌّ عن سفاري، فوالدٌ
+    // يمتحن ابنَه في المتصفّح ثم يثبّت يجد الرحلةَ من أوّلها. **وجدولُ حالاتها مفحوصٌ
+    // نقيّاً في `tools/test_firstrun.mjs`** — والمقيسُ هنا ما لا يقوله node: أنّها
+    // **تُرسَم في صدر الخريطة فعلاً**، وأنّ زرَّها **يبلغ بوابةَ اللوحة الحسابية**،
+    // وأنّ إخفاءها **ينجو من إعادة تحميل**.
+    //
+    // **وحالُ التثبيت تُساق بمدخلها الحقيقيّ**: `navigator.standalone` هو ما يعطينا
+    // إيّاه iOS نفسُه، فيُوضَع على نافذة التطبيق ثم تُعاد رسمةُ الخريطة — ولا كشفَ
+    // ثانياً يُحقَن يفترق عن كشف `install.js`.
+    const reloadApp = async () => {
+      swWin.location.reload();
+      await new Promise((r) => frame.addEventListener('load', r, { once: true }));
+      swWin = frame.contentWindow;
+      swDoc = frame.contentDocument;
+      hookAudio(swWin, APP_DOC);
+      swWin.addEventListener('error', (e) => errors.push(String(e.message)));
+      swWin.addEventListener('unhandledrejection', (e) => errors.push(String(e.reason)));
+      await wait(900);
+    };
+    const card = () => swDoc.querySelector('main.map .firstrun');
+    /** إعادةُ رسم الخريطة بلا إعادة تحميل — فيبقى ما وُضع على النافذة. */
+    const repaint = async () => {
+      swWin.location.hash = '#/x';
+      await wait(250);
+      swWin.location.hash = '#/';
+      await wait(450);
+    };
+
+    swWin.localStorage.clear();          // جهازٌ لم يُفتح فيه التطبيقُ قطّ
+    await reloadApp();
+
+    // (أ) **في المتصفّح غير المثبَّت: دعوةُ التثبيت وحدَها** — جوهرُ البلاغ
+    ok(Boolean(card()), 'بطاقةُ أوّل تشغيل مرسومةٌ على رحلةٍ بكر');
+    ok(card() && swDoc.querySelector('main.map').firstElementChild === card(),
+      'وفي **صدر** الخريطة — أوّلُ ما تقع عليه العين');
+    ok(card() && card().classList.contains('firstrun--install'),
+      'وفي المتصفّح غير المثبَّت: **دعوةُ التثبيت وحدَها**');
+    ok(card() && !card().querySelector('.firstrun-go'),
+      'ولا زرَّ لحاقٍ قبل التثبيت — فقياسٌ هنا لا ينتقل إلى مخزن المثبَّت');
+    ok(!/امتحان/.test(swDoc.querySelector('main.map').textContent),
+      'ولا كلمةَ «امتحان» على شاشة الطفل — البطاقةُ خطابُ بالغٍ بشارته');
+
+    // (ب) **وفي المثبَّت: دعوةُ اللحاق — وزرُّها بوابةُ اللوحة لا الامتحان**
+    Object.defineProperty(swWin.navigator, 'standalone', { value: true, configurable: true });
+    await repaint();
+    ok(card() && card().classList.contains('firstrun--placement'),
+      'وفي التطبيق المثبَّت: دعوةُ اللحاق تحلّ محلَّ دعوة التثبيت');
+    const goBtn = card() && card().querySelector('.firstrun-go');
+    ok(Boolean(goBtn), 'وفيها زرُّها');
+    if (goBtn) {
+      goBtn.click();
+      await wait(700);
+      ok(swWin.location.hash === '#/parent' && Boolean(swDoc.querySelector('.gate .gate-go')),
+        `وزرُّها يفتح **بوابةَ اللوحة الحسابية** لا الامتحانَ مباشرة (${swWin.location.hash})`);
+      ok(!swDoc.querySelector('.screen-card .pen-surface') && !swDoc.body.textContent.includes('اكتب ما تسمع'),
+        'ولا شيءَ من الامتحان مرسومٌ قبل عبورها — فلا يفتحه طفلٌ على نفسه');
+    }
+
+    // (ج) **وتختفي بأوّل نجمةٍ يكسبها الطفل** (نجومُ `?dev=1` تكفي شاهداً)
+    swWin.location.hash = '#/';
+    await wait(500);
+    const fillBtn = [...swDoc.querySelectorAll('.dev-row .btn')]
+      .find((b) => b.textContent.includes('أنجِز الكل بنجمة'));
+    if (fillBtn) {
+      fillBtn.click();
+      await wait(600);
+      ok(!card(), 'وتختفي بأوّل نجمةٍ يكسبها الطفل — رحلةٌ مُسّت لا تُدعى إلى بداية');
+    } else {
+      ok(false, 'لم يُوجَد زرُّ النجوم في أدوات ?dev=1 — لا يُقاس اختفاؤها بالنجمة');
+    }
+
+    // (د) **و«لاحقاً» تُخفيها إلى الأبد** — والمقيسُ نجاتُها من إعادة التحميل
+    swWin.localStorage.clear();
+    await reloadApp();
+    ok(Boolean(card()), 'ومحوُ التقدّم يردّها — فالذي أخفاها كانت النجمةَ لا سواها');
+    const laterBtn = card() && card().querySelector('.firstrun-later');
+    if (laterBtn) {
+      laterBtn.click();
+      await wait(400);
+      ok(!card(), 'و«لاحقاً» تُخفيها في مكانها بلا فراغٍ محجوز');
+      await reloadApp();
+      ok(!card(), '**ولا تعود بعد إعادة التحميل** — إلى الأبد');
+    } else {
+      ok(false, 'لم يُوجَد زرُّ «لاحقاً» — لا يُقاس الإخفاء');
+    }
+
+    swWin.localStorage.clear();          // نُعيد الجهازَ كما وجدناه
+    await reloadApp();
+
     // ————— ٩) وأخيراً: لا خطأ جافاسكربت واحد —————
     swWin.location.hash = '#/';
     await wait(500);

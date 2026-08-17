@@ -14,6 +14,9 @@ import * as audio from './audio.js';
 import * as support from './support.js';
 import * as install from './install.js';
 import * as probe from './probe.js';
+// **بطاقةُ أوّل تشغيل** (بلاغ «ثبّت أوّلاً ثم امتحن»، ١٧ أغسطس ٢٠٢٦): تقف في صدر
+// الخريطة على رحلةٍ بكرٍ وحدَها، وتردّ `null` فيما سواها — فلا فراغَ محجوز.
+import { firstRunCard } from './firstrun.js';
 import { renderReview, releaseReview } from './review.js';
 import { renderGate } from './gate.js';
 import { renderParent, skillsText } from './parent.js';
@@ -80,6 +83,11 @@ function renderMap() {
   );
 
   const main = h('main', { class: 'map' });
+
+  // **وبطاقةُ وليّ الأمر أوّلُ ما في الصدر** — وهي لا تقع إلا على رحلةٍ بكر: لا
+  // مراجعةَ يومئذٍ ولا نجمة، فلا تزاحم درسَ طفلٍ يمشي (ومَن مشى لا يراها أصلاً).
+  const first = firstRunCard(render);
+  if (first) main.append(first);
 
   const review = reviewCard();
   if (review) main.append(review);
