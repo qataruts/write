@@ -24,6 +24,7 @@ const read = (path) => readFileSync(new URL(path, APP), 'utf8');
 
 const pen = await import(new URL('js/pen.js', APP));
 const dev = await import(new URL('js/pendev.js', APP));
+const { PATHS } = await import(new URL('js/paths.js', APP));
 const traces = JSON.parse(readFileSync(new URL('./pen_traces.json', import.meta.url), 'utf8'));
 
 let fails = 0;
@@ -215,7 +216,13 @@ console.log('  (الهوامشُ تُقرأ من الحالات المقبولة
 // من نفسها (§٤ أدناه)، فانتقل الشكلُ إلى ملفّ مولِّد العدّة — والرباطُ باقٍ في
 // موضعه الصحيح: المولِّدُ يكتب المساراتِ والضرباتِ معاً، فلا تحكم عدّةٌ على شكلٍ
 // غير الذي سُجِّلت عليه. وحكمُ المحرّك على **مسارات الحروف** يحرسه `test_paths.mjs`.
-const refOf = (item) => traces.refs[item.ref];
+// **وحالاتُ الميدان تسمّي حرفَها لا شكلاً في الملفّ** (`ch/form`): مسارُها في
+// `app/js/paths.js` — «المسارُ يُسمّى ولا يُنسَخ» كما نصّ المستورِد. وكان هذا
+// السطرُ يقرأ `refs` وحدَها فانفجر بأوّل أثرٍ حقيقيّ وصل (١٧ أغسطس ٢٠٢٦) —
+// **بابٌ مفتوحٌ لم يمرّ به أحدٌ حتى مرّت به يدُ طفلة**.
+const refOf = (item) => (item.ref.includes('/')
+  ? PATHS[item.ref.split('/')[0]]?.[item.ref.split('/')[1]]
+  : traces.refs[item.ref]);
 
 const seen = new Map();
 for (const item of traces.cases) {

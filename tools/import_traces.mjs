@@ -35,11 +35,15 @@ const OLD_WARNING = 'مساراتٌ مصنوعة لا مساراتُ أطفال'
  * حارسٌ دائم لا حكايةٌ تُروى (بلاغُ قياس الرفض الكاذب، ١٧ أغسطس ٢٠٢٦).
  */
 function expectOf(item) {
-  if (item.eye === 'accept') return { accept: true };
-  if (item.eye === 'reject') return { accept: false };
+  // **وبأيّ حَكَمٍ تُقاس؟** بالذي قاسها ساعةَ التقاطها: نمطُ الشاشة الحرّ يُحكَم
+  // بـ`judgeFree` («الشكلُ لا الأثر»)، وما سواه بالحكم الموضعيّ. وكان هذا الحقلُ
+  // ساقطاً فأُعيد أوّلُ أثرٍ حقيقيّ على الحَكَم الخطأ فسقط كلُّه (١٧ أغسطس ٢٠٢٦).
+  const free = item.mode === 'free' ? { free: true } : {};
+  if (item.eye === 'accept') return { ...free, accept: true };
+  if (item.eye === 'reject') return { ...free, accept: false };
   // أثرٌ رُدَّ بشكوى: المنتظَرُ ردُّه بشكواها هي. وأثرٌ قُبل: المنتظَرُ قبولُه.
-  if (item.kind === 'fault') return { accept: false, fault: item.code };
-  return { accept: Boolean(item.accepted) };
+  if (item.kind === 'fault') return { ...free, accept: false, fault: item.code };
+  return { ...free, accept: Boolean(item.accepted) };
 }
 
 /** وصفُ الحالة بعبارةٍ تُقرأ — فالعدّةُ تُقرأ كما تُشغَّل. */
