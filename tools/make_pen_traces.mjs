@@ -16,7 +16,7 @@
 // يفحصها الفحصُ الذاتي إلا شكلاً. فالعدّةُ اليومَ تُثبت **حكمَ المحرّك** سالباً
 // وموجباً، ولا تدّعي أنها عايرت السماحةَ بأطفالٍ حقيقيين.
 
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { prepare, pointAt, TOLERANCE, inkBox, refPoints } from '../app/js/pen.js';
 import { PATHS } from '../app/js/paths.js';
 import { WORD_PATHS } from '../app/js/word_paths.js';
@@ -508,6 +508,64 @@ function build() {
     'ونونٌ **تفيض عن صندوقها** (٢٤٠٪) — تُقال لها «اكْتُبْهُ أَصْغَرْ»',
     warp(noon(rand), about(2.4, 2.4)));
 
+  // ————— شولةُ الكاف: **التخفيفُ لا يفتح بابَ الاتجاه** (ع٣، جلسة ك) —————
+  //
+  // 🔴 **حكمُ المالك (١٧ أغسطس ٢٠٢٦)**: شولةُ الكاف «لم تنضبط» في يد الخامسة، فتُخفَّف
+  // سماحتُها **معلَنةً في بيان الحرف** (`ease` على ضربتها). **وع٣ صفرٌ بحاله** (بندُ
+  // جلسة ك ٢): التخفيفُ في التغطية وحدَها — فيُجرَّب سالباً **على الكاف نفسِها** لا
+  // على غيرها: كافٌ تُكتب من طرفها الآخر، **وشولةٌ قبل جسمها** (نظيرُ النقطة قبل
+  // الجسم في حرفٍ لا نقطةَ له: الجزءُ الملحقُ قبل ما يُلحَق به)، وشولةٌ تُكتب معكوسةً
+  // وجسمُها مصيب. **والثلاثُ تُرَدّ ولو ثُلِّثت سماحةُ جزئها** (`test_pen.mjs §٢د`).
+  const KAF = PATHS['ك'].isolated;
+  const KAF_BOX = inkBox([refPoints(KAF)]);
+  const kafPolys = KAF.strokes.map((s) => prepare(s.points));
+  /** يدٌ تكتب الكافَ كما هي: جسمٌ ثم شولة. */
+  const kaf = (rand) => kafPolys.map((poly) => walk(poly, { jitter: 4, rand }));
+  const kafWarp = (strokes, at) => strokes.map((s) => s.map((p) => at(p).map(round)));
+  const kafCase = (id, expect, note, strokes) => cases.push({
+    id, expect, note, origin: 'synthetic', ref: 'ك/isolated', strokes,
+  });
+
+  // **والتخفيفُ له وجهٌ موجب**: شولةٌ تُكتب في اتجاهها الصحيح ويقصّر عنها الطفلُ
+  // قليلاً — بين أرضيّة الجزء وعتبة الشكل — **تُقبَل بالإعلان وتُرَدّ بنزعه**
+  // (`test_pen.mjs §٢د`). ولولا هذه الحالةُ لَكان التخفيفُ حبراً لا يمسّ يدَ طفل.
+  rand = rng(6060);
+  kafCase('kaf-tail-short-eased', { accept: true, free: true, eased: true },
+    '🏅 **شولةُ الكاف يقصّر عنها الطفلُ قليلاً** (٨٧٪ من طولها) — تُقبَل بسماحة الجزء '
+    + 'المعلَنة في بيان الحرف (حكمُ المالك ١٧ أغسطس ٢٠٢٦: «لم تنضبط في يد الخامسة»)، '
+    + '**وتُرَدّ `short` إن نُزع الإعلان** — فالقبولُ معلَّقٌ بالبيان لا بتسييبٍ عامّ',
+    (() => {
+      const [body, tail] = [walk(kafPolys[0], { jitter: 3, rand }),
+        walk(kafPolys[1], { to: 0.87, jitter: 3, rand })];
+      return [body, tail];
+    })());
+
+  rand = rng(6161);
+  kafCase('kaf-reversed', { accept: false, free: true, direction: true },
+    '**كافٌ تُكتب من طرفها الآخر**: جسمُها وشولتُها كلٌّ في اتجاهٍ معكوس — تُرَدّ '
+    + 'بالحكم الثاني، **ولا يفتحها تخفيفُ سماحة الشولة ولو ثُلِّث**: المرفوضُ فيها '
+    + 'الاتجاهُ لا الدقّة',
+    kaf(rand).map((s) => [...s].reverse()));
+
+  rand = rng(6262);
+  kafCase('kaf-tail-first', { accept: false, free: true, direction: true },
+    'و**شولةٌ قبل جسمها**: الجزءُ الملحقُ يُكتب قبل ما يُلحَق به — وهي النقطةُ قبل '
+    + 'الجسم بعينها في حرفٍ جزؤه الثاني ضربةٌ لا نقطة، **فالترتيبُ مادّةٌ مدرَّسة** '
+    + 'لا تفتحها سماحةُ الجزء',
+    (() => { const [body, tail] = kaf(rand); return [tail, body]; })());
+
+  rand = rng(6363);
+  kafCase('kaf-tail-reversed', { accept: false, free: true, direction: true },
+    'وكافٌ **جسمُها مصيبٌ وشولتُها معكوسة**: تُرَدّ وحدَها — فالتخفيفُ يُغفَر به '
+    + 'نقصانُ الشولة لا **عكسُ حركتها**، وهو أدقُّ ما يُحرَس هنا',
+    (() => { const [body, tail] = kaf(rand); return [body, [...tail].reverse()]; })());
+
+  rand = rng(6464);
+  kafCase('kaf-mirrored', { accept: false, free: true, direction: true },
+    'ومرآةُ الكاف — تملأ صندوقَها وليست كافاً: التوفيقُ إزاحةٌ وتحجيمٌ منتظم '
+    + '**لا انعكاس**',
+    kafWarp(kaf(rand), (p) => [2 * KAF_BOX.cx - p[0], p[1]]));
+
   // ————— طريقُ المحاولة الحرّة: يُمشى لمسةً لمسة (مراجعةُ المدير للجلسة م٣) —————
   //
   // 🔴 **العلّةُ المقيسة**: في محطة التمييز يُكتب **جسمُ الأخت** فيُقبَل — والجسمُ
@@ -617,6 +675,23 @@ function build() {
 
 const text = `${JSON.stringify(build(), null, 1)}\n`;
 
+/**
+ * 🔴 **والميدانيةُ لا يمسّها المولّد — وقد كان يمحوها** (جلسة ك، ١٧ أغسطس ٢٠٢٦):
+ * عهدُ المستورِد أنّ `origin: field` «تأتي من هناك **ولا يعيد المولّدُ توليدَها ولا
+ * يمسّها**» — وكان هذا الملفُّ يكتب حصيلتَه فوق الملفّ كلِّه، **فأوّلُ تشغيلةٍ بعد
+ * التجميد تمحو مساراتَ الطفلة الحقيقية بلا كلمة**. (وقعت في الجلسة نفسِها التي
+ * جمّدتها.) **فما لم يولّده هذا الملفُّ يُقرأ من الملفّ ويُعاد كما هو**، وتحذيرُه
+ * يتبع حالَه.
+ */
+function keepField() {
+  if (!existsSync(OUT)) return [];
+  try {
+    return (JSON.parse(readFileSync(OUT, 'utf8')).cases || []).filter((c) => c.origin === 'field');
+  } catch {
+    return [];
+  }
+}
+
 if (process.argv.includes('--self-test')) {
   let fails = 0;
   const ok = (cond, msg) => { if (!cond) { fails++; console.log('  ✗', msg); } else console.log('  ✓', msg); };
@@ -633,8 +708,14 @@ if (process.argv.includes('--self-test')) {
   // شكلٍ غير الذي سُجّلت عليه.
   ok(JSON.stringify(saved.refs) === JSON.stringify(made.refs),
     `والمساراتُ المرجعية في الملفّ عينُ ما يولّده المولّد (${Object.keys(made.refs).join('، ')})`);
-  ok(saved.cases.every((c) => saved.refs[c.ref]),
-    'ولكلِّ حالةٍ مسارٌ مرجعيّ موجودٌ باسمه');
+  // **والاسمُ وجهان**: المصنوعةُ تسمّي شكلاً في الملفّ نفسِه (محبوسٌ مع ضرباتها)،
+  // **والميدانيةُ تسمّي حرفَها وشكلَ موقعه** (`ك/isolated`) ومسارُه في `app/js/paths.js`
+  // — «المسارُ يُسمّى ولا يُنسَخ» (نصُّ المستورِد)، وهو عينُ ما يقرؤه `test_pen.mjs`.
+  const refFound = (name) => (name.includes('/')
+    ? Boolean(PATHS[name.split('/')[0]]?.[name.split('/')[1]])
+    : Boolean(saved.refs[name]));
+  ok(saved.cases.every((c) => refFound(c.ref)),
+    'ولكلِّ حالةٍ مسارٌ مرجعيّ موجودٌ باسمه — في الملفّ أو في مسارات الحروف');
   ok(saved.cases.every((c) => Array.isArray(c.strokes) && c.strokes.length
       && c.strokes.every((s) => s.length && s.every((p) => p.length === 2 && p.every(Number.isFinite)))),
     'وكلُّ حالةٍ — مصنوعةً كانت أو ميدانية — ضرباتٌ بنقاطٍ صحيحة على الشبكة');
@@ -652,5 +733,13 @@ if (process.argv.includes('--self-test')) {
   process.exit(fails ? 1 : 0);
 }
 
-writeFileSync(OUT, text);
-console.log(`كُتبت ${JSON.parse(text).cases.length} حالةً في tools/pen_traces.json`);
+const kept = keepField();
+const whole = JSON.parse(text);
+whole.cases = [...whole.cases, ...kept];
+if (kept.length) {
+  whole.warning = 'فيها مساراتُ ميدانٍ حقيقية (origin: field) مع المصنوعة — '
+    + 'المصنوعةُ تُثبت حكمَ المحرّك، والميدانيةُ تعاير سماحتَه';
+}
+writeFileSync(OUT, `${JSON.stringify(whole, null, 1)}\n`);
+console.log(`كُتبت ${whole.cases.length} حالةً في tools/pen_traces.json`
+  + `${kept.length ? ` (منها ${kept.length} ميدانيةً أُعيدت كما هي — لا يمسّها المولّد)` : ''}`);

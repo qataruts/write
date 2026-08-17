@@ -104,6 +104,40 @@ export function resolveTolerance(value) {
   return { ...TOLERANCE, ...(value || {}) };
 }
 
+/**
+ * ————— **سماحةُ الجزء الصغير الملحق — صفةٌ في بيانه لا فرعٌ في هذا الملفّ** —————
+ *
+ * 🔴 **حكمُ المالك (١٧ أغسطس ٢٠٢٦)** على صيد أوّل جلسة ميدان (`FIELD_TRIAL §٥`):
+ * طفلةُ الخامسة سقطت **أربع مرّاتٍ متتالية على الجزء الثاني للكاف وحدَه** — شولتِه —
+ * ووافقت عينُ المالك أنّه «لم ينضبط». والحكم: **تُخفَّف سماحةُ هذا الجزء** — لا
+ * تُبسَّط حركتُه ولا يُعاد نمذجتُه.
+ *
+ * **وهي صفةٌ في المسار يقرؤها المحرّك** (`ease` على الضربة): فلا حرفَ مذكورٌ باسمه في
+ * هذا الملفّ، **وما زاد من أجزاءٍ ملحقةٍ غداً يُصنَّف يومَ يُكتب** — تصنيفُه في عدّة
+ * التأليف (`tools/make_paths.py`: ضربةٌ ليست أولى الشكل وطولُها دون نصف أطولِ ضربةٍ
+ * فيه)، ورقمُه من هندسة الشكل لا من يد.
+ *
+ * **والتخفيفُ في التغطية وحدَها**: هي التي رُدَّت بها شولتُها (`short` ×٣)، **وبابُ
+ * الاتجاه لا يُفتَح** — `back` و`lateral` و`start` و`dot` كما هي، فالمعكوسُ والمرآةُ
+ * والجزءُ قبل أخيه تُرَدّ بالسماحة نفسِها التي كانت (يُجرَّب سالباً على الكاف نفسِها
+ * في `tools/test_pen.mjs §٢د`). ولِمَ تُخفَّف التغطيةُ للصغير؟ لأنّ **العتبةَ نسبةٌ
+ * والنقصانَ مطلق**: ما يُغفَر للجسم (١٢٪ من ١٢٧٨ = ١٥٣ وحدة) يصير على الشولة (١٢٪ من
+ * ٤٥٩ = ٥٥ وحدة) أضيقَ من نصف دائرة البداية التي يُقبَل فيها نزولُ الإصبع نفسُه.
+ *
+ * ⚠ **وأرضيّتُه معايرةٌ على الشاهد المجمَّد لا ذوق** (`FIELD_TRIAL §٤`): التخفيفُ
+ * الهندسيُّ كاملاً (٢٫٧٨ ⇒ عتبةُ ٠٫٦٦٦) **يقبل ردَّين وافقتهما عينُ المالك**
+ * (`field-015` تغطيتُها ٨٣٫٧٤٪ و`field-016` ٧٧٫١٠٪) — وأيُّ قبولٍ كاذبٍ **يُبطل
+ * التخفيف** (بندُ جلسة ك ٣). فالأرضيّةُ **أقصى تخفيفٍ لا يخرم الشاهد**: ٠٫٨٥،
+ * وهامشُها المقيس ١٫٢٦ نقطة فوق أعلى ردٍّ محقّ — يطبعه الحارسُ ولا يُدَّعى.
+ */
+export const EASE_FLOOR = 0.85;
+
+/** عتبةُ تغطية جزءٍ بعينه: سماحةُ المحطة، مخفَّفةً بما أعلنه بيانُه ومحبوسةً بأرضيّتها. */
+export function partCoverage(tol, ease) {
+  if (!(ease > 1)) return tol.coverage;
+  return Math.max(EASE_FLOOR, 1 - (1 - tol.coverage) * ease);
+}
+
 // ————— هندسةٌ صغيرة: الإسقاط على المسار —————
 
 const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
@@ -280,10 +314,15 @@ export function partsOf(ref) {
       folds: foldsOf(stroke, poly),
       start: stroke.start || stroke.points[0],
       end: poly.pts[poly.pts.length - 1],
+      // **وسماحتُه المعلَنة تسافر معه** (`ease`، انظر `partCoverage` أعلاه): تُقرأ من
+      // البيان ولا تُستنبَط هنا — فما لم يُعلَن فسماحتُه سماحةُ المحطة كما كانت.
+      ease: stroke.ease,
     });
   }
   for (const dot of ref?.dots || []) {
-    parts.push({ kind: 'dot', at: dot.at, count: dot.count || 1, start: dot.at, end: dot.at });
+    parts.push({
+      kind: 'dot', at: dot.at, count: dot.count || 1, start: dot.at, end: dot.at, ease: dot.ease,
+    });
   }
   return parts;
 }
@@ -345,7 +384,12 @@ export function createTrial(ref, options = {}) {
   const parts = partsOf(ref);
   // **الانغلاقُ يُعرَف مرّةً عند بناء المحاولة** وبسماحة المحطة نفسِها (لا بسماحةٍ
   // عامّة): محطةٌ تشدّ سماحتَها تشدّ معها ما تعدّه شكلاً مغلقاً — فلا مقياسان.
-  for (const part of parts) part.closed = isClosed(part, tol);
+  for (const part of parts) {
+    part.closed = isClosed(part, tol);
+    // **وعتبةُ تغطيته من بيانه**: سماحةُ المحطة لمن لم يُعلِن، ومخفَّفةٌ لمن أعلن
+    // (`partCoverage` أعلاه) — تُحسب مرّةً عند البناء فلا مقياسان في محاولةٍ واحدة.
+    part.coverage = partCoverage(tol, part.ease);
+  }
   const onFault = options.onFault || (() => {});
   const onProgress = options.onProgress || (() => {});
 
@@ -660,8 +704,10 @@ export function createTrial(ref, options = {}) {
 
     const progress = part.poly.len ? done.reach / part.poly.len : 1;
     let code = done.fault;
-    if (!code && progress < tol.coverage) code = note(FAULTS.SHORT, done.points[done.points.length - 1], done.aim).code;
-    const ok = done.startOk && !done.wandered && !done.reversed && progress >= tol.coverage;
+    // **وعتبةُ الجزء عتبتُه هو** (`part.coverage`): سماحةُ المحطة إلا أن يُعلِن بيانُه
+    // تخفيفاً — والجزءُ الصغير الملحق يُعلِنه (حكمُ المالك، ١٧ أغسطس ٢٠٢٦).
+    if (!code && progress < part.coverage) code = note(FAULTS.SHORT, done.points[done.points.length - 1], done.aim).code;
+    const ok = done.startOk && !done.wandered && !done.reversed && progress >= part.coverage;
     if (ok) index++;
     return { ok, code, progress, points: done.points };
   }

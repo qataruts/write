@@ -152,13 +152,73 @@ console.log('\n— ١ج) عدّةُ التقاط الميدان: إذنٌ صري
 
   // وأثرُ اللوح يُقرأ من `d` نصّاً — نقاطاً على الشبكة كما تدخل العدّة
   const pts = dev.fieldStrokes(['M10.5 20 L30 40 L50 60', 'M1 1']);
-  ok(pts.length === 1 && pts[0].length === 3 && pts[0][0][0] === 10.5,
-    'وأثرُ الحبر يُقرأ نقاطاً على الشبكة، وما دون نقطتين يسقط');
+  ok(pts.length === 2 && pts[0].length === 3 && pts[0][0][0] === 10.5
+    && pts[1].length === 1 && pts[1][0][0] === 1,
+    'وأثرُ الحبر يُقرأ نقاطاً على الشبكة، **والنقرةُ ضربةٌ بنقطةٍ واحدة تُلتقَط**'
+    + ' — نقطةُ الحرف نقرةٌ، وكان المرشِّحُ يبلعها (عطبُ ميدان ١٧ أغسطس)');
 
   dev.fieldClear();
   ok(dev.fieldBook().items.length === 0 && dev.fieldBook().on === false,
     'والمحوُ يمحو ويوقف — فلا يبقى التقاطٌ يعمل بلا علمِ أحد');
   delete globalThis.localStorage;
+}
+
+// ————— ١د. طريقُ الالتقاط يُمشى كاملاً: **الأثرُ يعود بحكمه هو** (جلسة ك) —————
+//
+// 🔴 **عطبُ ميدان ١٧ أغسطس ٢٠٢٦** (`FIELD_TRIAL §٥`): دفترُ الالتقاط أسقط **النقرات**
+// — ونقطةُ الحرف نقرةٌ — فعاد أثرُ «ب» بجسمه بلا نقطته. **وصندوقُ الحبر بلا النقطة
+// صندوقٌ آخر**: يتبدّل التوفيقُ في الحكم الثاني فيتبدّل الحكم (انحرافُ ١٨٦ بدل ١٠٧،
+// و`wander` بدل القبول). فسقطت ثلاثةُ آثارٍ من أربعةَ عشر ولم تُجمَّد.
+//
+// **والحارسُ يمشي الطريقَ كلَّه لا يقرأ سطراً**: يدٌ تكتب على آلة المحاولة الحرّة
+// (`createFreeRun` — عينُ ما يقوده اللوح)، ثم يُسلَك أثرُها **مسلكَ الميدان بعينه**:
+// `d` نصّاً ← `fieldStrokes` ← دفترٌ ← `toCases` ← إعادةٌ على المحرّك. **فيلزم أن
+// يعود الحكمُ هو هو** — وإلا فما يُجمَّد شاهدٌ كاذب. **ومجرَّبٌ سالباً**: يُعاد
+// المرشِّحُ القديم (`> 1`) فتسقط النقرةُ **فينقلب الحكم** — فلو عاد العطبُ يوماً
+// لَقُرئ هنا بعلّته.
+console.log('\n— ١د) طريقُ الالتقاط: أثرٌ يُعاد على المحرّك فيطابق حكمَه ساعةَ الالتقاط —');
+{
+  const { toCases } = await import(new URL('./import_traces.mjs', import.meta.url));
+  const ref = PATHS['ب'].isolated;      // جسمٌ ونقطةٌ — والنقطةُ نقرةٌ
+  /** يدٌ تمشي المسارَ خطوةً خطوة (نظيرُ ما يفعله مولّدُ العدّة) — بلا رجفة. */
+  const walk = (poly, step = 14) => {
+    const out = [];
+    for (let at = 0; at < poly.len; at += step) out.push(pen.pointAt(poly, at).at);
+    out.push(poly.pts[poly.pts.length - 1]);
+    return out.map((p) => [Math.round(p[0] * 10) / 10, Math.round(p[1] * 10) / 10]);
+  };
+  const parts = pen.partsOf(ref);
+  const body = walk(parts[0].poly);
+  const tap = [parts[1].at];            // **نقرةٌ واحدة**: نزلَ الإصبعُ ورفعه مكانه
+  const touches = [body, tap];
+
+  // ١) حكمُ المحرّك ساعةَ الالتقاط — من الآلة التي يقودها اللوح
+  const run = pen.createFreeRun(ref, {});
+  const results = touches.map((t) => run.push(t));
+  const live = results[results.length - 1];
+
+  // ٢) ثم يُسلَك الأثرُ مسلكَ الميدان: حبرُ اللوح `d` نصّاً، ثم الدفترُ، ثم العدّة
+  const inkD = touches.map((t) => t.map((p, i) => `${i ? 'L' : 'M'}${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(' '));
+  const book = { items: [{ ch: 'ب', form: 'isolated', mode: 'free', kind: 'done',
+    accepted: live.verdict.accepted, strokes: dev.fieldStrokes(inkD) }] };
+  const cases = toCases(book);
+  const back = cases[0] && pen.judgeFree(ref, cases[0].strokes);
+
+  ok(cases.length === 1 && cases[0].strokes.length === 2 && cases[0].strokes[1].length === 1,
+    `الأثرُ يعود بضربتيه **ومعهما النقرة** (${cases[0]?.strokes.map((s) => s.length).join(' + ') || 'لا شيء'} نقطة)`);
+  ok(live.verdict.accepted && back?.accepted === live.verdict.accepted
+    && (back?.primary || null) === (live.verdict.primary || null),
+    `وحكمُ الإعادة عينُ حكمِ الالتقاط (${live.verdict.accepted ? 'قُبل' : live.verdict.primary} ⇒ `
+    + `${back?.accepted ? 'قُبل' : back?.primary})`
+    + ` — انحرافُ الالتقاط ${Math.round(live.verdict.metrics.maxLateral)} والإعادة ${
+      Math.round(back?.metrics.maxLateral ?? -1)}`);
+
+  // **مجرَّبٌ سالباً بالعطب نفسِه**: المرشِّحُ القديم يطرح النقرةَ فينقلب الحكم
+  const lame = dev.fieldStrokes(inkD).filter((s) => s.length > 1);
+  const lameBack = pen.judgeFree(ref, lame);
+  ok(lame.length === 1 && !lameBack.accepted,
+    `وبالمرشِّح القديم (\`> 1\`) تسقط النقرةُ **فينقلب الحكم** إلى «${lameBack.primary}»`
+    + ` وانحرافُه ${Math.round(lameBack.metrics.maxLateral)} — وهو عطبُ الميدان بعينه`);
 }
 
 // ————— ١ب. مقاييسُ الإرشاد: **تصغر بصغر المادّة** (بلاغُ عين المالك) —————
@@ -417,6 +477,142 @@ console.log('\n— ٢ب) الخطوةُ الحرّة: النموذجُ يُوف�
   // **والخطوتان الموجَّهةُ والخافتة لا تُمَسّان**: الحكمُ الثاني معلَّقٌ بالنمط الحرّ وحدَه.
   ok(/mode === MODES\.FREE/.test(penCode) && /if \(!free\) trial\.down/.test(penCode),
     'والحكمُ الثاني للنمط الحرّ وحدَه — والموجَّهُ والخافتُ على حَكَمهما اللحظيّ كما كانا');
+}
+
+// ————— ٢د. سماحةُ الجزء الملحق: **العدّةُ تُعاد قبلَه وبعده ويُطبع الفرق** (جلسة ك) —————
+//
+// 🔴 **حكمُ المالك (١٧ أغسطس ٢٠٢٦)**: شولةُ الكاف «لم تنضبط» في يد الخامسة (أربع
+// سقطاتٍ متتالية عليها وحدَها، `FIELD_TRIAL §٥`) — فتُخفَّف سماحتُها **معلَنةً في
+// بيان الحرف**. **والتخفيفُ يُشترى بقياس لا بذوق** (بندُ جلسة ك ٣): تُعاد العدّةُ
+// المجمَّدة كلُّها **بالإعلان وبنزعه** ويُطبع الفرقُ حالةً حالة — **وأيُّ قبولٍ كاذبٍ
+// يظهر بسببه يُبطل التخفيف**.
+//
+// **وأداةُ القياس نزعُ الصفة** (نظيرُ `strip` في الطيّة): يُنزَع `ease` من المسار نفسِه
+// فيرجع الحكمُ إلى ما كان قبل الحكم — فلا يُقارَن أخضرُ اليوم بذاكرةِ أمس.
+console.log('\n— ٢د) سماحةُ الجزء الملحق: فرقُ العدّة قبلَه وبعده —');
+{
+  const bare = (ref) => ({
+    ...ref,
+    strokes: (ref.strokes || []).map(({ ease, ...rest }) => rest),   // eslint-disable-line no-unused-vars
+  });
+  const declared = traces.cases.filter((c) => refOf(c).strokes?.some((s) => s.ease > 1));
+  const verdictOf = (item, ref) => (item.expect.free
+    ? pen.judgeFree(ref, item.strokes) : pen.judge(ref, item.strokes));
+
+  // ١) الفرقُ على العدّة كلِّها: مَن تبدّل حكمُه، ومَن لم يُمَسّ
+  const moved = [];
+  for (const item of traces.cases) {
+    if (item.expect.run) continue;
+    const after = verdictOf(item, refOf(item));
+    const before = verdictOf(item, bare(refOf(item)));
+    if (before.accepted !== after.accepted || (before.primary || null) !== (after.primary || null)) {
+      moved.push({ item, before, after });
+    }
+  }
+  console.log(`  عدّةُ المعايرة ${traces.cases.length} حالة، وفيها ${declared.length} على مسارٍ`
+    + ` **يُعلِن سماحةَ جزء** — وتبدّل بالتخفيف ${moved.length} حكماً:`);
+  for (const { item, before, after } of moved) {
+    console.log(`    · ${item.id}: ${before.accepted ? 'قُبل' : before.primary}`
+      + ` ⇒ ${after.accepted ? 'قُبل' : after.primary}`);
+  }
+  /**
+   * **ولا قبولَ كاذبٌ جديد** — وهو نصُّ البند ٣: كلُّ حالةٍ **حكمُها المنتظَر ردٌّ**
+   * تبقى مردودةً بعد التخفيف. **والوجهُ الموجب مستثنىً بإعلانه** (`expect.eased`):
+   * حالةٌ جُمِّدت **لتُقبَل بالتخفيف** ليست قبولاً كاذباً بل هي عينُ المراد — ويُثبَت
+   * أدناه أنّ قبولَها معلَّقٌ بالبيان (تُرَدّ `short` إن نُزع).
+   */
+  const opened = moved.filter(({ item, before, after }) =>
+    !before.accepted && after.accepted && item.expect.accept === false);
+  ok(opened.length === 0,
+    `و**صفرُ قبولٍ كاذبٍ جديد** على العدّة المجمَّدة (${moved.length} حكماً تبدّل، كلُّه`
+    + ` بإعلانٍ منتظَر)${
+      opened.length ? ` — فُتح: ${opened.map((m) => m.item.id).join('، ')} ⇐ التخفيفُ باطل` : ''}`);
+
+  // **والوجهُ الموجب: التخفيفُ يعمل، وقبولُه معلَّقٌ بالإعلان** (نظيرُ `fold-single-line`)
+  const easedCases = traces.cases.filter((c) => c.expect.eased);
+  ok(easedCases.length > 0, `وللتخفيف حالةٌ موجبةٌ مجمَّدة (${easedCases.length})`);
+  for (const item of easedCases) {
+    const on = verdictOf(item, refOf(item));
+    const off = verdictOf(item, bare(refOf(item)));
+    ok(on.accepted && !off.accepted && off.primary === pen.FAULTS.SHORT,
+      `  «${item.id}»: تُقبَل بالإعلان${on.accepted ? '' : ' ← رُدّت! فالتخفيفُ حبرٌ لا يمسّ يداً'}`
+      + ` وتُرَدّ بنزعه «${off.primary}» — فالسماحةُ صفةٌ في البيان لا رقمٌ عامّ`);
+  }
+  // **وما لا يُعلِن لا يتبدّل**: التخفيفُ صفةُ بيانٍ لا تسييبٌ عامّ.
+  ok(moved.every(({ item }) => declared.includes(item)),
+    'وما لم يُعلِن بيانُه شيئاً لم يتبدّل حكمُه — التخفيفُ صفةٌ في المسار لا رقمٌ عامّ');
+
+  // ٢) **والأرضيّةُ معايرةٌ على الشاهد**: أعلى ردٍّ محقّ على الشولة، وهامشُ العتبة فوقه
+  const KAF = PATHS['ك'].isolated;
+  const parts = pen.partsOf(KAF);
+  const tail = parts[parts.length - 1];
+  const eased = pen.partCoverage(pen.TOLERANCE, tail.ease);
+  const raw = 1 - (1 - pen.TOLERANCE.coverage) * tail.ease;
+  /** تغطيةُ آخرِ جزءٍ في كتابةٍ ميدانية — تُقرأ من الحَكَم نفسِه لا تُدَّعى. */
+  const tailCoverage = (item) => {
+    const tol = pen.resolveTolerance(undefined);
+    const fit = pen.fitFree(refOf(item), item.strokes, tol);
+    const mapped = item.strokes.map((s) => s.map((p) => [
+      fit.model.cx + (p[0] - fit.child.cx) / fit.s,
+      fit.model.cy + (p[1] - fit.child.cy) / fit.s,
+    ]));
+    let best = 0;
+    const trial = pen.createTrial(refOf(item), {
+      tolerance: pen.easeTolerance(tol),
+      onProgress: ({ part, progress }) => {
+        if (part === parts.length - 1) best = Math.max(best, progress);
+      },
+    });
+    for (const raw2 of mapped) {
+      const pts = pen.simplify(raw2);
+      if (!pts.length) continue;
+      trial.down(pts[0][0], pts[0][1]);
+      for (const p of pts.slice(1)) trial.move(p[0], p[1]);
+      trial.up();
+    }
+    return best;
+  };
+  // **وتُقاس على الردود القِصَرية وحدَها**: هي التي تمسّها التغطية — أما المعكوسةُ
+  // فرُدَّت بالاتجاه وتغطيتُها تامّة، فقياسُ الأرضيّة عليها قياسٌ على غير جنسها.
+  const rejected = traces.cases.filter((c) => c.origin === 'field' && c.ref === 'ك/isolated'
+    && c.expect.accept === false && c.expect.fault === 'short');
+  const highest = Math.max(...rejected.map(tailCoverage));
+  console.log(`  الشولةُ: طولُها ${Math.round(tail.poly.len)} من ${Math.round(parts[0].poly.len)}`
+    + ` فسماحتُها المعلَنة ×${tail.ease} — وعتبتُها ${(eased * 100).toFixed(0)}٪`
+    + ` (التخفيفُ الهندسيُّ كاملاً ${(raw * 100).toFixed(1)}٪، محبوسٌ بأرضيّة ${
+      (pen.EASE_FLOOR * 100).toFixed(0)}٪)`);
+  ok(eased < pen.TOLERANCE.coverage && eased > highest,
+    `وأرضيّتُها **فوق أعلى ردٍّ محقّ في الميدان** (${(highest * 100).toFixed(2)}٪ في ${
+      rejected.length} ردٍّ مجمَّد) بهامش ${((eased - highest) * 100).toFixed(2)} نقطة`
+    + ' — فالتخفيفُ لا يشتري قبولاً كاذباً، والتخفيفُ الكاملُ يشتريه فهو محبوس');
+
+  /**
+   * **ودَينٌ مسمّى يُطبَع في كل تشغيلة**: التصنيفُ في عدّة التأليف يسري على مادّة
+   * النسخ كما يسري على الحروف، **وبناءُ `word_paths.js` يحتاج العدّةَ في متصفّح**
+   * (`make_paths.py --build`) — فلم يُعَد في هذه الجلسة. فشولةُ الكاف **داخل كلمة**
+   * تبقى على عتبة الشكل (٨٨٪) حتى يُعاد البناء. ويُعَدّ هنا بالرقم لا بالذكر.
+   */
+  const words = await import(new URL('js/word_paths.js', APP));
+  const owing = Object.values(words.WORD_PATHS).filter((ref) => {
+    const lens = (ref.strokes || []).map((s) => pen.prepare(s.points).len);
+    const longest = Math.max(...lens, 0);
+    return lens.some((l, i) => i > 0 && l < longest * 0.5 && !ref.strokes[i].ease);
+  }).length;
+  console.log(`  ودَينٌ مسمّى: ${owing} من مادّة النسخ فيها جزءٌ ملحقٌ صغير **بلا إعلان**`
+    + ' — تكسبه يومَ يُعاد بناء `word_paths.js` بعدّة التأليف (تحتاج متصفّحاً)');
+
+  // ٣) **ولا يُفتَح بابُ الاتجاه** (ع٣ صفرٌ بحاله): يُجرَّب سالباً **على الكاف نفسِها**
+  //    — معكوسةً، وشولتُها قبل جسمها، ومرآةً — **ولو ضوعفت سماحةُ جزئها ثلاثاً**.
+  const negatives = traces.cases.filter((c) => c.ref === 'ك/isolated' && c.expect.direction);
+  ok(negatives.length >= 3, `وللكاف ${negatives.length} حالةَ اتجاهٍ سالبة مجمَّدة (ع٣)`);
+  for (const item of negatives) {
+    const loud = { ...KAF, strokes: KAF.strokes.map((s) => (s.ease ? { ...s, ease: s.ease * 3 } : s)) };
+    const now = verdictOf(item, refOf(item));
+    const wild = pen.judgeFree(loud, item.strokes);
+    ok(!now.accepted && !wild.accepted,
+      `  «${item.id}»: تُرَدّ «${now.primary}»${wild.accepted ? ' ← قُبلت بتثليث السماحة!' : ''}`
+      + ` — ولو ثُلِّثت سماحةُ الجزء («${wild.primary}»)`);
+  }
 }
 
 // ————— ٢ج. طريقُ المحاولة الحرّة: **يُمشى لمسةً لمسة** (مراجعةُ المدير للجلسة م٣) —————

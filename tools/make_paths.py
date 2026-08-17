@@ -36,6 +36,7 @@
 import argparse
 import hashlib
 import json
+import math
 import re
 import shutil
 import sys
@@ -260,6 +261,38 @@ def chunk(points, per=7) -> list:
     return out
 
 
+# ————— سماحةُ الجزء الصغير الملحق: **تُصنَّف هنا وتُعلَن في البيان** —————
+#
+# 🔴 **حكمُ المالك (١٧ أغسطس ٢٠٢٦)** على صيد أوّل جلسة ميدان: طفلةُ الخامسة سقطت أربع
+# مرّاتٍ متتالية على **الجزء الثاني للكاف** وحدَه (شولتِه)، ووافقت عينُه أنه «لم
+# ينضبط». والحكم: تُخفَّف سماحةُ هذا الجزء — **صفةً في بيانه لا فرعاً في `pen.js`**.
+#
+# **والتصنيفُ هنا لأنه صفةُ شكلٍ لا حالةُ طفل**: ضربةٌ **ليست أولى الشكل** وطولُها
+# **دون نصف أطولِ ضربةٍ فيه** جزءٌ ملحقٌ صغير. فيقع اليومَ على شولتَي الكاف
+# (مفردةً ٠٫٣٦ ونهائيةً ٠٫٣٠) ولا يقع على ما قاربَ النصفَ من فوق (ثانيةُ ط/ظ ٠٫٥٣–٠٫٥٨،
+# ووسطى ٣ ٠٫٥١) — **وما زاد من أجزاءٍ غداً يُصنَّف يومَ يُكتب** بلا سطرٍ يُضاف.
+#
+# **ورقمُه من الهندسة لا من يد**: كم يبلغ الجزءُ من أطولِ ضربةٍ في شكله مقلوباً — فما
+# صغر نصيبُه من التخفيف أكبر، **وحدُّه الأدنى أرضيّةُ `pen.js`** (`EASE_FLOOR`،
+# معايرةٌ على الشاهد المجمَّد). ويقرؤه المحرّكُ تغطيةً وحدَها: بابُ الاتجاه لا يُفتَح.
+SMALL_PART = 0.5
+
+
+def path_len(points) -> float:
+    return sum(math.dist(points[i - 1], points[i]) for i in range(1, len(points)))
+
+
+def ease_of(strokes: list) -> list:
+    """سماحةُ كلِّ ضربةٍ من الشكل — `None` لمن ليس جزءاً ملحقاً صغيراً."""
+    lens = [path_len(s["points"]) for s in strokes]
+    if not lens:
+        return []
+    longest = max(lens)
+    return [None if i == 0 or not longest or length >= longest * SMALL_PART
+            else round(longest / length, 2)
+            for i, length in enumerate(lens)]
+
+
 HEADER = """\
 // **المساراتُ المرجعية** لحروف «اُكْتُبْ» بأشكال مواقعها (`METHOD.md §٣.١`):
 // شبكةٌ معيارية ١٠٠٠×١٠٠٠، `{ strokes: [{ points, start }], dots: [{ at, count, after }] }`،
@@ -293,6 +326,7 @@ def write_module(paths: dict, meta: dict) -> str:
             ref = forms[form]
             lines.append(f'   "{form}": {{')
             lines.append('    "strokes": [')
+            eases = ease_of(ref["strokes"])
             for si, stroke in enumerate(ref["strokes"]):
                 start = stroke["start"]
                 lines.append(f'     {{ "start": [{num(start[0])}, {num(start[1])}], "points": [')
@@ -306,6 +340,10 @@ def write_module(paths: dict, meta: dict) -> str:
                     tail += ', "folds": [' + ", ".join(
                         f'{{ "from": {int(f["from"])}, "apex": {int(f["apex"])},'
                         f' "to": {int(f["to"])} }}' for f in stroke["folds"]) + "]"
+                # **وسماحةُ الجزء الملحق الصغير صفةٌ فيه كالطيّة** (`ease_of` أعلاه):
+                # تُحسب من هندسة الشكل، فلا تُكتب بيد ولا يُذكَر حرفٌ باسمه في المحرّك.
+                if eases[si]:
+                    tail += f', "ease": {eases[si]}'
                 lines.append(tail + " }" + ("," if si < len(ref["strokes"]) - 1 else ""))
             lines.append("    ],")
             dots = ", ".join(

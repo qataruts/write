@@ -21,6 +21,8 @@
 // عينُ ما وُضع هذا الباب لمنعه.
 
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { resolve } from 'node:path';
 
 const OUT = new URL('./pen_traces.json', import.meta.url);
 const OLD_WARNING = 'مساراتٌ مصنوعة لا مساراتُ أطفال';
@@ -81,8 +83,11 @@ export function toCases(book) {
     origin: 'field',
     ref: `${item.ch}/${item.form}`,
     strokes: item.strokes,
+  // **والنقرةُ ضربةٌ يقبلها البابُ** (عطبُ ميدان ١٧ أغسطس ٢٠٢٦): ضربةٌ بنقطةٍ واحدة
+  // هي **نقطةُ الحرف** — يعدّها `partsOf` جزءاً كالجسم ويحكم عليها `up()` بانتشارها.
+  // فكان الحدُّ `> 1` يطرحها هنا كما طرحها الالتقاط، **فيدخل العدّةَ نصفُ أثر**.
   })).filter((c) => Array.isArray(c.strokes) && c.strokes.length
-    && c.strokes.every((s) => Array.isArray(s) && s.length > 1
+    && c.strokes.every((s) => Array.isArray(s) && s.length >= 1
       && s.every((p) => Array.isArray(p) && p.length === 2 && p.every(Number.isFinite))));
 }
 
@@ -98,10 +103,16 @@ function selfTest() {
         maxLateral: 40, lateral: 90, coverage: 96,
         strokes: [[[10, 10], [20, 20]]] },
       { ch: 'ن', form: 'isolated', mode: 'free', kind: 'done', accepted: true, strokes: [] },
+      // **ونقرةُ النقطة ضربةٌ بنقطةٍ واحدة**: تدخل بضربتيها لا بجسمها وحدَه
+      { ch: 'ب', form: 'isolated', mode: 'free', kind: 'done', accepted: true,
+        strokes: [[[10, 10], [20, 20]], [[15, 5]]] },
     ],
   };
   const cases = toCases(book);
-  ok(cases.length === 2, `الأثرُ بلا ضرباتٍ يسقط ولا يدخل العدّة (${cases.length} من ٣)`);
+  ok(cases.length === 3, `الأثرُ بلا ضرباتٍ يسقط ولا يدخل العدّة (${cases.length} من ٤)`);
+  ok(cases[2].strokes.length === 2 && cases[2].strokes[1].length === 1,
+    'و**نقرةُ النقطة تدخل**: ضربةٌ بنقطةٍ واحدة هي نقطةُ الحرف — لا يُبتَر منها الأثر'
+    + ' (عطبُ ميدان ١٧ أغسطس: عاد أثرُ «ب» بجسمه بلا نقطته فتبدّل حكمُه)');
   ok(cases.every((c) => c.origin === 'field'), 'وكلُّ داخلٍ من هنا مصدرُه `field` — لا يلتبس بالمصنوع');
   ok(cases[0].expect.accept === false && cases[0].expect.fault === 'start-end',
     'وحكمُ المردود شكواه بعينها — من المحرّك ساعةَ الالتقاط لا من ظنّ المستورِد');
@@ -122,35 +133,55 @@ function selfTest() {
   return fails ? 1 : 0;
 }
 
-const args = process.argv.slice(2);
-// (الرايةُ تُقرأ من `process.argv` بحرفها — بها يجدها جردُ `test_selftests.mjs`)
-if (process.argv.includes('--self-test')) process.exit(selfTest());
+function main() {
+  const args = process.argv.slice(2);
+  // (الرايةُ تُقرأ من `process.argv` بحرفها — بها يجدها جردُ `test_selftests.mjs`)
+  if (process.argv.includes('--self-test')) return selfTest();
 
-const file = args.find((a) => !a.startsWith('--'));
-if (!file || !existsSync(file)) {
-  console.log('استعمال: node tools/import_traces.mjs <ملفّ الميدان.json> [--write]');
-  process.exit(1);
+  const file = args.find((a) => !a.startsWith('--'));
+  if (!file || !existsSync(file)) {
+    console.log('استعمال: node tools/import_traces.mjs <ملفّ الميدان.json> [--write] [--only <أسماء>]');
+    return 1;
+  }
+
+  const book = JSON.parse(readFileSync(file, 'utf8'));
+  const all = toCases(book);
+  /**
+   * **ولا يُجمَّد إلا ما طابق** (بندُ جلسة ك، ١٧ أغسطس ٢٠٢٦): أثرٌ لا يُعاد على
+   * المحرّك بحكمه ساعةَ الالتقاط شاهدٌ كاذب — ومَن أراد تجميدَ ما طابق وحدَه سمّاه
+   * بـ`--only`، فيبقى الخامُ في `tools/field_traces/` كما هو ولا يُحرَّر بيد.
+   */
+  const only = args.includes('--only')
+    ? new Set(args[args.indexOf('--only') + 1].split(',').map((s) => s.trim()).filter(Boolean))
+    : null;
+  const cases = only ? all.filter((c) => only.has(c.id)) : all;
+  console.log(`في الملفّ ${(book.items || []).length} أثراً، صالحٌ منها ${all.length}`
+    + `${only ? `، والمسمّى منها ${cases.length}` : ''}:`);
+  for (const c of cases) console.log(`  · ${c.id} — ${c.note}`);
+
+  if (!args.includes('--write')) {
+    console.log('\n(جردٌ فقط — أضِف `--write` لإدخالها العدّة)');
+    return 0;
+  }
+
+  const saved = JSON.parse(readFileSync(OUT, 'utf8'));
+  const known = new Set(saved.cases.map((c) => c.id));
+  const fresh = cases.filter((c) => !known.has(c.id));
+  saved.cases = [...saved.cases, ...fresh];
+  // **ولا مسارَ مرجعيّ يُنسَخ**: مساراتُ الحروف تُقرأ من `app/js/paths.js` باسمها.
+  if (saved.cases.some((c) => c.origin === 'field')) {
+    saved.warning = 'فيها مساراتُ ميدانٍ حقيقية (origin: field) مع المصنوعة — '
+      + 'المصنوعةُ تُثبت حكمَ المحرّك، والميدانيةُ تعاير سماحتَه';
+  }
+  writeFileSync(OUT, `${JSON.stringify(saved, null, 1)}\n`);
+  console.log(`\nأُدخلت ${fresh.length} حالةً ميدانية (والعدّةُ الآن ${saved.cases.length}).`);
+  console.log('شغّل الآن: node tools/test_pen.mjs — وعليها تُعايَر العتبات، لا بالظنّ.');
+  return 0;
 }
 
-const book = JSON.parse(readFileSync(file, 'utf8'));
-const cases = toCases(book);
-console.log(`في الملفّ ${(book.items || []).length} أثراً، صالحٌ منها ${cases.length}:`);
-for (const c of cases) console.log(`  · ${c.id} — ${c.note}`);
-
-if (!args.includes('--write')) {
-  console.log('\n(جردٌ فقط — أضِف `--write` لإدخالها العدّة)');
-  process.exit(0);
+// **تُشغَّل مباشرةً فتعمل، وتُستورَد فتُعطي `toCases` ولا تفعل شيئاً**: حارسُ المحرّك
+// يمشي بها طريقَ الالتقاط كاملاً (`test_pen.mjs §١د`) — **اشتقاقٌ واحدٌ لا نسخةٌ
+// ثانية**، ولولا هذا الشرطُ لَخرجت الأداةُ بالعملية من تحت مستوردِها.
+if (fileURLToPath(import.meta.url) === resolve(process.argv[1] ?? '')) {
+  process.exit(main());
 }
-
-const saved = JSON.parse(readFileSync(OUT, 'utf8'));
-const known = new Set(saved.cases.map((c) => c.id));
-const fresh = cases.filter((c) => !known.has(c.id));
-saved.cases = [...saved.cases, ...fresh];
-// **ولا مسارَ مرجعيّ يُنسَخ**: مساراتُ الحروف تُقرأ من `app/js/paths.js` باسمها.
-if (saved.cases.some((c) => c.origin === 'field')) {
-  saved.warning = 'فيها مساراتُ ميدانٍ حقيقية (origin: field) مع المصنوعة — '
-    + 'المصنوعةُ تُثبت حكمَ المحرّك، والميدانيةُ تعاير سماحتَه';
-}
-writeFileSync(OUT, `${JSON.stringify(saved, null, 1)}\n`);
-console.log(`\nأُدخلت ${fresh.length} حالةً ميدانية (والعدّةُ الآن ${saved.cases.length}).`);
-console.log('شغّل الآن: node tools/test_pen.mjs — وعليها تُعايَر العتبات، لا بالظنّ.');
