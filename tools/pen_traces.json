@@ -31184,10 +31184,9 @@
    "id": "field-015-ك-isolated",
    "expect": {
     "free": true,
-    "accept": false,
-    "fault": "short"
+    "accept": true
    },
-   "note": "ميدان 15: «ك isolated» في نمط free — ردَّه المحرّكُ بشكوى short",
+   "note": "ميدان 15: «ك isolated» في نمط free — **ردَّه المحرّكُ بشكوى ، ثمّ حكم المالكُ (١٧ أغسطس ٢٠٢٦) أنّ شولةً كهذه تُقبَل** — فالمنتظَرُ قبولُها",
    "origin": "field",
    "ref": "ك/isolated",
    "strokes": [
@@ -31741,10 +31740,9 @@
    "id": "field-016-ك-isolated",
    "expect": {
     "free": true,
-    "accept": false,
-    "fault": "short"
+    "accept": true
    },
-   "note": "ميدان 16: «ك isolated» في نمط free — ردَّه المحرّكُ بشكوى short",
+   "note": "ميدان 16: «ك isolated» في نمط free — **ردَّه المحرّكُ بشكوى ، ثمّ حكم المالكُ (١٧ أغسطس ٢٠٢٦) أنّ شولةً كهذه تُقبَل** — فالمنتظَرُ قبولُها",
    "origin": "field",
    "ref": "ك/isolated",
    "strokes": [
