@@ -16,7 +16,7 @@
 
 import { h, DEV, topbar, brandMark, go } from './ui.js';
 import { PATHS, FORMS, FORM_NAMES, pathOf } from './curriculum.js';
-import { penSurface, FAULT_TEXT, MODES } from './pen.js';
+import { penSurface, FAULT_TEXT, MODES, FREE, easeTolerance } from './pen.js';
 
 const STEPS = [
   [MODES.GUIDED, 'موجَّه — المسار ظاهر'],
@@ -174,11 +174,26 @@ export function renderPenDev() {
      * المحرّك عليها — **وأثمنُها المردودة**: الشكوى التي رُدّت وهي في عين وليّ
      * الأمر صحيحة هي التي تعاير العتبة، لا المقبولةُ من أوّل مرّة.
      */
+    /**
+     * 🔴 **والحدُّ العامل يُسجَّل، لا السماحةُ الأساس وحدَها** (عطبُ سجلٍّ كشفه
+     * تشخيصُ `docs/FIELD_TRIAL.md §٦`، ١٨ أغسطس ٢٠٢٦): الحكمُ في النمط الحرّ يجري
+     * بسماحةٍ **مكرَّمة** (`judgeFree` ⇐ `easeTolerance` ×`FREE.ease`)، فحدُّ
+     * الانحراف الذي حُكم به ١٤٤ لا ٩٠. وكان الدفترُ يقيّد ٩٠ — **فقرأ القارئُ
+     * ثمانيةَ آثارٍ «تجاوزت حدَّها» ولم يجاوزه منها أثرٌ واحد**، وأقصاها ٩٨٫٦٪ منه.
+     * فيُقيَّدان معاً: `limit` الحدُّ الذي حُكم به، و`ease` معاملُ التكريم — ويبقى
+     * `lateral` الأساسَ كما كان فلا ينكسر ما قُرئ قبل اليوم.
+     */
+    const eased = state.mode === MODES.FREE;
+    const tolOf = () => (eased ? easeTolerance(surface.trial.tolerance) : surface.trial.tolerance);
+
     const capture = (kind, extra) => fieldRecord({
       ch: state.letter,
       form: state.form,
       mode: state.mode,
       kind,
+      lateral: Math.round(surface.trial.tolerance.lateral),
+      limit: Math.round(tolOf().lateral),
+      ease: eased ? FREE.ease : 1,
       ...extra,
       strokes: fieldStrokes(live?.ink()),
     });
@@ -201,15 +216,16 @@ export function renderPenDev() {
           codes: verdict.codes,
           maxLateral: Math.round(verdict.metrics.maxLateral),
           coverage: Math.round(verdict.metrics.coverage * 100),
-          lateral: Math.round(surface.trial.tolerance.lateral),
         });
         paintField();
         return say(
           verdict.accepted ? '✓ مقبول — الشروط الأربعة مستوفاة' : '✗ غير مقبول',
           `المحاولات ${verdict.attempts} · الأخطاء: ${verdict.codes.join('، ') || 'لا شيء'}`,
-          `أقصى انحراف ${Math.round(verdict.metrics.maxLateral)} من سماحة `
-          + `${Math.round(surface.trial.tolerance.lateral)} · التغطية `
-          + `${Math.round(verdict.metrics.coverage * 100)}٪`,
+          // **والمعروضُ هو المسجَّل**: الحدُّ العامل ومعاملُه — لا رقمٌ حُكم بغيره.
+          `أقصى انحراف ${Math.round(verdict.metrics.maxLateral)} من حدٍّ عامل `
+          + `${Math.round(tolOf().lateral)}`
+          + `${eased ? ` (أساسُه ${Math.round(surface.trial.tolerance.lateral)} ×${FREE.ease})` : ''}`
+          + ` · التغطية ${Math.round(verdict.metrics.coverage * 100)}٪`,
         );
       },
     });

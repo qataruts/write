@@ -143,16 +143,27 @@ const of = (list, wanted) => list.filter((r) => r.wanted === wanted).length;
 
 console.log(`\n— ١) المادّة: ${rows.length} حالةً — ${human.length} أثراً إنسانياً`
   + ` (${human.filter((r) => r.frozen).length} مجمَّدةً في العدّة و${human.filter((r) => !r.frozen).length} خاماً)`
-  + ` و${made.length} حالةً مصنوعة${walked.length ? ` · و${walked.length} حالةَ طريقٍ تُمشى لا تُحكَم دفعةً (${walked.join('، ')}) — موضعُها test_pen §٢ج` : ''} —`);
+  + ` و${made.length} حالةً مصنوعة${walked.length ? ` · وحالاتُ الطريق (${walked.length}) تُمشى لا تُحكَم دفعةً (${walked.join('، ')}) — موضعُها test_pen §٢ج` : ''} —`);
 
-const HEAD = 'الحصيلة';
-console.log(`\n  ${HEAD}:`);
-console.log(`  · **أثرٌ إنسانيّ صحيحٌ قُبل: ${count(human, true, true)} من ${of(human, true)}**`
-  + ` (ورُدّ ظلماً ${count(human, true, false)})`);
+// **والمجمَّدُ يُفرَد عن الخام في الحصيلة**: الخامُ فيه أثرٌ عاد من الالتقاط ناقصَ
+// نقطته (عطبُ `FIELD_TRIAL §٥`)، فخلطُه بالشاهد يُنقص الرقمَ بعيبِ عدّةٍ لا بعيبِ
+// حكم. ويُعَدّ ولا يُطرَح — فيوم يُصلَح الالتقاطُ يُجمَّد ويرتفع إلى سطره.
+const frozenHuman = human.filter((r) => r.frozen);
+const rawHuman = human.filter((r) => !r.frozen);
+
+console.log('\n  الحصيلة — المجمَّدُ في العدّة (وهو الشاهد):');
+console.log(`  · **أثرٌ إنسانيّ صحيحٌ قُبل: ${count(frozenHuman, true, true)} من ${of(frozenHuman, true)}**`
+  + ` (ورُدّ ظلماً ${count(frozenHuman, true, false)})`);
 console.log(`  · **تشويهٌ مصنوعٌ رُدّ: ${count(made, false, false)} من ${of(made, false)}**`
   + ` (وقُبل كذباً ${count(made, false, true)})`);
-console.log(`  · وأثرٌ إنسانيّ خاطئٌ رُدّ: ${count(human, false, false)} من ${of(human, false)}`
+console.log(`  · وأثرٌ إنسانيّ خاطئٌ رُدّ: ${count(frozenHuman, false, false)} من ${of(frozenHuman, false)}`
   + ` · وكتابةٌ مصنوعةٌ صحيحةٌ قُبلت: ${count(made, true, true)} من ${of(made, true)}`);
+if (rawHuman.length) {
+  console.log(`  · والخامُ الذي لم يُجمَّد (${rawHuman.length} من الآثار، ${books.join('، ')}):`
+    + ` صحيحٌ قُبل ${count(rawHuman, true, true)} من ${of(rawHuman, true)}`
+    + ` · وخاطئٌ رُدّ ${count(rawHuman, false, false)} من ${of(rawHuman, false)}`
+    + ' — يُقاس ويُتتبَّع ولا يُحتجّ به (عطبُ الالتقاط، `FIELD_TRIAL §٥`)');
+}
 
 const missed = rows.filter((r) => !r.match);
 if (missed.length) {
@@ -274,6 +285,28 @@ if (!existsSync(BASE_PATH)) {
       gone.length ? `حالاتٌ غابت عن المادّة — ${gone.join('، ')}` : 'ولا حالةَ غابت — المادّةُ لم تنقص');
     if (fixed.length) console.log(`  (وصُلح ${fixed.length}: ${fixed.map((c) => c.id).join('، ')})`);
   }
+}
+
+// ————— ٣) دفترُ الالتقاط يسجّل الحدَّ الذي حُكم به —————
+//
+// **وعطبُ السجل يُصلَح في أثر الحارس** (بندُ الجلسة ٣): كان `pendev.js` يقيّد
+// `surface.trial.tolerance.lateral` — **السماحةَ الأساس** — والحكمُ في النمط الحرّ
+// يجري بـ`easeTolerance` (×`FREE.ease`). فقرأ قارئُ الدفتر ثمانيةَ آثارٍ «فوق
+// الحدّ» ولم يجاوز الحدَّ العامل منها أثرٌ واحد (`FIELD_TRIAL §٦`). **فالحقلان
+// يُقيَّدان معاً**، وهذا يحرسهما — ويحرس أن الفرقَ بينهما ليس صفراً أصلاً.
+
+if (!FACTOR) {
+  console.log('\n— ٣) دفترُ الالتقاط: يقيّد الحدَّ العامل ومعاملَ التكريم —');
+  const devSrc = readFileSync(new URL('js/pendev.js', APP), 'utf8');
+  ok(pen.easeTolerance(pen.TOLERANCE).lateral !== pen.TOLERANCE.lateral,
+    `والفرقُ قائمٌ فالتقييدُ ذو معنى: أساسٌ ${pen.TOLERANCE.lateral}`
+    + ` وعاملٌ ${pen.easeTolerance(pen.TOLERANCE).lateral} (×${pen.FREE.ease})`);
+  ok(/limit:\s*Math\.round\(tolOf\(\)\.lateral\)/.test(devSrc) && /ease:\s*eased \? FREE\.ease/.test(devSrc),
+    'ودفترُ الالتقاط يقيّد `limit` (الحدَّ الذي حُكم به) و`ease` (معاملَ التكريم) مع كل أثر');
+  ok(/easeTolerance/.test(devSrc) && /from '\.\/pen\.js'/.test(devSrc),
+    'ويأخذُ المعاملَ من `pen.js` بعينه — لا رقمَ مكتوباً في صفحة الالتقاط');
+  ok(!/من سماحة /.test(devSrc),
+    'ولا يُعرَض على الشاشة رقمٌ يُسمّى «سماحة» وقد حُكم بغيره — المعروضُ هو المسجَّل');
 }
 
 if (FACTOR) {

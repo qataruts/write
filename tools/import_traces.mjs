@@ -63,7 +63,12 @@ function noteOf(item, i) {
     : `ميدان ${i}: «${where}» في نمط ${item.mode || '؟'} — `
       + `${item.accepted ? 'قُبل' : 'لم يُقبَل'}`
       + (item.maxLateral !== undefined
-        ? ` (أقصى انحراف ${item.maxLateral} من سماحة ${item.lateral}، تغطية ${item.coverage}٪)`
+        // **والانحرافُ يُقاس إلى الحدّ الذي حُكم به** (`FIELD_TRIAL §٦`): النمطُ الحرّ
+        // يُحكَم بسماحةٍ مكرَّمة، فقراءةُ الأساس وحدَه تُري تجاوزاً حيث لا تجاوز.
+        // ودفترٌ قديمٌ لا يحمل `limit` **يُعلَن نقصُه** ولا يُقرأ رقمُه على غير وجهه.
+        ? ` (أقصى انحراف ${item.maxLateral} من ${item.limit !== undefined
+          ? `حدٍّ عامل ${item.limit}${item.ease && item.ease !== 1 ? ` = ${item.lateral}×${item.ease}` : ''}`
+          : `سماحةٍ أساس ${item.lateral} — ودفترُه لا يحمل حدَّه العامل`}، تغطية ${item.coverage}٪)`
         : '');
 }
 
@@ -100,7 +105,7 @@ function selfTest() {
       { ch: 'ب', form: 'isolated', mode: 'free', kind: 'fault', code: 'start-end',
         strokes: [[[10, 10], [20, 20], [30, 30]]] },
       { ch: 'ب', form: 'isolated', mode: 'free', kind: 'done', accepted: true,
-        maxLateral: 40, lateral: 90, coverage: 96,
+        maxLateral: 40, lateral: 90, limit: 144, ease: 1.6, coverage: 96,
         strokes: [[[10, 10], [20, 20]]] },
       { ch: 'ن', form: 'isolated', mode: 'free', kind: 'done', accepted: true, strokes: [] },
       // **ونقرةُ النقطة ضربةٌ بنقطةٍ واحدة**: تدخل بضربتيها لا بجسمها وحدَه
@@ -118,6 +123,13 @@ function selfTest() {
     'وحكمُ المردود شكواه بعينها — من المحرّك ساعةَ الالتقاط لا من ظنّ المستورِد');
   ok(cases[1].expect.accept === true, 'وحكمُ المقبول قبولُه');
   ok(cases.every((c) => c.note && c.id && c.ref), 'ولكلِّ حالةٍ اسمٌ وعلّةٌ ومسارٌ مسمّى');
+  // **والعلّةُ تذكر الحدَّ الذي حُكم به لا الأساسَ وحدَه** (عطبُ سجلٍّ أُصلح، `FIELD_TRIAL §٦`)
+  ok(cases[1].note.includes('حدٍّ عامل 144') && cases[1].note.includes('90×1.6'),
+    'وانحرافُ الأثر يُقرأ إلى **حدِّه العامل** ومعاملِه لا إلى السماحة الأساس');
+  ok(toCases({ items: [{ ch: 'ب', form: 'isolated', mode: 'free', kind: 'done', accepted: true,
+    maxLateral: 40, lateral: 90, coverage: 96, strokes: [[[10, 10], [20, 20]]] }] })[0]
+    .note.includes('لا يحمل حدَّه العامل'),
+    'ودفترٌ من قبل الإصلاح يُعلن نقصَه — فلا يُقرأ رقمُه على غير وجهه');
   ok(new Set(cases.map((c) => c.id)).size === cases.length, 'ولا معرّفَ مكرَّر');
 
   // **والتحذيرُ يُحدَّث حين تدخل المادّة**: العدّةُ تُطالِب بذلك من نفسها
