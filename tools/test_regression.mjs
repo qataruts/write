@@ -58,11 +58,21 @@ const ok = (cond, msg) => { if (!cond) { fails++; console.log('  ✗', msg); } e
 // نفسِه (`toCases` — اشتقاقٌ واحدٌ لا نسخةٌ ثانية) ويُقاس ويُعلَن أنه غيرُ مجمَّد،
 // فيُرى أثرُ كلِّ تعديلٍ على **ثمانية عشر أثراً حقيقياً** لا على ما جُمِّد منها وحدَه.
 
+// ————— **الشاهدُ يشيخ بتبدّل مرجعه** — وسمُ `stale-reference` (بند ص٧) —————
+//
+// أثرٌ من الميدان كُتب فوق **الخيال القديم**، ثم صار مرجعُ الحرف **أثرَ يد المالك**
+// (بند ص٦): فحكمُه اليومَ **قياسٌ على غير ما رُسم عليه** — لا حكمٌ على المحرّك.
+// **فيُوسَم في `pen_traces.json` بتاريخه وعلّته، ويخرج من المقابلة ولا يُمحى**
+// (حكمُ الإدارة ٣ في مراجعة ص٦: «تُوسَم ولا تُحذَف ولا تُبتلَع»): يُقاس ويُطبع حكمُه
+// اليوم في سطرٍ باسمه، ولا يُحسب ردّاً كاذباً جديداً على تعديلٍ لم يفعله.
+// **وصنفُ العطب يُقيَّد للعائلة**: «حارسٌ يقيس ما لم يعد المرجعُ إياه».
+const staleOf = (c) => c.stale || null;
+
 const kitCases = traces.cases
   // **وحالاتُ الطريق تُمشى لا تُحكَم دفعةً** — آلتُها `createFreeRun`، وموضعُها
   // `test_pen.mjs §٢ج`. تُستثنى هنا **معدودةً معلَنة** لا صامتة.
   .filter((c) => !c.expect.run)
-  .map((c) => ({ ...c, frozen: true, book: 'pen_traces.json' }));
+  .map((c) => ({ ...c, frozen: true, book: 'pen_traces.json', stale: staleOf(c) }));
 
 const walked = traces.cases.filter((c) => c.expect.run).map((c) => c.id);
 const known = new Set(traces.cases.map((c) => c.id));
@@ -117,6 +127,7 @@ const rows = all.map((c) => {
     id: c.id,
     origin: c.origin === 'field' ? 'field' : 'synthetic',
     frozen: c.frozen,
+    stale: c.stale || null,
     book: c.book,
     note: c.note,
     wanted: Boolean(c.expect.accept),
@@ -148,7 +159,10 @@ console.log(`\n— ١) المادّة: ${rows.length} حالةً — ${human.len
 // **والمجمَّدُ يُفرَد عن الخام في الحصيلة**: الخامُ فيه أثرٌ عاد من الالتقاط ناقصَ
 // نقطته (عطبُ `FIELD_TRIAL §٥`)، فخلطُه بالشاهد يُنقص الرقمَ بعيبِ عدّةٍ لا بعيبِ
 // حكم. ويُعَدّ ولا يُطرَح — فيوم يُصلَح الالتقاطُ يُجمَّد ويرتفع إلى سطره.
-const frozenHuman = human.filter((r) => r.frozen);
+// **والموسومُ يُفرَد كما يُفرَد الخام**: يُقاس ويُعَدّ ويُطبع، ولا يدخل حصيلةَ
+// الشاهد — فمرجعُه ليس المرجعَ الذي يُحكَم به اليوم.
+const frozenHuman = human.filter((r) => r.frozen && !r.stale);
+const staleRows = rows.filter((r) => r.stale);
 const rawHuman = human.filter((r) => !r.frozen);
 
 console.log('\n  الحصيلة — المجمَّدُ في العدّة (وهو الشاهد):');
@@ -165,7 +179,18 @@ if (rawHuman.length) {
     + ' — يُقاس ويُتتبَّع ولا يُحتجّ به (عطبُ الالتقاط، `FIELD_TRIAL §٥`)');
 }
 
-const missed = rows.filter((r) => !r.match);
+if (staleRows.length) {
+  console.log(`\n  والموسومُ \`stale-reference\` (${staleRows.length}) — يُقاس ويُطبع ولا يُحكَم به:`);
+  for (const r of staleRows) {
+    console.log(`  · ${r.id}: المنتظَرُ ${r.wanted ? 'قبولٌ' : 'ردٌّ'}`
+      + ` والواقعُ ${r.accepted ? 'قبولٌ' : `ردٌّ بـ«${r.size || r.primary}»`}`
+      + ` (انحراف ${r.maxLateral}/${Math.round(r.limit)} · تغطية ${r.coverage}٪)`
+      + ` — ${r.stale.why}`);
+  }
+  console.log(`  ⇐ وبديلُها: ${staleRows[0].stale.replacedBy}`);
+}
+
+const missed = rows.filter((r) => !r.match && !r.stale);
 if (missed.length) {
   console.log(`\n  وما خالف المنتظَر (${missed.length}) — بالاسم:`);
   for (const r of missed) {
@@ -178,7 +203,7 @@ if (missed.length) {
 
 // **والهامشُ يُطبع لا يُستنتَج**: كم بقي بين أقصى انحراف كلِّ مقبولٍ وحدِّه العامل؟
 // (تشخيصُ §٦: «أربعةٌ من عشرٍ فوق ٨٠٪ من الحدّ العامل — فمعايرةُ السماحة حاجةٌ مقيسة»).
-const acceptedHuman = human.filter((r) => r.accepted).map((r) => ({ ...r, pct: (r.maxLateral / r.limit) * 100 }));
+const acceptedHuman = human.filter((r) => r.accepted && !r.stale).map((r) => ({ ...r, pct: (r.maxLateral / r.limit) * 100 }));
 acceptedHuman.sort((a, b) => b.pct - a.pct);
 if (acceptedHuman.length) {
   const tight = acceptedHuman.filter((r) => r.pct >= 80).length;
@@ -232,9 +257,13 @@ if (!existsSync(BASE_PATH)) {
   const now = new Map(rows.map((r) => [r.id, r]));
   const changed = [];
   const gone = [];
+  const staleIds = new Set(staleRows.map((r) => r.id));
   for (const [id, was] of Object.entries(base.cases)) {
     const is = now.get(id);
     if (!is) { gone.push(id); continue; }
+    // **والموسومُ خارجَ المقابلة**: أساسُه قِيس على مرجعٍ تبدّل، فالفرقُ فرقُ
+    // مرجعين لا فرقُ محرّكين — ويبقى في الأساس مقيَّداً حتى يُستبدَل أثرُه.
+    if (staleIds.has(id)) continue;
     if (was.accepted !== is.accepted || was.primary !== is.primary || was.size !== is.size) {
       changed.push({ id, was, is });
     }

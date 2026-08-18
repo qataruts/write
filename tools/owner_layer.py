@@ -414,6 +414,167 @@ def fix_dots(ch: str, form: str, dots: list, ref: dict) -> tuple:
     return order_dots(kept), notes
 
 
+# ————— **الطيّةُ في أثر اليد**: انطباقُه على نفسه يُعلَن بقياس (بند ص٧) —————
+#
+# الطيّةُ صفةٌ في القطعة تقول «**مكانٌ واحد يحمل طولين**» (`METHOD.md §٣.١`)، وبها
+# يقسم المحرّكُ المسارَ فلا يُقرأ العودُ ارتداداً. وفي الخيال تُقرأ من **مفرق الهيكل**
+# (`walkGesture` في العدّة: شوكةٌ يمشيها القلمُ ذهاباً وإياباً) — **ويدُ المالك لا تمرّ
+# بالهيكل أصلاً**: يكتب فوق الخيال حرّاً، فرأسُ الجيم وبطنُ العين وسنُّ الشين تعود على
+# نفسها **بلا إعلانٍ يقولها**. فيقف الطفلُ على شكلٍ يردّه المحرّكُ `reverse` على أدنى
+# رجفة (سبعةُ أشكالٍ احتملت **صفراً** من عهد `child-drift`).
+#
+# **والعلاجُ عندنا نظيرُه مقيسٌ**: في «توسعة الكلمة» أُعلن انطباقُ الحبر طيّةً بقياسٍ
+# آليّ (`make_paths.html: overlapFolds` — حكمُ المدير ١٣ أغسطس ٢٠٢٦). فهو بعينه يُنقَل
+# إلى أثر اليد، **ولا عتبةَ تُختار**: العتبتان سماحتا المحرّك نفسُه —
+#   · **مكاناً**: شقّان أقربُ من `lateral` لا يفرّق المحرّكُ بينهما — وهو بعينه ما
+#     يجعل الإعلانَ لازماً (وهو عينُ ما يفحصه `check_paths.check_folds`).
+#   · **وطولاً**: بينهما فوق `back × ٢` من طول المسار — فما دونها **جوارُ القلم لنفسه**
+#     (يعرفه المحرّكُ موضعاً واحداً أصلاً) لا زيارةٌ ثانية.
+#   · **وضلعٌ يقيسه المحرّك**: كلُّ ضلعٍ فوق `back`، وإلّا ابتلعه سماحُ بلوغ القمّة.
+# **وبلا قناع حبر**: الحرفُ يملأ صندوقَه فسماحاتُ المحرّك على مقياسه (`scale = ١`)،
+# وليس في طبقة اليد حبرُ كلمةٍ يُقاس عرضُه — فالحدُّ سماحةُ الانحراف بحرفها.
+
+def self_folds(points: list, tol: dict, near: float = None, notes: list = None) -> list:
+    """طيّاتُ قطعةٍ من انطباقها على نفسها — `{from, apex, to}` بأرقام نقاطها.
+
+    **والكشفُ على المسار مكثَّفاً ثم تُردّ أرقامُه إلى نقاطه**: خطوةُ المحرّك تترك
+    في سنّةِ الشين نقطتين أو ثلاثاً، فيسقط العناقُ لِقلّة العيّنة لا لانفكاك الحبر
+    (قِيست ش/وسطي: مقابلٌ واحدٌ لا غير). فيُكثَّف بأرضيّة الخطوة — **كما يُكثَّف
+    للتنقيح** (`refine`) — ويُقاس عليه، ثم يُرَدّ كلُّ رقمٍ إلى أقرب نقطةٍ في الطول
+    (نظيرُ `resampleStroke` في العدّة: الطيّةُ تُحمَل أطوالاً لا أرقامَ عيّنات).
+    """
+    poly = [list(p) for p in points]
+    if len(poly) < 4:
+        return []
+    cum = [0.0]
+    for i in range(1, len(poly)):
+        cum.append(cum[-1] + math.dist(poly[i - 1], poly[i]))
+    far = tol["back"] * 2          # تباعدٌ في الطول — دونه جوارُ القلم لنفسه
+    near = tol["lateral"] if near is None else near
+    floor, _ = step_rule()
+    fine = walk(poly, floor)
+    grain = [0.0]
+    for i in range(1, len(fine)):
+        grain.append(grain[-1] + math.dist(fine[i - 1], fine[i]))
+
+    mate = [-1] * len(fine)
+    for i in range(len(fine)):
+        gap = near
+        for j in range(i + 1, len(fine)):
+            if grain[j] - grain[i] < far:
+                continue
+            d = math.dist(fine[i], fine[j])
+            if d < gap:
+                gap, mate[i] = d, j
+
+    out, run = [], None
+
+    def tip(lo: int, hi: int) -> int:
+        """**رأسُ الشوكة**: أبعدُ نقاطها عن الوتر الواصل بين طرفيها.
+
+        وهو موضعُ الانعطاف الذي يقسم عليه المحرّكُ المسارَ — **يُقرأ من الشكل لا
+        من ترتيب العيّنات**: منتصفُ الأرقام يقع في رأسٍ حين يستوي الضلعان، ويزيغ
+        عنه حين يطول أحدُهما (ويدُ إنسانٍ لا تستوي)، فتُقاس الطيّةُ من رأسٍ ليس
+        رأسَها فلا يبلغه الطفلُ — وهو عينُ ما ردّ «الأثرَ الرطبَ» في خ/نهائي.
+        """
+        a, b = fine[lo], fine[hi]
+        return max(range(lo + 1, hi), key=lambda k: seg_dist(fine[k], a, b))
+
+    def hairpin(top: int) -> tuple:
+        """**حدُّ الطيّة حيث يفترق الضلعان**: تُمَدّ من رأسها إلى خارجٍ في الضلعين
+        معاً ما داما في حبرٍ واحد، فإذا افترقا وقفت.
+
+        **ولِمَ لا طرفا العناق؟** لأنّ العناقَ إنما يُلتقَط بعد `back × ٢` من الطول
+        (نافذةُ المحرّك)، فيقع طرفاه **في ما قبل الشوكة وما بعدها**: سنّةُ الشين
+        تخرج ضلعاها «سطرٌ + صعود» و«نزولٌ + سطر» — **فتكذب المرآة** التي يقرؤها
+        `pen.js` من الشكل (`mirror`)، ويُقرأ نزولُ الطفل على أثره الرطب ارتداداً.
+        فتُمَدّ من الرأس **متناظرةً** كما تُبنى طيّةُ الخيال (ضلعان مُزاحان عن مفرقٍ
+        واحد) — فتصدق المرآةُ ويُقبَل ما هو صواب.
+        """
+        k = 1
+        while (top - k >= 0 and top + k < len(fine)
+               and math.dist(fine[top - k], fine[top + k]) < near):
+            k += 1
+        k -= 1
+        return grain[top - k], grain[top], grain[top + k]
+
+    def close():
+        nonlocal run
+        # **والشوكةُ تُقابِل ولا تُوازي**: مَن مضى في ضلعها الصاعد رجع في النازل —
+        # فمقابلُ النقطة يتقهقر كلّما تقدّمت أو يثبت (`dir ≤ 0`). **وحلقةُ الهاء
+        # والواو والميم تُوازي**: مقابلُ النقطة على الجهة الأخرى يتقدّم بتقدّمها،
+        # فهي **موضعان في حلقةٍ** لا موضعٌ واحدٌ بطولين — ولو تقاربا في المكان.
+        # (وانطباقُ الكلمة يقبل الموازيَ لأنّ حبرَ الوصل يُمشى مرّتين في اتجاهٍ
+        # واحد بينهما نزهةٌ في حرفٍ آخر — وذلك لا يقع في حرفٍ مفرد.)
+        if run and run["n"] >= 2 and run["dir"] <= 0:
+            lo = run["i1"]
+            hi = max(run["j1"], run["j2"])
+            mid = min(run["j1"], run["j2"])
+            apex = round((run["i2"] + mid) / 2)   # وسطُ ما لم يُعانَق — موضعُ الرأس
+            # **ووسطُ الطيّة لا يزيد على نافذة المحرّك**: ما بين آخرِ مُعانَقةٍ
+            # صاعدةً وأوّلِ مُعانَقةٍ نازلةً **إنما بقي بلا عناقٍ لأنّ القاعدةَ نفسَها
+            # تمنعه** (تباعدٌ في الطول دون `back × ٢` جوارُ القلم لنفسه) — فإن جاوزه
+            # فبينهما **نزهةٌ حقيقية**: حلقةُ العين أو جسمُ الطاء يعود على مبدئه، وتلك
+            # موضعان في حلقةٍ لا موضعٌ واحدٌ بطولين. **ولا رقمَ يُختار**: النافذةُ
+            # نافذةُ المحرّك وزيادتُها خطوةُ التكثيف — وهي دقّةُ القياس نفسُها.
+            gap = grain[mid] - grain[run["i2"]]
+            if lo < apex < hi and gap <= far + floor:
+                out.append(hairpin(tip(lo, hi)))
+            elif notes is not None:
+                notes.append(f"عناقٌ طولُ وسطه {gap:.0f} فوق نافذة المحرّك"
+                             f" ({far + floor:.0f}) — نزهةٌ بين شقّيه لا طيّة")
+        elif run and notes is not None and run["n"] >= 2:
+            notes.append("عناقٌ مُوازٍ (مقابلُه يتقدّم بتقدّمه) — حلقةٌ لا شوكة")
+        run = None
+
+    for i, j in enumerate(mate):
+        if j < 0:
+            close()
+            continue
+        if (run and i == run["i2"] + 1 and abs(j - run["j2"]) <= 2
+                and (run["dir"] == 0 or j == run["j2"]
+                     or (j > run["j2"]) == (run["dir"] > 0))):
+            if run["dir"] == 0 and j != run["j2"]:
+                run["dir"] = 1 if j > run["j2"] else -1
+            run.update(i2=i, j2=j, n=run["n"] + 1)
+        else:
+            close()
+            run = {"i1": i, "i2": i, "j1": j, "j2": j, "n": 1, "dir": 0}
+    close()
+
+    def at(length: float) -> int:
+        """أقربُ نقطةٍ من نقاط القطعة إلى هذا الطول — ردُّ الرقم إلى موضعه."""
+        return min(range(len(cum)), key=lambda k: abs(cum[k] - length))
+
+    # **وضلعٌ يقيسه المحرّك**: يُفحَص على نقاط القطعة بأعيانها — فهي التي يفحصها
+    # `check_paths` ويمشيها المحرّك، لا على تكثيفٍ لا يراه أحد.
+    def keeps(fold: dict) -> bool:
+        a, mid, b = fold["from"], fold["apex"], fold["to"]
+        up = poly[a:mid + 1]
+        down = poly[mid:b + 1]
+        if len(up) < 2 or len(down) < 2:
+            return False
+        # **وضلعٌ يقيسه المحرّك**: أقصرُ من سماحة الارتداد يبتلعه سماحُ بلوغ القمّة
+        if min(poly_len(up), poly_len(down)) < tol["back"]:
+            if notes is not None:
+                notes.append(f"ضلعٌ طولُه {min(poly_len(up), poly_len(down)):.0f}"
+                             f" دون سماحة الارتداد ({tol['back']:.0f})")
+            return False
+        return True
+
+    kept = []
+    for lo, mid, hi in sorted(out):
+        fold = {"from": at(lo), "apex": at(mid), "to": at(hi)}
+        if not (fold["from"] < fold["apex"] < fold["to"]):
+            continue
+        if any(fold["from"] <= f["to"] and f["from"] <= fold["to"] for f in kept):
+            continue
+        if not keeps(fold):
+            continue
+        kept.append(fold)
+    return kept
+
+
 # ————— الطبقة —————
 
 def snap_in(strokes: list, dots: list, grid: float) -> tuple:
@@ -502,7 +663,11 @@ def layer(passes: int = TAUBIN_PASSES) -> tuple:
                 notes.append(f"خرج من الشبكة فرُدّ إليها بإزاحةٍ صلبة {moved} وحدة"
                              " — موضعٌ تبدّل لا شكل")
             shape = {
-                "strokes": [{"start": [s[0][0], s[0][1]], "points": s} for s in strokes],
+                # **والطيّةُ تُعلَن مع القطعة لا بعدها**: تُقرأ من نقاطها التي سيمشيها
+                # المحرّكُ بعينها (`self_folds` أعلاه)، فما انطبق منها أُعلن ولا يُدَّعى سواه.
+                "strokes": [({"start": [s[0][0], s[0][1]], "points": s, "folds": f}
+                             if (f := self_folds(s, tol)) else
+                             {"start": [s[0][0], s[0][1]], "points": s}) for s in strokes],
                 "dots": [{"at": [round(d[0], 1), round(d[1], 1)], "count": 1, "after": True}
                          for d in dots],
             }

@@ -300,6 +300,17 @@ for (const item of traces.cases) {
     + ` · ارتداد ${Math.round(m.maxBack)}/${pen.TOLERANCE.back}`
     + ` · تغطية ${Math.round(m.coverage * 100)}٪`;
   const wanted = item.expect.accept;
+  // **والموسومُ `stale-reference` يُقاس ولا يُحكَم به** (بند ص٧، وحكمُ الإدارة ٣ في
+  // مراجعة ص٦): أثرٌ من الميدان كُتب فوق **الخيال القديم** ثم صار مرجعُ حرفه أثرَ يد
+  // المالك — **فمنتظَرُه قِيس على غير ما يُقاس عليه اليوم**. فيبقى في العدّة بوسمه
+  // وعلّته وتاريخه، ويُطبع حكمُه اليوم بعينه، **ولا يُحمَّل المحرّكُ وزرَ مرجعٍ تبدّل**.
+  // ويُستبدَل بأثرٍ جديد من ساحة الحصاد بعد النشر — وحينها يسقط الوسمُ من نفسه.
+  if (item.stale) {
+    console.log(`  ○ ${item.id}: موسومٌ \`stale-reference\` (${item.stale.since})`
+      + ` — ${verdict.accepted ? 'يُقبَل' : `يُرفَض بـ«${verdict.size || verdict.primary}»`}`
+      + ` والمنتظَرُ ${item.expect.accept ? 'قبولٌ' : 'ردٌّ'}: ${item.stale.why}`);
+    continue;
+  }
   // **والمطلوبُ أوّلُ خطأ لا وجودُه بين الأخطاء**: الشكوى تُسمّى بعينها، فلو رُفض
   // المسارُ لعلّةٍ أخرى ثم جاء المنتظَرُ صدىً لها لَمَرّ الفحصُ على خطأٍ في الحكم.
   const faultOk = wanted || !item.expect.fault || verdict.primary === item.expect.fault;
