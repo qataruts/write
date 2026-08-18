@@ -576,15 +576,27 @@ console.log('\n— ٢د) سماحةُ الجزء الملحق: فرقُ العد
   // فرُدَّت بالاتجاه وتغطيتُها تامّة، فقياسُ الأرضيّة عليها قياسٌ على غير جنسها.
   const rejected = traces.cases.filter((c) => c.origin === 'field' && c.ref === 'ك/isolated'
     && c.expect.accept === false && c.expect.fault === 'short');
-  const highest = Math.max(...rejected.map(tailCoverage));
+  // **ولا حراسةَ على فراغ** (بلاغُ جلسة ص١، ١٨ أغسطس ٢٠٢٦): كان هذا السطرُ
+  // `Math.max(...[])` = `-Infinity` **فيمرّ الشرطُ دائماً** بعد أن نسخ حكمُ المالك
+  // (١٧ أغسطس، جلسة ك٢) حكمَي `field-015/016` إلى قبول — فذهبت المادّةُ وبقي الأخضر.
+  // **فصار الشاهدُ يُشترَط**: إن وُجد ردٌّ قِصَريٌّ وافقته عينٌ فالأرضيّةُ فوقه،
+  // **وإن غاب فالمقيسُ أنّ الأرضيّة هي رقمُ المالك بعينه** — والغيابُ يُطبع بعلّته
+  // وتاريخها لا يُبتلَع صامتاً.
+  const highest = rejected.length ? Math.max(...rejected.map(tailCoverage)) : null;
   console.log(`  الشولةُ: طولُها ${Math.round(tail.poly.len)} من ${Math.round(parts[0].poly.len)}`
     + ` فسماحتُها المعلَنة ×${tail.ease} — وعتبتُها ${(eased * 100).toFixed(0)}٪`
     + ` (التخفيفُ الهندسيُّ كاملاً ${(raw * 100).toFixed(1)}٪، محبوسٌ بأرضيّة ${
       (pen.EASE_FLOOR * 100).toFixed(0)}٪)`);
-  ok(eased < pen.TOLERANCE.coverage && eased > highest,
-    `وأرضيّتُها **فوق أعلى ردٍّ محقّ في الميدان** (${(highest * 100).toFixed(2)}٪ في ${
+  ok(highest === null
+    ? eased === pen.EASE_FLOOR && eased < pen.TOLERANCE.coverage
+    : eased < pen.TOLERANCE.coverage && eased > highest,
+  highest === null
+    ? `وأرضيّتُها **رقمُ المالك بعينه** (${(pen.EASE_FLOOR * 100).toFixed(0)}٪ دون تغطية ${
+      (pen.TOLERANCE.coverage * 100).toFixed(0)}٪) — **ولا ردَّ قِصَريّاً مجمَّداً يُقاس عليه**:`
+      + ' نسخ حكمُ المالك (١٧ أغسطس ٢٠٢٦) حكمَي `field-015/016` إلى قبول، فالغيابُ بعلّته لا بإهمال'
+    : `وأرضيّتُها **فوق أعلى ردٍّ محقّ في الميدان** (${(highest * 100).toFixed(2)}٪ في ${
       rejected.length} ردٍّ مجمَّد) بهامش ${((eased - highest) * 100).toFixed(2)} نقطة`
-    + ' — فالتخفيفُ لا يشتري قبولاً كاذباً، والتخفيفُ الكاملُ يشتريه فهو محبوس');
+      + ' — فالتخفيفُ لا يشتري قبولاً كاذباً، والتخفيفُ الكاملُ يشتريه فهو محبوس');
 
   /**
    * **ودَينٌ مسمّى يُطبَع في كل تشغيلة**: التصنيفُ في عدّة التأليف يسري على مادّة
