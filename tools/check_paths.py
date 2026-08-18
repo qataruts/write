@@ -256,6 +256,18 @@ def check(paths: dict, tol: dict, forms: list, letters=None) -> list:
             tag = f"«{ch}» {form}"
             if form not in forms:
                 bad.append(f"{tag}: شكلُ موقعٍ لا تعرفه `FORMS`")
+            # **وحدُّ الشبكة حدُّ خليّته هو** (بند ص٢/ب ٢، كما في بابِ الكلمات):
+            # الشكلُ يجلس في **خليّة السطر** لا في مربّعٍ مفترَض، فمن أعلن صندوقَه
+            # قِيس به — ومَن لم يُعلن فشبكتُه ١٠٠٠×١٠٠٠ كما كانت.
+            box = ref.get("box") or [grid, grid]
+            gw, gh = float(box[0]), float(box[1])
+            # **وسماحاتُه بمقياسه هو** (بند ص٢/ب ١، كما في بابِ الكلمات): الشكلُ
+            # يحمل `tolerance` — كم يبلغ حبرُه من الحرف الذي كان يملأ شبكتَه —
+            # **فبه يُحكَم فبه يُفحَص**، ولا مسطرتان لشكلٍ واحد.
+            scale = ref.get("tolerance")
+            scale = scale if isinstance(scale, (int, float)) and scale > 0 else 1.0
+            stol = {**tol, "start": tol["start"] * scale, "back": tol["back"] * scale,
+                    "lateral": tol["lateral"] * scale, "dot": tol["dot"] * scale}
             strokes = ref.get("strokes") or []
             dots = ref.get("dots") or []
             if ch in TAP_ONLY:
@@ -292,16 +304,16 @@ def check(paths: dict, tol: dict, forms: list, letters=None) -> list:
                     bad.append(f"{where}: `start` ليس أوّلَ نقاطه ({start} ≠ {points[0]})")
                 starts.append((f"{where} (جسم)", start or points[0]))
 
-                out = [p for p in points if not (0 <= p[0] <= grid and 0 <= p[1] <= grid)]
+                out = [p for p in points if not (0 <= p[0] <= gw and 0 <= p[1] <= gh)]
                 if out:
-                    bad.append(f"{where}: {len(out)} نقطةً خارج الشبكة ({out[0]})")
+                    bad.append(f"{where}: {len(out)} نقطةً خارج خليّته ({out[0]})")
 
                 length = poly_len(points)
-                if length < tol["start"]:
-                    bad.append(f"{where}: طولُه {length:.0f} دون دائرة البداية ({tol['start']:.0f})"
+                if length < stol["start"]:
+                    bad.append(f"{where}: طولُه {length:.0f} دون دائرة البداية ({stol['start']:.0f})"
                                " — جزءٌ لا يُكتب")
                 # أقصى طولِ قطعة: من نافذة المحرّك ورأسِ مساره (رأسُ الملفّ)
-                cap = min(tol["back"], length * tol["head_ratio"])
+                cap = min(stol["back"], length * tol["head_ratio"])
                 for k in range(1, len(points)):
                     step = dist(points[k - 1], points[k])
                     if step > cap + 0.5:
@@ -312,7 +324,7 @@ def check(paths: dict, tol: dict, forms: list, letters=None) -> list:
                         bad.append(f"{where}: نقطتان متطابقتان عند {points[k]}")
                         break
 
-                bad += check_folds(stroke, where, tol)
+                bad += check_folds(stroke, where, stol)
 
             for j, dot in enumerate(dots, 1):
                 where = f"{tag} نقطة {j}"
@@ -320,8 +332,8 @@ def check(paths: dict, tol: dict, forms: list, letters=None) -> list:
                 if not at or len(at) != 2:
                     bad.append(f"{where}: بلا موضع")
                     continue
-                if not (0 <= at[0] <= grid and 0 <= at[1] <= grid):
-                    bad.append(f"{where}: خارج الشبكة ({at})")
+                if not (0 <= at[0] <= gw and 0 <= at[1] <= gh):
+                    bad.append(f"{where}: خارج خليّته ({at})")
                 # **النقاطُ بعد الجسم** — قاعدةُ الخطّ المدرسيّ (`METHOD.md §٣.١`)
                 if dot.get("after") is not True:
                     bad.append(f"{where}: لا تُعلن `after: true` — والنقاطُ بعد الجسم")
@@ -346,11 +358,11 @@ def check(paths: dict, tol: dict, forms: list, letters=None) -> list:
                 for b in range(a + 1, len(starts)):
                     gap = dist(starts[a][1], starts[b][1])
                     pair_dots = "نقطة" in starts[a][0] and "نقطة" in starts[b][0]
-                    limit = tol["min_step"] if pair_dots else tol["start"]
+                    limit = tol["min_step"] if pair_dots else stol["start"]
                     if gap < limit:
                         bad.append(f"{tag}: بدايتا «{starts[a][0]}» و«{starts[b][0]}» "
                                    f"على بُعد {gap:.0f} < {limit:.0f} — لا يفرّق بينهما المحرّك")
-                    elif pair_dots and gap < tol["dot"]:
+                    elif pair_dots and gap < stol["dot"]:
                         clusters.append((gap, tag))
 
     # **ويُعلَن العددُ ولا يُسكَت عنه** — مجموعاً لا زوجاً زوجاً: أضيقُ فجوةٍ باسم
@@ -358,7 +370,7 @@ def check(paths: dict, tol: dict, forms: list, letters=None) -> list:
     if clusters:
         clusters.sort()
         print(f"  ○ عناقيدُ النقاط: {len(clusters)} زوجاً فجوتُه دون سماحة النقرة"
-              f" ({tol['dot']:.0f}) — أضيقُها {clusters[0][1]} على {clusters[0][0]:.0f}"
+              f" ({stol['dot']:.0f}) — أضيقُها {clusters[0][1]} على {clusters[0][0]:.0f}"
               f" وأوسعُها {clusters[-1][0]:.0f}. مواضعُ منفصلةٌ يفرّقها أقربُ المنتظَرات،"
               " وإرشادُ اللوح يومض موضعَ المنتظَرة منها")
     return bad
@@ -673,8 +685,15 @@ def self_test() -> int:
     # ٤) الشبكةُ والتطابقُ والطول
     ref = sound()
     ref["strokes"][0]["points"][5] = [1400.0, 200.0]
-    ok(any("خارج الشبكة" in b for b in check(one(ref), tol, forms)),
-       "ويُمسِك نقطةً خارج الشبكة المعيارية")
+    ok(any("خارج خليّته" in b for b in check(one(ref), tol, forms)),
+       "ويُمسِك نقطةً خارج خليّة الشكل (بلا صندوقٍ معلَن: الشبكةُ المعيارية)")
+    # **وحدُّ الخليّة يُقرأ من الشكل لا يُفترَض**: شكلٌ يعلن صندوقاً أوسعَ تُقبَل
+    # فيه النقطةُ نفسُها، وأضيقَ تُردّ — فلو أُهمل الإعلانُ لَحمرّ السطرُ كلُّه.
+    wide = sound()
+    wide["box"] = [2035.5, 2035.5]
+    wide["strokes"][0]["points"][5] = [1400.0, 200.0]
+    ok(not any("خارج خليّته" in b for b in check(one(wide), tol, forms)),
+       "ولا يردّها إن أعلن الشكلُ خليّةً تسعُها")
     ref = sound()
     ref["strokes"][0]["points"] = [[500.0, 100.0], [500.0, 100.0], [500.0, 160.0]]
     ok(any("طولُه" in b or "متطابقتان" in b for b in check(one(ref), tol, forms)),

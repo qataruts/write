@@ -54,6 +54,7 @@ WARM_OUT = ROOT / "app" / "js" / "warmups.js"
 WORD_OUT = ROOT / "app" / "js" / "word_paths.js"
 DROPPED = TOOLS / "paths_dropped.json"
 GHOST_OUT = TOOLS / "ghost_paths.json"   # الخيالُ خالصاً — مرجعُ طبقة المالك
+SEATING = TOOLS / "line_seating.json"   # تحويلُ الجلوس — به تُنقل المقيساتُ القديمة
 CURRICULUM = ROOT / "app" / "js" / "curriculum.js"
 FORMS = ["isolated", "initial", "medial", "final"]
 
@@ -63,6 +64,7 @@ WARM_SECTION = ("// ————— ٧ب) أشكالُ التهيئة الحرك
 
 sys.path.insert(0, str(TOOLS))
 import browser_test  # noqa: E402  (حظيرةُ الخادم ومُشغِّلُ Chrome — تبعيةٌ معلَنة)
+import line_layer  # noqa: E402  (سطرُ الكتابة وحدةً لا الحرف — بند ص٢/ب)
 import owner_layer  # noqa: E402  (طبقةُ المالك — أثرُ يده مسارَ محرّكٍ، بند ص٦)
 import ports  # noqa: E402  (جدولُ المنافذ — تُقرأ من موضعٍ واحد، `tools/ports.py`)
 
@@ -327,6 +329,15 @@ def write_module(paths: dict, meta: dict) -> str:
         for fi, form in enumerate(keys):
             ref = forms[form]
             lines.append(f'   "{form}": {{')
+            # **صندوقُ المادّة وسطرُها يسافران معها** (بند ص٢/ب ٢ و٤): الخليّةُ
+            # مربّعُ السطر الواحد للهجاء كلِّه، و`line` خطُّ الأساس الذي يجلس عليه
+            # الشكل — يرسمه اللوحُ ويوفّق عليه الحكمُ الثاني (`tools/line_layer.py`).
+            if ref.get("box"):
+                lines.append(f'    "box": [{num(ref["box"][0])}, {num(ref["box"][1])}],')
+            if ref.get("line") is not None:
+                lines.append(f'    "line": {num(ref["line"])},')
+            if ref.get("tolerance") is not None:
+                lines.append(f'    "tolerance": {ref["tolerance"]},')
             lines.append('    "strokes": [')
             eases = ease_of(ref["strokes"])
             for si, stroke in enumerate(ref["strokes"]):
@@ -571,6 +582,88 @@ def part_stamp() -> str:
     return f"{tool}·{sha()}·{material_sha()}"
 
 
+def seat_layer(paths: dict) -> dict:
+    """**سطرُ الكتابة وحدةً لا الحرف** (بند ص٢/ب ١): يُنزِّل الأشكالَ على سطرٍ واحد
+    بمقياسٍ عامٍّ واحد قبل أن تُكتب الوحدة — ويطبع ما تبدّل من نِسَب.
+
+    وموضعُها **بعد طبقة المالك**: النسبةُ تُحفَظ على الشكل الذي يُدرَّس فعلاً، لا
+    على خيالٍ تعلوه يدٌ بعده فتعيد كسرَه.
+    """
+    before = {f"{ch}/{form}": line_layer.ink(shape)
+              for ch, forms in paths.items() for form, shape in forms.items()}
+    seated, rep = line_layer.seat(paths)
+    sp = rep["spec"]
+    unit = sp["unit"]
+    print(f"\n📏 سطرُ الكتابة: الوحدةُ {unit} · القمّة {sp['cap']} · الأساس {sp['base']}"
+          f" · الخليّة {sp['cell']}² — ومقياسٌ عامٌّ واحد للهجاء كلِّه")
+    measured = [r for r in rep["shapes"] if r["ref"] is not None]
+    off = max((abs(r["got"] - r["ref"]) for r in measured), default=0)
+    moved = sorted(measured, key=lambda r: -abs(
+        (before[r["key"]][3] - before[r["key"]][2]) / unit - r["ref"]))[:5]
+    print(f"   {len(measured)} شكلاً على نسبة المرجع (أقصى فرقٍ {off:.4f} من الألف)"
+          f" · و{len(rep['shapes']) - len(measured)} بلا سندٍ نُقلت بحجمها")
+    for r in moved:
+        was = (before[r["key"]][3] - before[r["key"]][2]) / unit
+        print(f"   ⤷ {r['key']}: {was:.2f} ⇐ {r['ref']:.2f} من الألف")
+    for ch, forms in seated.items():
+        paths[ch] = forms
+    SEATING.write_text(json.dumps({
+        "what": "تحويلُ الجلوس على السطر لكلِّ شكل — `p' = to + (p - from) × scale`",
+        "why": "به يُنقَل إلى إطار السطر ما قِيس في الإطار القديم، **وأثقلُه آثارُ"
+               " الأطفال المجمَّدة** (`tools/pen_traces.json`): تُنقَل بالتحويل نفسِه"
+               " الذي نُقل به نموذجُها فتبقى العلاقةُ بينهما بحرفها — ولا تُعاد"
+               " تجربةُ ميدانٍ ولا يُكتب أثرٌ بيد.",
+        "tool": "tools/make_paths.py --seat",
+        "spec": rep["spec"],
+        "shapes": {r["key"]: {"scale": r["scale"], "from": r["from"], "to": r["to"]}
+                   for r in rep["shapes"]},
+    }, ensure_ascii=False), encoding="utf-8")
+    return {
+        "tool": "tools/line_layer.py",
+        "unit": unit, "cap": sp["cap"], "base": sp["base"], "cell": sp["cell"],
+        "top": sp["top"], "low": sp["low"],
+        "measured": len(measured), "unsupported": len(rep["shapes"]) - len(measured),
+        "off": round(off, 4),
+        "why": "النسبةُ بين الحروف تُحفَظ (أمرُ المالك ١٩ أغسطس ٢٠٢٦): مقياسٌ عامٌّ"
+               " واحدٌ للهجاء كلِّه وثلاثةُ خطوطٍ ثابتة، وكلُّ شكلٍ يأخذ نصيبَه من"
+               " `tools/naskh_metrics.json` — لا يُكبَّر حرفٌ وحدَه ليملأ خليّتَه.",
+    }
+
+
+def seat_build() -> int:
+    """**إعادةُ كتابة وحدة الحروف بلا متصفّح** — من جرد الخيال وطبقةِ المالك.
+
+    **ولا إحداثيَّ يُكتب بيد**: الخيالُ محفوظٌ بجرده (`tools/ghost_paths.json`) وقد
+    خرج من العدّة ساعةَ البناء ببصمة إيماءاتها، وطبقةُ المالك تُعاد من ملفّها،
+    وطبقةُ السطر حسابٌ محض. **وشرطُ صحّتها معلَنٌ ومحروس**: بصمةُ الإيماءات في الجرد
+    تطابق ملفَّها اليوم — فإن تبدّلت إيماءةٌ لزم البناءُ الكاملُ بمتصفّحه.
+    """
+    if not GHOST_OUT.exists():
+        print("لا جردَ للخيال — يلزم البناءُ الكامل (`--build`).")
+        return 1
+    ghost = json.loads(GHOST_OUT.read_text(encoding="utf-8"))
+    if ghost.get("sha") != sha():
+        print(f"جردُ الخيال بُني على إيماءةٍ أخرى ({ghost.get('sha')} ≠ {sha()})"
+              " — يلزم البناءُ الكامل (`--build`).")
+        return 1
+    paths, prior = ghost["paths"], paths_module()[1]
+    owner_layer.set_ghost(paths)
+    hand, owner = owner_layer.layer()
+    for ch, family in hand.items():
+        paths.setdefault(ch, {}).update(family)
+    away = max((row["away"] for row in owner["panel"]), default=0)
+    print(f"✍️  طبقةُ المالك: {owner['shapes']} شكلاً من يده تعلو الخيال")
+    seating = seat_layer(paths)
+    meta = dict(prior or {}, line=seating)
+    meta["owner"] = dict(meta.get("owner") or {}, sha=owner["sha"],
+                         shapes=owner["shapes"], passes=owner["passes"], away=away,
+                         limit=owner["limit"], ghost=[r["key"] for r in owner["dropped"]])
+    OUT.write_text(write_module(paths, meta), encoding="utf-8")
+    forms = sum(len(v) for v in paths.values())
+    print(f"\nكُتب {OUT.relative_to(ROOT)}: {len(paths)} حرفاً في {forms} شكلاً")
+    return 0
+
+
 def build(port: int, timeout: int, chunk: int = 100, fresh: bool = False) -> int:
     PARTS.mkdir(parents=True, exist_ok=True)
     stamp = part_stamp()
@@ -693,6 +786,8 @@ def build(port: int, timeout: int, chunk: int = 100, fresh: bool = False) -> int
     for row in owner["dropped"]:
         print(f"  ○ {row['key']}: بقي على الخيال — {row['why']}")
 
+    paths, seating = seat_layer(paths)
+
     meta = {
         "tool": "tools/make_paths.html",
         "gesture": "tools/path_anchors.json",
@@ -712,6 +807,7 @@ def build(port: int, timeout: int, chunk: int = 100, fresh: bool = False) -> int
                    " ثم تنعيمُ توبين ثم خطوةُ المحرّك، وبُعدُه عن أثره مقيسٌ في"
                    " `owner_layer.py --panel`. وما في `ghost` بقي على الخيال بعلّته.",
         },
+        "line": seating,
     }
     OUT.write_text(write_module(paths, meta), encoding="utf-8")
     forms = sum(len(v) for v in paths.values())
@@ -857,6 +953,10 @@ def self_test() -> int:
     # بأسمائه في `owner.ghost` **فلا يُدَّعى له نسبٌ ليس له**.
     stamp = (meta or {}).get("owner") or {}
     hand, report = owner_layer.layer()
+    # **وطبقةُ السطر تعلوهما معاً** (بند ص٢/ب ١): الوحدةُ تُكتب بعد الجلوس على
+    # السطر، فتُقابَل يدُ المالك بيده **بعد أن تجلس** — وإلا شكا الفاحصُ من مقياسٍ
+    # هو نفسُه أمرُ المالك. **وهي حسابٌ محضٌ يُعاد**، فالمقابلةُ تبقى مقابلةَ أثرٍ.
+    hand, _ = line_layer.seat(hand, unit=(meta or {}).get("line", {}).get("unit"))
     owned = {f"{ch}/{form}" for ch, family in hand.items() for form in family}
     ok(bool(stamp), f"ونسبُ الوحدة يعلن طبقةَ المالك ({stamp.get('shapes', '—')} شكلاً)")
     ok(stamp.get("sha") == owner_layer.sha(),
@@ -993,6 +1093,8 @@ def main() -> int:
     ap.add_argument("--open", action="store_true", help="العدّةُ لليد في متصفّحٍ مرئيّ")
     ap.add_argument("--nodes", action="store_true", help="جردُ عُقَد الخيال")
     ap.add_argument("--build", action="store_true", help="بناءُ app/js/paths.js")
+    ap.add_argument("--seat", action="store_true",
+                    help="إعادةُ كتابة وحدة الحروف من جرد الخيال بلا متصفّح")
     ap.add_argument("--sheet", metavar="PNG", help="لوحةُ مراجعةٍ بالعين")
     ap.add_argument("--bare", action="store_true", help="مع --sheet: بلا أرقام العُقَد")
     ap.add_argument("--only", metavar="حروف", help="مع --sheet: حروفٌ بعينها (للتأليف)")
@@ -1009,6 +1111,8 @@ def main() -> int:
         return self_test()
     if args.build:
         return build(args.port, args.timeout, args.chunk, args.fresh)
+    if args.seat:
+        return seat_build()
     if args.nodes:
         return nodes(args.port, args.timeout, Path(args.out) if args.out else None)
     if args.sheet:

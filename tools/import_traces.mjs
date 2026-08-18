@@ -79,6 +79,36 @@ function noteOf(item, i) {
  * الحروف في `app/js/paths.js` — فاسمُ الحالة يحمل الحرفَ وشكلَه، ويتكفّل
  * `test_pen.mjs` بمقابلة الاسم بمسار موجود.
  */
+/**
+ * ————— **دفترُ جهازٍ قديمٍ يُنقَل إلى إطار السطر** (بند ص٢/ب ٤) —————
+ *
+ * الأثرُ يُسجَّل بإحداثيات **اللوح الذي كُتب عليه**، ولوحُ الحرف كان الشبكةَ المربّعة
+ * ١٠٠٠×١٠٠٠ يملؤها الحرف. **ثم جلست الأشكالُ على سطرٍ واحدٍ في خليّة ٢٠٣٥** — فأثرٌ
+ * لم يُنقَل يُقاس إلى نموذجٍ ليس مكانَه ويُردّ `start-far` وهو صحيح.
+ *
+ * **فيُنقَل بالتحويل الذي نُقل به نموذجُه بعينه** (`tools/line_seating.json`):
+ * `p' = to + (p − from) × scale` — إزاحةٌ وتحجيمٌ منتظم، **فالعلاقةُ بين يد الطفل
+ * ونموذجه محفوظةٌ بحرفها**. ودفترُ جهازٍ يكتب `frame: "line"` (وهو ما تكتبه أجهزةُ
+ * اليوم بعد الجلوس) **لا يُنقَل** — فلا يُنقل أثرٌ مرّتين.
+ */
+const SEATING = (() => {
+  try {
+    const at = new URL('./line_seating.json', import.meta.url);
+    return JSON.parse(readFileSync(at, 'utf8')).shapes || {};
+  } catch { return {}; }
+})();
+
+export function seatStrokes(strokes, ref, frame) {
+  const rule = frame === 'line' ? null : SEATING[ref];
+  if (!rule) return strokes;
+  const [fx, fy] = rule.from;
+  const [tx, ty] = rule.to;
+  return strokes.map((stroke) => stroke.map((p) => [
+    Math.round((tx + (p[0] - fx) * rule.scale) * 10) / 10,
+    Math.round((ty + (p[1] - fy) * rule.scale) * 10) / 10,
+  ]));
+}
+
 export function toCases(book) {
   const items = Array.isArray(book?.items) ? book.items : [];
   return items.map((item, i) => ({
@@ -86,8 +116,9 @@ export function toCases(book) {
     expect: expectOf(item),
     note: noteOf(item, i + 1),
     origin: 'field',
+    frame: 'line',
     ref: `${item.ch}/${item.form}`,
-    strokes: item.strokes,
+    strokes: seatStrokes(item.strokes || [], `${item.ch}/${item.form}`, book?.frame),
   // **والنقرةُ ضربةٌ يقبلها البابُ** (عطبُ ميدان ١٧ أغسطس ٢٠٢٦): ضربةٌ بنقطةٍ واحدة
   // هي **نقطةُ الحرف** — يعدّها `partsOf` جزءاً كالجسم ويحكم عليها `up()` بانتشارها.
   // فكان الحدُّ `> 1` يطرحها هنا كما طرحها الالتقاط، **فيدخل العدّةَ نصفُ أثر**.
