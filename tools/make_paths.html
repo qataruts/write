@@ -94,6 +94,48 @@
   #preview .pen-arrow { fill: #b08a5a; }
   #preview .pen-head { display: none; fill: #b8342b; }
   #preview .pen-box--playing .pen-head { display: inline; }
+  /* ————— المِرسمة: **اللوحُ هو الشاشة** (بند ص٥/٩، درسُ صفحة التجربة ١٧ أغسطس) —————
+     لا مربّعٌ صغير في وسط صفحةٍ مزدحمة: السطحُ يأخذ كلَّ ما يبقى بعد شريطٍ علويّ
+     نحيف وصفِّ أزرارٍ كبيرة، وضلعُه أكبرُ مربّعٍ يسعه المنظور. ولا تباتٍ صغيرة. */
+  body.mirsam { display: block; background: #0e1218; overscroll-behavior: none;
+    -webkit-user-select: none; user-select: none; }
+  #mirsam { position: fixed; inset: 0; display: flex; flex-direction: column; gap: .4rem;
+    padding: .4rem; box-sizing: border-box; }
+  #mirsam-head { display: flex; align-items: center; gap: .6rem;
+    font-size: clamp(19px, 2.9vh, 30px); padding-inline: .4rem; }
+  #mirsam-count { color: #9aa7b8; font-variant-numeric: tabular-nums; }
+  #mirsam-name { font-weight: 700; font-size: clamp(22px, 3.4vh, 36px); }
+  #mirsam-hint { color: #9aa7b8; font-size: clamp(15px, 2.1vh, 22px); flex: 1;
+    text-align: start; }
+  #mirsam-board { flex: 1; min-height: 0; display: flex; justify-content: center; }
+  #slate { position: relative; height: 100%; aspect-ratio: 1; max-width: 100%;
+    background: #f7f4ee; border-radius: 1rem; touch-action: none; overflow: hidden; }
+  #slate canvas, #slate svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #slate .skel { stroke: #b7ac97; stroke-width: 4; fill: none; opacity: .5; }
+  #slate .hold { fill: #1d4f86; opacity: .5; }
+  #slate .hold.moved { fill: #c85a2a; opacity: .85; }
+  #slate .wet { stroke: #2f6ea8; stroke-width: 14; fill: none; stroke-linecap: round;
+    stroke-linejoin: round; opacity: .6; }
+  #slate .made { stroke: #b8342b; stroke-width: 12; fill: none; stroke-linecap: round;
+    stroke-linejoin: round; }
+  #slate .made-start { fill: #1f7a3d; }
+  #slate .made-head { fill: #b8342b; }
+  #slate .made-tag { fill: #fff; font: 700 34px/1 system-ui, sans-serif;
+    text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+  #mirsam-foot { display: flex; gap: .5rem; }
+  #mirsam-foot button { flex: 1; min-height: max(64px, 11vh); font-size: clamp(20px, 3.2vh, 34px);
+    font-weight: 700; border-radius: 1rem; border: 2px solid #2c3340; background: #1c2330;
+    color: var(--ink); }
+  #mirsam-foot button:disabled { opacity: .35; }
+  #mirsam-foot .go { background: #1f7a3d; border-color: #2fa057; flex: 2; }
+  #mirsam-foot .fix { background: #7a4a1f; border-color: #b08a5a; }
+  #mirsam-foot .fix.on { background: #c85a2a; border-color: #f0a070; }
+  #mirsam-say { position: fixed; inset-block-start: 40%; inset-inline: 10%;
+    background: #1f7a3d; color: #fff; font-size: clamp(22px, 4vh, 40px); font-weight: 700;
+    text-align: center; padding: 1.2rem; border-radius: 1rem; pointer-events: none;
+    opacity: 0; transition: opacity .18s; }
+  #mirsam-say.on { opacity: .96; }
+  #mirsam-say.bad { background: #8f2f26; }
   #log { padding: 1rem; white-space: pre-wrap; font-size: 13px; }
   .bad { color: #e08a80; } .ok { color: #7ec97e; }
 </style>
