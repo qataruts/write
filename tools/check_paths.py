@@ -545,11 +545,17 @@ def run(quiet: bool) -> int:
                 steps = [max(dist(s["points"][k - 1], s["points"][k])
                              for k in range(1, len(s["points"]))) for s in ref["strokes"]]
                 folds = sum(len(s.get("folds") or []) for s in ref["strokes"])
+                # **والشكلُ المنقور لا ضربةَ فيه** (الصفرُ بحكم المالك، ١٨ أغسطس ٢٠٢٦):
+                # `max()` على فراغٍ يرمي — وكان الجردُ المسهب يسقط به وحدَه بينما
+                # يمرّ `--quiet`. **وحارسٌ يخضرّ في وضعٍ ويرمي في آخر عيبٌ لا طرفة**.
                 print(f"  · {ch} {form}: {len(ref['strokes'])} جزءاً"
-                      f" · طول {'، '.join(f'{v:.0f}' for v in spans)}"
-                      f" · أقصى قطعة {max(steps):.0f}"
-                      f" · نقاط {sum(int(d['count']) for d in ref['dots'])}"
-                      + (f" · **طيّة {folds}**" if folds else ""))
+                      f" · طول {'، '.join(f'{v:.0f}' for v in spans) if spans else '—'}"
+                      f" · أقصى قطعة {max(steps):.0f}" if steps else
+                      f"  · {ch} {form}: نقرةٌ بلا ضربة"
+                      f" · نقاط {sum(int(d['count']) for d in ref['dots'])}")
+                if steps:
+                    print(f"      نقاط {sum(int(d['count']) for d in ref['dots'])}"
+                          + (f" · **طيّة {folds}**" if folds else ""))
 
     if letters is None:
         if not quiet:
