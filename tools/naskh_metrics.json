@@ -1,0 +1,3185 @@
+{
+ "سند": "docs/naskh/ — «حلقة هداية · Calligraphy 2»، ص٥٧–٦٢ (`STROKE_ORDER §٧ج`)",
+ "الوحدة": "ارتفاعُ الألف المعزولة في ص٥٩ = ١٫٠٠ — مقياسٌ واحدٌ للهجاء كلِّه",
+ "alif_px": 211.0,
+ "منهج": {
+  "عتبة الحرف": 90,
+  "عتبة الخطّ المنقّط": 128,
+  "up": "أعلى حبر الشكل فوق خطّ الأساس ÷ ارتفاع الألف",
+  "down": "أدنى حبره تحت خطّ الأساس ÷ ارتفاع الألف",
+  "width": "عرضُ حبره ÷ ارتفاع الألف",
+  "body_*": "الشكلُ بلا نقط الإعجام — وهو المقيسُ في تقرير الفرق",
+  "strokes": "منقولٌ من docs/NASKH_CROSS.md ولا يُستنبَط من الصورة"
+ },
+ "عدد": 112,
+ "مقيس": 111,
+ "متعذّر": [
+  {
+   "letter": "ا",
+   "form": "initial",
+   "why": "عمودُ الابتدائي نصٌّ لا شكل: «لا تأتي الألف في بداية الكلمة»"
+  }
+ ],
+ "بلا سند ضربات": [
+  {
+   "letter": "د",
+   "form": "isolated",
+   "why": "لم تسمِّه NASKH_CROSS في أقسامها الثلاثة — ولا يُخمَّن"
+  },
+  {
+   "letter": "د",
+   "form": "initial",
+   "why": "لم تسمِّه NASKH_CROSS في أقسامها الثلاثة — ولا يُخمَّن"
+  },
+  {
+   "letter": "ذ",
+   "form": "isolated",
+   "why": "لم تسمِّه NASKH_CROSS في أقسامها الثلاثة — ولا يُخمَّن"
+  },
+  {
+   "letter": "ذ",
+   "form": "initial",
+   "why": "لم تسمِّه NASKH_CROSS في أقسامها الثلاثة — ولا يُخمَّن"
+  },
+  {
+   "letter": "غ",
+   "form": "isolated",
+   "why": "لم تسمِّه NASKH_CROSS في أقسامها الثلاثة — ولا يُخمَّن"
+  },
+  {
+   "letter": "غ",
+   "form": "medial",
+   "why": "لم تسمِّه NASKH_CROSS في أقسامها الثلاثة — ولا يُخمَّن"
+  },
+  {
+   "letter": "غ",
+   "form": "final",
+   "why": "لم تسمِّه NASKH_CROSS في أقسامها الثلاثة — ولا يُخمَّن"
+  }
+ ],
+ "جسمٌ لم يُنقَّ من نقطه": [
+  {
+   "letter": "ت",
+   "form": "medial",
+   "why": "عُزل 3 مركّباً ونقطُه 2 — فقد يخرج من جسمه ما ليس نقطة"
+  },
+  {
+   "letter": "ي",
+   "form": "medial",
+   "why": "لم تُعزَل نقطتُه — فـ`body_*` يشمل نقطَه"
+  },
+  {
+   "letter": "ج",
+   "form": "final",
+   "why": "لم تُعزَل نقطتُه — فـ`body_*` يشمل نقطَه"
+  },
+  {
+   "letter": "ظ",
+   "form": "medial",
+   "why": "عُزل 2 مركّباً ونقطُه 1 — فقد يخرج من جسمه ما ليس نقطة"
+  }
+ ],
+ "أشكال زائدة في الصفحة": [
+  {
+   "letter": "ه",
+   "form": "medial_alt",
+   "page": 58,
+   "up": 0.3033,
+   "down": 0.4455,
+   "width": 1.0237,
+   "why": "صفُّ الهاء **خمسةُ أشكالٍ مرسومة** — والوسطيُّ عمودان، فالثاني `medial_alt`"
+  }
+ ],
+ "الجدول": [
+  {
+   "letter": "ب",
+   "form": "isolated",
+   "page": 57,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.5687,
+   "down": 0.3033,
+   "width": 1.0616,
+   "body_up": 0.5687,
+   "body_down": 0.0095,
+   "body_width": 1.0616,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 1,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 693,
+    "x0": 1081,
+    "x1": 1305,
+    "y0": 573,
+    "y1": 757
+   }
+  },
+  {
+   "letter": "ب",
+   "form": "initial",
+   "page": 57,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.5071,
+   "down": 0.3033,
+   "width": 0.5355,
+   "body_up": 0.5071,
+   "body_down": 0.0047,
+   "body_width": 0.5355,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 1,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 693,
+    "x0": 827,
+    "x1": 940,
+    "y0": 586,
+    "y1": 757
+   }
+  },
+  {
+   "letter": "ب",
+   "form": "medial",
+   "page": 57,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.3555,
+   "down": 0.3033,
+   "width": 0.7488,
+   "body_up": 0.3555,
+   "body_down": 0.0095,
+   "body_width": 0.7488,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 1,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 693,
+    "x0": 508,
+    "x1": 666,
+    "y0": 618,
+    "y1": 757
+   }
+  },
+  {
+   "letter": "ب",
+   "form": "final",
+   "page": 57,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.6209,
+   "down": 0.2986,
+   "width": 1.2417,
+   "body_up": 0.6209,
+   "body_down": 0.0095,
+   "body_width": 1.2417,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 1,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 693,
+    "x0": 133,
+    "x1": 395,
+    "y0": 562,
+    "y1": 756
+   }
+  },
+  {
+   "letter": "ت",
+   "form": "isolated",
+   "page": 57,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.6635,
+   "down": 0.0047,
+   "width": 1.0616,
+   "body_up": 0.5735,
+   "body_down": 0.0047,
+   "body_width": 1.0616,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 2,
+    "body_trusted": true,
+    "note": "نقطُه 2 في 1 مركّبٍ — عنقودٌ متلاصق، والصندوقُ صحيح"
+   },
+   "px": {
+    "baseline": 991,
+    "x0": 1081,
+    "x1": 1305,
+    "y0": 851,
+    "y1": 992
+   }
+  },
+  {
+   "letter": "ت",
+   "form": "initial",
+   "page": 57,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.7346,
+   "down": 0.0047,
+   "width": 0.5735,
+   "body_up": 0.5071,
+   "body_down": 0.0047,
+   "body_width": 0.5308,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 2,
+    "body_trusted": true,
+    "note": "نقطُه 2 في 1 مركّبٍ — عنقودٌ متلاصق، والصندوقُ صحيح"
+   },
+   "px": {
+    "baseline": 991,
+    "x0": 831,
+    "x1": 952,
+    "y0": 836,
+    "y1": 992
+   }
+  },
+  {
+   "letter": "ت",
+   "form": "medial",
+   "page": 57,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.6635,
+   "down": 0.0047,
+   "width": 0.7536,
+   "body_up": 0.6635,
+   "body_down": 0.0047,
+   "body_width": 0.7536,
+   "measured": true,
+   "dots": {
+    "found": 3,
+    "want": 2,
+    "body_trusted": false,
+    "note": "عُزل 3 مركّباً ونقطُه 2 — فقد يخرج من جسمه ما ليس نقطة"
+   },
+   "px": {
+    "baseline": 991,
+    "x0": 517,
+    "x1": 676,
+    "y0": 851,
+    "y1": 992
+   }
+  },
+  {
+   "letter": "ت",
+   "form": "final",
+   "page": 57,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.6635,
+   "down": 0.0047,
+   "width": 1.2322,
+   "body_up": 0.6303,
+   "body_down": 0.0047,
+   "body_width": 1.2322,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 2,
+    "body_trusted": true,
+    "note": "نقطُه 2 في 1 مركّبٍ — عنقودٌ متلاصق، والصندوقُ صحيح"
+   },
+   "px": {
+    "baseline": 991,
+    "x0": 143,
+    "x1": 403,
+    "y0": 851,
+    "y1": 992
+   }
+  },
+  {
+   "letter": "ث",
+   "form": "isolated",
+   "page": 57,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.8294,
+   "down": 0.0047,
+   "width": 1.0616,
+   "body_up": 0.6635,
+   "body_down": 0.0047,
+   "body_width": 1.0616,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 3,
+    "body_trusted": true,
+    "note": "نقطُه 3 في 1 مركّبٍ — عنقودٌ متلاصق، والصندوقُ صحيح"
+   },
+   "px": {
+    "baseline": 1261,
+    "x0": 1081,
+    "x1": 1305,
+    "y0": 1086,
+    "y1": 1262
+   }
+  },
+  {
+   "letter": "ث",
+   "form": "initial",
+   "page": 57,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.9052,
+   "down": 0.0,
+   "width": 0.5782,
+   "body_up": 0.7393,
+   "body_down": 0.0,
+   "body_width": 0.5782,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 3,
+    "body_trusted": true,
+    "note": "نقطُه 3 في 1 مركّبٍ — عنقودٌ متلاصق، والصندوقُ صحيح"
+   },
+   "px": {
+    "baseline": 1261,
+    "x0": 831,
+    "x1": 953,
+    "y0": 1070,
+    "y1": 1261
+   }
+  },
+  {
+   "letter": "ث",
+   "form": "medial",
+   "page": 57,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.8246,
+   "down": 0.0095,
+   "width": 0.7488,
+   "body_up": 0.6588,
+   "body_down": 0.0095,
+   "body_width": 0.7488,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 3,
+    "body_trusted": true,
+    "note": "نقطُه 3 في 1 مركّبٍ — عنقودٌ متلاصق، والصندوقُ صحيح"
+   },
+   "px": {
+    "baseline": 1261,
+    "x0": 517,
+    "x1": 675,
+    "y0": 1087,
+    "y1": 1263
+   }
+  },
+  {
+   "letter": "ث",
+   "form": "final",
+   "page": 57,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §٢ (جدولُ الرفعات الزائدة)",
+   "up": 0.8246,
+   "down": 0.0047,
+   "width": 1.237,
+   "body_up": 0.6588,
+   "body_down": 0.0047,
+   "body_width": 1.237,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 3,
+    "body_trusted": true,
+    "note": "نقطُه 3 في 1 مركّبٍ — عنقودٌ متلاصق، والصندوقُ صحيح"
+   },
+   "px": {
+    "baseline": 1261,
+    "x0": 143,
+    "x1": 404,
+    "y0": 1087,
+    "y1": 1262
+   }
+  },
+  {
+   "letter": "ن",
+   "form": "isolated",
+   "page": 57,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.5166,
+   "down": 0.3981,
+   "width": 0.654,
+   "body_up": 0.3934,
+   "body_down": 0.3981,
+   "body_width": 0.654,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 1,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1495,
+    "x0": 1115,
+    "x1": 1253,
+    "y0": 1386,
+    "y1": 1579
+   }
+  },
+  {
+   "letter": "ن",
+   "form": "initial",
+   "page": 57,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.7204,
+   "down": 0.0095,
+   "width": 0.5877,
+   "body_up": 0.4976,
+   "body_down": 0.0095,
+   "body_width": 0.5877,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 1,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1495,
+    "x0": 816,
+    "x1": 940,
+    "y0": 1343,
+    "y1": 1497
+   }
+  },
+  {
+   "letter": "ن",
+   "form": "medial",
+   "page": 57,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.7299,
+   "down": 0.0047,
+   "width": 0.7867,
+   "body_up": 0.3649,
+   "body_down": 0.0047,
+   "body_width": 0.7867,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 1,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1495,
+    "x0": 507,
+    "x1": 673,
+    "y0": 1341,
+    "y1": 1496
+   }
+  },
+  {
+   "letter": "ن",
+   "form": "final",
+   "page": 57,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.5403,
+   "down": 0.327,
+   "width": 0.8815,
+   "body_up": 0.3934,
+   "body_down": 0.327,
+   "body_width": 0.8815,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 1,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1495,
+    "x0": 179,
+    "x1": 365,
+    "y0": 1381,
+    "y1": 1564
+   }
+  },
+  {
+   "letter": "ي",
+   "form": "isolated",
+   "page": 57,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.4882,
+   "down": 0.6588,
+   "width": 1.0,
+   "body_up": 0.4882,
+   "body_down": 0.4171,
+   "body_width": 1.0,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 2,
+    "body_trusted": true,
+    "note": "نقطُه 2 في 1 مركّبٍ — عنقودٌ متلاصق، والصندوقُ صحيح"
+   },
+   "px": {
+    "baseline": 1760,
+    "x0": 1057,
+    "x1": 1268,
+    "y0": 1657,
+    "y1": 1899
+   }
+  },
+  {
+   "letter": "ي",
+   "form": "initial",
+   "page": 57,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.5024,
+   "down": 0.2607,
+   "width": 0.5924,
+   "body_up": 0.5024,
+   "body_down": 0.0047,
+   "body_width": 0.5924,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 2,
+    "body_trusted": true,
+    "note": "نقطُه 2 في 1 مركّبٍ — عنقودٌ متلاصق، والصندوقُ صحيح"
+   },
+   "px": {
+    "baseline": 1760,
+    "x0": 816,
+    "x1": 941,
+    "y0": 1654,
+    "y1": 1815
+   }
+  },
+  {
+   "letter": "ي",
+   "form": "medial",
+   "page": 57,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.3602,
+   "down": 0.2654,
+   "width": 0.8341,
+   "body_up": 0.3602,
+   "body_down": 0.2654,
+   "body_width": 0.8341,
+   "measured": true,
+   "dots": {
+    "found": 0,
+    "want": 2,
+    "body_trusted": false,
+    "note": "لم تُعزَل نقطتُه — فـ`body_*` يشمل نقطَه"
+   },
+   "px": {
+    "baseline": 1760,
+    "x0": 486,
+    "x1": 662,
+    "y0": 1684,
+    "y1": 1816
+   }
+  },
+  {
+   "letter": "ي",
+   "form": "final",
+   "page": 57,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.3081,
+   "down": 0.6635,
+   "width": 0.9194,
+   "body_up": 0.3081,
+   "body_down": 0.4313,
+   "body_width": 0.9194,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 2,
+    "body_trusted": true,
+    "note": "نقطُه 2 في 1 مركّبٍ — عنقودٌ متلاصق، والصندوقُ صحيح"
+   },
+   "px": {
+    "baseline": 1760,
+    "x0": 144,
+    "x1": 338,
+    "y0": 1695,
+    "y1": 1900
+   }
+  },
+  {
+   "letter": "ج",
+   "form": "isolated",
+   "page": 58,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.4313,
+   "down": 0.6777,
+   "width": 0.9289,
+   "body_up": 0.4313,
+   "body_down": 0.6777,
+   "body_width": 0.9289,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 1,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 432,
+    "x0": 1080,
+    "x1": 1276,
+    "y0": 341,
+    "y1": 575
+   }
+  },
+  {
+   "letter": "ج",
+   "form": "initial",
+   "page": 58,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.5355,
+   "down": 0.2559,
+   "width": 1.0948,
+   "body_up": 0.5355,
+   "body_down": 0.0047,
+   "body_width": 1.0948,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 1,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 432,
+    "x0": 785,
+    "x1": 1016,
+    "y0": 319,
+    "y1": 486
+   }
+  },
+  {
+   "letter": "ج",
+   "form": "medial",
+   "page": 58,
+   "strokes": 2,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.5403,
+   "down": 0.2559,
+   "width": 1.3318,
+   "body_up": 0.5403,
+   "body_down": 0.0047,
+   "body_width": 1.3318,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 1,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 432,
+    "x0": 462,
+    "x1": 743,
+    "y0": 318,
+    "y1": 486
+   }
+  },
+  {
+   "letter": "ج",
+   "form": "final",
+   "page": 58,
+   "strokes": 2,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.3744,
+   "down": 0.7204,
+   "width": 0.9289,
+   "body_up": 0.3744,
+   "body_down": 0.7204,
+   "body_width": 0.9289,
+   "measured": true,
+   "dots": {
+    "found": 0,
+    "want": 1,
+    "body_trusted": false,
+    "note": "لم تُعزَل نقطتُه — فـ`body_*` يشمل نقطَه"
+   },
+   "px": {
+    "baseline": 432,
+    "x0": 207,
+    "x1": 403,
+    "y0": 353,
+    "y1": 584
+   }
+  },
+  {
+   "letter": "ح",
+   "form": "isolated",
+   "page": 58,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.4313,
+   "down": 0.6825,
+   "width": 0.9289,
+   "body_up": 0.4313,
+   "body_down": 0.6825,
+   "body_width": 0.9289,
+   "measured": true,
+   "dots": {
+    "found": 0,
+    "want": 0,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 768,
+    "x0": 1080,
+    "x1": 1276,
+    "y0": 677,
+    "y1": 912
+   }
+  },
+  {
+   "letter": "ح",
+   "form": "initial",
+   "page": 58,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.5355,
+   "down": 0.0095,
+   "width": 1.0948,
+   "body_up": 0.5355,
+   "body_down": 0.0095,
+   "body_width": 1.0948,
+   "measured": true,
+   "dots": {
+    "found": 0,
+    "want": 0,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 768,
+    "x0": 756,
+    "x1": 987,
+    "y0": 655,
+    "y1": 770
+   }
+  },
+  {
+   "letter": "ح",
+   "form": "medial",
+   "page": 58,
+   "strokes": 2,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.5403,
+   "down": 0.0095,
+   "width": 1.3318,
+   "body_up": 0.5403,
+   "body_down": 0.0095,
+   "body_width": 1.3318,
+   "measured": true,
+   "dots": {
+    "found": 0,
+    "want": 0,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 768,
+    "x0": 434,
+    "x1": 715,
+    "y0": 654,
+    "y1": 770
+   }
+  },
+  {
+   "letter": "ح",
+   "form": "final",
+   "page": 58,
+   "strokes": 2,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.3697,
+   "down": 0.7204,
+   "width": 0.9289,
+   "body_up": 0.3697,
+   "body_down": 0.7204,
+   "body_width": 0.9289,
+   "measured": true,
+   "dots": {
+    "found": 0,
+    "want": 0,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 768,
+    "x0": 178,
+    "x1": 374,
+    "y0": 690,
+    "y1": 920
+   }
+  },
+  {
+   "letter": "خ",
+   "form": "isolated",
+   "page": 58,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.6872,
+   "down": 0.7062,
+   "width": 0.9289,
+   "body_up": 0.3981,
+   "body_down": 0.7062,
+   "body_width": 0.9289,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 1,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1108,
+    "x0": 1082,
+    "x1": 1278,
+    "y0": 963,
+    "y1": 1257
+   }
+  },
+  {
+   "letter": "خ",
+   "form": "initial",
+   "page": 58,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.8152,
+   "down": 0.0095,
+   "width": 1.0948,
+   "body_up": 0.5308,
+   "body_down": 0.0095,
+   "body_width": 1.0948,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 1,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1108,
+    "x0": 753,
+    "x1": 984,
+    "y0": 936,
+    "y1": 1110
+   }
+  },
+  {
+   "letter": "خ",
+   "form": "medial",
+   "page": 58,
+   "strokes": 2,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.8152,
+   "down": 0.0047,
+   "width": 1.327,
+   "body_up": 0.5403,
+   "body_down": 0.0047,
+   "body_width": 1.327,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 1,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1108,
+    "x0": 431,
+    "x1": 711,
+    "y0": 936,
+    "y1": 1109
+   }
+  },
+  {
+   "letter": "خ",
+   "form": "final",
+   "page": 58,
+   "strokes": 2,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.654,
+   "down": 0.7251,
+   "width": 0.9336,
+   "body_up": 0.3697,
+   "body_down": 0.7251,
+   "body_width": 0.9336,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 1,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1108,
+    "x0": 175,
+    "x1": 372,
+    "y0": 970,
+    "y1": 1261
+   }
+  },
+  {
+   "letter": "ه",
+   "form": "isolated",
+   "page": 58,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.6114,
+   "down": 0.0142,
+   "width": 0.4739,
+   "body_up": 0.6114,
+   "body_down": 0.0142,
+   "body_width": 0.4739,
+   "measured": true,
+   "dots": {
+    "found": 0,
+    "want": 0,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1506,
+    "x0": 1138,
+    "x1": 1238,
+    "y0": 1377,
+    "y1": 1509
+   }
+  },
+  {
+   "letter": "ه",
+   "form": "initial",
+   "page": 58,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.6635,
+   "down": 0.019,
+   "width": 0.872,
+   "body_up": 0.6635,
+   "body_down": 0.019,
+   "body_width": 0.872,
+   "measured": true,
+   "dots": {
+    "found": 0,
+    "want": 0,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1506,
+    "x0": 870,
+    "x1": 1054,
+    "y0": 1366,
+    "y1": 1510
+   }
+  },
+  {
+   "letter": "ه",
+   "form": "medial",
+   "page": 58,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §٢ (جدولُ الرفعات الزائدة)",
+   "up": 0.6493,
+   "down": 0.4218,
+   "width": 0.8578,
+   "body_up": 0.6493,
+   "body_down": 0.4218,
+   "body_width": 0.8578,
+   "measured": true,
+   "dots": {
+    "found": 0,
+    "want": 0,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1506,
+    "x0": 635,
+    "x1": 816,
+    "y0": 1369,
+    "y1": 1595
+   }
+  },
+  {
+   "letter": "ه",
+   "form": "final",
+   "page": 58,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.8294,
+   "down": 0.0142,
+   "width": 0.8104,
+   "body_up": 0.8294,
+   "body_down": 0.0142,
+   "body_width": 0.8104,
+   "measured": true,
+   "dots": {
+    "found": 0,
+    "want": 0,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1506,
+    "x0": 171,
+    "x1": 342,
+    "y0": 1331,
+    "y1": 1509
+   }
+  },
+  {
+   "letter": "م",
+   "form": "isolated",
+   "page": 58,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.4123,
+   "down": 0.6919,
+   "width": 0.4692,
+   "body_up": 0.4123,
+   "body_down": 0.6919,
+   "body_width": 0.4692,
+   "measured": true,
+   "dots": {
+    "found": 0,
+    "want": 0,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1776,
+    "x0": 1139,
+    "x1": 1238,
+    "y0": 1689,
+    "y1": 1922
+   }
+  },
+  {
+   "letter": "م",
+   "form": "initial",
+   "page": 58,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.4502,
+   "down": 0.0047,
+   "width": 0.9147,
+   "body_up": 0.4502,
+   "body_down": 0.0047,
+   "body_width": 0.9147,
+   "measured": true,
+   "dots": {
+    "found": 0,
+    "want": 0,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1776,
+    "x0": 846,
+    "x1": 1039,
+    "y0": 1681,
+    "y1": 1777
+   }
+  },
+  {
+   "letter": "م",
+   "form": "medial",
+   "page": 58,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §٢ (جدولُ الرفعات الزائدة)",
+   "up": 0.5118,
+   "down": 0.0095,
+   "width": 1.2417,
+   "body_up": 0.5118,
+   "body_down": 0.0095,
+   "body_width": 1.2417,
+   "measured": true,
+   "dots": {
+    "found": 0,
+    "want": 0,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1776,
+    "x0": 497,
+    "x1": 759,
+    "y0": 1668,
+    "y1": 1778
+   }
+  },
+  {
+   "letter": "م",
+   "form": "final",
+   "page": 58,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §٢ (جدولُ الرفعات الزائدة)",
+   "up": 0.4028,
+   "down": 0.782,
+   "width": 0.8104,
+   "body_up": 0.4028,
+   "body_down": 0.782,
+   "body_width": 0.8104,
+   "measured": true,
+   "dots": {
+    "found": 0,
+    "want": 0,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1776,
+    "x0": 197,
+    "x1": 368,
+    "y0": 1691,
+    "y1": 1941
+   }
+  },
+  {
+   "letter": "ا",
+   "form": "isolated",
+   "page": 59,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.9905,
+   "down": 0.0095,
+   "width": 0.109,
+   "body_up": 0.9905,
+   "body_down": 0.0095,
+   "body_width": 0.109,
+   "measured": true,
+   "dots": {
+    "found": 0,
+    "want": 0,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 499,
+    "x0": 1129,
+    "x1": 1152,
+    "y0": 290,
+    "y1": 501
+   }
+  },
+  {
+   "letter": "ا",
+   "form": "initial",
+   "page": 59,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": null,
+   "down": null,
+   "width": null,
+   "body_up": null,
+   "body_down": null,
+   "body_width": null,
+   "measured": false,
+   "why": "عمودُ الابتدائي نصٌّ لا شكل: «لا تأتي الألف في بداية الكلمة»"
+  },
+  {
+   "letter": "ا",
+   "form": "medial",
+   "page": 59,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 1.09,
+   "down": 0.0095,
+   "width": 0.6635,
+   "body_up": 1.09,
+   "body_down": 0.0095,
+   "body_width": 0.6635,
+   "measured": true,
+   "dots": {
+    "found": 0,
+    "want": 0,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 499,
+    "x0": 636,
+    "x1": 776,
+    "y0": 269,
+    "y1": 501
+   }
+  },
+  {
+   "letter": "ا",
+   "form": "final",
+   "page": 59,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 1.09,
+   "down": 0.0095,
+   "width": 0.6635,
+   "body_up": 1.09,
+   "body_down": 0.0095,
+   "body_width": 0.6635,
+   "measured": true,
+   "dots": {
+    "found": 0,
+    "want": 0,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 499,
+    "x0": 307,
+    "x1": 447,
+    "y0": 269,
+    "y1": 501
+   }
+  },
+  {
+   "letter": "د",
+   "form": "isolated",
+   "page": 59,
+   "strokes": null,
+   "strokes_source": "لم تسمِّه NASKH_CROSS في أقسامها الثلاثة — ولا يُخمَّن",
+   "up": 0.6445,
+   "down": 0.0,
+   "width": 0.4265,
+   "body_up": 0.6445,
+   "body_down": 0.0,
+   "body_width": 0.4265,
+   "measured": true,
+   "dots": {
+    "found": 0,
+    "want": 0,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 736,
+    "x0": 1138,
+    "x1": 1228,
+    "y0": 600,
+    "y1": 736
+   }
+  },
+  {
+   "letter": "د",
+   "form": "initial",
+   "page": 59,
+   "strokes": null,
+   "strokes_source": "لم تسمِّه NASKH_CROSS في أقسامها الثلاثة — ولا يُخمَّن",
+   "up": 0.6445,
+   "down": 0.0,
+   "width": 0.4218,
+   "body_up": 0.6445,
+   "body_down": 0.0,
+   "body_width": 0.4218,
+   "measured": true,
+   "dots": {
+    "found": 0,
+    "want": 0,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 736,
+    "x0": 840,
+    "x1": 929,
+    "y0": 600,
+    "y1": 736
+   }
+  },
+  {
+   "letter": "د",
+   "form": "medial",
+   "page": 59,
+   "strokes": 2,
+   "strokes_source": "NASKH_CROSS §٣ (حكمُ المالك) ⇐ عددُنا من paths.js",
+   "up": 0.763,
+   "down": 0.0142,
+   "width": 1.0142,
+   "body_up": 0.763,
+   "body_down": 0.0142,
+   "body_width": 1.0142,
+   "measured": true,
+   "dots": {
+    "found": 0,
+    "want": 0,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 736,
+    "x0": 479,
+    "x1": 693,
+    "y0": 575,
+    "y1": 739
+   }
+  },
+  {
+   "letter": "د",
+   "form": "final",
+   "page": 59,
+   "strokes": 2,
+   "strokes_source": "NASKH_CROSS §٣ (حكمُ المالك) ⇐ عددُنا من paths.js",
+   "up": 0.763,
+   "down": 0.0142,
+   "width": 1.0142,
+   "body_up": 0.763,
+   "body_down": 0.0142,
+   "body_width": 1.0142,
+   "measured": true,
+   "dots": {
+    "found": 0,
+    "want": 0,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 736,
+    "x0": 180,
+    "x1": 394,
+    "y0": 575,
+    "y1": 739
+   }
+  },
+  {
+   "letter": "ذ",
+   "form": "isolated",
+   "page": 59,
+   "strokes": null,
+   "strokes_source": "لم تسمِّه NASKH_CROSS في أقسامها الثلاثة — ولا يُخمَّن",
+   "up": 0.9384,
+   "down": -0.0047,
+   "width": 0.4265,
+   "body_up": 0.6445,
+   "body_down": -0.0047,
+   "body_width": 0.4265,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 1,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1031,
+    "x0": 1137,
+    "x1": 1227,
+    "y0": 833,
+    "y1": 1030
+   }
+  },
+  {
+   "letter": "ذ",
+   "form": "initial",
+   "page": 59,
+   "strokes": null,
+   "strokes_source": "لم تسمِّه NASKH_CROSS في أقسامها الثلاثة — ولا يُخمَّن",
+   "up": 0.9384,
+   "down": -0.0047,
+   "width": 0.4265,
+   "body_up": 0.6445,
+   "body_down": -0.0047,
+   "body_width": 0.4265,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 1,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1031,
+    "x0": 838,
+    "x1": 928,
+    "y0": 833,
+    "y1": 1030
+   }
+  },
+  {
+   "letter": "ذ",
+   "form": "medial",
+   "page": 59,
+   "strokes": 2,
+   "strokes_source": "NASKH_CROSS §٣ (حكمُ المالك) ⇐ عددُنا من paths.js",
+   "up": 1.0474,
+   "down": 0.0095,
+   "width": 1.0142,
+   "body_up": 0.7725,
+   "body_down": 0.0095,
+   "body_width": 1.0142,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 1,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1031,
+    "x0": 488,
+    "x1": 702,
+    "y0": 810,
+    "y1": 1033
+   }
+  },
+  {
+   "letter": "ذ",
+   "form": "final",
+   "page": 59,
+   "strokes": 2,
+   "strokes_source": "NASKH_CROSS §٣ (حكمُ المالك) ⇐ عددُنا من paths.js",
+   "up": 1.0474,
+   "down": 0.0095,
+   "width": 1.0142,
+   "body_up": 0.7725,
+   "body_down": 0.0095,
+   "body_width": 1.0142,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 1,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1031,
+    "x0": 189,
+    "x1": 403,
+    "y0": 810,
+    "y1": 1033
+   }
+  },
+  {
+   "letter": "ر",
+   "form": "isolated",
+   "page": 59,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.346,
+   "down": 0.4171,
+   "width": 0.5545,
+   "body_up": 0.346,
+   "body_down": 0.4171,
+   "body_width": 0.5545,
+   "measured": true,
+   "dots": {
+    "found": 0,
+    "want": 0,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1211,
+    "x0": 1138,
+    "x1": 1255,
+    "y0": 1138,
+    "y1": 1299
+   }
+  },
+  {
+   "letter": "ر",
+   "form": "initial",
+   "page": 59,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.346,
+   "down": 0.4171,
+   "width": 0.5545,
+   "body_up": 0.346,
+   "body_down": 0.4171,
+   "body_width": 0.5545,
+   "measured": true,
+   "dots": {
+    "found": 0,
+    "want": 0,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1211,
+    "x0": 835,
+    "x1": 952,
+    "y0": 1138,
+    "y1": 1299
+   }
+  },
+  {
+   "letter": "ر",
+   "form": "medial",
+   "page": 59,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.2986,
+   "down": 0.3981,
+   "width": 1.0806,
+   "body_up": 0.2986,
+   "body_down": 0.3981,
+   "body_width": 1.0806,
+   "measured": true,
+   "dots": {
+    "found": 0,
+    "want": 0,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1211,
+    "x0": 473,
+    "x1": 701,
+    "y0": 1148,
+    "y1": 1295
+   }
+  },
+  {
+   "letter": "ر",
+   "form": "final",
+   "page": 59,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.2986,
+   "down": 0.3981,
+   "width": 1.0806,
+   "body_up": 0.2986,
+   "body_down": 0.3981,
+   "body_width": 1.0806,
+   "measured": true,
+   "dots": {
+    "found": 0,
+    "want": 0,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1211,
+    "x0": 176,
+    "x1": 404,
+    "y0": 1148,
+    "y1": 1295
+   }
+  },
+  {
+   "letter": "ز",
+   "form": "isolated",
+   "page": 59,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.6825,
+   "down": 0.4218,
+   "width": 0.5498,
+   "body_up": 0.346,
+   "body_down": 0.4218,
+   "body_width": 0.5498,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 1,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1520,
+    "x0": 1134,
+    "x1": 1250,
+    "y0": 1376,
+    "y1": 1609
+   }
+  },
+  {
+   "letter": "ز",
+   "form": "initial",
+   "page": 59,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.6825,
+   "down": 0.4218,
+   "width": 0.5545,
+   "body_up": 0.346,
+   "body_down": 0.4218,
+   "body_width": 0.5545,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 1,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1520,
+    "x0": 835,
+    "x1": 952,
+    "y0": 1376,
+    "y1": 1609
+   }
+  },
+  {
+   "letter": "ز",
+   "form": "medial",
+   "page": 59,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.6825,
+   "down": 0.4028,
+   "width": 1.0806,
+   "body_up": 0.2986,
+   "body_down": 0.4028,
+   "body_width": 1.0806,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 1,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1520,
+    "x0": 480,
+    "x1": 708,
+    "y0": 1376,
+    "y1": 1605
+   }
+  },
+  {
+   "letter": "ز",
+   "form": "final",
+   "page": 59,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.6825,
+   "down": 0.4028,
+   "width": 1.0806,
+   "body_up": 0.2986,
+   "body_down": 0.4028,
+   "body_width": 1.0806,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 1,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1520,
+    "x0": 181,
+    "x1": 409,
+    "y0": 1376,
+    "y1": 1605
+   }
+  },
+  {
+   "letter": "و",
+   "form": "isolated",
+   "page": 59,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.455,
+   "down": 0.3744,
+   "width": 0.7062,
+   "body_up": 0.455,
+   "body_down": 0.3744,
+   "body_width": 0.7062,
+   "measured": true,
+   "dots": {
+    "found": 0,
+    "want": 0,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1807,
+    "x0": 1114,
+    "x1": 1263,
+    "y0": 1711,
+    "y1": 1886
+   }
+  },
+  {
+   "letter": "و",
+   "form": "initial",
+   "page": 59,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.455,
+   "down": 0.3744,
+   "width": 0.7062,
+   "body_up": 0.455,
+   "body_down": 0.3744,
+   "body_width": 0.7062,
+   "measured": true,
+   "dots": {
+    "found": 0,
+    "want": 0,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1807,
+    "x0": 817,
+    "x1": 966,
+    "y0": 1711,
+    "y1": 1886
+   }
+  },
+  {
+   "letter": "و",
+   "form": "medial",
+   "page": 59,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.4739,
+   "down": 0.4787,
+   "width": 1.0427,
+   "body_up": 0.4739,
+   "body_down": 0.4787,
+   "body_width": 1.0427,
+   "measured": true,
+   "dots": {
+    "found": 0,
+    "want": 0,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1807,
+    "x0": 467,
+    "x1": 687,
+    "y0": 1707,
+    "y1": 1908
+   }
+  },
+  {
+   "letter": "و",
+   "form": "final",
+   "page": 59,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.4739,
+   "down": 0.4787,
+   "width": 1.0427,
+   "body_up": 0.4739,
+   "body_down": 0.4787,
+   "body_width": 1.0427,
+   "measured": true,
+   "dots": {
+    "found": 0,
+    "want": 0,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1807,
+    "x0": 151,
+    "x1": 371,
+    "y0": 1707,
+    "y1": 1908
+   }
+  },
+  {
+   "letter": "س",
+   "form": "isolated",
+   "page": 60,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.327,
+   "down": 0.3934,
+   "width": 1.1564,
+   "body_up": 0.327,
+   "body_down": 0.3934,
+   "body_width": 1.1564,
+   "measured": true,
+   "dots": {
+    "found": 0,
+    "want": 0,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 532,
+    "x0": 1071,
+    "x1": 1315,
+    "y0": 463,
+    "y1": 615
+   }
+  },
+  {
+   "letter": "س",
+   "form": "initial",
+   "page": 60,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.346,
+   "down": 0.0047,
+   "width": 1.0142,
+   "body_up": 0.346,
+   "body_down": 0.0047,
+   "body_width": 1.0142,
+   "measured": true,
+   "dots": {
+    "found": 0,
+    "want": 0,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 532,
+    "x0": 784,
+    "x1": 998,
+    "y0": 459,
+    "y1": 533
+   }
+  },
+  {
+   "letter": "س",
+   "form": "medial",
+   "page": 60,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §٢ (جدولُ الرفعات الزائدة)",
+   "up": 0.3412,
+   "down": 0.0095,
+   "width": 1.1137,
+   "body_up": 0.3412,
+   "body_down": 0.0095,
+   "body_width": 1.1137,
+   "measured": true,
+   "dots": {
+    "found": 0,
+    "want": 0,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 532,
+    "x0": 469,
+    "x1": 704,
+    "y0": 460,
+    "y1": 534
+   }
+  },
+  {
+   "letter": "س",
+   "form": "final",
+   "page": 60,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.3839,
+   "down": 0.4028,
+   "width": 1.4408,
+   "body_up": 0.3839,
+   "body_down": 0.4028,
+   "body_width": 1.4408,
+   "measured": true,
+   "dots": {
+    "found": 0,
+    "want": 0,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 532,
+    "x0": 137,
+    "x1": 441,
+    "y0": 451,
+    "y1": 617
+   }
+  },
+  {
+   "letter": "ش",
+   "form": "isolated",
+   "page": 60,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.8057,
+   "down": 0.3839,
+   "width": 1.1564,
+   "body_up": 0.6398,
+   "body_down": 0.3839,
+   "body_width": 1.1564,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 3,
+    "body_trusted": true,
+    "note": "نقطُه 3 في 1 مركّبٍ — عنقودٌ متلاصق، والصندوقُ صحيح"
+   },
+   "px": {
+    "baseline": 860,
+    "x0": 1071,
+    "x1": 1315,
+    "y0": 690,
+    "y1": 941
+   }
+  },
+  {
+   "letter": "ش",
+   "form": "initial",
+   "page": 60,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.8057,
+   "down": 0.0,
+   "width": 1.0142,
+   "body_up": 0.6445,
+   "body_down": 0.0,
+   "body_width": 1.0142,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 3,
+    "body_trusted": true,
+    "note": "نقطُه 3 في 1 مركّبٍ — عنقودٌ متلاصق، والصندوقُ صحيح"
+   },
+   "px": {
+    "baseline": 860,
+    "x0": 785,
+    "x1": 999,
+    "y0": 690,
+    "y1": 860
+   }
+  },
+  {
+   "letter": "ش",
+   "form": "medial",
+   "page": 60,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §٢ (جدولُ الرفعات الزائدة)",
+   "up": 0.8057,
+   "down": 0.0047,
+   "width": 1.109,
+   "body_up": 0.6445,
+   "body_down": 0.0047,
+   "body_width": 1.109,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 3,
+    "body_trusted": true,
+    "note": "نقطُه 3 في 1 مركّبٍ — عنقودٌ متلاصق، والصندوقُ صحيح"
+   },
+   "px": {
+    "baseline": 860,
+    "x0": 470,
+    "x1": 704,
+    "y0": 690,
+    "y1": 861
+   }
+  },
+  {
+   "letter": "ش",
+   "form": "final",
+   "page": 60,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §٢ (جدولُ الرفعات الزائدة)",
+   "up": 0.8057,
+   "down": 0.3981,
+   "width": 1.436,
+   "body_up": 0.6398,
+   "body_down": 0.3981,
+   "body_width": 1.436,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 3,
+    "body_trusted": true,
+    "note": "نقطُه 3 في 1 مركّبٍ — عنقودٌ متلاصق، والصندوقُ صحيح"
+   },
+   "px": {
+    "baseline": 860,
+    "x0": 138,
+    "x1": 441,
+    "y0": 690,
+    "y1": 944
+   }
+  },
+  {
+   "letter": "ص",
+   "form": "isolated",
+   "page": 60,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.4218,
+   "down": 0.3886,
+   "width": 1.346,
+   "body_up": 0.4218,
+   "body_down": 0.3886,
+   "body_width": 1.346,
+   "measured": true,
+   "dots": {
+    "found": 0,
+    "want": 0,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1300,
+    "x0": 1021,
+    "x1": 1305,
+    "y0": 1211,
+    "y1": 1382
+   }
+  },
+  {
+   "letter": "ص",
+   "form": "initial",
+   "page": 60,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §٢ (جدولُ الرفعات الزائدة)",
+   "up": 0.4692,
+   "down": 0.0095,
+   "width": 1.1232,
+   "body_up": 0.4692,
+   "body_down": 0.0095,
+   "body_width": 1.1232,
+   "measured": true,
+   "dots": {
+    "found": 0,
+    "want": 0,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1300,
+    "x0": 750,
+    "x1": 987,
+    "y0": 1201,
+    "y1": 1302
+   }
+  },
+  {
+   "letter": "ص",
+   "form": "medial",
+   "page": 60,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §٢ (جدولُ الرفعات الزائدة)",
+   "up": 0.4882,
+   "down": 0.0379,
+   "width": 1.2133,
+   "body_up": 0.4882,
+   "body_down": 0.0379,
+   "body_width": 1.2133,
+   "measured": true,
+   "dots": {
+    "found": 0,
+    "want": 0,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1300,
+    "x0": 452,
+    "x1": 708,
+    "y0": 1197,
+    "y1": 1308
+   }
+  },
+  {
+   "letter": "ص",
+   "form": "final",
+   "page": 60,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §٢ (جدولُ الرفعات الزائدة)",
+   "up": 0.4929,
+   "down": 0.3697,
+   "width": 1.4123,
+   "body_up": 0.4929,
+   "body_down": 0.3697,
+   "body_width": 1.4123,
+   "measured": true,
+   "dots": {
+    "found": 0,
+    "want": 0,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1300,
+    "x0": 140,
+    "x1": 438,
+    "y0": 1196,
+    "y1": 1378
+   }
+  },
+  {
+   "letter": "ض",
+   "form": "isolated",
+   "page": 60,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.6872,
+   "down": 0.3886,
+   "width": 1.3602,
+   "body_up": 0.436,
+   "body_down": 0.3886,
+   "body_width": 1.3602,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 1,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1692,
+    "x0": 1028,
+    "x1": 1315,
+    "y0": 1547,
+    "y1": 1774
+   }
+  },
+  {
+   "letter": "ض",
+   "form": "initial",
+   "page": 60,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.7488,
+   "down": 0.0047,
+   "width": 1.128,
+   "body_up": 0.4787,
+   "body_down": 0.0047,
+   "body_width": 1.128,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 1,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1692,
+    "x0": 756,
+    "x1": 994,
+    "y0": 1534,
+    "y1": 1693
+   }
+  },
+  {
+   "letter": "ض",
+   "form": "medial",
+   "page": 60,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §٢ (جدولُ الرفعات الزائدة)",
+   "up": 0.7488,
+   "down": 0.0332,
+   "width": 1.2227,
+   "body_up": 0.4976,
+   "body_down": 0.0332,
+   "body_width": 1.2227,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 1,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1692,
+    "x0": 455,
+    "x1": 713,
+    "y0": 1534,
+    "y1": 1699
+   }
+  },
+  {
+   "letter": "ض",
+   "form": "final",
+   "page": 60,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §٢ (جدولُ الرفعات الزائدة)",
+   "up": 0.7488,
+   "down": 0.3697,
+   "width": 1.4218,
+   "body_up": 0.5024,
+   "body_down": 0.3697,
+   "body_width": 1.4218,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 1,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1692,
+    "x0": 140,
+    "x1": 440,
+    "y0": 1534,
+    "y1": 1770
+   }
+  },
+  {
+   "letter": "ف",
+   "form": "isolated",
+   "page": 61,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.8531,
+   "down": 0.0095,
+   "width": 0.9242,
+   "body_up": 0.5545,
+   "body_down": 0.0095,
+   "body_width": 0.9242,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 1,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 533,
+    "x0": 1094,
+    "x1": 1289,
+    "y0": 353,
+    "y1": 535
+   }
+  },
+  {
+   "letter": "ف",
+   "form": "initial",
+   "page": 61,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.8246,
+   "down": 0.0142,
+   "width": 0.6919,
+   "body_up": 0.564,
+   "body_down": 0.0142,
+   "body_width": 0.6919,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 1,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 533,
+    "x0": 816,
+    "x1": 962,
+    "y0": 359,
+    "y1": 536
+   }
+  },
+  {
+   "letter": "ف",
+   "form": "medial",
+   "page": 61,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.8246,
+   "down": 0.0047,
+   "width": 1.0427,
+   "body_up": 0.5403,
+   "body_down": 0.0047,
+   "body_width": 1.0427,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 1,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 533,
+    "x0": 477,
+    "x1": 697,
+    "y0": 359,
+    "y1": 534
+   }
+  },
+  {
+   "letter": "ف",
+   "form": "final",
+   "page": 61,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.8246,
+   "down": 0.0095,
+   "width": 1.4028,
+   "body_up": 0.545,
+   "body_down": 0.0095,
+   "body_width": 1.4028,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 1,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 533,
+    "x0": 137,
+    "x1": 433,
+    "y0": 359,
+    "y1": 535
+   }
+  },
+  {
+   "letter": "ق",
+   "form": "isolated",
+   "page": 61,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.7536,
+   "down": 0.3981,
+   "width": 0.8009,
+   "body_up": 0.4502,
+   "body_down": 0.3981,
+   "body_width": 0.7962,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 2,
+    "body_trusted": true,
+    "note": "نقطُه 2 في 1 مركّبٍ — عنقودٌ متلاصق، والصندوقُ صحيح"
+   },
+   "px": {
+    "baseline": 860,
+    "x0": 1133,
+    "x1": 1302,
+    "y0": 701,
+    "y1": 944
+   }
+  },
+  {
+   "letter": "ق",
+   "form": "initial",
+   "page": 61,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.8578,
+   "down": 0.0095,
+   "width": 0.7109,
+   "body_up": 0.5687,
+   "body_down": 0.0095,
+   "body_width": 0.6919,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 2,
+    "body_trusted": true,
+    "note": "نقطُه 2 في 1 مركّبٍ — عنقودٌ متلاصق، والصندوقُ صحيح"
+   },
+   "px": {
+    "baseline": 860,
+    "x0": 840,
+    "x1": 990,
+    "y0": 679,
+    "y1": 862
+   }
+  },
+  {
+   "letter": "ق",
+   "form": "medial",
+   "page": 61,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.8152,
+   "down": 0.0142,
+   "width": 1.0427,
+   "body_up": 0.5308,
+   "body_down": 0.0142,
+   "body_width": 1.0427,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 2,
+    "body_trusted": true,
+    "note": "نقطُه 2 في 1 مركّبٍ — عنقودٌ متلاصق، والصندوقُ صحيح"
+   },
+   "px": {
+    "baseline": 860,
+    "x0": 503,
+    "x1": 723,
+    "y0": 688,
+    "y1": 863
+   }
+  },
+  {
+   "letter": "ق",
+   "form": "final",
+   "page": 61,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.8104,
+   "down": 0.4597,
+   "width": 1.3175,
+   "body_up": 0.4502,
+   "body_down": 0.4597,
+   "body_width": 1.3175,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 2,
+    "body_trusted": true,
+    "note": "نقطُه 2 في 1 مركّبٍ — عنقودٌ متلاصق، والصندوقُ صحيح"
+   },
+   "px": {
+    "baseline": 860,
+    "x0": 173,
+    "x1": 451,
+    "y0": 689,
+    "y1": 957
+   }
+  },
+  {
+   "letter": "ك",
+   "form": "isolated",
+   "page": 61,
+   "strokes": 2,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 1.0474,
+   "down": 0.0237,
+   "width": 1.1137,
+   "body_up": 1.0474,
+   "body_down": 0.0237,
+   "body_width": 1.1137,
+   "measured": true,
+   "dots": {
+    "found": 0,
+    "want": 0,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1300,
+    "x0": 1063,
+    "x1": 1298,
+    "y0": 1079,
+    "y1": 1305
+   }
+  },
+  {
+   "letter": "ك",
+   "form": "initial",
+   "page": 61,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 1.5924,
+   "down": 0.0047,
+   "width": 1.2464,
+   "body_up": 1.5924,
+   "body_down": 0.0047,
+   "body_width": 1.2464,
+   "measured": true,
+   "dots": {
+    "found": 0,
+    "want": 0,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1300,
+    "x0": 775,
+    "x1": 1038,
+    "y0": 964,
+    "y1": 1301
+   }
+  },
+  {
+   "letter": "ك",
+   "form": "medial",
+   "page": 61,
+   "strokes": 2,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 1.4313,
+   "down": 0.019,
+   "width": 1.1232,
+   "body_up": 1.4313,
+   "body_down": 0.019,
+   "body_width": 1.1232,
+   "measured": true,
+   "dots": {
+    "found": 0,
+    "want": 0,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1300,
+    "x0": 500,
+    "x1": 737,
+    "y0": 998,
+    "y1": 1304
+   }
+  },
+  {
+   "letter": "ك",
+   "form": "final",
+   "page": 61,
+   "strokes": 2,
+   "strokes_source": "NASKH_CROSS §٢ (جدولُ الرفعات الزائدة)",
+   "up": 1.1943,
+   "down": 0.0095,
+   "width": 1.346,
+   "body_up": 1.1943,
+   "body_down": 0.0095,
+   "body_width": 1.346,
+   "measured": true,
+   "dots": {
+    "found": 0,
+    "want": 0,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1300,
+    "x0": 163,
+    "x1": 447,
+    "y0": 1048,
+    "y1": 1302
+   }
+  },
+  {
+   "letter": "ل",
+   "form": "isolated",
+   "page": 61,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 1.0284,
+   "down": 0.4502,
+   "width": 0.7062,
+   "body_up": 1.0284,
+   "body_down": 0.4502,
+   "body_width": 0.7062,
+   "measured": true,
+   "dots": {
+    "found": 0,
+    "want": 0,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1692,
+    "x0": 1135,
+    "x1": 1284,
+    "y0": 1475,
+    "y1": 1787
+   }
+  },
+  {
+   "letter": "ل",
+   "form": "initial",
+   "page": 61,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 1.1659,
+   "down": 0.0047,
+   "width": 0.7915,
+   "body_up": 1.1659,
+   "body_down": 0.0047,
+   "body_width": 0.7915,
+   "measured": true,
+   "dots": {
+    "found": 0,
+    "want": 0,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1692,
+    "x0": 824,
+    "x1": 991,
+    "y0": 1446,
+    "y1": 1693
+   }
+  },
+  {
+   "letter": "ل",
+   "form": "medial",
+   "page": 61,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §٢ (جدولُ الرفعات الزائدة)",
+   "up": 1.1564,
+   "down": 0.0047,
+   "width": 0.7536,
+   "body_up": 1.1564,
+   "body_down": 0.0047,
+   "body_width": 0.7536,
+   "measured": true,
+   "dots": {
+    "found": 0,
+    "want": 0,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1692,
+    "x0": 526,
+    "x1": 685,
+    "y0": 1448,
+    "y1": 1693
+   }
+  },
+  {
+   "letter": "ل",
+   "form": "final",
+   "page": 61,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §٢ (جدولُ الرفعات الزائدة)",
+   "up": 1.128,
+   "down": 0.4882,
+   "width": 1.0521,
+   "body_up": 1.128,
+   "body_down": 0.4882,
+   "body_width": 1.0521,
+   "measured": true,
+   "dots": {
+    "found": 0,
+    "want": 0,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1692,
+    "x0": 192,
+    "x1": 414,
+    "y0": 1454,
+    "y1": 1795
+   }
+  },
+  {
+   "letter": "ط",
+   "form": "isolated",
+   "page": 62,
+   "strokes": 2,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 1.1422,
+   "down": 0.0095,
+   "width": 1.0569,
+   "body_up": 1.1422,
+   "body_down": 0.0095,
+   "body_width": 1.0569,
+   "measured": true,
+   "dots": {
+    "found": 0,
+    "want": 0,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 566,
+    "x0": 1082,
+    "x1": 1305,
+    "y0": 325,
+    "y1": 568
+   }
+  },
+  {
+   "letter": "ط",
+   "form": "initial",
+   "page": 62,
+   "strokes": 2,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 1.1943,
+   "down": 0.0095,
+   "width": 1.2654,
+   "body_up": 1.1943,
+   "body_down": 0.0095,
+   "body_width": 1.2654,
+   "measured": true,
+   "dots": {
+    "found": 0,
+    "want": 0,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 566,
+    "x0": 746,
+    "x1": 1013,
+    "y0": 314,
+    "y1": 568
+   }
+  },
+  {
+   "letter": "ط",
+   "form": "medial",
+   "page": 62,
+   "strokes": 2,
+   "strokes_source": "NASKH_CROSS §٢ (جدولُ الرفعات الزائدة)",
+   "up": 1.0711,
+   "down": 0.0047,
+   "width": 1.4076,
+   "body_up": 1.0711,
+   "body_down": 0.0047,
+   "body_width": 1.4076,
+   "measured": true,
+   "dots": {
+    "found": 0,
+    "want": 0,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 566,
+    "x0": 416,
+    "x1": 713,
+    "y0": 340,
+    "y1": 567
+   }
+  },
+  {
+   "letter": "ط",
+   "form": "final",
+   "page": 62,
+   "strokes": 2,
+   "strokes_source": "NASKH_CROSS §٢ (جدولُ الرفعات الزائدة)",
+   "up": 1.1374,
+   "down": 0.0047,
+   "width": 1.2085,
+   "body_up": 1.1374,
+   "body_down": 0.0047,
+   "body_width": 1.2085,
+   "measured": true,
+   "dots": {
+    "found": 0,
+    "want": 0,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 566,
+    "x0": 137,
+    "x1": 392,
+    "y0": 326,
+    "y1": 567
+   }
+  },
+  {
+   "letter": "ظ",
+   "form": "isolated",
+   "page": 62,
+   "strokes": 2,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 1.1422,
+   "down": 0.0095,
+   "width": 1.0521,
+   "body_up": 1.1422,
+   "body_down": 0.0095,
+   "body_width": 1.0521,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 1,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 984,
+    "x0": 1088,
+    "x1": 1310,
+    "y0": 743,
+    "y1": 986
+   }
+  },
+  {
+   "letter": "ظ",
+   "form": "initial",
+   "page": 62,
+   "strokes": 2,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 1.1943,
+   "down": 0.0095,
+   "width": 1.2796,
+   "body_up": 1.1943,
+   "body_down": 0.0095,
+   "body_width": 1.2796,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 1,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 984,
+    "x0": 749,
+    "x1": 1019,
+    "y0": 732,
+    "y1": 986
+   }
+  },
+  {
+   "letter": "ظ",
+   "form": "medial",
+   "page": 62,
+   "strokes": 2,
+   "strokes_source": "NASKH_CROSS §٢ (جدولُ الرفعات الزائدة)",
+   "up": 1.0711,
+   "down": 0.0047,
+   "width": 1.4028,
+   "body_up": 1.0711,
+   "body_down": 0.0047,
+   "body_width": 1.4028,
+   "measured": true,
+   "dots": {
+    "found": 2,
+    "want": 1,
+    "body_trusted": false,
+    "note": "عُزل 2 مركّباً ونقطُه 1 — فقد يخرج من جسمه ما ليس نقطة"
+   },
+   "px": {
+    "baseline": 984,
+    "x0": 424,
+    "x1": 720,
+    "y0": 758,
+    "y1": 985
+   }
+  },
+  {
+   "letter": "ظ",
+   "form": "final",
+   "page": 62,
+   "strokes": 2,
+   "strokes_source": "NASKH_CROSS §٢ (جدولُ الرفعات الزائدة)",
+   "up": 1.1374,
+   "down": 0.0047,
+   "width": 1.2038,
+   "body_up": 1.1374,
+   "body_down": 0.0047,
+   "body_width": 1.2038,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 1,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 984,
+    "x0": 144,
+    "x1": 398,
+    "y0": 744,
+    "y1": 985
+   }
+  },
+  {
+   "letter": "ع",
+   "form": "isolated",
+   "page": 62,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.5166,
+   "down": 0.8246,
+   "width": 0.9905,
+   "body_up": 0.5166,
+   "body_down": 0.8246,
+   "body_width": 0.9905,
+   "measured": true,
+   "dots": {
+    "found": 0,
+    "want": 0,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1309,
+    "x0": 1088,
+    "x1": 1297,
+    "y0": 1200,
+    "y1": 1483
+   }
+  },
+  {
+   "letter": "ع",
+   "form": "initial",
+   "page": 62,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §٢ (جدولُ الرفعات الزائدة)",
+   "up": 0.6445,
+   "down": 0.0095,
+   "width": 0.9005,
+   "body_up": 0.6445,
+   "body_down": 0.0095,
+   "body_width": 0.9005,
+   "measured": true,
+   "dots": {
+    "found": 0,
+    "want": 0,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1309,
+    "x0": 786,
+    "x1": 976,
+    "y0": 1173,
+    "y1": 1311
+   }
+  },
+  {
+   "letter": "ع",
+   "form": "medial",
+   "page": 62,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.4834,
+   "down": 0.0142,
+   "width": 0.981,
+   "body_up": 0.4834,
+   "body_down": 0.0142,
+   "body_width": 0.981,
+   "measured": true,
+   "dots": {
+    "found": 0,
+    "want": 0,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1309,
+    "x0": 467,
+    "x1": 674,
+    "y0": 1207,
+    "y1": 1312
+   }
+  },
+  {
+   "letter": "ع",
+   "form": "final",
+   "page": 62,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §١ (الموافق) ⇐ عددُنا من paths.js",
+   "up": 0.5355,
+   "down": 0.8815,
+   "width": 1.128,
+   "body_up": 0.5355,
+   "body_down": 0.8815,
+   "body_width": 1.128,
+   "measured": true,
+   "dots": {
+    "found": 0,
+    "want": 0,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1309,
+    "x0": 137,
+    "x1": 375,
+    "y0": 1196,
+    "y1": 1495
+   }
+  },
+  {
+   "letter": "غ",
+   "form": "isolated",
+   "page": 62,
+   "strokes": null,
+   "strokes_source": "لم تسمِّه NASKH_CROSS في أقسامها الثلاثة — ولا يُخمَّن",
+   "up": 0.7441,
+   "down": 0.7346,
+   "width": 0.981,
+   "body_up": 0.4739,
+   "body_down": 0.7346,
+   "body_width": 0.981,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 1,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1770,
+    "x0": 1085,
+    "x1": 1292,
+    "y0": 1613,
+    "y1": 1925
+   }
+  },
+  {
+   "letter": "غ",
+   "form": "initial",
+   "page": 62,
+   "strokes": 1,
+   "strokes_source": "NASKH_CROSS §٢ (جدولُ الرفعات الزائدة)",
+   "up": 0.8436,
+   "down": 0.0,
+   "width": 0.891,
+   "body_up": 0.5877,
+   "body_down": 0.0,
+   "body_width": 0.891,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 1,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1770,
+    "x0": 785,
+    "x1": 973,
+    "y0": 1592,
+    "y1": 1770
+   }
+  },
+  {
+   "letter": "غ",
+   "form": "medial",
+   "page": 62,
+   "strokes": null,
+   "strokes_source": "لم تسمِّه NASKH_CROSS في أقسامها الثلاثة — ولا يُخمَّن",
+   "up": 0.7441,
+   "down": 0.0047,
+   "width": 0.9526,
+   "body_up": 0.4408,
+   "body_down": 0.0047,
+   "body_width": 0.9526,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 1,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1770,
+    "x0": 469,
+    "x1": 670,
+    "y0": 1613,
+    "y1": 1771
+   }
+  },
+  {
+   "letter": "غ",
+   "form": "final",
+   "page": 62,
+   "strokes": null,
+   "strokes_source": "لم تسمِّه NASKH_CROSS في أقسامها الثلاثة — ولا يُخمَّن",
+   "up": 0.7441,
+   "down": 0.7867,
+   "width": 1.1137,
+   "body_up": 0.4882,
+   "body_down": 0.7867,
+   "body_width": 1.1137,
+   "measured": true,
+   "dots": {
+    "found": 1,
+    "want": 1,
+    "body_trusted": true,
+    "note": null
+   },
+   "px": {
+    "baseline": 1770,
+    "x0": 144,
+    "x1": 379,
+    "y0": 1613,
+    "y1": 1936
+   }
+  }
+ ],
+ "الصفحات": [
+  {
+   "page": 57,
+   "file": "١.jpg",
+   "sha": "f234ff13c22080ae",
+   "baselines": [
+    693,
+    991,
+    1261,
+    1495,
+    1760
+   ],
+   "أشكال": 20
+  },
+  {
+   "page": 58,
+   "file": "٢.jpg",
+   "sha": "71f8e571067e4c13",
+   "baselines": [
+    432,
+    768,
+    1108,
+    1506,
+    1776
+   ],
+   "أشكال": 21
+  },
+  {
+   "page": 59,
+   "file": "٣.jpg",
+   "sha": "7975eba0fbff8dac",
+   "baselines": [
+    499,
+    736,
+    1031,
+    1211,
+    1520,
+    1807
+   ],
+   "أشكال": 23
+  },
+  {
+   "page": 60,
+   "file": "٤.jpg",
+   "sha": "04a02183c2956c29",
+   "baselines": [
+    532,
+    860,
+    1300,
+    1692
+   ],
+   "أشكال": 16
+  },
+  {
+   "page": 61,
+   "file": "٥.jpg",
+   "sha": "cee2c19276745d80",
+   "baselines": [
+    533,
+    860,
+    1300,
+    1692
+   ],
+   "أشكال": 16
+  },
+  {
+   "page": 62,
+   "file": "٦.jpg",
+   "sha": "f8be289591c9e04a",
+   "baselines": [
+    566,
+    984,
+    1309,
+    1770
+   ],
+   "أشكال": 16
+  }
+ ]
+}
