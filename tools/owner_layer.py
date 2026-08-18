@@ -434,7 +434,8 @@ def fix_dots(ch: str, form: str, dots: list, ref: dict) -> tuple:
 # **وبلا قناع حبر**: الحرفُ يملأ صندوقَه فسماحاتُ المحرّك على مقياسه (`scale = ١`)،
 # وليس في طبقة اليد حبرُ كلمةٍ يُقاس عرضُه — فالحدُّ سماحةُ الانحراف بحرفها.
 
-def self_folds(points: list, tol: dict, near: float = None, notes: list = None) -> list:
+def self_folds(points: list, tol: dict, near: float = None, notes: list = None,
+               far: float = None, fork: float = None) -> list:
     """طيّاتُ قطعةٍ من انطباقها على نفسها — `{from, apex, to}` بأرقام نقاطها.
 
     **والكشفُ على المسار مكثَّفاً ثم تُردّ أرقامُه إلى نقاطه**: خطوةُ المحرّك تترك
@@ -442,6 +443,10 @@ def self_folds(points: list, tol: dict, near: float = None, notes: list = None) 
     (قِيست ش/وسطي: مقابلٌ واحدٌ لا غير). فيُكثَّف بأرضيّة الخطوة — **كما يُكثَّف
     للتنقيح** (`refine`) — ويُقاس عليه، ثم يُرَدّ كلُّ رقمٍ إلى أقرب نقطةٍ في الطول
     (نظيرُ `resampleStroke` في العدّة: الطيّةُ تُحمَل أطوالاً لا أرقامَ عيّنات).
+
+    **و`far`/`fork` مقبضا قياسٍ لا معايرة** (جلسة ص٨): نافذتا المشيتين تُمرَّران
+    لتُجرَّب النافذةُ **ونقيضُها** فيَبين أثرُها مقيساً — وقيمتاهما في التشغيل
+    `back × ٢` و`back` من `pen.js` نفسِه، لا رقمين مكتوبين هنا.
     """
     poly = [list(p) for p in points]
     if len(poly) < 4:
@@ -449,7 +454,25 @@ def self_folds(points: list, tol: dict, near: float = None, notes: list = None) 
     cum = [0.0]
     for i in range(1, len(poly)):
         cum.append(cum[-1] + math.dist(poly[i - 1], poly[i]))
-    far = tol["back"] * 2          # تباعدٌ في الطول — دونه جوارُ القلم لنفسه
+    # ————— **نافذتان لا واحدة — والثانيةُ للشوكة القصيرة** (جلسة ص٨) —————
+    #
+    # النافذةُ الأولى `back × ٢` (١٤٠) عهدُها قائم: **تباعدٌ في الطول دونه جوارُ
+    # القلم لنفسه**. غير أنّها **تُعمي عن الشوكة القصيرة**: سنٌّ ضلعاها ٧٠–١٤٠،
+    # فمقابلُ نقاطها على ١٤٠ يقع فيما قبلها وما بعدها لا على ضلعها (قِيست ت/وسطي:
+    # صعودُها ١٠١ ونزولُها ٧٧) — **وهي مع ذلك موضعٌ واحد بطولين** يرتدّ عليه مؤشّرُ
+    # التقدّم، فتُقرأ كتابةُ الطفل الصحيحة `reverse`.
+    #
+    # **والنافذةُ الثانية `back` (٧٠) — رقمُ `pen.js` بعينه لا رقمٌ مختار**: هي
+    # المسافةُ التي يسلّم عندها المحرّكُ نفسُه من ضلع الطيّة الصاعد إلى النازل
+    # (`pen.js`: `stroke.reach >= fold.apex - tol.back`) — **فما رآه المحرّكُ جوارَ
+    # قمّةٍ تُعبَر لا يجوز أن يُعمى عنه الكاشف**. وما دونها يبتلعه سماحُ الارتداد
+    # نفسُه فلا يحتاج إعلاناً أصلاً (وهو عينُ ما تحرسه `keeps` أدناه: ضلعٌ دون
+    # `back` لا طيّةَ له).
+    #
+    # **والثانيةُ تابعةٌ لا بديل**: تُمشى بعد الأولى، وما تقاطع مع طيّةٍ أولى سقط —
+    # فلا تُزحزح الأولى عن موضعها، ولا تُبدَّل تسعٌ وأربعون طيّةً قائمةً بسواها.
+    far = tol["back"] * 2 if far is None else far   # تباعدٌ في الطول
+    fork = tol["back"] if fork is None else fork    # نافذةُ الشوكة — سماحةُ الارتداد
     near = tol["lateral"] if near is None else near
     floor, _ = step_rule()
     fine = walk(poly, floor)
@@ -457,17 +480,20 @@ def self_folds(points: list, tol: dict, near: float = None, notes: list = None) 
     for i in range(1, len(fine)):
         grain.append(grain[-1] + math.dist(fine[i - 1], fine[i]))
 
-    mate = [-1] * len(fine)
-    for i in range(len(fine)):
-        gap = near
-        for j in range(i + 1, len(fine)):
-            if grain[j] - grain[i] < far:
-                continue
-            d = math.dist(fine[i], fine[j])
-            if d < gap:
-                gap, mate[i] = d, j
+    def mates(window: float) -> list:
+        """مقابلُ كلِّ نقطةٍ في نافذةِ تباعدٍ مُعطاة — أقربُ حبرٍ يزورها ثانيةً."""
+        found = [-1] * len(fine)
+        for i in range(len(fine)):
+            gap = near
+            for j in range(i + 1, len(fine)):
+                if grain[j] - grain[i] < window:
+                    continue
+                d = math.dist(fine[i], fine[j])
+                if d < gap:
+                    gap, found[i] = d, j
+        return found
 
-    out, run = [], None
+    out, run, span, found = [], None, far, None
 
     def tip(lo: int, hi: int) -> int:
         """**رأسُ الشوكة**: أبعدُ نقاطها عن الوتر الواصل بين طرفيها.
@@ -518,29 +544,43 @@ def self_folds(points: list, tol: dict, near: float = None, notes: list = None) 
             # موضعان في حلقةٍ لا موضعٌ واحدٌ بطولين. **ولا رقمَ يُختار**: النافذةُ
             # نافذةُ المحرّك وزيادتُها خطوةُ التكثيف — وهي دقّةُ القياس نفسُها.
             gap = grain[mid] - grain[run["i2"]]
-            if lo < apex < hi and gap <= far + floor:
-                out.append(hairpin(tip(lo, hi)))
+            if lo < apex < hi and gap <= span + floor:
+                found.append(hairpin(tip(lo, hi)))
             elif notes is not None:
-                notes.append(f"عناقٌ طولُ وسطه {gap:.0f} فوق نافذة المحرّك"
-                             f" ({far + floor:.0f}) — نزهةٌ بين شقّيه لا طيّة")
+                notes.append(f"عناقٌ طولُ وسطه {gap:.0f} فوق نافذة المشية"
+                             f" ({span + floor:.0f}) — نزهةٌ بين شقّيه لا طيّة")
         elif run and notes is not None and run["n"] >= 2:
             notes.append("عناقٌ مُوازٍ (مقابلُه يتقدّم بتقدّمه) — حلقةٌ لا شوكة")
         run = None
 
-    for i, j in enumerate(mate):
-        if j < 0:
-            close()
-            continue
-        if (run and i == run["i2"] + 1 and abs(j - run["j2"]) <= 2
-                and (run["dir"] == 0 or j == run["j2"]
-                     or (j > run["j2"]) == (run["dir"] > 0))):
-            if run["dir"] == 0 and j != run["j2"]:
-                run["dir"] = 1 if j > run["j2"] else -1
-            run.update(i2=i, j2=j, n=run["n"] + 1)
-        else:
-            close()
-            run = {"i1": i, "i2": i, "j1": j, "j2": j, "n": 1, "dir": 0}
-    close()
+    def sweep(window: float) -> list:
+        """مشيةٌ كاملة بنافذةِ تباعدٍ واحدة — تُعيد أوتارَ ما وجدته من شوكاتٍ.
+
+        **والنافذةُ صفةُ المشية لا صفةُ الملفّ**: قاعدةُ «وسطُ الطيّة لا يزيد على
+        النافذة» تُقاس بنافذة مشيتها هي — فلا تُقاس شوكةُ السبعين بنافذة المئة
+        والأربعين ولا العكس.
+        """
+        nonlocal run, span, found
+        run, span, found = None, window, []
+        for i, j in enumerate(mates(window)):
+            if j < 0:
+                close()
+                continue
+            if (run and i == run["i2"] + 1 and abs(j - run["j2"]) <= 2
+                    and (run["dir"] == 0 or j == run["j2"]
+                         or (j > run["j2"]) == (run["dir"] > 0))):
+                if run["dir"] == 0 and j != run["j2"]:
+                    run["dir"] = 1 if j > run["j2"] else -1
+                run.update(i2=i, j2=j, n=run["n"] + 1)
+            else:
+                close()
+                run = {"i1": i, "i2": i, "j1": j, "j2": j, "n": 1, "dir": 0}
+        close()
+        return found
+
+    out = sweep(far)
+    # **ثم الشوكةُ القصيرة بنافذتها** — تابعةً لا بديلاً، وما تقاطع مع أولى سقط.
+    forks = sweep(fork) if fork < far else []
 
     def at(length: float) -> int:
         """أقربُ نقطةٍ من نقاط القطعة إلى هذا الطول — ردُّ الرقم إلى موضعه."""
@@ -560,10 +600,21 @@ def self_folds(points: list, tol: dict, near: float = None, notes: list = None) 
                 notes.append(f"ضلعٌ طولُه {min(poly_len(up), poly_len(down)):.0f}"
                              f" دون سماحة الارتداد ({tol['back']:.0f})")
             return False
+        # **ولا يُقترح على الفاحص ما يردّه** (عثرةُ ص٨ مقيسة): طيّةٌ يرفضها
+        # `check_paths.check_folds` **تُسقِط الشكلَ كلَّه إلى الخيال** — فيُفقد أثرُ
+        # يد المالك في شكلٍ صحيحٍ بسبب صفةٍ زائدة (وقع في `ش/ابتدائي`: ضلعاها على
+        # ١٠٦ ≥ سماحة الانحراف ٩٠، فنزل الشكلُ من يده إلى الخيال). **فيُمتحن هنا
+        # بمقياس الفاحص بعينه** — لا بنظيرٍ له — فما لا يقبله لا يُدَّعى، ويبقى
+        # الشكلُ على يده بلا طيّة: **صفةٌ تُترك خيرٌ من يدٍ تُمحى**.
+        if check_paths.check_folds(
+                {"points": poly, "folds": [fold]}, "طيّة", tol):
+            if notes is not None:
+                notes.append("طيّةٌ يردّها الفاحصُ — تُترك ولا يُدفَع بها")
+            return False
         return True
 
     kept = []
-    for lo, mid, hi in sorted(out):
+    for lo, mid, hi in sorted(out) + sorted(forks):
         fold = {"from": at(lo), "apex": at(mid), "to": at(hi)}
         if not (fold["from"] < fold["apex"] < fold["to"]):
             continue

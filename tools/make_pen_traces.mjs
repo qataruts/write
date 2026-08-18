@@ -211,7 +211,10 @@ const TOOTH_LINE = prepare([...TOOTH_ARM_IN, ...TOOTH_SPINE.slice(1),
 const WORD_CASES = ['تمر', 'شَمْسْ', 'الشَّمْسْ'];
 
 const LAM_MEDIAL = PATHS['ل'].medial;
-const LAM_POLY = prepare(LAM_MEDIAL.strokes[0].points);
+// **وقطعُ الشكل تُقرأ من الشكل لا يُفترَض عددُها** (عثرةُ ص٨، أختُ `folds[0]`): كان
+// يُؤخذ `strokes[0]` وحدَه، فلمّا صار ل/وسطي قطعتين خرجت الحالةُ **ناقصةً قطعةً**
+// فرُدّت `incomplete` — رَدٌّ كاذبٌ على كتابةٍ صحيحة، سببُه المولّدُ لا المحرّك.
+const LAM_POLY = LAM_MEDIAL.strokes.map((s) => prepare(s.points));
 const BA_MEDIAL = PATHS['ب'].medial;
 const BA_FINAL = PATHS['ب'].final;
 
@@ -222,7 +225,13 @@ const BA_FINAL = PATHS['ب'].final;
  */
 function retrace(ref) {
   const stroke = ref.strokes[0];
-  const fold = stroke.folds[0];
+  // **وضربةٌ بلا طيّةٍ حالٌ سويّة لا شاذّة** (كشفُ ص٧: الطيّةُ تُقرأ من أثر يد
+  // المالك نفسِه — `owner_layer.self_folds` — فتثبت حيث انطبق الحبرُ وتغيب حيث
+  // لم ينطبق). **فمادّةُ «العودة على الأثر الرطب» هي الطيّة**: لا تُختلق حيث
+  // غابت — فحالةٌ تُبنى على طيّةٍ موهومة تشهد على محرّكٍ لا على مسار. فيُعاد
+  // `null` **ويُعلَن الإسقاط** عند نداءِ الحالة، ولا ينفجر المولّدُ ولا يصمت.
+  const fold = stroke.folds?.[0];
+  if (!fold) return null;
   const rising = stroke.points.slice(fold.from, fold.apex + 1);
   return prepare([
     ...stroke.points.slice(0, fold.from + 1),
@@ -244,6 +253,21 @@ function build() {
   const add = (id, expect, note, strokes, ref = 'sample') => cases.push({
     id, expect, note, origin: 'synthetic', ref, strokes,
   });
+  /**
+   * **حالةُ «العودة على الأثر الرطب» تُبنى أو تُسقَط معلَنةً** — ولا تُبنى على
+   * طيّةٍ موهومة. فإن غابت طيّةُ مسارِها (وذلك حالٌ سويّة بعد ص٧) طُبع إسقاطُها
+   * بموضعه وسببه على `stderr` — **فالسقوطُ الصامت يُقرأ تغطيةً وهو نقصُها**.
+   */
+  const addRetrace = (id, expect, note, ref, refName, rand) => {
+    const path = retrace(ref);
+    if (!path) {
+      console.error(`  ⚠ أُسقطت «${id}»: مسارُ «${refName}» بلا طيّةٍ معلَنة`
+        + ' — ولا تُختلق طيّةٌ لحالةِ عودةٍ على الأثر الرطب');
+      return false;
+    }
+    add(id, expect, note, [walk(path, { jitter: 4, rand }), ...dotsOf(ref, rand)], refName);
+    return true;
+  };
 
   const dot = (rand) => tap(DOT, rand);
   const clean = (rand, opts = {}) => BODY.map((poly) => walk(poly, { rand, ...opts }));
@@ -393,19 +417,19 @@ function build() {
     + '`child-drift` في مراجعة المدير (سقط برجفة ٤٠) فعاد فوقه بإعلان الطيّة، '
     + '**ثم سقطت طيّتُه بحكم المالك في مرجعية الكرّاسة (§١)** فصار عموداً نازلاً '
     + 'من قمّته — ويبقى شاهدَ الرجفة على أطول عمودٍ موصول',
-    [walk(LAM_POLY, {
+    LAM_POLY.map((poly) => walk(poly, {
       jitter: 4, sway: (r) => Math.sin(r * Math.PI * 2) * TOLERANCE.lateral * 0.5, rand,
-    })], 'lam-medial');
+    })), 'lam-medial');
 
   // **والمعيارُ يُثبَت على مادّته** (مراجعةُ المدير الثانية للجلسة ٢ب): «العودةُ على
   // الأثر الرطب» تُجمَّد على **ب/وسطي وب/نهائي الحقيقيّين** — أوسعِ فجوةِ ضلعين في
   // المنهج (١٦٠) وأضيقِ قوسٍ فيه — لا على السنّ الاصطناعية وحدَها.
 
   rand = rng(1919);
-  add('ba-medial-retrace', { accept: true, needsFold: true },
+  addRetrace('ba-medial-retrace', { accept: true, needsFold: true },
     '**ب/وسطي: العودةُ على الأثر الرطب** — يصعد ضلعَ السنّة الصاعد وينزل عليه هو. '
     + 'كانت تُردّ `wander`: فجوةُ الضلعين ١٦٠ وسماحةُ الانحراف ٩٠',
-    [walk(retrace(BA_MEDIAL), { jitter: 4, rand }), ...dotsOf(BA_MEDIAL, rand)], 'ba-medial');
+    BA_MEDIAL, 'ba-medial', rand);
 
   rand = rng(2020);
   add('ba-medial-reversed', { accept: false, fault: 'start-end' },
@@ -414,10 +438,10 @@ function build() {
       ...dotsOf(BA_MEDIAL, rand)], 'ba-medial');
 
   rand = rng(2121);
-  add('ba-final-retrace', { accept: true, needsFold: true },
+  addRetrace('ba-final-retrace', { accept: true, needsFold: true },
     '**ب/نهائي: العودةُ على الأثر الرطب** على تُوَيْجها — أضيقُ قوسٍ في المنهج. '
     + 'كانت تُردّ `reverse` كاذباً وفجوةُ ضلعيها ٨٠ داخلَ السماحة',
-    [walk(retrace(BA_FINAL), { jitter: 4, rand }), ...dotsOf(BA_FINAL, rand)], 'ba-final');
+    BA_FINAL, 'ba-final', rand);
 
   rand = rng(2222);
   add('ba-final-reversed', { accept: false, fault: 'start-end' },
