@@ -55,8 +55,15 @@ console.log('\n— ٢) التغطية —');
 ok(shapes.length > 0, `المسارات: ${Object.keys(paths.PATHS).length} حرفاً في ${shapes.length} شكلاً`);
 ok(Object.entries(paths.PATHS).every(([, byForm]) => forms.every((f) => byForm[f])),
   `ولكلِّ حرفٍ أشكالُ مواقعه الأربعة (${forms.join('، ')})`);
-ok(shapes.every(({ ref }) => ref.strokes?.length && ref.strokes.every((s) => s.start)),
-  'ولكلِّ شكلٍ أجزاءٌ ببداياتٍ معلنة');
+// **والصفرُ نقرةٌ بحكم المالك، لا شكلٌ بلا مسار** (١٨ أغسطس ٢٠٢٦،
+// `docs/STROKE_ORDER.md §٢`): «نقطةٌ تُنقَر لا دائرةٌ تُرسَم» — فمادّتُه قيدُ نقرةٍ
+// لا ضربةَ مسار. **والقائمةُ معلَنةٌ بأعيانها** ويُطالَب مَن فيها بنقرته كما يُطالَب
+// مَن سواه بضربته، فلا يفرغ شكلٌ من مادّته صامتاً.
+const TAP_ONLY = new Set(['٠']);
+ok(shapes.every(({ ch, ref }) => (TAP_ONLY.has(ch)
+  ? !ref.strokes?.length && ref.dots?.length
+  : ref.strokes?.length && ref.strokes.every((s) => s.start))),
+  `ولكلِّ شكلٍ أجزاءٌ ببداياتٍ معلنة — ولِمَن مادّتُه نقرةٌ نقرتُه (${[...TAP_ONLY].join('، ')})`);
 ok(curriculum.PATHS === paths.PATHS,
   'و`curriculum.js` يصدّر المساراتِ بأعيانها — مصدرُ حقيقةٍ واحدٌ للشاشات');
 ok(shapes.every(({ ch, form }) => curriculum.pathOf(ch, form)),
@@ -87,7 +94,12 @@ const taps = (ref) => ref.dots.map((d) => Array.from({ length: d.count || 1 }, (
 const trace = (ref, opts) => [...ref.strokes.map((s) => walk(s.points, opts)), ...taps(ref)];
 
 console.log('\n— ٣) الحكم: على كل مسارٍ صحيحاً ومعكوساً —');
-for (const { ch, form, ref } of shapes) {
+// **والنقرةُ لا جهةَ لها فلا تُمتحَن بالعكس** — امتحانُها في مكانها لا في اتجاهها:
+// تُقبَل في موضعها وتُردّ بعيدةً عنه. **والقائمةُ معلَنة** فلا يفلت شكلٌ من امتحان
+// الاتجاه صامتاً بأن يفرغ من ضرباته.
+const walkers = shapes.filter(({ ch }) => !TAP_ONLY.has(ch));
+const tappers = shapes.filter(({ ch }) => TAP_ONLY.has(ch));
+for (const { ch, form, ref } of walkers) {
   const good = pen.judge(ref, trace(ref));
   const back = pen.judge(ref, trace(ref, { from: 1, to: 0 }));
   ok(good.accepted && !back.accepted,
@@ -96,13 +108,25 @@ for (const { ch, form, ref } of shapes) {
 }
 
 // **والمعكوسُ مرفوضٌ باتجاهه لا بدقّته**: تُضاعَف السماحةُ ثلاثاً فيبقى مرفوضاً.
-const loose = shapes.filter(({ ref }) => !pen.judge(ref, trace(ref, { from: 1, to: 0 }), { tolerance: 3 }).accepted);
-ok(loose.length === shapes.length,
-  `والمعكوسُ يُرفَض في الأشكال كلِّها ولو ضوعفت السماحةُ ثلاثاً (${loose.length}/${shapes.length})`);
+const loose = walkers.filter(({ ref }) => !pen.judge(ref, trace(ref, { from: 1, to: 0 }), { tolerance: 3 }).accepted);
+ok(loose.length === walkers.length,
+  `والمعكوسُ يُرفَض في الأشكال كلِّها ولو ضوعفت السماحةُ ثلاثاً (${loose.length}/${walkers.length})`);
+
+// **ومَن مادّتُه نقرة**: تُقبَل نقرتُه في موضعها، وتُردّ إن نُقرت بعيداً عنه بضعف
+// سماحة النقطة — فالمقياسُ مقياسُ نقطةٍ (نقرةٌ داخل نصف قطرها) لا شروطَ المسار.
+for (const { ch, form, ref } of tappers) {
+  const at = ref.dots[0].at;
+  const far = [[at[0] + pen.TOLERANCE.dot * 2, at[1]]];
+  const hit = pen.judge(ref, taps(ref));
+  const miss = pen.judge(ref, [[...far, ...far, ...far]]);
+  ok(hit.accepted && !miss.accepted,
+    `${ch} ${curriculum.FORM_NAMES[form]}: النقرةُ في موضعها ${hit.accepted ? 'تُقبَل' : `تُرفَض «${hit.primary}»`}`
+    + ` · وبعيداً عنه ${miss.accepted ? 'تُقبَل — وهو خطأ!' : `تُرفَض «${miss.primary}»`}`);
+}
 
 
 // **والنقاطُ بعد الجسم**: مَن نقَط قبل أن يكتب الجسمَ رُدّ بخطئه بعينه.
-const dotted = shapes.filter(({ ref }) => ref.dots.length);
+const dotted = walkers.filter(({ ref }) => ref.dots.length);
 ok(dotted.length > 0, `والمنقوطُ من الأشكال ${dotted.length} — تُجرَّب فيها قاعدةُ «النقاطُ بعد الجسم»`);
 for (const { ch, form, ref } of dotted) {
   const first = pen.judge(ref, [...taps(ref), ...ref.strokes.map((s) => walk(s.points))]);
@@ -227,10 +251,10 @@ if (tightest) {
 }
 
 // وما لا طيّةَ فيه لا يتبدّل حكمُه بنزعٍ ولا إثبات — فالصفةُ لا تسري على غير أهلها
-ok(shapes.filter(({ ref }) => !ref.strokes.some((s) => s.folds?.length))
+ok(walkers.filter(({ ref }) => !ref.strokes.some((s) => s.folds?.length))
   .every(({ ref }) => pen.judge(ref, trace(ref)).accepted
     && !pen.judge(ref, trace(ref, { from: 1, to: 0 })).accepted),
-  `والأشكالُ التي لا طيّةَ فيها (${shapes.length - folded.length}) على حكمها كما كانت`);
+  `والأشكالُ التي لا طيّةَ فيها (${walkers.length - folded.length}) على حكمها كما كانت`);
 
 // ————— ٦) تمييزُ المتشابهات: أيفرّق المحرّكُ بين كلِّ أختين؟ (الجلسة ٧) —————
 //

@@ -1055,6 +1055,10 @@ function studio(ch, form) {
   const graph = skeletonGraph(skeleton);
   return {
     ch, form, mask, image, bodyMask, skeleton, graph, cal,
+    // **مركزُ الجسم نفسِه** — يحتاجه الشكلُ الذي جسمُه نقرةٌ لا مسار (الصفرُ بحكم
+    // المالك، ١٨ أغسطس ٢٠٢٦): موضعُ النقرة **مقروءٌ من الخيال** كسائر النقاط، ولا
+    // يُكتب إحداثيّاً بيد.
+    bodyAt: [body.at[0] * PX, body.at[1] * PX],
     marks,                                   // أجرامُ العلامات كما هي
     markWork: marks.map(markStudio),         // ولكلِّ علامةٍ هيكلُها وعُقَدُها (حكمُ الشولة)
     dots: dotsFrom(marks),
@@ -1185,6 +1189,13 @@ function compose(work, gesture) {
   }
   // **العلامةُ ضربةً**: `marks` إيماءتُها المؤلَّفة (حكمُ الشولة)، و`markStrokes` مشيُ
   // هيكلها آلياً (مرشّحُ اللوحة قبل الحكم). وفي الحالين تخرج من النقاط وتدخل الأجزاء.
+  // **جسمٌ يُنقَر لا يُمشى** (`tap`): حكمُ المالك في الصفر (١٨ أغسطس ٢٠٢٦) — «نقطةٌ
+  // تُنقَر لا دائرةٌ تُرسَم». فالجرمُ الواحد المصمت يخرج **قيدَ نقرةٍ** بموضع مركزه
+  // مقروءاً من الخيال، ولا ضربةَ مسارٍ له — ويُحكَم عليه بمعيار النقطة لا بشروط
+  // المسار الأربعة. **وليس هذا شكلاً بلا مسار**: هو شكلٌ مادّتُه نقرة.
+  if (gesture.tap) {
+    return { strokes: [], dots: [{ at: [round1(work.bodyAt[0]), round1(work.bodyAt[1])], count: 1, after: false }] };
+  }
   if (gesture.marks) return { strokes: [...strokes, ...markGesture(work, gesture.marks)], dots: [] };
   if (gesture.markStrokes) return { strokes: [...strokes, ...markStrokes(work)], dots: [] };
   return { strokes, dots: work.dots };

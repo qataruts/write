@@ -776,6 +776,12 @@ def self_test() -> int:
                    f"{ch}/{form}: عينُ «{entry.get('sameAs')}» بعلّةٍ مكتوبة")
                 continue
             shape = entry.get("strokes")
+            # **والجسمُ الذي يُنقَر لا يُمشى إيماءتُه صفرُ ضربات** (`tap`): حكمُ المالك
+            # في الصفر (١٨ أغسطس ٢٠٢٦) — «نقطةٌ تُنقَر لا دائرةٌ تُرسَم». **وليس شكلاً
+            # بلا مسار** بل شكلاً مادّتُه نقرة، وموضعُها مقروءٌ من الخيال لا مكتوبٌ بيد.
+            if entry.get("tap"):
+                ok(shape == [], f"{ch}/{form}: نقرةٌ بحكم المالك — إيماءتُه بلا ضربات ({shape})")
+                continue
             ok(isinstance(shape, list) and shape
                and all(isinstance(s, list) and len(s) >= 2 and all(isinstance(i, int) and i > 0 for i in s)
                        for s in shape),
