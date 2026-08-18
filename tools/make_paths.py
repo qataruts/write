@@ -582,6 +582,57 @@ def part_stamp() -> str:
     return f"{tool}·{sha()}·{material_sha()}"
 
 
+# ————— **أمرا المالك في الشكل**: أختان بجسمٍ واحد (بند ص٢/ب ٥) —————
+#
+# «`س` الأربعةُ من `ش` بلا نقاط · و`ض` الأربعةُ من `ص` بنقطة» — أمرُ المالك (١٩
+# أغسطس ٢٠٢٦). **وعلّتُه في الخطّ لا في العدّة**: جسمُ الشين جسمُ السين بعينه
+# والفارقُ نقطُه، وجسمُ الضاد جسمُ الصاد والفارقُ نقطتُه — **فلا يجوز أن تفترق
+# أختان في جسمٍ واحد** لأنّ اليد رسمتهما مرّتين. وهو عينُ ما يفعله `twins` في
+# الأرقام: مسارٌ واحدٌ يُدَّعى ويُحرَس.
+#
+# **ولا يُمَسّ `owner_shapes.json`**: أثرُ يد المالك يبقى بختمه شاهداً، والاشتقاقُ
+# يجري في البناء **بعد طبقته وقبل الجلوس على السطر** — فيُقيَّد في نسب الوحدة.
+DERIVED = [
+    {"from": "ش", "to": "س", "dots": 0,
+     "why": "جسمُ الشين جسمُ السين — والفارقُ نقطُه (أمرُ المالك ١٩ أغسطس ٢٠٢٦)"},
+    {"from": "ص", "to": "ض", "dots": 1,
+     "why": "جسمُ الضاد جسمُ الصاد — والفارقُ نقطتُه (أمرُ المالك ١٩ أغسطس ٢٠٢٦)"},
+]
+
+
+def derive_layer(paths: dict) -> list:
+    """يشتقّ الأختَ من أختها بجسمها ونقطِها المعلَن — ويعيد قيداً بما اشتُقّ.
+
+    **وموضعُ النقطة يُقرأ من أثر المالك في الحرف المشتَقّ نفسِه**: نسبتُها من صندوق
+    حبره تُنقَل إلى صندوق الجسم الجديد — فلا يُكتب إحداثيٌّ بيد ولا يُقدَّر موضع.
+    """
+    done = []
+    for rule in DERIVED:
+        src, dst = paths.get(rule["from"]), paths.get(rule["to"])
+        if not src or not dst:
+            continue
+        for form in FORMS:
+            if form not in src or form not in dst:
+                continue
+            was, body = dst[form], src[form]
+            old_box = line_layer.ink(was)
+            new_box = line_layer.ink({"strokes": body["strokes"], "dots": []})
+            dots = []
+            for dot in was["dots"][:rule["dots"]]:
+                rx = ((dot["at"][0] - old_box[0]) / max(old_box[1] - old_box[0], 1e-6))
+                ry = ((dot["at"][1] - old_box[2]) / max(old_box[3] - old_box[2], 1e-6))
+                dots.append({**dot, "at": [
+                    round(new_box[0] + rx * (new_box[1] - new_box[0]), 1),
+                    round(new_box[2] + ry * (new_box[3] - new_box[2]), 1)]})
+            dst[form] = {"strokes": [json.loads(json.dumps(one)) for one in body["strokes"]],
+                         "dots": dots}
+            done.append(f"{rule['to']}/{form}")
+    for rule in DERIVED:
+        how = "بلا نقاط" if not rule["dots"] else f"بـ{rule['dots']} نقطة"
+        print(f"🤝 {rule['to']} الأربعةُ من {rule['from']} {how} — {rule['why']}")
+    return done
+
+
 def seat_layer(paths: dict) -> dict:
     """**سطرُ الكتابة وحدةً لا الحرف** (بند ص٢/ب ١): يُنزِّل الأشكالَ على سطرٍ واحد
     بمقياسٍ عامٍّ واحد قبل أن تُكتب الوحدة — ويطبع ما تبدّل من نِسَب.
@@ -600,8 +651,15 @@ def seat_layer(paths: dict) -> dict:
     off = max((abs(r["got"] - r["ref"]) for r in measured), default=0)
     moved = sorted(measured, key=lambda r: -abs(
         (before[r["key"]][3] - before[r["key"]][2]) / unit - r["ref"]))[:5]
+    # **وما بقي بعيداً عن المرجع يُعَدّ ويُطبع** (مدخلُ ص٢/ج): الارتفاعُ صار عينَ
+    # المرجع بالحساب، **والعرضُ شهادةُ الشكل نفسِه** — فهو ما لا يصلحه مقياسٌ
+    # منتظم: شكلٌ عرضُه يخالف صفَّه شكلٌ يخالف صفَّه، ويُشتقّ من المرجع اشتقاقاً.
+    wide = sorted((abs(r["got_width"] - r["ref_width"]) for r in measured), reverse=True)
+    far = [r for r in measured if abs(r["got_width"] - r["ref_width"]) > 0.15]
     print(f"   {len(measured)} شكلاً على نسبة المرجع (أقصى فرقٍ {off:.4f} من الألف)"
           f" · و{len(rep['shapes']) - len(measured)} بلا سندٍ نُقلت بحجمها")
+    print(f"   وبقي بعيداً عن المرجع **عرضاً** {len(far)} شكلاً (فوق ٠٫١٥ من الألف)"
+          f" — وسيطُ الفرق {wide[len(wide) // 2]:.3f} وأقصاه {wide[0]:.3f}: مدخلُ ص٢/ج")
     for r in moved:
         was = (before[r["key"]][3] - before[r["key"]][2]) / unit
         print(f"   ⤷ {r['key']}: {was:.2f} ⇐ {r['ref']:.2f} من الألف")
@@ -623,7 +681,8 @@ def seat_layer(paths: dict) -> dict:
         "unit": unit, "cap": sp["cap"], "base": sp["base"], "cell": sp["cell"],
         "top": sp["top"], "low": sp["low"],
         "measured": len(measured), "unsupported": len(rep["shapes"]) - len(measured),
-        "off": round(off, 4),
+        "off": round(off, 4), "far": len(far), "farLimit": 0.15,
+        "widthMedian": round(wide[len(wide) // 2], 4),
         "why": "النسبةُ بين الحروف تُحفَظ (أمرُ المالك ١٩ أغسطس ٢٠٢٦): مقياسٌ عامٌّ"
                " واحدٌ للهجاء كلِّه وثلاثةُ خطوطٍ ثابتة، وكلُّ شكلٍ يأخذ نصيبَه من"
                " `tools/naskh_metrics.json` — لا يُكبَّر حرفٌ وحدَه ليملأ خليّتَه.",
@@ -653,7 +712,9 @@ def seat_build() -> int:
         paths.setdefault(ch, {}).update(family)
     away = max((row["away"] for row in owner["panel"]), default=0)
     print(f"✍️  طبقةُ المالك: {owner['shapes']} شكلاً من يده تعلو الخيال")
+    derived = derive_layer(paths)
     seating = seat_layer(paths)
+    seating["derived"] = derived
     meta = dict(prior or {}, line=seating)
     meta["owner"] = dict(meta.get("owner") or {}, sha=owner["sha"],
                          shapes=owner["shapes"], passes=owner["passes"], away=away,
@@ -786,7 +847,9 @@ def build(port: int, timeout: int, chunk: int = 100, fresh: bool = False) -> int
     for row in owner["dropped"]:
         print(f"  ○ {row['key']}: بقي على الخيال — {row['why']}")
 
-    paths, seating = seat_layer(paths)
+    derived = derive_layer(paths)
+    seating = seat_layer(paths)
+    seating["derived"] = derived
 
     meta = {
         "tool": "tools/make_paths.html",
@@ -957,7 +1020,11 @@ def self_test() -> int:
     # السطر، فتُقابَل يدُ المالك بيده **بعد أن تجلس** — وإلا شكا الفاحصُ من مقياسٍ
     # هو نفسُه أمرُ المالك. **وهي حسابٌ محضٌ يُعاد**، فالمقابلةُ تبقى مقابلةَ أثرٍ.
     hand, _ = line_layer.seat(hand, unit=(meta or {}).get("line", {}).get("unit"))
-    owned = {f"{ch}/{form}" for ch, family in hand.items() for form in family}
+    # **والمشتقّاتُ تُستثنى من مقابلة اليد وتُحرَس بحدّها هي** (بند ص٢/ب ٥): جسمُها
+    # ليس جسمَ أثره في حرفها بل جسمُ أثره في أختها — فالمقابلةُ الصادقة أن يكون
+    # **جسمُ الأختين واحداً في الوحدة نفسِها** ونقطُهما بجدول الحقيقة، وذلك أدناه.
+    derived = set((meta or {}).get("line", {}).get("derived") or [])
+    owned = {f"{ch}/{form}" for ch, family in hand.items() for form in family} - derived
     ok(bool(stamp), f"ونسبُ الوحدة يعلن طبقةَ المالك ({stamp.get('shapes', '—')} شكلاً)")
     ok(stamp.get("sha") == owner_layer.sha(),
        f"وبصمةُ أشكاله في الوحدة عينُ الملفّ ({stamp.get('sha', '—')} = {owner_layer.sha()})"
@@ -980,6 +1047,25 @@ def self_test() -> int:
     ok(not astray, f"وكلُّ شكلٍ من يده في الوحدة عينُ ما تُخرجه طبقتُه ({len(owned)})"
        + (f" — خالف: {'، '.join(astray[:5])}" if astray else ""))
 
+    # ————— ٣ج) **أختان بجسمٍ واحد**: `س` من `ش` و`ض` من `ص` (أمرُ المالك) —————
+    ok(len(derived) == len(DERIVED) * len(FORMS),
+       f"وأشكالُ الأختين المشتقّة معلَنةٌ في نسب الوحدة ({len(derived)} من"
+       f" {len(DERIVED) * len(FORMS)})")
+    for rule in DERIVED:
+        astray = []
+        for form in FORMS:
+            got = (paths.get(rule["to"]) or {}).get(form)
+            src = (paths.get(rule["from"]) or {}).get(form)
+            if not got or not src:
+                astray.append(f"{rule['to']}/{form} (ناقص)")
+                continue
+            if json.dumps(got["strokes"], sort_keys=True) != json.dumps(src["strokes"], sort_keys=True):
+                astray.append(f"{rule['to']}/{form} (جسمٌ خالف)")
+            elif len(got["dots"]) != rule["dots"]:
+                astray.append(f"{rule['to']}/{form} (نقطُه {len(got['dots'])})")
+        ok(not astray, f"و{rule['to']} الأربعةُ جسمُها جسمُ {rule['from']} بعينه"
+           f" ونقطُها {rule['dots']}" + (f" — خالف: {'، '.join(astray)}" if astray else ""))
+
     # ٤) الأجزاءُ بعددها، والدعوى «عينُ شكلٍ آخر» صادقةٌ في الوحدة كذلك
     for ch, forms in letters.items():
         for form, entry in forms.items():
@@ -988,7 +1074,7 @@ def self_test() -> int:
                 continue
             # **وأجزاءُ ما جاء من يده أجزاءُ يده لا أجزاءُ الإيماءة**: الإيماءةُ سيّرت
             # الخيالَ وحدَه، وهو اليومَ تحت أثره — فيُحرَس بمطابقة الطبقة أعلاه.
-            if f"{ch}/{form}" in owned:
+            if f"{ch}/{form}" in owned or f"{ch}/{form}" in derived:
                 continue
             if entry.get("sameAs"):
                 twin = paths[ch].get(entry["sameAs"])

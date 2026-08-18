@@ -103,10 +103,25 @@ def metrics() -> dict:
     return table
 
 
-def ink(shape: dict) -> tuple:
+# ————— **الأختان بجسمٍ واحد ومقياسٍ واحد** (بند ص٢/ب ٥) —————
+#
+# `ش` هي `س` ونقطُها، و`ض` هي `ص` ونقطتُها (أمرُ المالك ١٩ أغسطس ٢٠٢٦) — **والجسمُ
+# إن كان واحداً فمقياسُه واحد**. ويُؤخذ المقياسُ من **الأخت التي لا نقطَ لها**،
+# وعلّتُه مقيسةٌ في الجدول نفسِه: عرضُ `ش` عرضُ `س` بالرقم عينه (١٫١٥٦٤ · ١٫٤٤٠٨ …)
+# **وارتفاعُه يزيد بمقدار نقطه** (`ش/معزول` ٠٫٨٠٥٧ مقابل ٠٫٣٢٧) — بل حتى `body_up`
+# المزعوم أنه بلا نقط بقي ٠٫٦٤، **فعزلُ النقط في الصورة لم يتمّ**. ⇐ فلو قِيست
+# المنقوطةُ إلى صفّها لَصغُر جسمُها بمقدار نقطه وافترق عن أخته.
+#
+# **فتُقاس المنقوطةُ بجسمها إلى صفِّ أختها، ونقطُها يركب معه** — ويُطبع فرقُها عن
+# صفِّها في الجرد فلا يُخفى.
+SISTERS = {"ش": "س", "ض": "ص"}
+
+
+def ink(shape: dict, body_only: bool = False) -> tuple:
     """صندوقُ حبر الشكل — الضرباتُ ومواضعُ نقطه (وهو ما يقيسه المرجع في `up/down`)."""
     pts = [p for s in shape["strokes"] for p in s["points"]]
-    pts += [d["at"] for d in shape["dots"]]
+    if not body_only:
+        pts += [d["at"] for d in shape["dots"]]
     xs = [p[0] for p in pts]
     ys = [p[1] for p in pts]
     return min(xs), max(xs), min(ys), max(ys)
@@ -169,8 +184,9 @@ def seat(paths: dict, unit: float = None) -> tuple:
             if form not in forms:
                 continue
             shape = forms[form]
-            x0, x1, y0, y1 = ink(shape)
-            row = table.get((ch, form))
+            kin = SISTERS.get(ch)
+            x0, x1, y0, y1 = ink(shape, body_only=bool(kin))
+            row = table.get((kin or ch, form))
             if row is None:
                 # **بلا سندٍ من المرجع**: يُنقَل ولا يُقاس — أسفلُ حبره على السطر.
                 scale = 1.0
@@ -200,7 +216,7 @@ def seat(paths: dict, unit: float = None) -> tuple:
                 # على ما كانت** فلا يتبدّل بالنسبة حكمٌ على أثر طفل.
                 "tolerance": round(scale, 4),
             }
-            nx0, nx1, ny0, ny1 = ink(out[ch][form])
+            nx0, nx1, ny0, ny1 = ink(out[ch][form], body_only=bool(kin))
             report.append({
                 "key": f"{ch}/{form}", "letter": ch, "form": form,
                 "scale": round(scale, 6),
@@ -212,6 +228,7 @@ def seat(paths: dict, unit: float = None) -> tuple:
                 "ref": round(row["up"] + row["down"], 4) if row else None,
                 "got": round((ny1 - ny0) / unit, 4),
                 "ref_width": round(row["width"], 4) if row else None,
+                "basis": (f"جسمُه إلى صفِّ {kin}" if kin else None),
                 "got_width": round((nx1 - nx0) / unit, 4),
                 "up": round((base - ny0) / unit, 4),
                 "down": round((ny1 - base) / unit, 4),
