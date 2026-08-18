@@ -36,7 +36,7 @@
   `penSurface` من `app/js/pen.js` نفسِه — فما يراه المؤلِّفُ متحركاً هو ما يحكم به
   المحرّك على الطفل، ولا شكلَ ثانٍ في هذا المشروع أصلاً.
 
-  الأوضاع: (بلا راية) عدّةٌ لليد · `?nodes=1` جردُ العُقَد · `?build=1` بناءُ
+  الأوضاع: (بلا راية) عدّةٌ لليد · `?board=1` **مِرسمةُ المالك** · `?nodes=1` جردُ العُقَد · `?build=1` بناءُ
   المسارات كلِّها · `?sheet=1` لوحةُ مراجعةٍ بالعين. والثلاثةُ الأخيرة تُرسل
   حصيلتَها إلى سائقها بـ`POST /result` (بروتوكول `browser_test.py`).
 -->
@@ -107,8 +107,13 @@
   #mirsam-name { font-weight: 700; font-size: clamp(22px, 3.4vh, 36px); }
   #mirsam-hint { color: #9aa7b8; font-size: clamp(15px, 2.1vh, 22px); flex: 1;
     text-align: start; }
-  #mirsam-board { flex: 1; min-height: 0; display: flex; justify-content: center; }
-  #slate { position: relative; height: 100%; aspect-ratio: 1; max-width: 100%;
+  #mirsam-board { flex: 1; min-height: 0; display: flex; align-items: center;
+    justify-content: center; }
+  /* **وضلعُه يُحسب بالبكسل لا يُترك لنسبةٍ تتنازع مع سقفها**: `aspect-ratio` مع
+     `height:100%` و`max-width:100%` يتمدّد في الطولي فيُشدّ الخيالُ (قناعٌ يُمطّ)
+     **وتفترق طبقتاه** — القناعُ يمتدّ والـSVG يحفظ نسبتَه، فيقع حبرُ يده في غير
+     موضعه. فالمقاسُ يُحسب من الحاوية وأبعاد اللوح (`fitSlate`) ويُكتب بكسلاً. */
+  #slate { position: relative; flex: none;
     background: #f7f4ee; border-radius: 1rem; touch-action: none; overflow: hidden; }
   #slate canvas, #slate svg { position: absolute; inset: 0; width: 100%; height: 100%; }
   #slate .skel { stroke: #b7ac97; stroke-width: 4; fill: none; opacity: .5; }
@@ -2914,6 +2919,525 @@ async function runStudio() {
   await reload();
 }
 
+// ————— ١١) المِرسمة: لوحُ المالك — كتابةٌ واحدةٌ تعطي الشكلَ والحركةَ معاً —————
+//
+// **سندُها** (بند `SESSIONS.md` ص٥، وتصريحُ المالك ١٨ أغسطس ٢٠٢٦): «سأكتب **فوق
+// علامتك** بخطٍّ أوضحَ وأجمل، **واعتمد أنت شيئاً قريباً من الشكل الذي أعطيك إياه مع
+// الاتجاهات». ⇐ **فلا وضعان بل نمطٌ واحد**: يكتب فوق خيالنا الخافت كما يُكتب الحرفُ
+// حقاً، **فضرباتُه هي أجزاؤنا بترتيبها واتجاهها، وأثرُه هو مرجعُ الشكل**.
+//
+// **وتعديلُ العهد مكتوبٌ صريحاً** (`SESSIONS.md` ص٥/٤): «لا إحداثياتٌ تُكتب بيد» عهدٌ
+// ضدَّ **الرقم المظنون** لا ضدَّ **المرجع المرسوم** — فنصُّه اليوم: «لا إحداثيّ إلا من
+// هيكل الخيال **أو من يد المالك مرجعاً**، ويُختم بمصدره وتاريخه (`origin: owner`)».
+// فما يخرج من هنا مختومٌ كذلك في `tools/owner_shapes.json`، ولا يُكتب في `paths.js` بيد.
+//
+// **والتطبيعُ معلَنٌ لا يبدّل الهوية** — أربعُ خطوات، ولكلٍّ سندُها:
+//   ١) **تحويلُ تشابهٍ** (نقلٌ ومقياسٌ واحدٌ للمحورين): يضع أعلى أثره على **خطّ القمّة**
+//      وأسفلَه على **خطّ الأساس** (مصطلحا الكرّاسة) — وهو **حفظُ الهوية بتعريفها**
+//      الهندسيّ: الأشكالُ المتشابهة شكلٌ واحد. ولا تدويرَ ولا قصَّ ولا مقياسَين.
+//      **وإن جاوز عرضُه صندوقَه رجع المقياسُ إلى العرض** (سنّةُ `wordFit` نفسُها).
+//   ٢) **تنعيمٌ خفيف** برشّتين — رعشةُ الإصبع لا رسمُ اليد.
+//   ٣) **إعادةُ أخذِ عيّناتٍ منتظمة** بـ`resample` — خطوةُ المحرّك نفسُها لا خطوةٌ ثانية.
+//   ٤) **وتقريبٌ إلى عُشر وحدة الشبكة** (يفعله `resample`) — فالخرجُ على ١٠٠٠×١٠٠٠.
+//
+// **و«قريبٌ من رسمه» رقمٌ محروس لا رخصةُ انحراف**: يُقاس بُعدُ كلِّ نقطةٍ من أثره
+// (بعد التشابه، فالتشابهُ لا يبدّل شكلاً) عن المسار المعتمَد، ويُطبع أقصاه ومتوسطُه —
+// **وحدُّه سماحةُ المحرّك نفسُها** (`TOLERANCE.lateral`): ما أزاحه التطبيعُ أكثرَ ممّا
+// يسمح به المحرّكُ لطفلٍ ينحرف عن نموذجه **لم يعد رسمَه**، فيُردّ ولا يُعتمَد.
+// **ولا يُعتمَد إلا ما رآه بعينه**: الناتجُ يُعرض فوق أثره قبل «اعتمد».
+
+/** كلماتُ الدَّور الثالث — يختارها المنهجُ لا الهوى (ص٥/٨): أصعبُ وصلاتنا وأطولُ موصول. */
+const OWNER_WORDS = ['مِحْفَظَة', 'غُرْفَة', 'شَمْس', 'سُلَحْفَاة', 'عَنْكَبُوت'];
+/** ما شكا منه بعينه (١٨ أغسطس) — يتقدّم داخلَ دَوره لا على الطابور كلِّه. */
+const COMPLAINED = ['ط', 'ظ', 'م', 'ص', 'ض'];
+const DIGIT = /^[٠-٩]$/;
+const JOINED = FORMS.filter((f) => f !== 'isolated');
+const arNum = (n) => String(n).replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[+d]);
+
+/**
+ * **الطابورُ محسوبٌ لا مقدَّر: ١٢٢ خانة** — ١١٢ شكلَ حرفٍ (٢٨ × أربعة مواقع) + ١٠
+ * أرقامٍ مرّةً واحدة (أشكالُ الرقم الأربعة **متطابقةٌ بايتاً** فرسمُها مرّةً يسري على
+ * أربعتها، ويُعلَن في الشاشة ولا يُخفى).
+ *
+ * **وترتيبُه ثمرةُ الكرّاسة** (`STROKE_ORDER.md §١ب`): تُبذَر المعزولاتُ الثمانيةُ
+ * والعشرون منها فيُصدِّقها المالكُ سريعاً، **فيبدأ طابورُه بما لا تغطّيه**:
+ * **الأرقامُ العشرة** (لا تغطّيها ألبتّة) ← **الأشكالُ الموصولة ٨٤** (لا تغطّيها) ←
+ * **المعزولاتُ ٢٨ تصديقاً**. وفي كلِّ دَورٍ يتقدّم **ما شكا منه** ثم يمضي بترتيب المنهج.
+ */
+function ownerQueue(spec) {
+  const keys = Object.keys(spec.letters);
+  const digits = keys.filter((ch) => DIGIT.test(ch));
+  const letters = keys.filter((ch) => !DIGIT.test(ch));
+  const first = [...COMPLAINED.filter((ch) => letters.includes(ch)),
+    ...letters.filter((ch) => !COMPLAINED.includes(ch))];
+  const slot = (ch, form) => ({ kind: 'letter', ch, form, key: `${ch}/${form}`,
+    name: `${ch} · ${FORM_AR[form]}` });
+  return [
+    ...digits.map((ch) => ({ kind: 'digit', ch, form: 'isolated', key: `${ch}/isolated`,
+      name: `الرقم ${ch}`, twins: FORMS.length })),
+    ...first.flatMap((ch) => JOINED.map((form) => slot(ch, form))),
+    ...first.map((ch) => slot(ch, 'isolated')),
+    ...OWNER_WORDS.map((text) => ({ kind: 'word', text, key: `كلمة/${text}`, name: text })),
+  ];
+}
+
+// ————— إسقاطُ أثر اليد: التطبيعُ ومقياسُ القرب —————
+
+/** صندوقُ حبرٍ من ضربات (كـ`maskBox` سواءً بسواء، لكنه من نقاطٍ لا من قناع). */
+function inkBox(strokes) {
+  let x0 = Infinity; let y0 = Infinity; let x1 = -Infinity; let y1 = -Infinity;
+  for (const stroke of strokes) {
+    for (const [x, y] of stroke) {
+      if (x < x0) x0 = x;
+      if (x > x1) x1 = x;
+      if (y < y0) y0 = y;
+      if (y > y1) y1 = y;
+    }
+  }
+  if (!Number.isFinite(x0)) return null;
+  return { x0, y0, x1, y1, w: x1 - x0, h: y1 - y0, cx: (x0 + x1) / 2, cy: (y0 + y1) / 2 };
+}
+
+/** بُعدُ نقطةٍ عن قطعةٍ مستقيمة — أساسُ مقياس القرب. */
+function segDist(p, a, b) {
+  const vx = b[0] - a[0];
+  const vy = b[1] - a[1];
+  const l2 = vx * vx + vy * vy;
+  if (!l2) return dist(p, a);
+  const t = Math.max(0, Math.min(1, ((p[0] - a[0]) * vx + (p[1] - a[1]) * vy) / l2));
+  return Math.hypot(p[0] - (a[0] + t * vx), p[1] - (a[1] + t * vy));
+}
+
+/** بُعدُ نقطةٍ عن مسارٍ مكسور. */
+function polyDist(p, poly) {
+  if (poly.length < 2) return dist(p, poly[0] || p);
+  let best = Infinity;
+  for (let i = 1; i < poly.length; i++) best = Math.min(best, segDist(p, poly[i - 1], poly[i]));
+  return best;
+}
+
+/**
+ * **تطبيعُ أثر اليد** — الخطواتُ الأربع أعلاه، ومعها مقياسُ القرب.
+ * `raw` ضرباتُ يده بترتيبها (نقاطٌ على شبكة اللوح)، و`taps` نقراتُه.
+ * ويعود بالمسار المعتمَد ومعه **رقمُ القرب** الذي يفتح «اعتمد» أو يُغلقه.
+ */
+function normalizeInk(box, raw, taps = []) {
+  const span = box.sheet[0] - 2 * MARGIN;
+  const his = inkBox(raw);
+  // **حرفٌ نقرةٌ لا مسار** (الصفرُ بحكم المالك): لا أثرَ يُطبَّع، والنقرةُ حيث نقر.
+  if (!his) {
+    return { strokes: [], dots: taps.map((p) => [round1(p[0]), round1(p[1])]),
+      norm: { scale: 1, shift: [0, 0], mean: 0, max: 0, limit: TOLERANCE.lateral }, ok: !!taps.length };
+  }
+  // ١) تحويلُ التشابه: قمّتُه على القمّة وأساسُه على الأساس — وإن عرُض رجع إلى العرض
+  const scale = Math.min(box.fit.h / (his.h || 1), span / (his.w || 1));
+  const shift = [box.fit.cx - his.cx * scale, box.fit.cy - his.cy * scale];
+  const put = (p) => [p[0] * scale + shift[0], p[1] * scale + shift[1]];
+  const placed = raw.map((stroke) => stroke.map(put));
+  // ٢ و٣ و٤) تنعيمٌ خفيف ثم عيّناتٌ منتظمة على الشبكة (خطوةُ المحرّك نفسُها)
+  const strokes = placed.map((stroke) => (stroke.length > 1 ? resample(smooth(stroke, 2))
+    : [[round1(stroke[0][0]), round1(stroke[0][1])]]));
+  // مقياسُ القرب: كلُّ نقطةٍ من أثره **بعد التشابه** إلى المسار المعتمَد
+  let sum = 0;
+  let count = 0;
+  let max = 0;
+  for (let s = 0; s < placed.length; s++) {
+    for (const p of placed[s]) {
+      const d = polyDist(p, strokes[s]);
+      sum += d;
+      count++;
+      if (d > max) max = d;
+    }
+  }
+  const mean = count ? sum / count : 0;
+  return {
+    strokes,
+    dots: taps.map(put).map((p) => [round1(p[0]), round1(p[1])]),
+    norm: { scale: round1(scale * 100) / 100, shift: shift.map(round1),
+      mean: round1(mean), max: round1(max), limit: TOLERANCE.lateral },
+    ok: max <= TOLERANCE.lateral,
+  };
+}
+
+/** المسارُ المعتمَد بصيغة المحرّك — ليُحكَم عليه بحكمه لا بحكمٍ ثانٍ. */
+const asMade = (out) => ({
+  strokes: out.strokes.filter((s) => s.length > 1).map((points) => ({ points, start: points[0] })),
+  dots: out.dots.map((at) => ({ at, count: 1, after: true })),
+});
+
+// ————— لوحُ المِرسمة —————
+
+let ANCHOR_SPEC = { letters: {} };
+
+/**
+ * **خيالُ خانةٍ** — حرفاً كان أو رقماً أو كلمة. ويُقرأ منه ساعتَه (لا بعدَه) كلُّ ما
+ * تتبدّل به عوالمُ اللوح (`SHEET_W/H` تتبدّل للكلمة): صندوقُ الحبر، **وصندوقُ
+ * المسار** الذي عليه تقع المحاذاة، وبصمتُه.
+ *
+ * **ولِمَ صندوقُ المسار لا صندوقُ الحبر؟** لأنّ أثرَ يده **خطُّ وسطٍ** كمسارنا سواءً —
+ * والحبرُ أوسعُ منه بنصف عرض القلم من كلِّ جهة. فمحاذاةُ خطِّ وسطٍ إلى صندوق حبرٍ
+ * تنفخ رسمَه بعرض القلم، **ومحاذاةُ مثيلٍ بمثيله** تضعه حيث يقع حقاً.
+ */
+async function slotGhost(item) {
+  if (item.kind === 'word') {
+    const cal = await wordFit(item.text);
+    const image = await svgPaint(item.text, cal.size, cal.x, cal.baseline);
+    const mask = imageMask(image);
+    const ink = maskBox(mask);
+    const sig = fingerprint(mask);
+    setSheet(GRID);                     // وتُردّ عوالمُ اللوح كما كانت
+    if (!ink) throw new Error(`لا حبرَ في «${item.text}»`);
+    // **والكلمةُ بلا هيكلٍ مؤلَّف** (`compose` لا يمشي هيكلَ كلمة، §٧ج) — فصندوقُها
+    // صندوقُ حبرها، ويُعلَن: أثرُه يقع أوسعَ من مسارنا بنصف عرض القلم.
+    return { image, ink, fit: ink, sheet: cal.box, sig, base: null, top: ink.y0, made: null };
+  }
+  const work = studio(item.ch, item.form);
+  const ink = maskBox(work.bodyMask);
+  // **ورسمُنا الحاليّ يُعرض معه** (ص٥/٥: «الخيالُ خافتٌ تحت يده — رسمُنا الحالي»):
+  // جهةً وترتيباً كما تفعل أسهمُ الكرّاسة المرقَّمة، فيحكم على معروضٍ لا على فراغ.
+  const entry = ANCHOR_SPEC.letters[item.ch]?.[item.form];
+  const gesture = entry?.sameAs ? ANCHOR_SPEC.letters[item.ch][entry.sameAs] : entry;
+  const src = entry?.sameAs ? studio(item.ch, entry.sameAs) : work;
+  let made = null;
+  try { made = gesture ? compose(src, gesture) : null; } catch { made = null; }
+  const lines = made && made.strokes.length ? made.strokes.map((s) => s.points)
+    : work.graph.edges.map((e) => e.chain.map(px2grid));
+  return { image: work.image, ink, fit: inkBox(lines) || ink, sheet: [GRID, GRID],
+    sig: work.sig, base: work.cal.baseline, top: (inkBox(lines) || ink).y0, made };
+}
+
+async function runOwnerBoard() {
+  ANCHOR_SPEC = await anchors();
+  const queue = ownerQueue(ANCHOR_SPEC);
+  const shapes = queue.filter((s) => s.kind !== 'word').length;
+  const state = await fetch('/__done.json').then((r) => r.json()).catch(() => ({ done: [] }));
+  const done = new Set(state.done || []);
+  const skipped = new Set(JSON.parse(localStorage.getItem('mirsam:skip') || '[]'));
+
+  document.body.className = 'mirsam';
+  document.body.innerHTML = `
+    <div id="mirsam">
+      <div id="mirsam-head">
+        <span id="mirsam-count"></span>
+        <span id="mirsam-name"></span>
+        <span id="mirsam-hint"></span>
+      </div>
+      <div id="mirsam-board"><div id="slate"></div></div>
+      <div id="mirsam-foot">
+        <button id="back">السابق</button>
+        <button id="redo">أعِد</button>
+        <button id="keep" class="go">اعتمد</button>
+        <button id="skip">تخطَّ</button>
+      </div>
+    </div>
+    <div id="mirsam-say"></div>`;
+
+  const slate = document.getElementById('slate');
+  const banner = document.getElementById('mirsam-say');
+  const keep = document.getElementById('keep');
+  const count = document.getElementById('mirsam-count');
+  const name = document.getElementById('mirsam-name');
+  const hint = document.getElementById('mirsam-hint');
+  let at = 0;
+  let box = null;                        // خيالُ الخانة الجارية
+  let raw = [];                          // ضرباتُ يده بترتيبها
+  let taps = [];                         // ونقراتُه
+  let wet = null;                        // الضربةُ تحت إصبعه الآن
+  let wetPath = null;
+  let out = null;                        // الناتجُ المطبَّع المعروض
+  let ink = null;                        // طبقةُ الحبر (تُحدَّث وحدَها فلا يُعاد الخيال)
+
+  const tell = (text, bad = false) => {
+    banner.textContent = text;
+    banner.classList.toggle('bad', bad);
+    banner.classList.add('on');
+    setTimeout(() => banner.classList.remove('on'), bad ? 2800 : 1000);
+  };
+
+  /** أوّلُ خانةٍ لم تُعتمَد ولم تُتخطَّ — **استئنافٌ من حيث وقف** (ص٥/٥). */
+  const resume = () => {
+    const k = queue.findIndex((s) => !done.has(s.key) && !skipped.has(s.key));
+    return k < 0 ? 0 : k;
+  };
+
+  /** **الخيالُ يُبنى مرّةً للخانة**: قناعٌ ١٠٠٠×١٠٠٠ يُعاد رسمُه مع كلِّ حركةِ إصبعٍ
+   *  يُثقِل اللوحَ على الآيباد — فطبقةُ الخيال والسطر تُركَّب مرّةً، والحبرُ وحدَه يُعاد. */
+  /** **ضلعُ اللوح محسوبٌ من الحاوية**: أكبرُ ما يسع نسبةَ الخيال فيها — فطبقتا
+   *  الخيال والحبر على مقاسٍ واحد، وإسقاطُ إصبعه يقع حيث وقع. */
+  function fitSlate() {
+    if (!box) return null;
+    const [w, h] = box.sheet;
+    const room = document.getElementById('mirsam-board').getBoundingClientRect();
+    const s = Math.min(room.width / w, room.height / h);
+    slate.style.width = `${Math.floor(w * s)}px`;
+    slate.style.height = `${Math.floor(h * s)}px`;
+    return { room, side: [Math.floor(w * s), Math.floor(h * s)] };
+  }
+
+  function mount() {
+    const [w, h] = box.sheet;
+    fitSlate();
+    const canvas = document.createElement('canvas');
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext('2d');
+    ctx.putImageData(box.image, 0, 0);
+    ctx.globalCompositeOperation = 'destination-over';
+    ctx.fillStyle = '#f7f4ee';
+    ctx.fillRect(0, 0, w, h);
+    canvas.style.opacity = '.20';
+    const guide = sv('svg', { viewBox: `0 0 ${w} ${h}` });
+    // **سطرُ الكرّاسة ظاهر** (ص٥/١): خطُّ الأساس (سطرُ الكتابة) وخطُّ القمّة — وعليهما
+    // يُحاذى أثرُه، فما يراه هو ما يقيس به التطبيع.
+    if (box.base != null) guide.append(sv('line', { class: 'grid-line base', x1: 0, y1: round1(box.base), x2: w, y2: round1(box.base) }));
+    if (box.top != null) guide.append(sv('line', { class: 'grid-line', x1: 0, y1: round1(box.top), x2: w, y2: round1(box.top) }));
+    if (box.made) for (const stroke of box.made.strokes) guide.append(sv('path', { class: 'skel', d: pathD(stroke.points) }));
+    ink = sv('svg', { viewBox: `0 0 ${w} ${h}` });
+    slate.replaceChildren(canvas, guide, ink);
+    // **ونصيبُ اللوح من المنظور يُقاس ويُقال** — لا يوصَف: بلاغُ المالك في صفحة
+    // التجربة («مربّعٌ في المنتصف ضيّق») لا يُردّ عليه بوصفٍ بل برقمٍ من الشاشة.
+    if (qs.has('shot')) {
+      const seen = slate.getBoundingClientRect();
+      const share = Math.round((seen.height / innerHeight) * 100);
+      const ratio = round1((seen.width / seen.height) / (w / h));
+      say(share >= 60 && Math.abs(ratio - 1) < 0.02,
+        `اللوحُ يملأ المنظور: ${Math.round(seen.width)}×${Math.round(seen.height)}`
+        + ` من ${innerWidth}×${innerHeight} — ${share}٪ ارتفاعاً، ونسبتُه ×${ratio}`);
+      // **والأزرارُ في المنظور لا تحته**: زرٌّ مقطوعٌ يُقرأ صفحةً معطّلة — وهو عينُ
+      // ما شكا منه. ومقاسُ اللمس ≥٦٤ بكسل عهدُ العائلة.
+      const foot = document.getElementById('mirsam-foot').getBoundingClientRect();
+      const small = [...document.querySelectorAll('#mirsam-foot button')]
+        .map((b) => b.getBoundingClientRect())
+        .filter((r) => Math.min(r.width, r.height) < 64);
+      const buttons = document.querySelectorAll('#mirsam-foot button').length;
+      say(foot.bottom <= innerHeight + 1 && !small.length,
+        `وأزرارُه ${arNum(buttons)} في المنظور: أسفلُها ${Math.round(foot.bottom)} من ${innerHeight}`
+        + ` وأصغرُ ضلعٍ ${Math.round(Math.min(...[...document.querySelectorAll('#mirsam-foot button')]
+          .map((b) => Math.min(b.getBoundingClientRect().width, b.getBoundingClientRect().height))))} بكسلاً`);
+      send();
+    }
+  }
+
+  /** طبقةُ الحبر: أثرُه رطباً، والناتجُ المطبَّع فوقه ببداياته وأرقامه واتجاهاته. */
+  function drawInk() {
+    const parts = [];
+    for (const stroke of raw) if (stroke.length > 1) parts.push(sv('path', { class: 'wet', d: pathD(stroke) }));
+    for (const tap of taps) parts.push(sv('circle', { class: 'wet', cx: round1(tap[0]), cy: round1(tap[1]), r: 26 }));
+    if (out) {
+      out.strokes.forEach((points, i) => {
+        if (points.length > 1) parts.push(sv('path', { class: 'made', d: pathD(points) }));
+        parts.push(sv('circle', { class: 'made-start', cx: points[0][0], cy: points[0][1], r: 30 }));
+        const tag = sv('text', { class: 'made-tag', x: points[0][0], y: points[0][1] });
+        tag.textContent = arNum(i + 1);
+        parts.push(tag);
+        const tip = points[points.length - 1];
+        const from = points[Math.max(0, points.length - 4)];
+        const a = Math.atan2(tip[1] - from[1], tip[0] - from[0]);
+        const arm = (turn) => `${round1(tip[0] - 46 * Math.cos(a + turn))} ${round1(tip[1] - 46 * Math.sin(a + turn))}`;
+        parts.push(sv('path', { class: 'made-head', d: `M${tip[0]} ${tip[1]} L${arm(0.42)} L${arm(-0.42)} Z` }));
+      });
+      for (const dot of out.dots) parts.push(sv('circle', { class: 'made-start', cx: dot[0], cy: dot[1], r: 22 }));
+    }
+    ink.replaceChildren(...parts);
+    wetPath = null;
+  }
+
+  /** ورأسُ الشريط: العدّادُ والاسمُ والإرشاد — **بلا سطرِ قراءاتٍ تقنية**. */
+  function label() {
+    const item = queue[at];
+    count.textContent = item.kind === 'word'
+      ? `كلمة ${arNum(OWNER_WORDS.indexOf(item.text) + 1)} من ${arNum(OWNER_WORDS.length)}`
+      : `${arNum(at + 1)} من ${arNum(shapes)}`;
+    name.textContent = item.name;
+    const near = out && out.strokes.length
+      ? ` · قربُ رسمك ${arNum(Math.round(out.norm.max))} من ${arNum(out.norm.limit)}`
+      : '';
+    hint.textContent = (item.kind === 'digit'
+      ? 'يُرسَم مرّةً — وأشكالُه الأربعة متطابقةٌ فيسري عليها'
+      : item.kind === 'word' ? 'اكتبها موصولةً كما تكتبها — والوصلُ بيدك'
+        : 'اكتبه فوق الخيال كما يُكتب — ضربةً بعد ضربة') + near;
+    keep.disabled = !(out && (out.strokes.length || out.dots.length) && out.ok);
+    document.getElementById('back').disabled = at === 0;
+  }
+
+  function reckon() {
+    out = (raw.length || taps.length) ? normalizeInk(box, raw, taps) : null;
+    if (out && !out.ok && out.strokes.length) {
+      tell(`التطبيعُ أزاح رسمَك ${arNum(Math.round(out.norm.max))} وحدة`
+        + ` (الحدُّ ${arNum(out.norm.limit)}) — أعِد الرسمَ أوضح`, true);
+    }
+    drawInk();
+    label();
+  }
+
+  async function show(k) {
+    at = Math.max(0, Math.min(queue.length - 1, k));
+    raw = [];
+    taps = [];
+    wet = null;
+    out = null;
+    try {
+      box = await slotGhost(queue[at]);
+    } catch (e) {
+      tell(`${queue[at].name}: ${e.message}`, true);
+      return;
+    }
+    mount();
+    drawInk();
+    label();
+  }
+
+  // ————— يدُه على اللوح: كلُّ نزلةِ قلمٍ ضربة، وترتيبُها ترتيبُه واتجاهُها اتجاهُه —————
+  const spot = (ev) => {
+    const rect = slate.getBoundingClientRect();
+    const [w, h] = box.sheet;
+    return [((ev.clientX - rect.left) / rect.width) * w, ((ev.clientY - rect.top) / rect.height) * h];
+  };
+  slate.addEventListener('pointerdown', (ev) => {
+    if (!box) return;
+    ev.preventDefault();
+    slate.setPointerCapture(ev.pointerId);
+    wet = [spot(ev)];
+    raw.push(wet);
+    wetPath = sv('path', { class: 'wet', d: pathD(wet) });
+    ink.append(wetPath);
+  });
+  slate.addEventListener('pointermove', (ev) => {
+    if (!wet) return;
+    const p = spot(ev);
+    if (dist(p, wet[wet.length - 1]) < 2) return;
+    wet.push(p);
+    // **حرفٌ واحد يُحدَّث لا لوحٌ يُعاد**: خطُّ الضربة الجارية وحدَه
+    if (wetPath) wetPath.setAttribute('d', pathD(wet));
+  });
+  const lift = () => {
+    if (!wet) return;
+    const stroke = wet;
+    wet = null;
+    raw = raw.filter((s) => s !== stroke);
+    // **ما لا يبلغ نصفَ قطر قبول النقطة ليس مساراً يُقاس — بل نقرة** (`TOLERANCE.dot`):
+    // فالنقاطُ نقراً كما نصّ البند، والمحرّكُ نفسُه يحكم على النقرة بمعيار النقطة.
+    const len = stroke.length > 1 ? prepare(stroke).len : 0;
+    if (len < TOLERANCE.dot) taps.push(stroke[0]);
+    else raw.push(stroke);
+    reckon();
+  };
+  slate.addEventListener('pointerup', lift);
+  slate.addEventListener('pointercancel', lift);
+
+  document.getElementById('redo').onclick = () => {
+    raw = [];
+    taps = [];
+    wet = null;
+    out = null;
+    drawInk();
+    label();
+  };
+  // **ورجعةٌ إلى ما مضى** — زيادةٌ على الثلاثة بعلّةٍ مكتوبة: طابورٌ من ١٢٢ خانة
+  // بلا رجعةٍ يجعل نقرةً واحدةً خاطئة على «اعتمد» **عطباً لا يُصلحه إلا مدير**.
+  // وهي زرٌّ كبيرٌ رابع لا تبَّةٌ صغيرة، فعهدُ اللوح على حاله.
+  document.getElementById('back').onclick = () => show(at - 1);
+  document.getElementById('skip').onclick = () => {
+    skipped.add(queue[at].key);
+    localStorage.setItem('mirsam:skip', JSON.stringify([...skipped]));
+    show(at + 1);
+  };
+  // **ولا حفظَ بلا اعتماد، ولا انتقالَ تلقائيّ** (ص٥/٥): زرُّه وحدَه يختم ويُقدّم.
+  keep.onclick = async () => {
+    const item = queue[at];
+    keep.disabled = true;
+    try {
+      const res = await fetch('/accept', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          kind: item.kind, ch: item.ch, form: item.form, text: item.text, key: item.key,
+          sig: box.sig, sheet: box.sheet, strokes: out.strokes, dots: out.dots, norm: out.norm,
+        }),
+      }).then((r) => r.json());
+      if (!res.ok) throw new Error(res.why || 'ردَّ الخادمُ رفضاً');
+      (res.done || []).forEach((k) => done.add(k));
+      done.add(item.key);
+      tell(res.said || 'اعتُمد ✓');
+      show(at + 1);
+    } catch (e) {
+      tell(`لم يُحفظ: ${e.message}`, true);
+      keep.disabled = false;
+    }
+  };
+
+  addEventListener('resize', () => { if (box) { fitSlate(); } });
+  await show(resume());
+}
+
+// ————— مشهدُ الفحص: الطابورُ محسوب، والتطبيعُ لا يبدّل الهوية، والعكسُ يخرج عكساً —————
+
+async function runOwnerCheck() {
+  ANCHOR_SPEC = await anchors();
+  const queue = ownerQueue(ANCHOR_SPEC);
+  const shapes = queue.filter((s) => s.kind !== 'word');
+  const digits = shapes.filter((s) => s.kind === 'digit');
+  const joined = shapes.filter((s) => s.kind === 'letter' && s.form !== 'isolated');
+  const alone = shapes.filter((s) => s.kind === 'letter' && s.form === 'isolated');
+  say(shapes.length === 122 && digits.length === 10 && joined.length === 84 && alone.length === 28,
+    `الطابورُ محسوبٌ لا مقدَّر: ${shapes.length} خانة`
+    + ` — ${digits.length} أرقام و${joined.length} موصولاً و${alone.length} معزولاً`);
+  say(queue.slice(0, digits.length).every((s) => s.kind === 'digit')
+    && queue.slice(digits.length, digits.length + joined.length).every((s) => s.kind === 'letter' && s.form !== 'isolated')
+    && queue.slice(digits.length + joined.length, shapes.length).every((s) => s.form === 'isolated'),
+  'وترتيبُه بما لا تغطّيه الكرّاسة أوّلاً: الأرقامُ ثم الموصولةُ ثم تصديقُ المعزولات');
+  say(joined.slice(0, COMPLAINED.length * JOINED.length)
+    .every((s) => COMPLAINED.includes(s.ch)),
+  `وما شكا منه يتقدّم في دَوره: ${COMPLAINED.join(' · ')}`);
+  say(queue.filter((s) => s.kind === 'word').length === OWNER_WORDS.length,
+    `ودَورُ الكلمات مفتوحٌ بـ${arNum(OWNER_WORDS.length)} كلمات`);
+
+  // شواهدُ ثلاثة: ما شكا منه (ط) · وموصولٌ (م/وسطي) · ورقمٌ (٣)
+  for (const [ch, form] of [['ط', 'isolated'], ['م', 'medial'], ['٣', 'isolated']]) {
+    const box = await slotGhost({ kind: 'letter', ch, form });
+    const tag = `${ch}/${FORM_AR[form]}`;
+    if (!box.made) { say(false, `${tag}: لا رسمَ حالياً يُعرض تحت يده`); continue; }
+    const ref = box.made.strokes.map((s) => s.points);
+    // ١) التطبيعُ لا يبدّل الهوية: ما أزاحه دون سماحة المحرّك نفسِها
+    const fwd = normalizeInk(box, ref);
+    say(fwd.ok, `${tag}: التطبيعُ لا يبدّل الهوية — أقصى إزاحةٍ ${fwd.norm.max}`
+      + ` (الحدُّ ${TOLERANCE.lateral}) ومتوسطُها ${fwd.norm.mean} · مقياسُه ×${fwd.norm.scale}`);
+    // ٢) **سالباً**: رسمةٌ عكسية تُخرج مرجعاً عكسياً — البدايةُ حيث كانت النهاية
+    const rev = normalizeInk(box, ref.map((s) => [...s].reverse()));
+    const flipped = rev.strokes.length === fwd.strokes.length && rev.strokes.every((s, i) => {
+      const twin = fwd.strokes[i];
+      return dist(s[0], twin[twin.length - 1]) < TOLERANCE.start
+        && dist(s[s.length - 1], twin[0]) < TOLERANCE.start;
+    });
+    say(flipped, `${tag}: والعكسُ يخرج عكساً — بدايةُ المعكوس حيث كانت نهايةُ الصحيح`);
+    // ٣) وحكمُ المحرّك عليه بعينه: الصحيحُ يُقبل والمعكوسُ يُرفَض
+    const made = asMade(fwd);
+    const dotted = made.dots.map((d) => [d.at, d.at, d.at]);
+    const good = judge(made, [...fwd.strokes, ...dotted]);
+    const bad = judge(made, [...rev.strokes, ...dotted]);
+    say(good.accepted && !bad.accepted,
+      `${tag}: وحكمُ المحرّك — الصحيحُ ${good.accepted ? 'يُقبل ✓' : `يُرفَض (${good.primary}) ✗`}`
+      + ` والمعكوسُ ${bad.accepted ? 'يُقبَل ✗' : `يُرفَض (${bad.primary}) ✓`}`);
+    // ٤) والحدُّ محروسٌ مجرَّباً سالباً: رعشةٌ مصنوعة فوق الحدّ تُردّ ولا تُعتمَد
+    const shaky = ref.map((s) => s.map((p, i) => [p[0] + (i % 2 ? 1 : -1) * TOLERANCE.lateral * 2, p[1]]));
+    const rough = normalizeInk(box, shaky);
+    say(!rough.ok, `${tag}: والحدُّ يردّ ما بعُد — رعشةٌ مصنوعة أقصاها ${rough.norm.max}`
+      + ` فوق ${TOLERANCE.lateral} ⇐ ${rough.ok ? 'مرّت ✗' : 'رُدَّت ✓'}`);
+  }
+
+  // ٥) والنقرةُ نقرةٌ لا مسار: أثرٌ أقصرُ من نصف قطر النقطة يخرج نقرةً بموضعه
+  const zero = await slotGhost({ kind: 'letter', ch: '٠', form: 'isolated' });
+  const tapped = normalizeInk(zero, [], [[500, 500]]);
+  say(!tapped.strokes.length && tapped.dots.length === 1 && tapped.ok,
+    `٠/معزول: النقرةُ تخرج نقرةً بموضعها (${tapped.dots[0]}) لا مساراً`);
+
+  // ٦) ودَورُ الكلمات يُبنى خيالُه فعلاً — ولو لم يُملأ في أوّل جلسة
+  const word = await slotGhost({ kind: 'word', text: OWNER_WORDS[0] });
+  say(!!word.ink && word.sheet[0] > 0,
+    `وخيالُ «${OWNER_WORDS[0]}» يُبنى: صندوقُه ${word.sheet[0]}×${word.sheet[1]}`);
+  await send();
+}
+
 // ————— الإقلاع —————
 
 let FONT_SRC = null;
@@ -2925,6 +3449,7 @@ let FONT_SRC = null;
     else if (qs.has('build')) await runBuild();
     else if (qs.has('nodes')) await runNodes();
     else if (qs.has('sheet')) await runSheet();
+    else if (qs.has('board')) await (qs.has('check') ? runOwnerCheck() : runOwnerBoard());
     else await runStudio();
   } catch (e) {
     const box = document.createElement('div');
@@ -2932,7 +3457,7 @@ let FONT_SRC = null;
     box.className = 'bad';
     box.textContent = `استثناء: ${e && e.message}`;
     document.body.append(box);
-    if (!qs.has('open')) { say(false, `استثناء: ${e && e.message}`); await send(); }
+    if (!qs.has('open') && !(qs.has('board') && !qs.has('check'))) { say(false, `استثناء: ${e && e.message}`); await send(); }
   }
 })();
 </script>

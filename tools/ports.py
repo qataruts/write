@@ -41,6 +41,7 @@ PORTS = {
     "identity_panel": 8725,
     "identity_doors": 8726,
     "perf_check": 8727,
+    "owner_board": 8728,
 }
 
 
