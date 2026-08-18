@@ -53,6 +53,7 @@ OUT = ROOT / "app" / "js" / "paths.js"
 WARM_OUT = ROOT / "app" / "js" / "warmups.js"
 WORD_OUT = ROOT / "app" / "js" / "word_paths.js"
 DROPPED = TOOLS / "paths_dropped.json"
+GHOST_OUT = TOOLS / "ghost_paths.json"   # الخيالُ خالصاً — مرجعُ طبقة المالك
 CURRICULUM = ROOT / "app" / "js" / "curriculum.js"
 FORMS = ["isolated", "initial", "medial", "final"]
 
@@ -62,6 +63,7 @@ WARM_SECTION = ("// ————— ٧ب) أشكالُ التهيئة الحرك
 
 sys.path.insert(0, str(TOOLS))
 import browser_test  # noqa: E402  (حظيرةُ الخادم ومُشغِّلُ Chrome — تبعيةٌ معلَنة)
+import owner_layer  # noqa: E402  (طبقةُ المالك — أثرُ يده مسارَ محرّكٍ، بند ص٦)
 import ports  # noqa: E402  (جدولُ المنافذ — تُقرأ من موضعٍ واحد، `tools/ports.py`)
 
 
@@ -666,12 +668,50 @@ def build(port: int, timeout: int, chunk: int = 100, fresh: bool = False) -> int
         print(f"بناءٌ محدود بـ«{payload['partial']}» — لا تُكتب منه الوحدة.")
         return 1
     paths = payload["paths"]
+
+    # ————— **٥) طبقةُ المالك تعلو الخيال** (بند ص٦) —————
+    #
+    # الخيالُ ألّف الشكلَ من مُشكِّل العربية، **وأثرُ يد المالك ألّفه من يدٍ تكتبه**
+    # — وهو المرجعُ حين يجتمعان (حكمُه ١٨ أغسطس ٢٠٢٦: «اعتمد ما بعثته لك بعد
+    # التنقيح»). فما جاء منه يعلو، **وما لم يصل منه — أو ردَّه فاحصُ المحرّك — يبقى
+    # على الخيال بعلّةٍ معلنة** تُكتب في نسب الوحدة فلا يُظَنّ يوماً أنه من يده.
+    # **والخيالُ يُجرَد قبل أن يعلوَه**: حصيلةُ المتصفّح هي الخيالُ خالصاً، فتُكتب
+    # جرداً يقرؤه `owner_layer` مرجعاً للنِّسَب — فلا يقيس البناءُ إلى نفسه.
+    GHOST_OUT.write_text(json.dumps({
+        "what": "الخيالُ خالصاً — حصيلةُ عدّة التأليف قبل أن تعلوَها طبقةُ المالك",
+        "tool": "tools/make_paths.py --build",
+        "sha": sha(),
+        "paths": payload["paths"],
+    }, ensure_ascii=False), encoding="utf-8")
+    owner_layer.set_ghost(payload["paths"])
+    hand, owner = owner_layer.layer()
+    for ch, family in hand.items():
+        paths.setdefault(ch, {}).update(family)
+    away = max((row["away"] for row in owner["panel"]), default=0)
+    print(f"\n✍️  طبقةُ المالك: {owner['shapes']} شكلاً من يده تعلو الخيال"
+          f" — أقصى بُعدٍ عن أثره {away} من {owner['limit']:.0f}")
+    for row in owner["dropped"]:
+        print(f"  ○ {row['key']}: بقي على الخيال — {row['why']}")
+
     meta = {
         "tool": "tools/make_paths.html",
         "gesture": "tools/path_anchors.json",
         "sha": sha(),
         "grid": payload["meta"]["grid"],
         "font": "NotoNaskhArabic — نسخٌ مدرسيّ (ق٢)",
+        "owner": {
+            "file": "tools/owner_shapes.json",
+            "sha": owner["sha"],
+            "at": "2026-08-18",
+            "shapes": owner["shapes"],
+            "passes": owner["passes"],
+            "away": away,
+            "limit": owner["limit"],
+            "ghost": [row["key"] for row in owner["dropped"]],
+            "why": "أثرُ يد المالك مرجعَ الشكل والحركة (بند ص٦) — والتنقيحُ تكثيفٌ"
+                   " ثم تنعيمُ توبين ثم خطوةُ المحرّك، وبُعدُه عن أثره مقيسٌ في"
+                   " `owner_layer.py --panel`. وما في `ghost` بقي على الخيال بعلّته.",
+        },
     }
     OUT.write_text(write_module(paths, meta), encoding="utf-8")
     forms = sum(len(v) for v in paths.values())
@@ -808,11 +848,47 @@ def self_test() -> int:
        f"وبصمةُ الإيماءة في الوحدة عينُ الملفّ على القرص ({meta.get('sha') if meta else '—'} = {sha()})"
        + ("" if meta and meta.get("sha") == sha() else " — عُدِّلت الإيماءةُ ولم يُعَد البناء"))
 
+    # ————— ٣ب) **طبقةُ المالك: ما ادُّعي أنه من يده فهو من يده** (بند ص٦) —————
+    #
+    # `paths.js` صار طبقتين: خيالٌ مؤلَّفٌ من إيماءةٍ، **وأثرُ يدٍ يعلوه**. فيُحرَس
+    # الثاني بحرفه: بصمةُ ملفّ أشكاله في الوحدة **عينُ الملفّ على القرص** (تعديلُ
+    # أثره بلا إعادة بناءٍ يحمرّ)، **وكلُّ شكلٍ ادُّعي أنه من يده يطابق ما تُخرجه
+    # الطبقةُ اليوم** — فلا يُحرَّر إحداثيٌّ من أثره بيد. وما رُدّ إلى الخيال معلَنٌ
+    # بأسمائه في `owner.ghost` **فلا يُدَّعى له نسبٌ ليس له**.
+    stamp = (meta or {}).get("owner") or {}
+    hand, report = owner_layer.layer()
+    owned = {f"{ch}/{form}" for ch, family in hand.items() for form in family}
+    ok(bool(stamp), f"ونسبُ الوحدة يعلن طبقةَ المالك ({stamp.get('shapes', '—')} شكلاً)")
+    ok(stamp.get("sha") == owner_layer.sha(),
+       f"وبصمةُ أشكاله في الوحدة عينُ الملفّ ({stamp.get('sha', '—')} = {owner_layer.sha()})"
+       + ("" if stamp.get("sha") == owner_layer.sha() else " — تبدّل أثرُه ولم يُعَد البناء"))
+    ok(sorted(stamp.get("ghost") or []) == sorted(row["key"] for row in report["dropped"]),
+       f"وما بقي على الخيال معلَنٌ بأسمائه ({len(stamp.get('ghost') or [])})")
+    # **والمقابلةُ على الأرقام لا على صيغة الكتابة**: الوحدةُ تكتب `480` والطبقةُ
+    # تعطي `480.0`، وتُلحِق الوحدةُ بالجزء صفتَه المحسوبة (`ease`) — فيُقابَل ما
+    # جاء من يده: مواضعُ نقاطه ومباديه ونقطُه، مقرَّبةً كما تُكتب.
+    def bones(ref):
+        if not ref:
+            return None
+        return {"strokes": [[[round(float(v), 1) for v in p] for p in s["points"]]
+                            for s in ref["strokes"]],
+                "dots": [[round(float(v), 1) for v in d["at"]] for d in ref["dots"]]}
+
+    astray = [key for key in sorted(owned)
+              if bones(paths.get(key.split("/")[0], {}).get(key.split("/")[1]))
+              != bones(hand[key.split("/")[0]][key.split("/")[1]])]
+    ok(not astray, f"وكلُّ شكلٍ من يده في الوحدة عينُ ما تُخرجه طبقتُه ({len(owned)})"
+       + (f" — خالف: {'، '.join(astray[:5])}" if astray else ""))
+
     # ٤) الأجزاءُ بعددها، والدعوى «عينُ شكلٍ آخر» صادقةٌ في الوحدة كذلك
     for ch, forms in letters.items():
         for form, entry in forms.items():
             ref = paths.get(ch, {}).get(form)
             if ref is None:
+                continue
+            # **وأجزاءُ ما جاء من يده أجزاءُ يده لا أجزاءُ الإيماءة**: الإيماءةُ سيّرت
+            # الخيالَ وحدَه، وهو اليومَ تحت أثره — فيُحرَس بمطابقة الطبقة أعلاه.
+            if f"{ch}/{form}" in owned:
                 continue
             if entry.get("sameAs"):
                 twin = paths[ch].get(entry["sameAs"])
