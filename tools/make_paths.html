@@ -3040,6 +3040,13 @@ async function runStudio() {
 
 /** كلماتُ الدَّور الثالث — يختارها المنهجُ لا الهوى (ص٥/٨): أصعبُ وصلاتنا وأطولُ موصول. */
 const OWNER_WORDS = ['مِحْفَظَة', 'غُرْفَة', 'شَمْس', 'سُلَحْفَاة', 'عَنْكَبُوت'];
+
+// ————— بابُ العلامات (`?only=marks`) — **آخرُ ما بقي من خطِّ الطباعة** —————
+// الثمانيةُ المتغيّرة أجسامُها معتمَدةٌ من يد المالك في `paths.js` (أ إ آ ⇐ ا · ؤ ⇐ و
+// · ئ ى ⇐ ي · ة ⇐ ه)، **والعلامةُ وحدَها تأتي من الخطّ**. فهذه خمسُ سلَعٍ تُرسَم
+// كالكلمة سواءً بسواء (مسارٌ واحدٌ من خيالٍ واحد) — ولا شيفرةَ التقاطٍ جديدة.
+const OWNER_MARKS = ['ء', 'أ', 'إ', 'آ', 'ة'];
+const MARKS_MODE = qs.get('only') === 'marks';
 /** ما شكا منه بعينه (١٨ أغسطس) — يتقدّم داخلَ دَوره لا على الطابور كلِّه. */
 const COMPLAINED = ['ط', 'ظ', 'م', 'ص', 'ض'];
 const DIGIT = /^[٠-٩]$/;
@@ -3057,6 +3064,10 @@ const arNum = (n) => String(n).replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[+d])
  * **المعزولاتُ ٢٨ تصديقاً**. وفي كلِّ دَورٍ يتقدّم **ما شكا منه** ثم يمضي بترتيب المنهج.
  */
 function ownerQueue(spec) {
+  if (MARKS_MODE) {
+    return OWNER_MARKS.map((text) => ({ kind: 'word', text,
+      key: `علامة/${text}`, name: text }));
+  }
   const keys = Object.keys(spec.letters);
   const digits = keys.filter((ch) => DIGIT.test(ch));
   const letters = keys.filter((ch) => !DIGIT.test(ch));
@@ -3337,8 +3348,10 @@ async function runOwnerBoard() {
   /** ورأسُ الشريط: العدّادُ والاسمُ والإرشاد — **بلا سطرِ قراءاتٍ تقنية**. */
   function label() {
     const item = queue[at];
+    const bank = MARKS_MODE ? OWNER_MARKS : OWNER_WORDS;
     count.textContent = item.kind === 'word'
-      ? `كلمة ${arNum(OWNER_WORDS.indexOf(item.text) + 1)} من ${arNum(OWNER_WORDS.length)}`
+      ? `${MARKS_MODE ? 'علامة' : 'كلمة'} ${arNum(bank.indexOf(item.text) + 1)}`
+        + ` من ${arNum(bank.length)}`
       : `${arNum(at + 1)} من ${arNum(shapes)}`;
     name.textContent = item.name;
     const near = out && out.strokes.length
@@ -3346,7 +3359,9 @@ async function runOwnerBoard() {
       : '';
     hint.textContent = (item.kind === 'digit'
       ? 'يُرسَم مرّةً — وأشكالُه الأربعة متطابقةٌ فيسري عليها'
-      : item.kind === 'word' ? 'اكتبها موصولةً كما تكتبها — والوصلُ بيدك'
+      : item.kind === 'word'
+        ? (MARKS_MODE ? 'اكتبها كما تكتبها — والعلامةُ ضربةٌ مستقلّةٌ بعد الجسم'
+          : 'اكتبها موصولةً كما تكتبها — والوصلُ بيدك')
         : 'اكتبه فوق الخيال كما يُكتب — ضربةً بعد ضربة') + near;
     keep.disabled = !(out && (out.strokes.length || out.dots.length) && out.ok);
     document.getElementById('back').disabled = at === 0;

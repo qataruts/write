@@ -34,7 +34,7 @@ import { penSurface, partsOf, MODES } from './pen.js';
 import { easeFor, demoPace } from './support.js';
 import {
   h, fill, icon, go, arNum, starsRow, topbar, brandMark, mascot, cheer, faceEl,
-  nodeTitle, traceFace,
+  nodeTitle, traceFace, bare,
 } from './ui.js';
 
 /**
@@ -179,7 +179,7 @@ export function renderNode(node) {
           + `${state.done || i < state.unit ? ' unit--done' : ''}`
           + (level >= VEIL_STEPS ? ' unit--hushed' : ''),
         'aria-label': unit.text,
-      }, level >= VEIL_STEPS ? icon('ear') : unit.text);
+      }, level >= VEIL_STEPS ? icon('ear') : bare(unit.text));
     }));
   }
 

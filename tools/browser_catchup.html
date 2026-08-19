@@ -203,9 +203,16 @@ function watchNetwork(win) {
     }
 
     /** يمشي وحدةً كاملةً كتابةً — والخروجُ ببلوغ شاشة حكمها. */
+    // **وعيّنةُ كلِّ وحدةٍ تُقرأ من وحدتها** (تصحيحٌ، ١٩ أغسطس ٢٠٢٦): كان العدَدُ
+    // يُقرأ مرّةً من الوحدة الأولى ثم يُمشى به في كلِّ وحدة، **فنفدت الحلقةُ قبل أن
+    // تُتمّ وحدةً أطولَ منها** (وقفت عند «كتابة ٢ من ٤») فلم تظهر شاشةُ حكمها وقُرئ
+    // ذلك «الشرخُ لا يوقف الامتحان». **وعدَدُ خطوات وحدةٍ يُقرأ من الوحدة نفسِها.**
+    const dotsNow = () => doc.querySelectorAll('.dots .dot').length || dots;
+
     async function playUnit(right) {
       const seen = [];
-      for (let i = 0; i < dots + 2 && !doc.querySelector('.celebrate'); i++) {
+      const room = dotsNow() * 2 + 2;
+      for (let i = 0; i < room && !doc.querySelector('.celebrate'); i++) {
         seen.push(await answer(right));
       }
       await wait(500);

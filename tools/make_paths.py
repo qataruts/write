@@ -1026,7 +1026,11 @@ def build(port: int, timeout: int, chunk: int = 100, fresh: bool = False) -> int
         print(f"{len(failed)} كلمةً لم تُبنَ — لا تُكتب وحدةٌ ناقصة.")
         return 1
     payload["words"] = words
-    payload["markGlyphs"] = glyphs
+    # **ولا شارةَ لحركةٍ أُجّلت** (حكمُ المالك ١٩ أغسطس ٢٠٢٦): بطاقاتُ العلامات
+    # صارت حروفاً بأعيانها، **وشارتُها من `PATHS`** لا من قياسٍ على حدة — فما بقي
+    # في `markGlyphs` من حركاتٍ بيانٌ ميّتٌ يُشحَن ولا يُعرَض. ⇐ يُسقَط عند البناء.
+    payload["markGlyphs"] = {m: g for m, g in glyphs.items()
+                             if not any("\u064b" <= c <= "\u0652" or c == "\u0670" for c in m)}
     payload["dropped"] = [{"kind": "sentence", "why": why} for why in failed_sentences] \
         + [{"kind": "pair", "why": why} for why in failed_pairs]
     payload["meta"]["failedPairs"] = failed_pairs
@@ -1275,8 +1279,15 @@ def self_test() -> int:
         return 1
 
     # ١) لا مسارَ بلا إيماءةٍ ولّدته، ٢) ولا إيماءةَ بلا مسار
+    #
+    # **ولطبقةِ العلامات مولّدُها فتُعلِن نفسَها** (`tools/mark_layer.py`، ١٩ أغسطس
+    # ٢٠٢٦): المتغيّراتُ الثمانية **جسمُها حرفٌ معتمَدٌ في الوحدة وعلامتُها من رسم
+    # المالك** — فلا إيماءةَ لها في `path_anchors.json` ولا يجب، **لكنّها ليست
+    # مدسوسةً بيد**: مفاتيحُها معلَنةٌ في `PATHS_SOURCE.marks.keys`، ومن لم يُعلَن
+    # فيها فهو دخيلٌ كما كان. **فالإعلانُ شرطٌ لا إعفاء.**
+    declared = set((meta or {}).get("marks", {}).get("keys") or [])
     extra = [f"{ch}/{form}" for ch, forms in paths.items() for form in forms
-             if form not in letters.get(ch, {})]
+             if form not in letters.get(ch, {}) and f"{ch}/{form}" not in declared]
     ok(not extra, "ولا مسارَ في الوحدة بلا إيماءةٍ ولّدته — لا يُدَسّ شكلٌ بيد"
        + (f" — دخيلٌ: {'، '.join(extra)}" if extra else ""))
     late = [f"{ch}/{form}" for ch, forms in letters.items() for form in forms

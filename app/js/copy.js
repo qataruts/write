@@ -42,7 +42,7 @@
 import * as progress from './progress.js';
 import { starsForReview } from './progress.js';
 import * as audio from './audio.js';
-import { WORDS, SPOKEN_WORDS, markInfo } from './curriculum.js';
+import { WORDS, SPOKEN_WORDS, markInfo, PATHS } from './curriculum.js';
 import { WORD_PATHS, MARK_PATHS } from './word_paths.js';
 import { penSurface, refGlyph, MODES, FREE } from './pen.js';
 // **وضعُ الدعم — شاشةُ اكتساب** (جلسة د): سماحةٌ موسَّعة في أوّل لقاءٍ بالكلمة،
@@ -52,7 +52,7 @@ import { easeFor, demoPace } from './support.js';
 import { SAY as FADE_SAY } from './fade.js';
 import {
   h, fill, icon, go, arNum, starsRow, topbar, brandMark, mascot, cheer, faceEl,
-  nodeTitle, traceFace,
+  nodeTitle, traceFace, bare,
 } from './ui.js';
 
 /**
@@ -171,7 +171,11 @@ export const renderCopy = (part, stageId = null) => renderNode(nodeOf(part, stag
  */
 function markCard(mark, onClose) {
   const info = markInfo(mark);
-  const glyph = MARK_PATHS[mark];
+  // **وما كان حرفاً تأخذه البطاقةُ من `PATHS`** (١٩ أغسطس ٢٠٢٦): بعد حكم المالك
+  // «نؤجّل الشدّةَ والتنوين» لم يبقَ في البطاقات إلا **حروفٌ** (أ · ة · إ · ء)،
+  // **وهي في `paths.js` بيد المالك** — فتُعرَض من مسارها الذي سيكتبه الطفلُ بعينه،
+  // لا من شارةٍ مقيسةٍ على حدة. **فالبطاقةُ واللوحُ مسارٌ واحد** («النموذجُ هو المقياس»).
+  const glyph = PATHS[mark]?.isolated || MARK_PATHS[mark];
   return h('div', { class: 'mark-card' },
     h('div', { class: 'mark-face' }, glyph ? refGlyph(glyph, 'ref-glyph mark-glyph') : mark),
     h('div', { class: 'mark-text' },
@@ -248,7 +252,7 @@ export function renderNode(node) {
       class: `unit unit--word${i === state.unit && !state.done ? ' unit--now' : ''}`
         + `${state.done || i < state.unit ? ' unit--done' : ''}`,
       'aria-label': unit.text,
-    }, unit.text)));
+    }, bare(unit.text))));
   }
 
   /** العلاماتُ التي تُفتَح بطاقتُها عند هذه الوحدة ولم تُفتَح بعدُ في هذه الجلسة. */

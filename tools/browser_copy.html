@@ -88,10 +88,12 @@ function watchNetwork(win) {
     // **وتُفتَح عقدُ الوصل كلُّها**: هذه سَوقةُ شاشةٍ لا سَوقةُ قفل — والقفلُ التسلسليّ
     // محروسٌ في `--suite gate` و`--suite field`، ولو تُرك هنا لَرَدّ الموجّهُ الاختبارَ
     // إلى الخريطة عند أوّل عقدةٍ لم تُتَمّ (وهو ما وقع في أوّل تشغيل).
-    for (const node of nodes.slice(0, first)) progress.setStars(node.id, 3);
-    for (const node of nodes.filter((n) => n.type === 'join' || n.type === 'gate')) {
-      progress.setStars(node.id, 3);
-    }
+    // **وتُفتَح الرحلةُ كلُّها لا عقدُ الوصل وحدَها** (تصحيحٌ، ١٩ أغسطس ٢٠٢٦): كان
+    // يفتح ما قبل أوّل عقدة وصلٍ وعقدَ الوصل والبوّابات، **فبقي بينها مقفلٌ لم يُفتَح**.
+    // ولم يظهر حتى **انتقلت بطاقةُ العلامة الأولى إلى العقدة ٤٩** بحذف محطّتَي الشدّة
+    // والتنوين — فردَّ الموجّهُ الفحصَ إلى الخريطة (`hash=#/`) وقُرئ ذلك «بطاقةٌ لا
+    // تُفتح» وهو قفلٌ يعمل كما يجب. **وسَوقةُ شاشةٍ لا تحرس قفلاً**، فتُفتح كلُّها.
+    for (const node of nodes) progress.setStars(node.id, 3);
 
     const joinNodes = nodes.filter((n) => n.type === 'join');
     const pairNode = joinNodes.find((n) => (n.joins || []).length);

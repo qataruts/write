@@ -18,6 +18,8 @@
 import { PATHS } from '../app/js/paths.js';
 import { TOLERANCE } from '../app/js/pen.js';
 import { TABLE } from './direction_table.mjs';
+import { LETTERS, VARIANTS, DIGITS as TAUGHT_DIGITS, Q3_RULING }
+  from '../app/js/curriculum.js';
 
 const FORMS = ['isolated', 'initial', 'medial', 'final'];
 const FORM_AR = { isolated: 'معزول', initial: 'ابتدائي', medial: 'وسطي', final: 'نهائي' };
@@ -97,7 +99,20 @@ console.log(`  المسطرة: يمينٌ ≥ ${RIGHT} · يسارٌ ≤ ${LEFT}
   + '  (وهي مسطرةُ جرد الإدارة، ١٨ أغسطس ٢٠٢٦)');
 
 console.log('\n— ١) الجدولُ يغطّي المادّةَ كلَّها، ولا سطرَ فيه بلا سند —');
-ok(rows.length === 122, `المادّةُ ${rows.length} شكلاً معلَناً (١١٢ حرفاً و١٠ أرقام)`);
+// **وعددُ المادّة يُشتقّ من المنهج لا يُكتب رقماً** (قاعدةُ «الحدُّ العامل لا الثابتُ
+// المكتوب»، ١٩ أغسطس ٢٠٢٦): كان `=== 122` فسقط يومَ دخلت الثمانيةُ المتغيّرة الوحدةَ
+// بحكم المالك — **ورقمٌ صحيحُ الأمس حارسٌ كاذبُ اليوم**. والمقصودُ أنّ الوحدةَ تغطّي
+// ما يعلّمه المنهجُ بعينه: كلُّ حرفٍ ومتغيّرٍ بمواقعه الأربعة، والرقمُ شكلاً واحداً.
+// **والمنهجُ يسجّل ساقطَه بنفسه**: متغيّرٌ بلا حاملٍ في سطوح اقرأ كلِّها (`surface: null`
+// في `Q3_RULING`) لا يبلغ الطفلَ فلا يُطالَب بمسار — «ؤ» و«ئ» اليوم. **فلا قائمةَ
+// تُكتب هنا**: يُقرأ حكمُ المولّد، فيومَ يجد لهما حاملاً يُطالِب بهما من نفسه.
+const dropped = new Set(Q3_RULING.filter((r) => !r.surface).map((r) => r.mark));
+const variants = Object.keys(VARIANTS).filter((ch) => !dropped.has(ch));
+const taught = (Object.keys(LETTERS).length + variants.length) * FORMS.length
+  + Object.keys(TAUGHT_DIGITS).length;
+ok(rows.length === taught,
+  `المادّةُ ${rows.length} شكلاً معلَناً — ويعلّم المنهجُ ${taught}`
+  + (dropped.size ? ` (وأسقط ${[...dropped].join('، ')} بلا حامل)` : ''));
 ok(Object.keys(TABLE).length === rows.length,
   `والجدولُ ${Object.keys(TABLE).length} سطراً — سطرٌ لكلِّ شكل`);
 const orphanRow = Object.keys(TABLE).filter((k) => !rows.some((r) => r.key === k));
@@ -249,6 +264,19 @@ for (const { ch, form, ref } of many) {
   ok(JSON.stringify(at) === JSON.stringify(want),
     `${ch} ${FORM_AR[form]}: ${at.length} نقاطٍ بترتيب اليمين ← اليسار`
     + ` (${at.map((p) => Math.round(p[0])).join(' ← ')})`);
+}
+
+// **بابُ الناقص**: يُصدِر سطورَ ما في المادّة ولا سطرَ له — **بأرقامٍ مقيسةٍ من
+// `measure` نفسِها لا مكتوبةٍ بيد**. فشكلٌ جديد يدخل الوحدةَ يأخذ سطرَه محسوباً،
+// **ويبقى `why` بيد من أدخله** — فالسندُ يُكتب ولا يُولَّد.
+if (process.argv.includes('--rows')) {
+  const why = process.argv[process.argv.indexOf('--rows') + 1] || 'يُكتب سندُه';
+  for (const row of rows) {
+    if (TABLE[row.key]) continue;
+    const m = measure(row.ref);
+    console.log(` '${row.key}': { side: '${m.side}', sanad: 'م', rx: ${+m.rx.toFixed(2)},`
+      + ` why: '${why}' },`);
+  }
 }
 
 if (process.argv.includes('--table')) {

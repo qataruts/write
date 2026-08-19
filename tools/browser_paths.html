@@ -207,7 +207,12 @@ function walk(points, back) {
         await wait(420);
         const moved = trails.some((t) => Number(t.getAttribute('stroke-dashoffset'))
           < Number(t.getAttribute('stroke-dasharray')) - 1);
-        ok(moved, `${ch} ${FORM_NAMES[form]}: ويُرسَم متحركاً على مساره (شاهِد)`);
+        // **ومَن مادّتُه نقرةٌ لا مسارَ له يُمشى عليه ولا معكوسَ يُردّ** — الصفرُ
+        // بحكم المالك (`test_direction`: «ومَن مادّتُه نقرةٌ لا جهةَ له»): لا ضربةَ
+        // فيه تتحرّك، **ومعكوسُ النقرة هي**. فاشتراطُ الحركة والردِّ عليه اشتراطُ
+        // ما لا يكون — **ولا يُستثنى إلا من لا ضربةَ له**، وما له ضربةٌ يُحاسَب.
+        const isTap = !(ref.strokes || []).length;
+        if (!isTap) ok(moved, `${ch} ${FORM_NAMES[form]}: ويُرسَم متحركاً على مساره (شاهِد)`);
         press('أعِد');
         await wait(80);
 
@@ -222,10 +227,11 @@ function walk(points, back) {
         await writeAll(ref, true);
         const bad = readout();
         const rejected = !/✓ مقبول/.test(bad);
-        ok(accepted && rejected,
+        ok(isTap ? accepted : (accepted && rejected),
           `${ch} ${FORM_NAMES[form]}: الصحيحُ ${accepted ? 'يُقبَل' : 'رُدّ — ' + good.split('\n')[0]}`
-          + ` · المعكوسُ ${rejected ? 'يُرفَض' : 'قُبل وهو خطأ!'}`);
-        if (accepted && rejected) judged++;
+          + (isTap ? ' · ونقرةٌ لا معكوسَ لها (حكمُ المالك)'
+            : ` · المعكوسُ ${rejected ? 'يُرفَض' : 'قُبل وهو خطأ!'}`));
+        if (accepted && (rejected || isTap)) judged++;
         press('أعِد');
         await wait(40);
 

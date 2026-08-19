@@ -24,7 +24,7 @@
 //   ٨) **لا وعدَ بما ليس في التطبيق**: كلُّ اسمِ زرٍّ تَعِد به الصفحةُ يُقابَل بنصّه في
 //      `app/js/` — فلو غُيّر اسمٌ هناك احمرّ هنا.
 
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 
 const ROOT = new URL('../', import.meta.url);
 const APP = new URL('app/', ROOT);
@@ -526,6 +526,39 @@ for (const label of PROMISED) {
 for (const [name, text] of Object.entries(PAGES)) {
   ok(text.includes(`<span class="w-print-url">${SITE}</span>`),
     `${name}: عنوانُنا في ترويسة المطبوع نصّاً لا رابطاً`);
+}
+
+// ————— **بابُ التصحيح** (`--fix`): يكتب المحسوبَ في الصفحات —————
+//
+// **وعلّتُه أنّ الحاسبَ واحدٌ لا اثنان**: أرقامُ الصفحات موسومةٌ بيد ومحسوبةٌ هنا،
+// **فلو حُدِّثت بيدٍ ثانيةٍ لَافترق مصدران** — والصوابُ أن يكتبها **الحاسبُ نفسُه**،
+// فلا يُكتب رقمٌ لم يُقَس. **ولا يُغيّر إلا ما وُسم**: `data-stat` وعمودَ عدد المحطات
+// في جدول الرحلة — وما سواهما نصٌّ لا يمسّه.
+if (process.argv.includes('--fix')) {
+  console.log('\n— تصحيحُ أرقام الصفحات من المحسوب —');
+  let touched = 0;
+  for (const name of PAGE_NAMES) {
+    const file = new URL(name, WELCOME);
+    let text = readFileSync(file, 'utf8');
+    const was = text;
+    text = text.replace(/(data-stat="([^"]+)"[^>]*>)([^<]+)(<)/g,
+      (all, head, key, shown, tail) => (STATS[key] === undefined ? all
+        : head + ar(STATS[key]) + tail));
+    if (name === 'curriculum.html') {
+      // **وبطاقاتُ أنماط المحطات كذلك** — عددُها من الرحلة لا من نصٍّ يشيخ.
+      text = text.replace(/(<article class="w-station" data-covers="([^"]+)" data-count=")([^"]+)(")/g,
+        (all, head, kind, shown, tail) => head + ar(nodesOfKind(kind)) + tail);
+      text = text.replace(
+        /(<tr>\s*<td class="w-num-cell">[^<]+<\/td>\s*<td class="w-stage">([^<]+)<\/td>\s*<td class="w-num-cell">)([^<]+)(<)/g,
+        (all, head, title, shown, tail) => {
+          const want = TABLE_NODES.get(title.trim());
+          return want === undefined ? all : head + ar(want) + tail;
+        });
+    }
+    if (text !== was) { writeFileSync(file, text); touched += 1; console.log(`  ✎ ${name}`); }
+  }
+  console.log(touched ? `  ⇐ صُحّح ${ar(touched)} ملفّاً — أعِد الفحص` : '  لا شيء يُصحَّح');
+  process.exit(0);
 }
 
 console.log(fails ? `\n${ar(fails)} إخفاق` : '\nالمرجعُ التعريفيّ سليم: قشرةٌ واحدة، وأرقامٌ محسوبة، ولا وعدَ بما ليس فيه.');

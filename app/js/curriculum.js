@@ -92,10 +92,8 @@ export const STAGES = [
       {
         "part": "w",
         "title": "كَلِمَاتُ المجموعة الأولى",
-        "words": ["بَابَا", "مَامَا", "بَابْ", "مَالْ"],
-        "marks": ["َ", "ْ"]
-      },
-      { "part": "sign-tanween", "title": "التَّنوين", "words": ["بَابٌ"], "marks": ["ٌ"] }
+        "words": ["بَابَا", "مَامَا", "بَابْ", "مَالْ"]
+      }
     ]
   },
   {
@@ -211,8 +209,7 @@ export const STAGES = [
     "nodes": [
       { "part": "pair", "title": "وَصْلُ حَرْفَيْن", "joins": ["سل"] },
       { "part": "triple", "title": "وَصْلُ ثَلَاثَة", "joins": ["سلا"] },
-      { "part": "w", "title": "كَلِمَاتُ المجموعة الثالثة", "words": ["سَلَامْ", "دَرَسْ"] },
-      { "part": "sign-shadda", "title": "الشَّدّة", "words": ["سُلَّمْ"], "marks": ["ُ", "ّ"] }
+      { "part": "w", "title": "كَلِمَاتُ المجموعة الثالثة", "words": ["سَلَامْ", "دَرَسْ"] }
     ]
   },
   {
@@ -290,15 +287,13 @@ export const STAGES = [
       {
         "part": "w-1",
         "title": "كَلِمَاتُ المجموعة الرابعة ١",
-        "words": ["بَيْتْ", "تُوتْ", "يَدْ", "وَلَدْ", "تِينْ"],
-        "marks": ["ِ"]
+        "words": ["بَيْتْ", "تُوتْ", "يَدْ", "وَلَدْ", "تِينْ"]
       },
       {
         "part": "w-2",
         "title": "كَلِمَاتُ المجموعة الرابعة ٢",
         "words": ["هِلَالْ", "شَمْسْ", "زَيْتْ", "ذَهَبْ"]
       },
-      { "part": "sign-tanween", "title": "التَّنوين", "words": ["وَلَدٌ"] },
       { "part": "sign-lam", "title": "اللام الشمسية والقمرية", "words": ["الشَّمْسْ"] },
       { "part": "sign-hamza", "title": "الهَمْزَة", "words": ["أُمِّي"], "marks": ["أ"] },
       { "part": "prep", "title": "كَلِمَاتٌ لِلْجُمَل", "words": ["مُنِيرْ", "تَدُورْ"] }
@@ -377,7 +372,6 @@ export const STAGES = [
         "title": "كَلِمَاتُ المجموعة الخامسة ٢",
         "words": ["عِنَبْ", "ثَعْلَبْ", "غُرَابْ"]
       },
-      { "part": "sign-shadda", "title": "الشَّدّة", "words": ["سُكَّرْ", "دُكَّانْ"] },
       { "part": "sign-lam", "title": "اللام الشمسية والقمرية", "words": ["السَّمَكْ"] },
       {
         "part": "prep",
@@ -460,7 +454,6 @@ export const STAGES = [
         "title": "كَلِمَاتُ المجموعة السادسة ٢",
         "words": ["جَبَلْ", "حَلِيبْ", "خَرُوفْ"]
       },
-      { "part": "sign-tanween", "title": "التَّنوين", "words": ["قَلَمٌ"] },
       { "part": "sign-lam", "title": "اللام الشمسية والقمرية", "words": ["الْقَمَرْ"] },
       {
         "part": "sign-hamza",
@@ -2436,30 +2429,6 @@ export const GATES = [
  * لمن يرسمه: حرفٌ مدروسٌ وعليه علامة، لا حرفٌ جديد.
  */
 export const MARKS = [
-  { "mark": "َ", "title": "فَتحة", "word": "بَابَا", "node": "g1-words:w", "base": null },
-  { "mark": "ْ", "title": "السُّكون", "word": "بَابْ", "node": "g1-words:w", "base": null },
-  {
-    "mark": "ٌ",
-    "title": "التَّنوين",
-    "word": "بَابٌ",
-    "node": "g1-words:sign-tanween",
-    "base": null
-  },
-  {
-    "mark": "ُ",
-    "title": "ضَمّة",
-    "word": "سُلَّمْ",
-    "node": "g3-words:sign-shadda",
-    "base": null
-  },
-  {
-    "mark": "ّ",
-    "title": "الشَّدّة",
-    "word": "سُلَّمْ",
-    "node": "g3-words:sign-shadda",
-    "base": null
-  },
-  { "mark": "ِ", "title": "كَسرة", "word": "تِينْ", "node": "g4-words:w-1", "base": null },
   {
     "mark": "أ",
     "title": "همزةٌ فوق الألف",
@@ -2521,12 +2490,6 @@ export const WORDS = {
     "from": "g1",
     "letters": [["م", "initial"], ["ا", "final"], ["ل", "isolated"]]
   },
-  "بَابٌ": {
-    "say": "بَابٌ",
-    "emoji": "🚪",
-    "from": "tanween",
-    "letters": [["ب", "initial"], ["ا", "final"], ["ب", "isolated"]]
-  },
   "نَارْ": {
     "say": "نار",
     "emoji": "🔥",
@@ -2562,12 +2525,6 @@ export const WORDS = {
     "emoji": "📖",
     "from": "g2",
     "letters": [["د", "isolated"], ["ر", "isolated"], ["س", "isolated"]]
-  },
-  "سُلَّمْ": {
-    "say": "سُلَّمْ",
-    "emoji": "🪜",
-    "from": "shadda",
-    "letters": [["س", "initial"], ["ل", "medial"], ["م", "final"]]
   },
   "بَيْتْ": {
     "say": "بيت",
@@ -2617,12 +2574,6 @@ export const WORDS = {
     "emoji": "🥇",
     "from": "g7",
     "letters": [["ذ", "isolated"], ["ه", "initial"], ["ب", "final"]]
-  },
-  "وَلَدٌ": {
-    "say": "وَلَدٌ",
-    "emoji": "👦",
-    "from": "tanween",
-    "letters": [["و", "isolated"], ["ل", "initial"], ["د", "final"]]
   },
   "الشَّمْسْ": {
     "say": "الشَّمْسْ",
@@ -2683,18 +2634,6 @@ export const WORDS = {
     "emoji": "🐦‍⬛",
     "from": "g7",
     "letters": [["غ", "initial"], ["ر", "final"], ["ا", "isolated"], ["ب", "isolated"]]
-  },
-  "سُكَّرْ": {
-    "say": "سُكَّرْ",
-    "emoji": "🍬",
-    "from": "shadda",
-    "letters": [["س", "initial"], ["ك", "medial"], ["ر", "final"]]
-  },
-  "دُكَّانْ": {
-    "say": "دُكَّانْ",
-    "emoji": "🏪",
-    "from": "shadda",
-    "letters": [["د", "isolated"], ["ك", "initial"], ["ا", "final"], ["ن", "isolated"]]
   },
   "السَّمَكْ": {
     "say": "السَّمَكْ",
@@ -2761,12 +2700,6 @@ export const WORDS = {
     "emoji": "🐑",
     "from": "g5",
     "letters": [["خ", "initial"], ["ر", "final"], ["و", "isolated"], ["ف", "isolated"]]
-  },
-  "قَلَمٌ": {
-    "say": "قَلَمٌ",
-    "emoji": "✏️",
-    "from": "tanween",
-    "letters": [["ق", "initial"], ["ل", "medial"], ["م", "final"]]
   },
   "الْقَمَرْ": {
     "say": "الْقَمَرْ",
@@ -7054,10 +6987,6 @@ export const VARIANTS = {
  * **وتُعلَن الساقطاتُ في صفحة الأسس**: «اكتبُ يعلّم كتابةَ ما علّمه اقرأ قراءةً».
  */
 export const Q3_RULING = [
-  { "mark": "ّ", "name": "الشَّدّة", "surface": "مقرَّرةٌ سلفاً", "word": null },
-  { "mark": "ً", "name": "التَّنوين", "surface": null, "word": null },
-  { "mark": "ٌ", "name": "التَّنوين", "surface": "مقرَّرةٌ سلفاً", "word": null },
-  { "mark": "ٍ", "name": "التَّنوين", "surface": null, "word": null },
   { "mark": "أ", "name": "همزةٌ فوق الألف", "surface": "بنكُ الكلمات", "word": "أُمِّي" },
   { "mark": "إ", "name": "همزةٌ تحت الألف", "surface": "بنكُ الكلمات", "word": "إِبْرِيقْ" },
   { "mark": "ؤ", "name": "همزةٌ فوق الواو", "surface": null, "word": null },

@@ -239,8 +239,13 @@ def make_server(port: int, results: list, lan: bool):
         def do_GET(self):
             path = self.path.partition("?")[0]
             if path in ("/", "/mirsam"):
+                # **والتحويلُ يحمل استعلامَ الزائر معه** (عيبٌ أمسكه المالك، ١٩ أغسطس
+                # ٢٠٢٦): كان يبتلع `?only=marks` فيفتح الطابورَ الكامل مكانَ المطلوب —
+                # فيرسم المالكُ خمسَ كلماتٍ ليست ما طُلب منه.
+                extra = self.path.partition("?")[2]
+                target = "/__make_paths.html?board=1" + (f"&{extra}" if extra else "")
                 self.send_response(302)
-                self.send_header("Location", "/__make_paths.html?board=1")
+                self.send_header("Location", target)
                 self.end_headers()
                 return
             if path == "/__make_paths.html":
