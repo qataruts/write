@@ -434,8 +434,21 @@ CROSS_SILENT = {         # ما لم تسمِّه المقاطعةُ في أيٍ
 }
 
 
+# 🔑 **وأربعةٌ سمّاها المالكُ بعدده** (`NASKH_CROSS §٥`، ١٩ أغسطس ٢٠٢٦) — **وحكمُه
+# مقدَّمٌ على قراءة §٢**: هي قرأت الوسطيَّ ضربةً واحدة، **وهو يميّز مدخلَ الوصل من
+# جسم الحرف** فيجعله اثنتين. ⇐ فيُقرأ من هنا لا من الجدول، **ولا يعود البناءُ
+# يمحوه** (مُحي مرّةً حين أُعيد `--build`).
+CROSS_OWNER = {
+    ("ص", "initial"): 1, ("ص", "medial"): 2,
+    ("ض", "initial"): 1, ("ض", "medial"): 2,
+}
+
+
 def strokes_of(letter: str, form: str, ours: dict) -> tuple:
     """(عددُ ضربات المرجع، سندُه) — أو (None، علّةُ التعذّر)."""
+    if (letter, form) in CROSS_OWNER:
+        return CROSS_OWNER[(letter, form)], ("NASKH_CROSS §٥ — حكمُ المالك"
+                                             " (مدخلُ الوصل ضربةٌ مستقلّة)")
     if (letter, form) in CROSS_REF:
         return CROSS_REF[(letter, form)], "NASKH_CROSS §٢ (جدولُ الرفعات الزائدة)"
     if form in CROSS_AGREE.get(letter, ()):
@@ -512,6 +525,11 @@ def emit(pages: dict) -> dict:
                         "measured": True,
                         "dots": dots_note(shape),
                         "px": {"baseline": base, **{k: full[k] for k in ("x0", "x1", "y0", "y1")}},
+                        # **وصندوقُ نقطه بعينه** (ملاحظةُ المالك ٢، `NASKH_CROSS §٥`):
+                        # الفرقُ بين `up` و`body_up` **حافّةُ النقطة لا مركزُها**،
+                        # ونقطُنا **مركزٌ لا صندوق** — فلا يُقابَل مركزٌ بحافّة.
+                        # ⇐ فيُكتب صندوقُ النقط ليُقرأ منه **مركزُها** ويُنزَّل عليه.
+                        "dots_px": (dict(shape["dots_box"]) if shape.get("dots_box") else None),
                     })
                 table.append(rec)
     return {

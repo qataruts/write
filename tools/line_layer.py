@@ -229,6 +229,26 @@ def widen(shape: dict, want: float, cx: float, x0: float, x1: float) -> tuple:
     return 1 + lo * (k - 1), abs(lo - 1.0) > 1e-3
 
 
+# ————— **نقطُ الأختين تُنزَّل على موضعها من المرجع** (ملاحظةُ المالك ٢) —————
+#
+# > «`ش/ابتدائي` · `ض/معزول` · `ض/ابتدائي` صغيرةٌ قليلاً» — **وعلّتُها مسمّاةٌ
+# > بيده**: المرجعُ يقيس المنقوطةَ **بنقطها**، وأجسامُنا سُوّيت على رقم الأخت غير
+# > المنقوطة — **فالجسمُ صحيحٌ والمجموعُ يبدو قصيراً**.
+#
+# **والمقابلةُ لا تصحّ مركزاً بحافّة**: `up` في المرجع **حافّةُ النقطة العليا**
+# ونقطُنا **مركزٌ لا صندوق**. ⇐ فيُطرح **نصفُ نقطة المرجع** (مقيسٌ من صناديق نقطه
+# نفسِها، لا رقمٌ يُكتب) — فيقع مركزُ نقطتنا العليا حيث مركزُ نقطته العليا،
+# **ويبلغ المجموعُ رقمَ المرجع**. **والتنزيلُ رأسيٌّ وحدَه**: «صغيرةٌ» حكمُ
+# ارتفاعٍ، والأفقُ يحكمه مدخلُ الوصل فلا يُزحزَح لأجل نقطة.
+def dot_half(table: dict = None) -> float:
+    """**نصفُ ارتفاع نقطة المرجع بوحدة الألف** — وسيطُ صناديق نقطه، لا رقمٌ مذوق."""
+    data = json.loads(METRICS.read_text(encoding="utf-8"))
+    unit = float(data["alif_px"])
+    highs = sorted((r["dots_px"]["y1"] - r["dots_px"]["y0"]) / unit
+                   for r in data["الجدول"] if r.get("dots_px"))
+    return (highs[len(highs) // 2] / 2) if highs else 0.0
+
+
 def ink(shape: dict, body_only: bool = False) -> tuple:
     """صندوقُ حبر الشكل — الضرباتُ ومواضعُ نقطه (وهو ما يقيسه المرجع في `up/down`)."""
     pts = [p for s in shape["strokes"] for p in s["points"]]
@@ -368,10 +388,20 @@ def seat(paths: dict, unit: float = None) -> tuple:
                     kx, capped = 1 + lo * (kx - 1), True
 
             nx, move = place(kx)
+            # **ونقطُ الأخت تُنزَّل على موضعها من صفِّها هي** (ملاحظةُ المالك ٢):
+            # جسمُها من أختها **ونقطُها من رقمها** — فيبلغ مجموعُها رقمَ المرجع.
+            drop = 0.0
+            mine = table.get((ch, form))
+            if kin and mine and shape["dots"]:
+                want_top = base - (mine["up"] - dot_half()) * unit
+                got_top = min(move(d["at"])[1] for d in shape["dots"])
+                drop = round(want_top - got_top, 1)
             out[ch][form] = {
                 "strokes": [restep([move(p) for p in s["points"]], scaled(tol, scale))
                             for s in shape["strokes"]],
-                "dots": [{**d, "at": move(d["at"])} for d in shape["dots"]],
+                "dots": [{**d, "at": [move(d["at"])[0],
+                                      round(move(d["at"])[1] + drop, 1)]}
+                         for d in shape["dots"]],
                 "box": [cell, cell],
                 "line": base,
                 # **ومقياسُ الشكل يسافر معه** (`pen.js: resolveTolerance`): كم يبلغ
@@ -397,6 +427,8 @@ def seat(paths: dict, unit: float = None) -> tuple:
                 # **والقياسُ الأفقيُّ يُقيَّد بأرقامه**: كم قُرِّب، وهل قُصَّ لأجل حلقة.
                 "kx": round(kx, 4),
                 "capped": capped,
+                # **وإنزالُ النقط يُقيَّد برقمه** (ملاحظةُ المالك ٢): كم وحدةً نزلت.
+                "dots_drop": drop,
                 "up": round((base - ny0) / unit, 4),
                 "down": round((ny1 - base) / unit, 4),
             })
