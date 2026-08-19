@@ -247,7 +247,13 @@ console.log('\n— ١ب) مقاييسُ الإرشاد تُشتقّ من مقي�
   const words = await import(new URL('js/word_paths.js', APP));
   const scales = Object.values(words.WORD_PATHS).map((w) => w.tolerance).filter((t) => t > 0);
   const tight = Math.min(...scales);
-  ok(scales.length > 0 && tight < 1,
+  // **والمقيسُ الاشتقاقُ لا صِغَرُ المادّة** (جلسة ك١): كان يُشترَط أن تكون أضيقُ
+  // مادّةٍ دون الواحد — **وهو وصفُ حالٍ لا حدُّ محرّك**، سقط يومَ جلست الكلمةُ على
+  // سطر الحروف بمقياسها (بند ص٢/ب): حروفُها فيها بحجمها في محطتها فنسبتُها واحد.
+  // **والحكمُ الذي يحرسه هذا الباب** — أنّ مقاييسَ الإرشاد تُشتقّ من نسبة المادّة —
+  // يُقاس على المادّة الحقيقية بأيّ نسبةٍ كانت، ويُجرَّب سالباً بالنسبة المصنوعة فوق.
+  ok(scales.length > 0 && tight > 0
+    && Math.abs(pen.guideOf({ tolerance: tight }).dot - pen.GUIDE.dot * tight) < 1e-9,
     `وأضيقُ مادّةٍ في الشجرة نسبتُها ${tight} — فنقطتُها ${(pen.GUIDE.dot * tight).toFixed(1)}`
     + ` لا ${pen.GUIDE.dot}`);
 }

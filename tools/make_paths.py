@@ -67,6 +67,7 @@ import browser_test  # noqa: E402  (حظيرةُ الخادم ومُشغِّلُ
 import line_layer  # noqa: E402  (سطرُ الكتابة وحدةً لا الحرف — بند ص٢/ب)
 import owner_layer  # noqa: E402  (طبقةُ المالك — أثرُ يده مسارَ محرّكٍ، بند ص٦)
 import ports  # noqa: E402  (جدولُ المنافذ — تُقرأ من موضعٍ واحد، `tools/ports.py`)
+import word_layer  # noqa: E402  (تركيبُ الكلمة من `paths.js` — جلسة ك١)
 
 
 def sha() -> str:
@@ -519,6 +520,14 @@ def write_words(words: dict, glyphs: dict, meta: dict) -> str:
                 tail += ', "folds": [' + ", ".join(
                     f'{{ "from": {int(f["from"])}, "apex": {int(f["apex"])},'
                     f' "to": {int(f["to"])} }}' for f in stroke["folds"]) + "]"
+            # **والمرورُ الثاني في الاتجاه نفسِه يسافر مع الكلمة كما يسافر مع الحرف**
+            # (بند ص٢/ز): وصلُ الكلمة يمشي حبراً قد يُمشى مرّتين، فإن لم تُكتب صفتُه
+            # قرأه الحَكَمُ ارتداداً — **وهي من `self_passes` بمقاييس المحرّك، لا بيد**.
+            if stroke.get("passes"):
+                tail += ', "passes": [' + ", ".join(
+                    f'{{ "from": {int(s["from"])}, "to": {int(s["to"])},'
+                    f' "again": {int(s["again"])}, "until": {int(s["until"])} }}'
+                    for s in stroke["passes"]) + "]"
             lines.append(tail + " }" + ("," if si < len(ref["strokes"]) - 1 else ""))
         lines.append("   ],")
         dots = ", ".join(
@@ -1147,6 +1156,69 @@ def build(port: int, timeout: int, chunk: int = 100, fresh: bool = False) -> int
     return 0
 
 
+# ————— 📐 **الكلماتُ تُركَّب من `paths.js`** (جلسة ك١، أمرُ المالك ١٩ أغسطس ٢٠٢٦) —————
+#
+# «**اجعل الكلَّ نابعاً من الحروف التي اعتمدناها، ولا كلماتٍ من حروفٍ قديمة**».
+# **والعلّةُ مقيسة**: `word_paths.js` كان يُنزِّل قانونيَّ المتصفّح — الخيالَ خالصاً —
+# على أجساد الكلمة، فبقي على حروفٍ سبقت طبقةَ المالك وطبقةَ السطر: ألفُ الكلمات تنزل
+# والمفردةُ تصعد · و«با» قطعتان والصوابُ واحدة · وخطوةُ العيّنة ١٣٫٦ في الكلمات و٤٧٫٣
+# في الحروف. **وكلُّها أثرُ بنائين، وتزول بالبناء الواحد.**
+#
+# **فالطريقُ شقّان**: المتصفّحُ **يقيس** (أين يجلس كلُّ حرفٍ من خيال الكلمة المُشكَّل،
+# وأين علامتُه، وأين سطرُها) — و`word_layer.py` **يركّب** من `paths.js` بعينه.
+
+
+def measure(port: int, timeout: int, chunk: int = 100, fresh: bool = False) -> int:
+    """دفعاتُ القياس ثم التركيب — تكتب `app/js/word_paths.js`."""
+    PARTS.mkdir(parents=True, exist_ok=True)
+    paths, _ = paths_module()
+    if not paths:
+        print("لا `app/js/paths.js` — تُبنى الحروفُ أولاً (`--build` أو `--seat`).")
+        return 1
+    stamp = word_layer.stamp(part_stamp())
+    first = PARTS / "measure-0000.json"
+    total = None
+    parts = []
+    start = 0
+    while total is None or start < total:
+        stop = start + chunk if total is None else min(start + chunk, total)
+        part_file = PARTS / f"measure-{start:04d}.json"
+        kept = None
+        if part_file.exists() and not fresh:
+            try:
+                got = json.loads(part_file.read_text(encoding="utf-8"))
+                if got.get("stamp") == stamp and got.get("from") == start \
+                        and got.get("to") == stop:
+                    kept = got
+            except json.JSONDecodeError:
+                kept = None
+        if kept is None:
+            got = drive(f"?build=1&part=measure&from={start}&to={stop}", port, timeout)
+            if not got:
+                print(f"  ✗ [{start}–{stop}] لم تصل حصيلةٌ — الأجزاءُ الخضرُ محفوظة،"
+                      " وإعادةُ التشغيل تكمل من هنا.")
+                return 1
+            report(got)
+            piece = next((r for r in got if "measure" in r), None)
+            if not piece:
+                print(f"  ✗ [{start}–{stop}] دفعةٌ بلا حصيلة")
+                return 1
+            kept = {"stamp": stamp, **piece["measure"]}
+            part_file.write_text(json.dumps(kept, ensure_ascii=False), encoding="utf-8")
+        else:
+            print(f"  ⤷ [{start}–{stop}] جزءٌ قائمٌ ببصمته — لا يُعاد")
+        parts.append(kept)
+        if total is None:
+            total = int(kept.get("total") or 0)
+            if not total:
+                print("قائمةُ عمل الكلمات فارغة")
+                return 1
+            print(f"\n📐 قائمةُ عمل الكلمات {total} وحدةً، والدفعةُ {chunk}\n")
+        start = stop
+    head = json.loads(first.read_text(encoding="utf-8"))
+    return word_layer.build(paths, parts, head, WORD_OUT, part_stamp())
+
+
 def nodes(port: int, timeout: int, out: Path) -> int:
     results = drive("?nodes=1", port, timeout)
     if not results:
@@ -1415,10 +1487,14 @@ def main() -> int:
     # 🧩 حجمُ دفعة الكلمات، ونزعُ المنسوخ: `--fresh` يبني كلَّ شيء من جديد
     ap.add_argument("--chunk", type=int, default=100, help="عددُ وحدات النسخ في الدفعة")
     ap.add_argument("--fresh", action="store_true", help="بلا نسخٍ من بناءٍ قائم ولا جزءٍ محفوظ")
+    ap.add_argument("--words", action="store_true",
+                    help="قياسُ خيال الكلمات ثم تركيبُها من `paths.js` (جلسة ك١)")
     args = ap.parse_args()
 
     if args.self_test:
         return self_test()
+    if args.words:
+        return measure(args.port, args.timeout, args.chunk, args.fresh)
     if args.build:
         return build(args.port, args.timeout, args.chunk, args.fresh)
     if args.seat:

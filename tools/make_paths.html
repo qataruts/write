@@ -2580,6 +2580,98 @@ function buildAll(spec, canon = null) {
  * تكتب جزأها وتطبع نبضَها**، والملفُّ النهائيّ يُجمَّع من الأجزاء — وعهدُ «لا وحدةَ
  * ناقصة» يبقى على الملفّ النهائيّ حيث كان.
  */
+/**
+ * ————— 📐 **دفعةُ القياس**: خيالُ الكلمة يُقاس ولا يُؤلَّف منه مسار (جلسة ك١) —————
+ *
+ * **علّتُها أمرُ المالك** (١٩ أغسطس ٢٠٢٦): «اجعل الكلَّ نابعاً من الحروف التي
+ * اعتمدناها، ولا كلماتٍ من حروفٍ قديمة». وكان تأليفُ الكلمة يُنزِّل **قانونيَّ
+ * المتصفّح** (الخيالَ خالصاً) على جسد الكلمة — فبقيت الكلماتُ على حروفٍ سبقت
+ * طبقةَ المالك (ص٦) وطبقةَ السطر (ص٢). **والحرفُ اليومَ في `paths.js` بعينه**،
+ * فلا يُبنى من جديد ولا يُشتقّ: **تُقاس من الخيال المواضعُ وحدَها** — أين يجلس
+ * كلُّ حرفٍ من الكلمة وأين علامتُه — **ويُركَّب المسارُ في `tools/word_layer.py`
+ * من `paths.js` نفسِه**.
+ *
+ * ⇐ **فما يخرج من هنا قياسٌ لا مسار**: صناديقُ الأجساد والعلامات وخطُّ الأساس.
+ */
+function boxOut(b) {
+  return b && { x0: round1(b.x0), y0: round1(b.y0), x1: round1(b.x1), y1: round1(b.y1),
+    w: round1(b.w), h: round1(b.h), cx: round1(b.cx), cy: round1(b.cy) };
+}
+
+function measureWord(st) {
+  return {
+    line: round1(st.line),
+    sheet: st.cal.box,
+    units: st.units.map((unit) => ({
+      text: unit.text,
+      form: unit.form,
+      kind: unit.kind,
+      wordEnd: !!unit.wordEnd,
+      box: boxOut(unit.body.box),
+      extras: unit.extras.map((b) => boxOut(b.box)),
+      marks: unitMarks(unit, st.chars).map((m) => ({ mark: m.mark, box: boxOut(groupBox(m.blobs)) })),
+    })),
+  };
+}
+
+/** قانونيّاتُ العلامات — تُبنى مرّةً في أوّل دفعةٍ وتُقيَّد لتقرأها طبقةُ التركيب. */
+async function markLibrary(spec, texts) {
+  const needed = [...new Set(texts.flatMap((t) => [...t].filter((c) => HARAKA.test(c))))];
+  const out = {};
+  for (const mark of needed) {
+    if (!spec.marks?.[mark]?.strokes?.length) {
+      throw new Error(`العلامة «${mark}» تلزم الكلماتِ ولا إيماءةَ لها في \`marks\``);
+    }
+    const cm = await markCanonical(mark, spec.marks[mark]);
+    out[mark] = {
+      box: boxOut(cm.box),
+      strokes: cm.strokes.map((s) => ({ points: s.points, folds: s.folds || [] })),
+      glyph: cm.glyph,
+    };
+  }
+  return out;
+}
+
+async function runWordMeasure() {
+  const spec = await anchors();
+  const cur = await import('/js/curriculum.js');
+  JOINS_AFTER = {};
+  for (const [ch, info] of Object.entries(cur.LETTERS)) JOINS_AFTER[ch] = !!info.joins;
+  for (const [ch, info] of Object.entries(cur.VARIANTS)) JOINS_AFTER[ch] = !!info.joins;
+  await inlineFont(FONT_SRC);
+  const list = workListOf(cur);
+  const from = Number(qs.get('from') || 0);
+  const to = Number(qs.get('to') || 0) || list.length;
+  const shapes = {};
+  const failed = [];
+  for (const item of list.slice(from, to)) {
+    try {
+      shapes[item.text] = { ...measureWord(await wordStudio(item.text)), kind: item.kind };
+    } catch (e) {
+      failed.push({ kind: item.kind, text: item.text, why: `«${item.text}»: ${e.message}` });
+    }
+  }
+  const extra = {};
+  if (from === 0) {
+    // **المتغيّراتُ ولام-ألف قانونيّاتٌ لا حروفَ في `paths.js`** — تبقى على الخيال
+    // بعلّتها المعلَنة (ليست من حروف اقرأ الثمانية والعشرين فلا طبقةَ مالكٍ لها
+    // ولا صفَّ في المرجع)، **ويُقيَّد ذلك في نسب الوحدة** فلا يُظَنّ أنها منه.
+    const canon = {};
+    for (const group of ['variants', 'ligatures']) {
+      if (spec[group]) buildAll({ letters: spec[group] }, canon);
+    }
+    extra.canon = canon;
+    extra.marks = await markLibrary(spec, list.map((i) => i.text));
+    extra.joins = JOINS_AFTER;
+    extra.total = list.length;
+  }
+  say(true, `دفعةُ القياس [${from}–${to}] من ${list.length}:`
+    + ` قِيست ${Object.keys(shapes).length} · تعذّرت ${failed.length}`, {
+    measure: { from, to, total: list.length, shapes, failed, ...extra },
+  });
+  await send();
+}
+
 async function runWordChunk() {
   const spec = await anchors();
   const canon = await (await fetch('/__canon.json')).json();
@@ -3445,7 +3537,8 @@ let FONT_SRC = null;
 (async () => {
   try {
     FONT_SRC = await loadFont();
-    if (qs.get('part') === 'words') await runWordChunk();
+    if (qs.get('part') === 'measure') await runWordMeasure();
+    else if (qs.get('part') === 'words') await runWordChunk();
     else if (qs.has('build')) await runBuild();
     else if (qs.has('nodes')) await runNodes();
     else if (qs.has('sheet')) await runSheet();
