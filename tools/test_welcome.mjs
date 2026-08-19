@@ -111,6 +111,15 @@ for (const [name, text] of Object.entries(PAGES)) {
     `${name}: ولا بريدَ آخرَ منثورٌ في النصّ`);
 }
 
+// **والأبعادُ المكتوبةُ تُقابَل بترويسة الملفّ نفسِه** (دَينٌ أمسكته ت١): أُعيد
+// توليدُ اللقطات فطالت الشاشاتُ (السطرُ على اللوح)، **وبقيت الأبعادُ المكتوبةُ
+// أبعادَ الأمس في عشرة مواضع** — فتُعرَض الصورةُ ممطوطةً ويرتجّ التخطيط. فلا
+// يُقاس **وجودُ** الرقم وحدَه بعد اليوم، بل **صدقُه**.
+const pngSize = (name) => {
+  const buf = readFileSync(new URL(`shots/${name}`, WELCOME));
+  return { w: buf.readUInt32BE(16), h: buf.readUInt32BE(20) };
+};
+
 // كلُّ صورةٍ بأبعادها و`loading="lazy"` — فلا ترتجّ الصفحةُ عند التحميل
 for (const [name, text] of Object.entries(PAGES)) {
   const imgs = [...text.matchAll(/<img\b[^>]*>/g)].map((m) => m[0]);
@@ -118,6 +127,14 @@ for (const [name, text] of Object.entries(PAGES)) {
   const eager = imgs.filter((t) => !/loading="lazy"/.test(t) && !/src="\.\.\/icons\//.test(t));
   ok(bad.length === 0 && eager.length === 0,
     `${name}: ${ar(imgs.length)} صورةً كلُّها بأبعادها وبتحميلٍ كسول`);
+
+  const wrong = imgs.filter((t) => /src="shots\//.test(t)).filter((t) => {
+    const real = pngSize(t.match(/src="shots\/([^"]+)"/)[1]);
+    return Number(t.match(/width="(\d+)"/)?.[1]) !== real.w
+      || Number(t.match(/height="(\d+)"/)?.[1]) !== real.h;
+  }).map((t) => t.match(/src="shots\/([^"]+)"/)[1]);
+  ok(wrong.length === 0,
+    `${name}: وأبعادُ كلِّ لقطةٍ هي أبعادُ ملفّها${wrong.length ? ` — الشائخ: ${wrong.join('، ')}` : ''}`);
 }
 
 // ————— ٣. قشرةٌ واحدة —————
@@ -184,6 +201,15 @@ const q3 = {
   dropped: Q3_RULING.filter((r) => !r.surface).length,
 };
 
+// **وعدُ الترتيب يُقاس لا يُصدَّق** (البند ٣ من ت١): نقضت م١ ترتيبَ «الحروفُ
+// كلُّها ثم الأشكال ثم الوصل» إلى مناوبةٍ (مجموعة ← أشكالُها ← كلماتُها)، وكان
+// وعدُ الصفحة يصف المنسوخ. **فتُقرأ الأرقامُ الثلاثةُ من الرحلة نفسِها**: عددُ
+// المجموعات، وموضعُ أوّل كلمةٍ فيها، وكم حرفاً سبقها — ويومَ يتبدّل الترتيبُ
+// يحمرّ الوعدُ قبل أن يُقرأ كاذباً.
+const ALL_NODES = progress.allNodes();
+const firstWordAt = ALL_NODES.findIndex((n) => n.words?.length);
+const FIRST_WORD = firstWordAt < 0 ? null : ALL_NODES[firstWordAt].words[0];
+
 const STATS = {
   // **«القسم» في هذه الصفحات مرحلةٌ من المنهج لا محطةٌ على الخريطة** (الجلسة ش):
   // جدولُ «الرحلة بترتيبها» يعدّ مراحلَ `METHOD §٤` وبواباتِها الثلاث، وقد صارت
@@ -220,6 +246,9 @@ const STATS = {
   q3Station: q3.station,
   q3Hosted: q3.hosted,
   q3Dropped: q3.dropped,
+  groups: STAGES.filter((s) => /^g\d+$/.test(s.id)).length,
+  firstWordNode: firstWordAt + 1,
+  firstWordLetters: ALL_NODES.slice(0, firstWordAt).filter((n) => n.type === 'letter').length,
 };
 
 const seen = new Set();
@@ -231,6 +260,15 @@ for (const [name, text] of Object.entries(PAGES)) {
       `${name}: «${key}» = ${shown.trim()} ${want === undefined ? '— رقمٌ لا تعرفه البيانات' : `(المحسوب ${ar(want)})`}`);
   }
 }
+// واسمُ أوّل كلمةٍ يُقابَل بمصدره — فلا يبقى «بَابَا» مكتوباً إن تبدّلت الكلمة
+// **وموضعُ القياس صدرُ الصفحة** لا الصفحةُ كلُّها: الكلمةُ ترد في خانة مادّتها
+// من الجدول على كلّ حال، فلو قِيست الصفحةُ كلُّها لَبقي وعدُ الصدر بلا حارس.
+{
+  const head = cur.match(/<div class="w-head">[\s\S]*?<\/div>/)?.[0] || '';
+  ok(FIRST_WORD !== null && head.includes(FIRST_WORD),
+    `وأوّلُ كلمةٍ في الرحلة مسمّاةٌ في صدر صفحة المنهج بعينها (${FIRST_WORD ?? 'لا كلمة'})`);
+}
+
 const unused = Object.keys(STATS).filter((k) => !seen.has(k));
 ok(unused.length === 0, `ولا رقمَ محسوبٌ بلا موضعٍ في الصفحات${unused.length ? `: ${unused.join('، ')}` : ''}`);
 
@@ -367,6 +405,44 @@ console.log('\n٦ج. بابُ حقيبة المعلم من صدر الدليل')
     'ولا يُطبَع المسارُ نصّاً على الشاشة');
   ok(/\.w-kit a\[href\^="http"\]::after/.test(css) && /@media print/.test(css),
     'وعلى **الورق** يُكشَف العنوان بقاعدة طباعة — فمن طبع الدليلَ بلغ الحقيبة');
+}
+
+console.log('\n٧د. بابُ ساحة الحصاد — في الذيل وحدَه');
+
+// **حكمُ المالك** (١٨ أغسطس ٢٠٢٦، بلاغُ ساحة الحصاد): الرابطُ **سطرٌ هادئ في ذيل
+// الرئيسة** حيث بابُ العائلة — **لا في الصدر ولا في الشريط ولا بطاقةً بين
+// الأقسام**. **وعلّتُه**: دعوةُ متطوّعٍ لا ميزةُ طفل، فلا تزاحم وعدَ المنتَج.
+// **فيُقاس موضعُه كما يُقاس ترتيبُ الأقسام** — لا يُصدَّق أنه في الذيل لأنه كُتب فيه.
+{
+  const home = PAGES['index.html'];
+  const ARENA = '../arena/';
+  const LINE = 'ساعِدنا نُحسّن المحرّك — اكتب حروفاً في ثلاث دقائق';
+
+  ok(existsSync(new URL('arena/index.html', APP)),
+    'صفحةُ الساحة موجودةٌ على القرص — فلا يَعِد الذيلُ ببابٍ ليس خلفه شيء');
+
+  const foot = home.match(/<footer class="w-foot">[\s\S]*?<\/footer>/)?.[0] || '';
+  ok(foot.includes(`href="${ARENA}"`) && foot.includes(LINE),
+    'رابطُ الساحة في **ذيل** الرئيسة بلفظه — دعوةُ مشاركةٍ لا وعدُ ميزة');
+
+  // وموضعُه مقيسٌ لا مدّعىً: بعد سطر العائلة، وفي آخر الصفحة كلِّها
+  const atArena = home.indexOf(`href="${ARENA}"`);
+  const atFamily = home.lastIndexOf(FAMILY);
+  const atMain = home.indexOf('</main>');
+  ok(atArena > atMain && atArena > atFamily,
+    'وموضعُه بعد آخر أقسام الصفحة وبعد بابِ العائلة — لا بطاقةً بين الأقسام');
+
+  // ولا يظهر في الشريط ولا في الصدر
+  const nav = home.match(/<nav class="w-topnav"[\s\S]*?<\/nav>/)?.[0] || '';
+  const hero = home.match(/<header class="w-hero">[\s\S]*?<\/header>/)?.[0] || '';
+  const band = home.match(/<aside class="w-band"[\s\S]*?<\/aside>/)?.[0] || '';
+  ok(!nav.includes(ARENA) && !nav.includes('arena')
+    && !hero.includes('arena') && !band.includes('arena'),
+    'ولا أثرَ له في الشريط ولا في الصدر ولا في شريط الإنصاف');
+
+  // ولا يُدخَل إلى تطبيق الطفل — القيدُ الأول من قيود الساحة
+  ok(!Object.entries(PAGES).some(([n, t]) => n !== 'index.html' && t.includes('arena')),
+    'ولا يتكرّر في صفحةٍ أخرى — بابٌ واحدٌ في موضعٍ واحد');
 }
 
 console.log('\n٧أ. شريطُ الإنصاف تحت الصدر مباشرة');

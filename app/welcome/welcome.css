@@ -485,6 +485,24 @@
 
 .w-why ol li { margin-bottom: .4rem; }
 
+/* أصلُنا المعلَن في §٧ — ثلاثةٌ مسمّاة بأرقامٍ مشرقية كقائمة «حدود النطاق» */
+.w-origins {
+  margin: .5rem 0 .75rem;
+  padding-inline-start: 1.35rem;
+  list-style-type: arabic-indic;
+  color: var(--ink-soft);
+}
+
+.w-origins li { margin-bottom: .4rem; }
+
+/* بابُ ساحة الحصاد في الذيل — سطرٌ هادئ لا بطاقةٌ تزاحم */
+.w-arena { margin-top: .35rem; }
+.w-arena span {
+  display: block;
+  font-size: .86em;
+  color: var(--ink-soft);
+}
+
 /* ————— الخاتمة ————— */
 
 .w-end {
