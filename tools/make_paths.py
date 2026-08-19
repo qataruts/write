@@ -582,6 +582,78 @@ def part_stamp() -> str:
     return f"{tool}·{sha()}·{material_sha()}"
 
 
+# ————— **الرفعاتُ الزائدة تُدمَج**: جدولُ `NASKH_CROSS §٢` (بند ص٢/ب ٣) —————
+#
+# **القاعدةُ الجامعة** (`STROKE_ORDER §٧هـ`): «عددُ ضربات الشكل = عددُ رفعات القلم
+# **التي يوجبها الخطّ**، لا أكثر» — ويوجبها: **حرفٌ لا يوصل بما بعده** (د ذ ر ز و ا)
+# · **شولةُ الكاف** · **النقاط** · **وعمودُ ط/ظ**. وما زاد **رفعٌ زائدٌ يُدرَّس للطفل
+# بلا موجب**: فمن وصَل حيث يصل الخطّاطُ رُدَّ عليه.
+#
+# **والعددُ منقولٌ من المرجع لا مستنبَطٍ من صورتنا** (`docs/NASKH_CROSS.md §٢`،
+# قرأتها الإدارةُ صفحةً صفحة) — وهذا الجدولُ نصُّها بعينه: الشكلُ وكم ضربةً له.
+# **والدمجُ من المقدّمة**: الزائدُ في هذه الأحدَ والعشرين **مدخلُ الوصل انفصل عن
+# جسمه**، وما يوجبه الخطّ (عمودُ ط/ظ وشولةُ الكاف) **آخِرُ الضربات** — فيبقى.
+#
+# ⚠ **وما بين الضربتين حبرٌ يقوله المرجعُ وضاع من خيالنا**: الوصلُ يمضي والقلمُ
+# على الورق، فخيالُ الحرف المُشكَّل قطعه. **فالدمجُ يصله بأقصر طريق** ثم تُعاد
+# خطوةُ المحرّك على المسار كلِّه فيُمشى الوصلُ كما يُمشى غيرُه. **وطولُ ما وُصل
+# يُطبع شكلاً شكلاً** — فما طال منه شكلٌ يُشتقّ من المرجع في ص٢/ج، لا وصلٌ يُدَّعى.
+MERGES = {
+    "ث/final": 1, "ه/medial": 1, "م/medial": 1, "م/final": 1, "س/medial": 1,
+    "ش/medial": 1, "ش/final": 1, "ل/medial": 1, "ل/final": 1, "ع/initial": 1,
+    "غ/initial": 1, "ص/initial": 1, "ص/medial": 1, "ص/final": 1, "ض/medial": 1,
+    "ض/final": 1, "ك/final": 2, "ط/medial": 2, "ط/final": 2, "ظ/medial": 2,
+    "ظ/final": 2,
+}
+
+
+def merge_layer(paths: dict) -> dict:
+    """يدمج ما فجوتُه دون ما يفرّقه المحرّك، **ويرفع ما سواه بأرقامه**.
+
+    🔴 **والفيصلُ قِيس ولم يُختَر** (وهو عينُ فيصل §٧د): **ما دون سماحة الانحراف
+    (٩٠) لا يفرّق المحرّكُ بين موضعيه أصلاً** — فتلك «رفعةٌ مزعومة»: حركةٌ واحدة
+    شُطرت ضربتين، ودمجُها **يردّ ما كان**، ولا يخترع حبراً.
+
+    ⚠ **وما جاوزها فالوصلُ فيه اختراع**: بين الضربتين حبرٌ **منحنٍ** يقوله المرجعُ
+    وضاع من خيالنا، والدمجُ الميكانيكيُّ يصله **بخطٍّ مستقيم** فيُدرِّس الطفلَ
+    حركةً ليست في الخطّ. **وقِيس ثمنُه فكان ثقيلاً**: بدمج الأحدَ والعشرين كلِّها
+    ارتفعت حمراءُ `test_paths` من **٧ إلى ١٦** — أحدَ عشرَ شكلاً هبط احتمالُه
+    للرجفة دون عهد `child-drift` (ط/وسطي ١٨ · ط/نهائي ٢١ · ظ/نهائي ٢٧ …)، وانكسر
+    في `test_direction` إغلاقُ ص وض على ملتقى العين. ⇐ **فهذه لا تُدمَج دمجاً بل
+    يُشتقّ شكلُها من المرجع** (ص٢/ج)، وتُطبع هنا بأرقامها فلا تُنسى.
+    """
+    limit = owner_layer.tolerance()["lateral"]
+    done, raised = [], []
+    for key, want in MERGES.items():
+        ch, form = key.split("/")
+        ref = (paths.get(ch) or {}).get(form)
+        if not ref or len(ref["strokes"]) <= want:
+            continue
+        spans = [round(math.dist(ref["strokes"][i]["points"][-1],
+                                 ref["strokes"][i + 1]["points"][0]))
+                 for i in range(len(ref["strokes"]) - want)]
+        row = {"key": key, "to": want, "from": len(ref["strokes"]), "bridges": spans}
+        if max(spans) >= limit:
+            raised.append(row)
+            continue
+        strokes = list(ref["strokes"])
+        while len(strokes) > want:
+            head, nxt = strokes[0], strokes[1]
+            strokes = [{"start": head["start"],
+                        "points": head["points"] + nxt["points"]}] + strokes[2:]
+        ref["strokes"] = strokes
+        done.append(row)
+    raised.sort(key=lambda r: -max(r["bridges"]))
+    print(f"\n✂️  الرفعاتُ الزائدة بجدول `NASKH_CROSS §٢`: {len(MERGES)} شكلاً"
+          f" — دُمج {len(done)} فجوتُه دون {limit:.0f}، ورُفع {len(raised)} إلى ص٢/ج")
+    for row in done:
+        print(f"   ✓ {row['key']}: {row['from']} ⇐ {row['to']} ضربةً"
+              f" (فجوةٌ {'، '.join(str(b) for b in row['bridges'])} — رفعةٌ مزعومة)")
+    print("   ○ ويبقى بلا دمجٍ (الوصلُ فيه اختراعُ حبرٍ لا ردُّ حركة): "
+          + "، ".join(f"{r['key']} {max(r['bridges'])}" for r in raised))
+    return {"merged": done, "raised": raised, "limit": limit}
+
+
 # ————— **أمرا المالك في الشكل**: أختان بجسمٍ واحد (بند ص٢/ب ٥) —————
 #
 # «`س` الأربعةُ من `ش` بلا نقاط · و`ض` الأربعةُ من `ص` بنقطة» — أمرُ المالك (١٩
@@ -712,9 +784,12 @@ def seat_build() -> int:
         paths.setdefault(ch, {}).update(family)
     away = max((row["away"] for row in owner["panel"]), default=0)
     print(f"✍️  طبقةُ المالك: {owner['shapes']} شكلاً من يده تعلو الخيال")
+    merged = merge_layer(paths)
     derived = derive_layer(paths)
     seating = seat_layer(paths)
     seating["derived"] = derived
+    seating["merged"] = merged["merged"]
+    seating["raised"] = [r["key"] for r in merged["raised"]]
     meta = dict(prior or {}, line=seating)
     meta["owner"] = dict(meta.get("owner") or {}, sha=owner["sha"],
                          shapes=owner["shapes"], passes=owner["passes"], away=away,
@@ -847,9 +922,12 @@ def build(port: int, timeout: int, chunk: int = 100, fresh: bool = False) -> int
     for row in owner["dropped"]:
         print(f"  ○ {row['key']}: بقي على الخيال — {row['why']}")
 
+    merged = merge_layer(paths)
     derived = derive_layer(paths)
     seating = seat_layer(paths)
     seating["derived"] = derived
+    seating["merged"] = merged["merged"]
+    seating["raised"] = [r["key"] for r in merged["raised"]]
 
     meta = {
         "tool": "tools/make_paths.html",
@@ -1024,7 +1102,12 @@ def self_test() -> int:
     # ليس جسمَ أثره في حرفها بل جسمُ أثره في أختها — فالمقابلةُ الصادقة أن يكون
     # **جسمُ الأختين واحداً في الوحدة نفسِها** ونقطُهما بجدول الحقيقة، وذلك أدناه.
     derived = set((meta or {}).get("line", {}).get("derived") or [])
-    owned = {f"{ch}/{form}" for ch, family in hand.items() for form in family} - derived
+    # **والمدموجُ كالمشتقّ**: ضربتاه صارتا واحدة بجدول المرجع، فلا يطابق أثرَ يده
+    # ضربةً بضربة — **ويُحرَس بعدد ضرباته** أدناه (وهو عينُ ما يقوله المرجع).
+    merged = {row["key"]: row["to"] for row in
+              ((meta or {}).get("line", {}).get("merged") or [])}
+    owned = ({f"{ch}/{form}" for ch, family in hand.items() for form in family}
+             - derived - set(merged))
     ok(bool(stamp), f"ونسبُ الوحدة يعلن طبقةَ المالك ({stamp.get('shapes', '—')} شكلاً)")
     ok(stamp.get("sha") == owner_layer.sha(),
        f"وبصمةُ أشكاله في الوحدة عينُ الملفّ ({stamp.get('sha', '—')} = {owner_layer.sha()})"
@@ -1066,6 +1149,14 @@ def self_test() -> int:
         ok(not astray, f"و{rule['to']} الأربعةُ جسمُها جسمُ {rule['from']} بعينه"
            f" ونقطُها {rule['dots']}" + (f" — خالف: {'، '.join(astray)}" if astray else ""))
 
+    astray = [key for key, want in merged.items()
+              if len(((paths.get(key.split("/")[0]) or {}).get(key.split("/")[1])
+                      or {"strokes": []})["strokes"]) != want]
+    ok(not astray and set(merged) <= set(MERGES),
+       f"وما دُمج من الرفعات الزائدة على عدد المرجع ({len(merged)} من {len(MERGES)}"
+       " — وما بقي مرفوعٌ إلى ص٢/ج بأرقامه)"
+       + (f" — خالف: {'، '.join(astray)}" if astray else ""))
+
     # ٤) الأجزاءُ بعددها، والدعوى «عينُ شكلٍ آخر» صادقةٌ في الوحدة كذلك
     for ch, forms in letters.items():
         for form, entry in forms.items():
@@ -1074,7 +1165,8 @@ def self_test() -> int:
                 continue
             # **وأجزاءُ ما جاء من يده أجزاءُ يده لا أجزاءُ الإيماءة**: الإيماءةُ سيّرت
             # الخيالَ وحدَه، وهو اليومَ تحت أثره — فيُحرَس بمطابقة الطبقة أعلاه.
-            if f"{ch}/{form}" in owned or f"{ch}/{form}" in derived:
+            if f"{ch}/{form}" in owned or f"{ch}/{form}" in derived \
+                    or f"{ch}/{form}" in merged:
                 continue
             if entry.get("sameAs"):
                 twin = paths[ch].get(entry["sameAs"])
