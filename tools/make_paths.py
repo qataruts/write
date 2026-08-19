@@ -827,17 +827,26 @@ def seat_layer(paths: dict) -> dict:
     # **وفرجةُ النقطة عن جسمها** (حكمُ المالك، `STROKE_ORDER §٩`): ما رُفع يُسمّى
     # بمقداره، وأضيقُ فرجةٍ بقيت تُطبع — **فلا يُدَّعى استيفاءٌ ولا يُخفى ناقص**.
     lifted = [r for r in rep["shapes"] if r.get("dots_lift")]
-    gaps = sorted((r["dot_gap"], r["key"]) for r in rep["shapes"]
-                  if r.get("dot_gap") is not None)
-    want = line_layer.DOT_CLEARANCE * unit
-    print(f"⚫ فرجةُ النقطة (حدُّها {want:.0f} = {line_layer.DOT_CLEARANCE} من الألف):"
-          f" رُفع نقطُ {len(lifted)} من {len(gaps)} شكلاً منقوطاً"
+    dotted = [r for r in rep["shapes"] if r.get("dot_gap") is not None]
+    gaps = sorted((r["dot_gap"], r["key"]) for r in dotted)
+    floor = line_layer.DOT_CLEARANCE * unit
+    print(f"⚫ فرجةُ النقطة — **حدُّها من قبولها العامل لا من ثابت**"
+          f" (أرضيّةُ المالك {floor:.0f} = {line_layer.DOT_CLEARANCE} من الألف،"
+          f" والحدُّ أكبرُها ونصفِ قطر قبول الشكل):"
+          f" رُفع نقطُ {len(lifted)} من {len(dotted)} شكلاً منقوطاً"
           + ("" if not lifted else " — "
              + "، ".join(f"{r['key']} +{r['dots_lift']} ⇐ {r['dot_gap']}" for r in lifted)))
-    below = [g for g in gaps if g[0] < want]
-    print(f"   وأضيقُ ما بقي {gaps[0][1]} ({gaps[0][0]}) · ودون الحدّ {len(below)}"
-          + ("" if not below else " — " + "، ".join(f"{k} {v}" for v, k in below)
-             + " (نقطٌ تحت جسمها: خارجَ نصّ الحكم، تُبلَّغ ولا تُحرَّك)"))
+    # **وما لم يبلغ حدَّه يُسمّى برقمه وعلّته** — لا يمرّ نقصٌ صامتاً.
+    short = [r for r in dotted if r["dot_gap"] < r["dot_want"] - 0.05]
+    stayed = len(dotted) - len(lifted)
+    print(f"   ولم يتبدّل {stayed} شكلاً · ودون حدِّه {len(short)}"
+          + ("" if not short else ":\n"
+             + "\n".join(f"      ⤷ {r['key']}: فرجتُه {r['dot_gap']} وحدُّه {r['dot_want']}"
+                          + (" — نقطُه تحت جسمه: خارجَ نصّ الحكم، يُبلَّغ ولا يُحرَّك"
+                             if r["fit_room"] is None or r["dot_gap"] < floor else
+                             f" — ومتّسعُ نسبته {r['fit_room']} دون ما يلزمه"
+                             " (**أمرُ النسبة أعلى**، فيُبلَّغ للمدير)")
+                          for r in short)))
     # **والمرورُ الثاني في الاتجاه نفسِه يُعلَن بأصحابه** (بند ص٢/ز): حالةٌ ثالثةٌ
     # في البيانات كما تُعلَن الطيّة — **كشفتها مقاييسُ المحرّك بأعيانها** ولم تُختَر
     # لها عتبة، فمن حملها حملها بقياسٍ لا باسمه.
@@ -873,6 +882,10 @@ def seat_layer(paths: dict) -> dict:
         "dotsLifted": [{"key": r["key"], "by": r["dots_lift"], "gap": r["dot_gap"]}
                        for r in lifted],
         "dotGapLow": {"key": gaps[0][1], "gap": gaps[0][0]},
+        # **وما لم يبلغ حدَّه العامل يُقيَّد في الوحدة نفسِها** — بحدِّه ومتّسع
+        # نسبته، **فلا يُعرَف النقصُ من وثيقةٍ وحدَها** (بلاغُ ص٢/ز للمدير).
+        "dotHeld": [{"key": r["key"], "gap": r["dot_gap"], "want": r["dot_want"],
+                     "room": r["fit_room"]} for r in short],
         "widthMedian": round(wide[len(wide) // 2], 4),
         "why": "النسبةُ بين الحروف تُحفَظ (أمرُ المالك ١٩ أغسطس ٢٠٢٦): مقياسٌ عامٌّ"
                " واحدٌ للهجاء كلِّه وثلاثةُ خطوطٍ ثابتة، وكلُّ شكلٍ يأخذ نصيبَه من"

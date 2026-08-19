@@ -338,29 +338,65 @@ def check_dot_count(dots: list, want: int, tag: str) -> list:
 DOT_RULE_EXEMPT = {
     ("ي", "isolated"): 116.9,   # نقطتاها تحت جسمها — بُلِّغت للمدير في بند فرجة النقطة
 }
+
+# ————— **وأربعةٌ يقف دونها أمرُ النسبة** — بلاغُ جلسة ص٢/ز، مقيسٌ لا مسكوتٌ عنه —————
+#
+# **الحدُّ صار من القبول العامل** (`line_layer.dot_clearance`)، فبانَ أنّ أربعةَ
+# أشكالٍ **لا تبلغ حدَّها إلا برفعٍ يجاوز هامشَ المطابقة** الذي يحرس **أمرَ النسبة
+# المنتهي** (أمرُ المالك ١٩ أغسطس ٢٠٢٦: «يجب حفظ النسبة… لا جدال فيه») — نقطُها
+# محسوبةٌ من حبرها في `line_layer.audit`، فرفعُها يُطيل الشكلَ فوق نسبة المرجع.
+# **ومتّسعُ كلٍّ منها ٢٤ وحدةً تقريباً، وما يلزمه ٢٤–٥٢.**
+#
+# ⇐ **وأمرُ النسبة أعلى، فلم تُرفَع** — **والقرارُ للمدير**: أيُشدُّ نصفُ قطر قبول
+# النقطة نفسُه (وهو الخيارُ الثاني في بلاغ `STROKE_ORDER §٩هـ`)؟ أم يُوسَّع هامشُ
+# المطابقة بأمرِ مالك؟ أم يُعاد اشتقاقُ شكلها فتنخفض قمّةُ جسمها؟
+# **وحتى ذلك تُقيَّد بأرقامها**: تُطبع في كلِّ فحص، **وتحمرّ إن ضاقت عمّا هي عليه**.
+DOT_FIT_BLOCKED = {
+    ("ق", "isolated"): 216.8,
+    ("خ", "isolated"): 267.6,
+    ("غ", "isolated"): 247.7,
+    ("غ", "initial"): 215.1,
+    ("غ", "final"): 277.0,
+}
 DOT_EXEMPT_SLACK = 0.5          # هامشُ التقريب: ما دونه ليس تفاقماً
 
 
 def check_dot_clearance(paths: dict, unit: float) -> tuple:
-    """`(شكاوى، مبلَّغات)` — أفرجةُ كلِّ نقطةٍ عن جسم حرفها تبلغ حدَّ المالك؟"""
-    want = line_layer.DOT_CLEARANCE * unit
+    """`(شكاوى، مبلَّغات)` — أتبلغ فرجةُ كلِّ نقطةٍ **نصفَ قطر قبولها العامل**؟
+
+    **والحدُّ العامل لا الثابتُ المكتوب** (عهدُ ١٩ أغسطس ٢٠٢٦): `resolveTolerance`
+    يضرب نصفَ قطر قبول النقطة في مقياس المادّة، **فقبولُ `ض/معزول` ٢٣٠ لا ١٤٠**
+    وحدُّ الألف الرُّبعيُّ دونه. ⇐ **فيُطلَب الحدُّ من الدالّة التي تحكم به**
+    (`line_layer.dot_clearance`) لا من رقمٍ في وثيقة.
+    """
+    tol = load_tolerance()
     bad, told = [], []
     for ch, shapes in sorted(paths.items()):
         for form, ref in shapes.items():
             dots, strokes = ref.get("dots") or [], ref.get("strokes") or []
             if not dots or not strokes:
                 continue          # نقرةٌ بلا جسم: لا جسمَ تُقاس إليه الفرجة
+            scale = ref.get("tolerance")
+            scale = scale if isinstance(scale, (int, float)) and scale > 0 else 1.0
+            want = line_layer.dot_clearance(tol, scale, unit)
             gap = min(line_layer.dot_gap(ref, d["at"]) for d in dots)
-            spared = DOT_RULE_EXEMPT.get((ch, form))
             tag = f"«{ch}» {form}"
-            if spared is not None:
-                told.append(f"{tag}: فرجتُه {gap:.1f} — خارجَ نصّ الحكم (نقطُه تحت جسمه)")
-                if gap < spared - DOT_EXEMPT_SLACK:
-                    bad.append(f"{tag}: فرجةُ نقطته {gap:.1f} وكانت {spared}"
-                               " — المعفوُّ مثبَّتٌ لا يزداد ضيقاً")
-            elif gap < want:
-                bad.append(f"{tag}: فرجةُ نقطته عن جسمه {gap:.1f} ودونها الحدُّ"
-                           f" {want:.0f} ({line_layer.DOT_CLEARANCE} من الألف)"
+            spared = DOT_RULE_EXEMPT.get((ch, form))
+            blocked = DOT_FIT_BLOCKED.get((ch, form))
+            held = spared if spared is not None else blocked
+            if held is not None:
+                told.append(f"{tag}: فرجتُه {gap:.1f} وحدُّه العامل {want:.0f} — "
+                            + ("خارجَ نصّ الحكم (نقطُه تحت جسمه)" if spared is not None
+                               else "يقف دونه أمرُ النسبة (بلاغُ ص٢/ز)"))
+                if gap < held - DOT_EXEMPT_SLACK:
+                    bad.append(f"{tag}: فرجةُ نقطته {gap:.1f} وكانت {held} — "
+                               + ("المعفوُّ" if spared is not None else "الموقوفُ")
+                               + " مثبَّتٌ لا يزداد ضيقاً")
+            elif gap < want - DOT_EXEMPT_SLACK:
+                bad.append(f"{tag}: فرجةُ نقطته عن جسمه {gap:.1f} ودونها حدُّها"
+                           f" العامل {want:.0f} (نصفُ قطر قبولها بمقياس مادّتها"
+                           f" ×{scale:.2f}، وأرضيّةُ المالك"
+                           f" {line_layer.DOT_CLEARANCE * unit:.0f})"
                            " — «مسافةٌ واضحة بين الحرف والنقطة» (حكمُ المالك)")
     return bad, told
 
@@ -1062,6 +1098,29 @@ def self_test() -> int:
     ref["dots"] = [{**d, "at": [d["at"][0], d["at"][1] - 20]} for d in ref["dots"]]
     ok(any("المعفوُّ مثبَّتٌ" in b for b in check_dot_clearance(tight, unit)[0]),
        "ويُمسِك معفوّاً ضاقت فرجتُه عمّا أُعلنت — فالإعفاءُ تثبيتٌ لا رخصةُ تفاقم")
+
+    # **والحدُّ عاملٌ لا ثابتٌ مكتوب** (عهدُ ١٩ أغسطس): يُجرَّب الفرقُ بعينه —
+    # **فرجةٌ تجاوز أرضيّةَ المالك ولا تبلغ نصفَ قطر قبول مادّتها**: تمرّ بمقياس
+    # الثابت وتحمرّ بمقياس القبول العامل. **وهذا هو العطبُ الذي كشفه البلاغ.**
+    floor = line_layer.DOT_CLEARANCE * unit
+    scaled_up = one(sound())
+    ref = scaled_up["ب"]["isolated"]
+    ref["tolerance"] = 2.0                    # مادّةٌ نصفُ قبولها ٢٨٠ لا ١٤٠
+    ref["dots"][0]["at"] = [500.0 + floor + 10, 950.0]
+    hot, _ = check_dot_clearance(scaled_up, unit)
+    ok(any("حدُّها العامل" in b and "×2.00" in b for b in hot),
+       f"ويُمسِك فرجةً فوق أرضيّة المالك ({floor:.0f}) ودون نصفِ قطر قبولها العامل"
+       " — **الحدُّ العامل لا الثابتُ المكتوب**")
+    ref["tolerance"] = 1.0                    # المادّةُ نفسُها بمقياسها الأصل
+    ok(not check_dot_clearance(scaled_up, unit)[0],
+       "وتمرّ الفرجةُ عينُها إذا كان قبولُ مادّتها دونها — فالحدُّ يتبع القبولَ لا العكس")
+
+    # **والموقوفُ بأمر النسبة مثبَّتٌ لا يزداد ضيقاً** — كالمعفوّ سواءً بسواء
+    held = json.loads(json.dumps(load_paths()))
+    ref = held["غ"]["final"]
+    ref["dots"] = [{**d, "at": [d["at"][0], d["at"][1] + 20]} for d in ref["dots"]]
+    ok(any("الموقوفُ مثبَّتٌ" in b for b in check_dot_clearance(held, unit)[0]),
+       "ويُمسِك موقوفاً بأمر النسبة ضاقت فرجتُه — فالوقفُ تثبيتٌ لا رخصةُ تفاقم")
 
     print(f"\n{fails} فشل" if fails else "\nالفاحصُ يمسك كلَّ ما وُضع له")
     return 1 if fails else 0
