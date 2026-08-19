@@ -102,15 +102,29 @@ def behind(a: list, b: list, step: float = 74.0) -> list:
     return [a[0] - (dx / length) * step, a[1] - (dy / length) * step]
 
 
-def tag(at: list, number: int, kind: str) -> str:
+def tag(at: list, number: int, kind: str, zoom: float = 1.0) -> str:
     """رقمُ الجزء في قرصه — **وهو ترتيبُ كتابةٍ لا عنوانُ عقدة**."""
-    return (f'<circle class="tag {kind}" cx="{at[0]:.1f}" cy="{at[1]:.1f}" r="52"/>'
-            f'<text class="num" x="{at[0]:.1f}" y="{at[1]:.1f}">{number}</text>')
+    return (f'<circle class="tag {kind}" cx="{at[0]:.1f}" cy="{at[1]:.1f}"'
+            f' r="{52 * zoom:.0f}"/>'
+            f'<text class="num" x="{at[0]:.1f}" y="{at[1]:.1f}"'
+            f' style="font-size:{70 * zoom:.0f}px">{number}</text>')
 
 
 def cell(ch: str, form: str, ref: dict) -> str:
-    """خانةُ شكلٍ واحد: مسارُه · بدايتُه · سهمُه · أرقامُ أجزائه بترتيبها."""
+    """خانةُ شكلٍ واحد: **سطرُه** · مسارُه · بدايتُه · سهمُه · أرقامُ أجزائه بترتيبها.
+
+    **وصندوقُها صندوقُ المادّة** (بند ص٢/ب ٢): الأشكالُ تجلس على سطرٍ واحدٍ في خليّةٍ
+    ضلعُها ألفان، **فمن قرأها في شبكةِ ألفٍ رأى رُبعَها**. وعلاماتُ اللوح (السهمُ
+    والقرصُ والرقم) **تكبر بمقياس خليّته** وإلا صارت ذَرّاً في لوحٍ ضِعفَي شبكتها.
+    """
+    box = ref.get("box") or [GRID, GRID]
+    span = float(box[1])
+    zoom = span / GRID
     body = []
+    # **والسطرُ يُرسم في اللوح كما يُرسم للطفل** — فما يراه المالكُ هو ما يراه.
+    if ref.get("line") is not None:
+        body.append(f'<line class="seat" x1="0" y1="{ref["line"]:.1f}"'
+                    f' x2="{box[0]:.1f}" y2="{ref["line"]:.1f}"/>')
     order = 0
     for stroke in ref.get("strokes") or []:
         points = stroke["points"]
@@ -118,19 +132,26 @@ def cell(ch: str, form: str, ref: dict) -> str:
         body.append(f'<polyline class="ink" points="{line}"/>')
         start = stroke.get("start") or points[0]
         a, b = head_of(points)
-        body.append(arrow(a, b))
-        body.append(f'<circle class="begin" cx="{start[0]:.1f}" cy="{start[1]:.1f}" r="26"/>')
+        body.append(arrow(a, b, 62.0 * zoom))
+        body.append(f'<circle class="begin" cx="{start[0]:.1f}" cy="{start[1]:.1f}"'
+                    f' r="{26 * zoom:.0f}"/>')
         order += 1
         # **ورقمُ الضربة خلفَ حركتها**: لو وُضع على المبدأ لَغطّى السهمَ الذي يليه —
         # فيُزاح إلى الوراء بقدر قطره في عكس جهة المضيّ، **فيُقرأ الرقمُ ويُرى السهم**.
-        body.append(tag(behind(a, b), order, "stroke"))
+        body.append(tag(behind(a, b, 74.0 * zoom), order, "stroke", zoom))
     for dot in ref.get("dots") or []:
         at = dot["at"]
-        body.append(f'<circle class="dot" cx="{at[0]:.1f}" cy="{at[1]:.1f}" r="30"/>')
+        body.append(f'<circle class="dot" cx="{at[0]:.1f}" cy="{at[1]:.1f}"'
+                    f' r="{30 * zoom:.0f}"/>')
         order += 1
-        body.append(tag(at, order, "dot"))
+        body.append(tag(at, order, "dot", zoom))
     name = f"{ch} · {FORM_AR.get(form, form)}"
-    return (f'<figure class="cell"><svg viewBox="0 0 {GRID} {GRID}">'
+    # **وللّوح فُسحةٌ حول الخليّة**: أرقامُ الترتيب تُرسَم **خلف** مبدأ الضربة، فمن
+    # بدأ عند سقف الخليّة (`ك/ابتدائي`، أعلى الهجاء) خرج رقمُه عنها. وهي فُسحةُ
+    # مراجعةٍ بالعين لا خليّةُ كتابة — ولوحُ الطفل يبقى على خليّته.
+    pad = 90 * zoom
+    return (f'<figure class="cell"><svg viewBox="{-pad:.0f} {-pad:.0f}'
+            f' {box[0] + 2 * pad:.0f} {box[1] + 2 * pad:.0f}">'
             + "".join(body) + f'</svg><figcaption>{name}</figcaption></figure>')
 
 
@@ -149,8 +170,10 @@ p.note b { color: var(--begin); }
 .cell svg { display: block; width: 100%; aspect-ratio: 1; }
 figcaption { position: absolute; inset-block-start: 6px; inset-inline-start: 10px;
              font-size: 15px; color: #6b7280; }
-.ink { fill: none; stroke: var(--ink); stroke-width: 26; stroke-linecap: round;
+.ink { fill: none; stroke: var(--ink); stroke-width: 53; stroke-linecap: round;
        stroke-linejoin: round; opacity: .82; }
+/* **سطرُ الكتابة** كما يراه الطفلُ على لوحه — خافتٌ متقطّع لا يزاحم الحبر */
+.seat { stroke: var(--line); stroke-width: 6; stroke-dasharray: 28 24; }
 .arrow { fill: var(--begin); }
 .begin { fill: var(--begin); }
 .dot { fill: var(--dot); }

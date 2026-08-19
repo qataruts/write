@@ -43,8 +43,9 @@ const scale = span / Math.max(width, height);   // ← لكلِّ حرفٍ مق�
 تخطيطٍ معلَنٌ هنا بأرقامه، ونتيجتُه أنّ الألف تأخذ ٣٩٪ من الخليّة **وتبقى الدالُ
 صغيرةً بالنسبة إليها كما هي في المرجع**.
 
-**والهامشُ نصفُ سماحة الانحراف** (٤٥ = ٩٠/٢): أضيقُ ما لا يُقَصّ به حبرُ شكلٍ رُسم
-على الحدّ ولا نصفُ ممرّه — ولا رقمَ مذوقاً.
+**والهامشُ يسع أبعدَ ما يُرسَم فوق الحبر**: سهمُ الاتجاه ودائرةُ البداية يُرسمان
+بمقياس المادّة، وأكبرُ الأشكال مقياساً `غ/نهائي` — **فالهامشُ سهمُه** (١٠٩ وحدة)،
+ولولاه لَقُصّت دائرةُ بداية `ك/ابتدائي` وهي أعلى الهجاء. ولا رقمَ مذوقاً.
 
 ## واللوحُ لا يصغُر لصِغَر الحرف (`STROKE_ORDER §٨د`)
 
@@ -66,6 +67,7 @@ const scale = span / Math.max(width, height);   // ← لكلِّ حرفٍ مق�
 
 import argparse
 import json
+import math
 import re
 import sys
 from pathlib import Path
@@ -80,15 +82,32 @@ PATHS_JS = ROOT / "app" / "js" / "paths.js"
 FORMS = ["isolated", "initial", "medial", "final"]
 DIGITS = set("٠١٢٣٤٥٦٧٨٩")
 
-# **هامشُ الخليّة**: نصفُ سماحة الانحراف — تُقرأ من المحرّك لا تُكتب هنا.
-MARGIN = 45.0
-
-
-def tolerance_lateral() -> float:
-    """سماحةُ الانحراف من `pen.js` بعينها — رقمٌ واحدٌ في المشروع لا نسختان."""
+def engine(name: str, fallback: float) -> float:
+    """رقمٌ من `pen.js` بعينه — سماحةً كان أو مقياسَ إرشاد؛ لا نسختان في المشروع."""
     src = (ROOT / "app" / "js" / "pen.js").read_text(encoding="utf-8")
-    hit = re.search(r"lateral:\s*([\d.]+)", src)
-    return float(hit.group(1)) if hit else 90.0
+    hit = re.search(rf"{name}:\s*([\d.]+)", src)
+    return float(hit.group(1)) if hit else fallback
+
+
+def max_scale(paths: dict, unit: float, table: dict) -> float:
+    """أكبرُ مقياسِ شكلٍ في الهجاء — يقرؤه من `tolerance` إن كُتب، وإلا حسبه.
+
+    **فيستوي على البناء وعلى الوحدة المولَّدة**: الحارسُ يقرأ ما كُتب، والبناءُ
+    يحسبه قبل أن يُكتب — والرقمُ واحد.
+    """
+    best = 0.0
+    for ch, forms in paths.items():
+        for form, shape in forms.items():
+            got = shape.get("tolerance")
+            if got is None:
+                kin = SISTERS.get(ch)
+                row = table.get((kin or ch, form))
+                if not row:
+                    continue
+                x0, x1, y0, y1 = ink(shape, body_only=bool(kin))
+                got = (row["up"] + row["down"]) * unit / max(y1 - y0, 1e-6)
+            best = max(best, float(got))
+    return best
 
 
 def metrics() -> dict:
@@ -138,7 +157,15 @@ def spec(paths: dict = None) -> dict:
     top = max(table.items(), key=lambda kv: kv[1]["up"])[0]
     low = max(table.items(), key=lambda kv: kv[1]["down"])[0]
     unit = alif_unit(paths)
-    margin = tolerance_lateral() / 2
+    # **وهامشُ الخليّة يسع أبعدَ ما يُرسَم فوق الحبر** (لا نصفَ سماحةٍ مذوقاً):
+    # اللوحُ يرسم حول المسار **دائرةَ بدايةٍ وسهمَ اتجاه** بمقياس المادّة
+    # (`pen.js: guideOf`)، **وأكبرُ الأشكاء مقياساً `غ/نهائي` (٢٫٣٥)** — فسهمُه
+    # يبلغ ١٠٨ وحدةً فوق حبره. فلو كان الهامشُ نصفَ السماحة (٤٥) **لَقُصّت دائرةُ
+    # بداية `ك/ابتدائي`** وهي أعلى الهجاء — والإرشادُ يُقَصّ حيث يحتاجه الطفل أكثر.
+    margin = max(engine("lateral", 90.0) / 2,
+                 engine("arrowTip", 46.0) * max_scale(paths or read_paths(), unit,
+                                                      table))
+    margin = float(math.ceil(margin))
     cell = round((ascent + descent) * unit + 2 * margin, 1)
     return {
         "unit": unit,                       # ارتفاعُ الألف — وحدةُ القياس كلِّها

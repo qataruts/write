@@ -24,10 +24,12 @@ p' = to + (p − from) × scale
 ١٠٧ × المقياس، وما كان مقبولاً يبقى مقبولاً بنسبته. **ولا يُعاد أثرٌ ولا يُلمَس
 شكلُه** — إزاحةٌ وتحجيمٌ منتظم لا غير، وهو عينُ ما جرى للنموذج فوقه.
 
-## ولا يُنقَل أثرٌ مرّتين
+## ولا يُنقَل أثرٌ مرّتين — **ولا يبقى في إطارٍ شاخ**
 
-يُختَم كلُّ منقولٍ بـ`frame: "line"`، **فالتشغيلةُ الثانية لا تجد ما تنقله**.
-والمقياسُ يُقيَّد في الأثر نفسِه (`seated`) فيُعرَف بأيّ رقمٍ نُقل.
+يُختَم كلُّ منقولٍ ببصمة الإطار الذي نُقل إليه (`frame`: ضلعُ الخليّة وخطُّ الأساس)
+**ويُقيَّد التحويلُ الذي نُقل به** (`seat`). فالتشغيلةُ الثانية على الإطار نفسِه
+لا تجد ما تنقله، **وإن تبدّل الإطار** (تبدّل هامشُ الخليّة مثلاً) **رُدَّ الأثرُ
+بعكس تحويله ثم نُقل بالجديد** — فلا يُترك في إطارٍ شاخ ولا يُنقَل نقلتين.
 """
 
 import json
@@ -44,28 +46,36 @@ def main() -> int:
     if not SEATING.exists():
         print("لا قيدَ لتحويل الجلوس — يُبنى بـ`make_paths.py --seat`.")
         return 1
-    seating = json.loads(SEATING.read_text(encoding="utf-8"))["shapes"]
+    book = json.loads(SEATING.read_text(encoding="utf-8"))
+    seating, spec = book["shapes"], book["spec"]
+    frame = f"line {spec['cell']}/{spec['base']}"
     data = json.loads(TRACES.read_text(encoding="utf-8"))
     moved, stale, ready = [], [], []
     for case in data.get("cases", []):
         if case.get("origin") != "field":
             continue
-        if case.get("frame") == "line":
+        if case.get("frame") == frame:
             ready.append(case["id"])
             continue
         rule = seating.get(case.get("ref"))
         if not rule:
             stale.append(case["id"])
             continue
-        scale = rule["scale"]
-        fx, fy = rule["from"]
-        tx, ty = rule["to"]
+        was = case.get("seat")
         if not check:
+            # **ويُرَدُّ أوّلاً إلى إطاره الأوّل** إن كان قد نُقل إلى إطارٍ شاخ —
+            # بعكس تحويله المقيَّد فيه، فلا يُضاف نقلٌ على نقل.
+            if was:
+                case["strokes"] = [[[was["from"][0] + (p[0] - was["to"][0]) / was["scale"],
+                                     was["from"][1] + (p[1] - was["to"][1]) / was["scale"]]
+                                    for p in stroke] for stroke in case["strokes"]]
+            scale, (fx, fy), (tx, ty) = rule["scale"], rule["from"], rule["to"]
             case["strokes"] = [[[round(tx + (p[0] - fx) * scale, 1),
                                  round(ty + (p[1] - fy) * scale, 1)] for p in stroke]
                                for stroke in case["strokes"]]
-            case["frame"] = "line"
-            case["seated"] = scale
+            case["frame"] = frame
+            case["seat"] = rule
+            case.pop("seated", None)
         moved.append(case["id"])
 
     print(f"في إطار السطر سلفاً: {len(ready)} · يُنقَل: {len(moved)}"
