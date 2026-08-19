@@ -936,7 +936,13 @@ export function fitFree(ref, strokes, tol = TOLERANCE) {
    */
   const bodyModel = inkBox([partsOf(ref).filter((q) => q.kind === 'stroke')
     .flatMap((q) => q.poly.pts)]);
-  const bodyChild = inkBox((strokes || []).filter((q) => (q || []).length > 1));
+  // **والنقرةُ تُعرَف بمداها لا بعدد نقاطها**: يدٌ تنقر تترك نقاطاً متتالية في
+  // موضعٍ واحد، **فعدُّ النقاط يخدع** — والمقياسُ أنّ **ما لا يبلغ ممرَّ السماحة
+  // ليس جسماً**، وهو حدُّ `sizeOf` نفسُه («شكلٌ يغرق في ممرّ سماحته لا يُقاس»).
+  const bodyChild = inkBox((strokes || []).filter((q) => {
+    const one = inkBox([q]);
+    return one && Math.hypot(one.w, one.h) >= tol.lateral;
+  }));
   if (!bodyModel || !bodyChild) return { s: s > 0 ? s : 1, child, model };
   const bx = bodyModel.w > tol.lateral ? bodyChild.w / bodyModel.w : 0;
   const by = bodyModel.h > tol.lateral ? bodyChild.h / bodyModel.h : 0;
