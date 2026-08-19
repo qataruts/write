@@ -220,6 +220,85 @@ def check_folds(stroke: dict, where: str, tol: dict) -> list:
     return bad
 
 
+def check_passes(stroke: dict, where: str, tol: dict) -> list:
+    """**المرورُ الثاني في الاتجاه نفسِه**: حبرٌ واحد يُمشى مرّتين، ومروران يقيسهما المحرّك.
+
+    وهي الحالةُ الثالثةُ المعلَنة (`METHOD.md §٣.١`، بند ص٢/ز): الطيّةُ **ذهابٌ
+    وإياب**، وهذه **مرورٌ ثم مرورٌ في الاتجاه عينه** — وسندُها برهانٌ أويلريّ على
+    جسم `ط` و`ظ` الموصولتين (أربعةُ رؤوسٍ فرديّة فلا مسارَ واحد، وأقلُّ إصلاحٍ
+    تكرارُ السطر تحت الحلقة). **وهي رخصةٌ في الحكم** كالطيّة: داخلَها يقرأ المحرّكُ
+    موضعَ القلم من أقرب المرورين ويُنزّله على مرور طوره — **فدعواها على حبرٍ لا
+    يُمشى مرّتين تفتح على الحرف باباً لا يُغلَق**.
+
+    والمفحوصُ أربعةٌ، **كلُّها من جنس ما تحرسه لا أرقاماً حرّة**:
+      · **أرقامٌ سليمة**: `from < to ≤ again < until` داخلَ نقاط القطعة.
+      · **مروران يشتركان في الحبر**: أدنى مسافةٍ بين المرورين دون سماحة الانحراف —
+        وهو بعينه ما يجعل الموضعَ الواحد يحمل طولين فيلتبس الإسقاط.
+      · **ورأسا القلم متوافقان**: جداءُ المتّجهين موجب — **وإلّا فهي شوكةٌ أو حلقةٌ
+        لا مرورٌ ثانٍ**، وحكمُهما غيرُ حكمه.
+      · **ومرورٌ يقيسه المحرّك**: أقصرُ من سماحة الارتداد (`back`) يبتلعه سماحُها.
+    **ولا يقع مكانان في مكان**: لا تتداخل المروراتُ بعضُها ببعض ولا مع طيّةٍ معلَنة.
+    """
+    bad = []
+    passes = stroke.get("passes")
+    if passes is None:
+        return bad
+    points = stroke.get("points") or []
+    last = len(points) - 1
+    if not isinstance(passes, list) or not passes:
+        return [f"{where}: `passes` معلنةٌ فارغةً أو ليست قائمة — والمرورُ يُعلَن أو يُترك"]
+
+    keys = ("from", "to", "again", "until")
+    spans = []
+    for n, span in enumerate(passes, 1):
+        tag = f"{where} مرور {n}"
+        if not isinstance(span, dict) or any(not isinstance(span.get(k), int) for k in keys):
+            bad.append(f"{tag}: أرقامُ نقاطٍ صحيحةٌ لازمة ({' و'.join(keys)})")
+            continue
+        a, b, c, d = (span[k] for k in keys)
+        if not (0 <= a < b <= c < d <= last):
+            bad.append(f"{tag}: أرقامُه {a}،{b}،{c}،{d} خارجَ نقاط القطعة أو غيرُ مرتّبة (٠..{last})")
+            continue
+        spans.append((a, d, tag))
+
+        first, again = points[a:b + 1], points[c:d + 1]
+        shortest = min(poly_len(first), poly_len(again))
+        if shortest < tol["back"]:
+            bad.append(f"{tag}: مرورٌ طولُه {shortest:.0f} دون سماحة الارتداد "
+                       f"({tol['back']:.0f}) — لا يقيسه المحرّك")
+        # **والبرهانُ على المرور اشتراكُ المرورين في الحبر** — كالطيّة سواءً بسواء:
+        # ما دون سماحة الانحراف لا يفرّق المحرّكُ بينهما، وهو علّةُ الإعلان نفسُها.
+        touch = min(dist(p, q) for p in first for q in again)
+        if touch >= tol["lateral"]:
+            bad.append(f"{tag}: مروراه لا يشتركان في حبر (أدنى مسافةٍ بينهما "
+                       f"{touch:.0f} ≥ سماحة الانحراف {tol['lateral']:.0f}) "
+                       "— لا يُدَّعى مرورٌ حيث يفرّق المحرّكُ الموضعين")
+        # **ورأسا القلم متوافقان**: وإلّا فالمرورُ الثاني عودٌ لا مرور — والفيصلُ
+        # إشارةُ جداءٍ لا عتبةٌ تُختار (وهو عينُ ما يفصل به الكاشفُ في العدّة).
+        if head(points, a, b)[0] * head(points, c, d)[0] \
+                + head(points, a, b)[1] * head(points, c, d)[1] <= 0:
+            bad.append(f"{tag}: رأسا قلمه متعاكسان — تلك شوكةٌ أو حلقةٌ لا مرورٌ ثانٍ")
+
+    spans.sort()
+    for i in range(1, len(spans)):
+        if spans[i][0] < spans[i - 1][1]:
+            bad.append(f"{spans[i][2]}: يتداخل مع مرورٍ قبله — ولا يقع مكانان في مكان")
+    for a, d, tag in spans:
+        for fold in (stroke.get("folds") or []):
+            if isinstance(fold, dict) and isinstance(fold.get("from"), int) \
+                    and isinstance(fold.get("to"), int) \
+                    and fold["from"] <= d and a <= fold["to"]:
+                bad.append(f"{tag}: يتداخل مع طيّةٍ معلَنة — والطيّةُ أسبقُ، فلا يقع مكانان في مكان")
+    return bad
+
+
+def head(points: list, a: int, b: int) -> tuple:
+    """**رأسُ القلم في مدىً من المسار**: متّجهُ طرفيه موحَّداً — جهةُ مشيه لا شكلُه."""
+    vx, vy = points[b][0] - points[a][0], points[b][1] - points[a][1]
+    n = math.hypot(vx, vy) or 1.0
+    return vx / n, vy / n
+
+
 def check_dot_count(dots: list, want: int, tag: str) -> list:
     """**النقاطُ مواضعُ لا نقراتٌ في موضع** — يُعَدُّ القيدُ لا مجموعُ `count`.
 
@@ -383,6 +462,7 @@ def check(paths: dict, tol: dict, forms: list, letters=None) -> list:
                         break
 
                 bad += check_folds(stroke, where, stol)
+                bad += check_passes(stroke, where, stol)
 
             for j, dot in enumerate(dots, 1):
                 where = f"{tag} نقطة {j}"
@@ -548,6 +628,7 @@ def check_words(words: dict, tol: dict, material: set) -> list:
                     bad.append(f"{where}: نقطتان متطابقتان عند {points[k]}")
                     break
             bad += check_folds(stroke, where, wtol)
+            bad += check_passes(stroke, where, wtol)
 
         for j, dot in enumerate(dots, 1):
             where = f"{tag} نقطة {j}"
@@ -615,6 +696,7 @@ def run(quiet: bool) -> int:
                 steps = [max(dist(s["points"][k - 1], s["points"][k])
                              for k in range(1, len(s["points"]))) for s in ref["strokes"]]
                 folds = sum(len(s.get("folds") or []) for s in ref["strokes"])
+                passes = sum(len(s.get("passes") or []) for s in ref["strokes"])
                 # **والشكلُ المنقور لا ضربةَ فيه** (الصفرُ بحكم المالك، ١٨ أغسطس ٢٠٢٦):
                 # `max()` على فراغٍ يرمي — وكان الجردُ المسهب يسقط به وحدَه بينما
                 # يمرّ `--quiet`. **وحارسٌ يخضرّ في وضعٍ ويرمي في آخر عيبٌ لا طرفة**.
@@ -625,7 +707,8 @@ def run(quiet: bool) -> int:
                       f" · نقاط {sum(int(d['count']) for d in ref['dots'])}")
                 if steps:
                     print(f"      نقاط {sum(int(d['count']) for d in ref['dots'])}"
-                          + (f" · **طيّة {folds}**" if folds else ""))
+                          + (f" · **طيّة {folds}**" if folds else "")
+                          + (f" · **مرورٌ ثانٍ {passes}**" if passes else ""))
 
     if letters is None:
         if not quiet:
@@ -889,6 +972,70 @@ def self_test() -> int:
     ref["strokes"][0]["folds"] = []
     ok(any("تُعلَن أو تُترك" in b for b in check(one(ref), tol, forms)),
        "ويُمسِك `folds` معلنةً فارغة — الطيّةُ تُعلَن أو تُترك")
+
+    # ٨ب) **المرورُ الثاني في الاتجاه نفسِه** — الحالةُ الثالثة (بند ص٢/ز)
+    #
+    # ومادّتُها **جسمُ الطاء مجرَّداً**: سطرٌ يُمشى يساراً، ثمّ نزهةٌ في حلقةٍ تقوم
+    # منه وتعود إليه، ثمّ **يُمشى ذلك السطرُ بعينه يساراً مرّةً ثانية**.
+    def passed():
+        line_in = seg([900.0, 620.0], [420.0, 640.0], 12)
+        loop = seg(line_in[-1], [560.0, 240.0], 10) + seg([560.0, 240.0], [840.0, 610.0], 10)[1:]
+        line_out = seg([880.0, 625.0], [300.0, 650.0], 14)
+        pts = line_in + loop[1:] + line_out
+        first, again = len(line_in) - 1, len(line_in) + len(loop) - 1
+        return {
+            "strokes": [{"start": pts[0], "points": pts, "passes": [
+                {"from": 0, "to": first, "again": again, "until": len(pts) - 1}]}],
+            "dots": [{"at": [520.0, 900.0], "count": 1, "after": True}],
+        }
+
+    ok(not check(one(passed()), tol, forms),
+       "والمسارُ ذو المرور الثاني في الاتجاه نفسِه — معلَناً سليماً — يمرّ")
+
+    ref = passed()
+    ref["strokes"][0]["passes"] = [{"from": 5, "to": 2, "again": 8, "until": 12}]
+    ok(any("غيرُ مرتّبة" in b for b in check(one(ref), tol, forms)),
+       "ويُمسِك مروراً أرقامُه غيرُ مرتّبة أو خارجَ نقاط القطعة")
+
+    # **ودعوى المرور على حبرٍ لا يُمشى مرّتين تُردّ** — كما تُردّ دعوى الطيّة على
+    # قطعةٍ سويّة: المرورُ رخصةٌ في الحكم، فلا يُدَّعى حيث يفرّق المحرّكُ الموضعين.
+    ref = sound()
+    span = len(ref["strokes"][0]["points"]) - 1
+    ref["strokes"][0]["passes"] = [{"from": 0, "to": span // 3,
+                                    "again": span // 2, "until": span}]
+    ok(any("لا يشتركان في حبر" in b for b in check(one(ref), tol, forms)),
+       "ويُمسِك **مروراً مزعوماً على حبرٍ يُمشى مرّةً** — مرّاه لا يشتركان في حبر")
+
+    # **والشوكةُ ليست مروراً ثانياً**: حبرُها واحدٌ ورأسا قلمها متعاكسان — فمن
+    # ادّعاها مروراً ادّعى رخصةَ غيرها، ويحمرّ باسمه.
+    ref = folded()
+    fold = ref["strokes"][0]["folds"][0]
+    ref["strokes"][0].pop("folds")
+    ref["strokes"][0]["passes"] = [{"from": fold["from"], "to": fold["apex"],
+                                    "again": fold["apex"], "until": fold["to"]}]
+    ok(any("رأسا قلمه متعاكسان" in b for b in check(one(ref), tol, forms)),
+       "ويُمسِك **شوكةً مدَّعاةً مروراً ثانياً** — رأسا قلمها متعاكسان")
+
+    # **ولا يقع مكانان في مكان**: مرورٌ يتقاطع مع طيّةٍ معلَنة — والطيّةُ أسبقُ.
+    ref = passed()
+    pts = ref["strokes"][0]["points"]
+    span = ref["strokes"][0]["passes"][0]
+    ref["strokes"][0]["folds"] = [{"from": span["to"], "apex": span["to"] + 5,
+                                   "to": span["again"]}]
+    ok(any("يتداخل مع طيّةٍ معلَنة" in b for b in check(one(ref), tol, forms)),
+       "ويُمسِك مروراً يتقاطع مع طيّةٍ معلَنة")
+
+    ref = passed()
+    span = ref["strokes"][0]["passes"][0]
+    ref["strokes"][0]["passes"] = [{"from": span["from"], "to": span["from"] + 1,
+                                    "again": span["again"], "until": span["again"] + 1}]
+    ok(any("دون سماحة الارتداد" in b for b in check(one(ref), tol, forms)),
+       f"ويُمسِك مروراً أقصرَ من سماحة الارتداد ({tol['back']:.0f}) — لا يقيسه المحرّك")
+
+    ref = passed()
+    ref["strokes"][0]["passes"] = []
+    ok(any("يُعلَن أو يُترك" in b for b in check(one(ref), tol, forms)),
+       "ويُمسِك `passes` معلنةً فارغة — المرورُ يُعلَن أو يُترك")
 
     # ٩) وأرقامُه من المحرّك لا من هنا
     src = PEN_JS.read_text(encoding="utf-8")

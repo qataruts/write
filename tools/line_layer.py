@@ -550,9 +550,15 @@ def restep(points: list, tol: dict) -> dict:
     """
     walked = owner_layer.resample(points, tol)
     folds = owner_layer.self_folds(walked, tol)
+    # **والمرورُ الثاني يُكشف بعد الطيّة لا قبلها** (بند ص٢/ز): الطيّةُ أسبقُ، وما
+    # تقاطع معها من مرورٍ سقط — فلا يقع مكانان في مكان. **وهو من مقاييس المحرّك
+    # نفسِها** بمقياس الشكل الذي يُحكَم به (`scaled` أعلاه).
+    passes = owner_layer.self_passes(walked, tol, folds=folds)
     stroke = {"start": [walked[0][0], walked[0][1]], "points": walked}
     if folds:
         stroke["folds"] = folds
+    if passes:
+        stroke["passes"] = passes
     return stroke
 
 

@@ -353,6 +353,14 @@ def write_module(paths: dict, meta: dict) -> str:
                     tail += ', "folds": [' + ", ".join(
                         f'{{ "from": {int(f["from"])}, "apex": {int(f["apex"])},'
                         f' "to": {int(f["to"])} }}' for f in stroke["folds"]) + "]"
+                # **والمرورُ الثاني في الاتجاه نفسِه صفةٌ ثالثة** (بند ص٢/ز):
+                # `owner_layer.self_passes` تُصدِرها بمقاييس المحرّك بأعيانها، فلا
+                # يستنبطها الحَكَمُ صامتاً ولا تُكتب بيد.
+                if stroke.get("passes"):
+                    tail += ', "passes": [' + ", ".join(
+                        f'{{ "from": {int(s["from"])}, "to": {int(s["to"])},'
+                        f' "again": {int(s["again"])}, "until": {int(s["until"])} }}'
+                        for s in stroke["passes"]) + "]"
                 # **وسماحةُ الجزء الملحق الصغير صفةٌ فيه كالطيّة** (`ease_of` أعلاه):
                 # تُحسب من هندسة الشكل، فلا تُكتب بيد ولا يُذكَر حرفٌ باسمه في المحرّك.
                 if eases[si]:
@@ -830,6 +838,15 @@ def seat_layer(paths: dict) -> dict:
     print(f"   وأضيقُ ما بقي {gaps[0][1]} ({gaps[0][0]}) · ودون الحدّ {len(below)}"
           + ("" if not below else " — " + "، ".join(f"{k} {v}" for v, k in below)
              + " (نقطٌ تحت جسمها: خارجَ نصّ الحكم، تُبلَّغ ولا تُحرَّك)"))
+    # **والمرورُ الثاني في الاتجاه نفسِه يُعلَن بأصحابه** (بند ص٢/ز): حالةٌ ثالثةٌ
+    # في البيانات كما تُعلَن الطيّة — **كشفتها مقاييسُ المحرّك بأعيانها** ولم تُختَر
+    # لها عتبة، فمن حملها حملها بقياسٍ لا باسمه.
+    twins = [(f"{ch}/{form}", sum(len(s.get("passes") or []) for s in ref["strokes"]))
+             for ch, forms in seated.items() for form, ref in forms.items()
+             if any(s.get("passes") for s in ref["strokes"])]
+    print(f"⇄ المرورُ الثاني في الاتجاه نفسِه: {len(twins)} شكلاً"
+          + ("" if not twins else " — " + "، ".join(
+              f"{k} ×{n}" if n > 1 else k for k, n in twins)))
     for ch, forms in seated.items():
         paths[ch] = forms
     SEATING.write_text(json.dumps({

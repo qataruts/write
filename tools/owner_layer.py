@@ -480,19 +480,6 @@ def self_folds(points: list, tol: dict, near: float = None, notes: list = None,
     for i in range(1, len(fine)):
         grain.append(grain[-1] + math.dist(fine[i - 1], fine[i]))
 
-    def mates(window: float) -> list:
-        """مقابلُ كلِّ نقطةٍ في نافذةِ تباعدٍ مُعطاة — أقربُ حبرٍ يزورها ثانيةً."""
-        found = [-1] * len(fine)
-        for i in range(len(fine)):
-            gap = near
-            for j in range(i + 1, len(fine)):
-                if grain[j] - grain[i] < window:
-                    continue
-                d = math.dist(fine[i], fine[j])
-                if d < gap:
-                    gap, found[i] = d, j
-        return found
-
     out, run, span, found = [], None, far, None
 
     def tip(lo: int, hi: int) -> int:
@@ -562,7 +549,7 @@ def self_folds(points: list, tol: dict, near: float = None, notes: list = None,
         """
         nonlocal run, span, found
         run, span, found = None, window, []
-        for i, j in enumerate(mates(window)):
+        for i, j in enumerate(revisits(fine, grain, window, near)):
             if j < 0:
                 close()
                 continue
@@ -623,6 +610,122 @@ def self_folds(points: list, tol: dict, near: float = None, notes: list = None,
         if not keeps(fold):
             continue
         kept.append(fold)
+    return kept
+
+
+# ————— **المرورُ الثاني في الاتجاه نفسِه** — الحالةُ الثالثة (بند ص٢/ز) —————
+#
+# **وسندُها برهانٌ لا ذوق** (مراجعةُ الإدارة لجلسة ص٢/و، ١٩ أغسطس ٢٠٢٦): حبرُ
+# `ط/وسطي` و`ظ/وسطي` وأختيهما **أربعةُ أضلاع**، وقدما الحلقة درجتُهما ٣ ورأسا الوصل
+# ١ — **أربعةُ رؤوسٍ فرديّة فلا مسارَ أويلريّ**، **وأقلُّ إصلاحٍ تكرارُ السطر تحت
+# الحلقة بعينه**. ⇐ **فالازدواجُ صفةُ الخطّ لا صنعتُنا**، ومحرّكٌ لا يمثّله ناقصٌ
+# بنيوياً. وحكمُ المدير: **يوسَّع المحرّك بحالةٍ ثالثة معلَنة** لا يُقايَض عيبٌ بعيب.
+#
+# **والحالاتُ الثلاثُ تُقرأ من مقياسٍ واحد** — «مكانٌ واحد يحمل طولين» — وتفترق
+# بجهة المرور الثاني:
+#   · **شوكةٌ (طيّة)**: ذهابٌ وإياب — مقابلُ النقطة **يتقهقر** كلّما تقدّمت (`self_folds`).
+#   · **حلقةٌ**: جهتا دائرةٍ تتجاوران — مقابلُها يتقدّم بتقدّمها **ورأسُ قلمه معاكس**.
+#   · **ومرورٌ ثانٍ**: مقابلُها يتقدّم بتقدّمها **ورأسُ قلمه معها** — وهذه الثالثة.
+# **والفيصلُ إشارةُ ضربٍ لا عتبةٌ تُختار**: جدَاءُ الرأسين موجبٌ أو سالب.
+#
+# **وسماحاتُ المحرّك بأعيانها** كما في `self_folds`: مكاناً `lateral`، وطولاً فوق
+# `back × ٢` (فما دونها جوارُ القلم لنفسه)، وضلعٌ دون `back` لا يقيسه المحرّك.
+# **وما تقاطع مع طيّةٍ معلَنةٍ سقط** — فلا يقع مكانان في مكان.
+
+
+def revisits(fine: list, grain: list, window: float, near: float) -> list:
+    """مقابلُ كلِّ نقطةٍ في نافذةِ تباعدٍ مُعطاة — **أقربُ حبرٍ يزورها ثانيةً**.
+
+    **ولا تُسأل عن جهته**: تُعطي الأقربَ كائناً ما كان، ثم يسأله كلُّ كاشفٍ سؤالَه
+    (`self_folds` عن التقهقر، و`self_passes` عن الرأس) — فلو رُشِّح المقابلُ بجهته
+    لَادّعى كاشفٌ مروراً ثانياً والأقربُ إليه شوكةٌ لا مرور.
+    """
+    found = [-1] * len(fine)
+    for i in range(len(fine)):
+        gap = near
+        for j in range(i + 1, len(fine)):
+            if grain[j] - grain[i] < window:
+                continue
+            d = math.dist(fine[i], fine[j])
+            if d < gap:
+                gap, found[i] = d, j
+    return found
+
+
+def self_passes(points: list, tol: dict, near: float = None, notes: list = None,
+                far: float = None, folds: list = None) -> list:
+    """مروراتُ قطعةٍ على حبرها ثانيةً في الاتجاه نفسِه — `{from, to, again, until}`.
+
+    `from..to` أوّلُ المرورين و`again..until` ثانيهما، **بأرقام نقاط القطعة**؛
+    والكشفُ على المسار مكثَّفاً ثم تُردّ أرقامُه إلى نقاطه (كما في `self_folds`).
+    """
+    poly = [list(p) for p in points]
+    if len(poly) < 4:
+        return []
+    cum = [0.0]
+    for i in range(1, len(poly)):
+        cum.append(cum[-1] + math.dist(poly[i - 1], poly[i]))
+    far = tol["back"] * 2 if far is None else far
+    near = tol["lateral"] if near is None else near
+    floor, _ = step_rule()
+    fine = walk(poly, floor)
+    grain = [0.0]
+    for i in range(1, len(fine)):
+        grain.append(grain[-1] + math.dist(fine[i - 1], fine[i]))
+
+    def head(k: int) -> tuple:
+        """رأسُ القلم عند نقطةٍ من المكثَّف — متّجهُ حركته موحَّداً."""
+        a, b = fine[max(0, k - 1)], fine[min(len(fine) - 1, k + 1)]
+        vx, vy = b[0] - a[0], b[1] - a[1]
+        n = math.hypot(vx, vy) or 1.0
+        return vx / n, vy / n
+
+    def same_way(i: int, j: int) -> bool:
+        """**أيمشي المرورُ الثاني كما مشى الأول؟** — جداءُ الرأسين موجب."""
+        (ax, ay), (bx, by) = head(i), head(j)
+        return ax * bx + ay * by > 0
+
+    mates = revisits(fine, grain, far, near)
+    runs, run = [], None
+    for i, j in enumerate(mates):
+        # **الحلقةُ تُستبعَد برأس قلمها لا بحجمها**: مقابلُها يتقدّم بتقدّمها كالمرور
+        # الثاني سواءً بسواء، **غير أنّ قلمَه يمشي عكسَه** (جهتا دائرة).
+        if j < 0 or not same_way(i, j):
+            run = None
+            continue
+        if run and i == run["i2"] + 1 and j > run["j2"]:
+            run.update(i2=i, j2=j, n=run["n"] + 1)
+        else:
+            run = {"i1": i, "i2": i, "j1": j, "j2": j, "n": 1}
+            runs.append(run)
+
+    def at(length: float) -> int:
+        return min(range(len(cum)), key=lambda k: abs(cum[k] - length))
+
+    kept = []
+    for run in runs:
+        if run["n"] < 2:
+            continue
+        span = {"from": at(grain[run["i1"]]), "to": at(grain[run["i2"]]),
+                "again": at(grain[run["j1"]]), "until": at(grain[run["j2"]])}
+        a, b, c, d = span["from"], span["to"], span["again"], span["until"]
+        if not (a < b <= c < d):
+            continue
+        # **وضلعٌ يقيسه المحرّك**: مرورٌ أقصرُ من سماحة الارتداد يبتلعه سماحُها.
+        short = min(poly_len(poly[a:b + 1]), poly_len(poly[c:d + 1]))
+        if short < tol["back"]:
+            if notes is not None:
+                notes.append(f"مرورٌ ثانٍ طولُه {short:.0f} دون سماحة الارتداد"
+                             f" ({tol['back']:.0f}) — لا يقيسه المحرّك")
+            continue
+        # **ولا يقع مكانان في مكان**: ما تقاطع مع طيّةٍ معلَنةٍ سقط — وهي أسبقُ.
+        if any(f["from"] <= d and a <= f["to"] for f in (folds or [])):
+            if notes is not None:
+                notes.append("مرورٌ ثانٍ يتقاطع مع طيّةٍ معلَنة — تُقدَّم الطيّةُ ويُترك")
+            continue
+        if any(s["from"] <= d and a <= s["until"] for s in kept):
+            continue
+        kept.append(span)
     return kept
 
 
