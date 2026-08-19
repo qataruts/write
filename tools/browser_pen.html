@@ -133,14 +133,21 @@ const resources = (win) => win.performance.getEntriesByType('resource').map((e) 
       && surface.querySelectorAll('.pen-dot').length === ref.dots.length,
       `والحرفُ المعروض «${dotted}» بنقطته — والنموذجُ المرسوم عينُ مساره`);
 
-    // ————— محاكاةُ يدٍ تكتب: من الشبكة المعيارية إلى إحداثيات الشاشة —————
+    // ————— محاكاةُ يدٍ تكتب: من **خليّة المادّة** إلى إحداثيات الشاشة —————
+    //
+    // **والخليّةُ تُقرأ من اللوح لا تُفترَض ألفاً** (بند ص٢/ب ٢): الحرفُ صار يجلس
+    // على السطر في مربّعٍ ضلعُه ٢٠٣٥، فقسمةُ الإحداثيّ على ألفٍ تضع اليدَ في ربع
+    // اللوح وتُردّ `start-far` وهي مصيبة. وهو عينُ حساب `toGrid` في `pen.js`
+    // معكوساً — يُقرأ من `viewBox` الذي يرسمه اللوحُ بنفسه.
     let pointerId = 1;
+    const cell = (surface.getAttribute('viewBox') || '0 0 1000 1000')
+      .split(/\s+/).map(Number);
     const toClient = ([x, y]) => {
       const rect = surface.getBoundingClientRect();
-      const size = Math.min(rect.width, rect.height);
+      const unit = Math.min(rect.width / cell[2], rect.height / cell[3]);
       return {
-        clientX: rect.left + (rect.width - size) / 2 + (x / 1000) * size,
-        clientY: rect.top + (rect.height - size) / 2 + (y / 1000) * size,
+        clientX: rect.left + (rect.width - cell[2] * unit) / 2 + x * unit,
+        clientY: rect.top + (rect.height - cell[3] * unit) / 2 + y * unit,
       };
     };
     const fire = (type, point, type_ = 'touch', id = pointerId) => {

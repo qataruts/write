@@ -1214,7 +1214,14 @@ export function penSurface(config) {
   const rule = sv('g', { class: 'pen-rule', 'aria-hidden': 'true' });
   const seat = baseline ?? ref?.line ?? null;
   if (seat != null) {
-    rule.append(sv('line', { class: 'pen-baseline', x1: 0, y1: seat, x2: bw, y2: seat }));
+    // **وغِلَظُ السطر بمقياس لوحه** (بند ص٢/ب ٤): خليّةُ الحرف صارت مربّعَ السطر
+    // (٢٠٣٥ وحدة) وخليّةُ الكلمة ألفٌ — **فخيطٌ بغِلَظٍ ثابتٍ يدقّ في أحدهما
+    // ويغلُظ في الآخر**. فيُقرأ من الصندوق نفسِه كما تُقرأ مقاييسُ الإرشاد.
+    const hair = Math.max(1, Math.round(bh / GRID * 3));
+    rule.append(sv('line', {
+      class: 'pen-baseline', x1: 0, y1: seat, x2: bw, y2: seat,
+      'stroke-width': hair, 'stroke-dasharray': `${hair * 5} ${hair * 4}`,
+    }));
   }
   const fence = sv('g', { class: 'pen-bounds' });      // ممرُّ السماحة (اختياريّ)
   const model = sv('g', { class: 'pen-model' });

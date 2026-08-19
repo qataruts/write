@@ -333,7 +333,10 @@ export function renderNode(node) {
     // عونها من قرارٍ واحد — فلا يفترق ما وُسِّع عمّا وُسِم. وإذنُه أوّلُ لقاءٍ
     // بالمهارة وحدَه (صندوقُ ليتنر صفر)، ومطفأً يعود `tolerance` إلى `undefined`
     // كما كان حرفاً قبل هذه الجلسة.
-    const aid = easeFor(undefined,
+    // **وسماحةُ الحرف تسافر معه كما تسافر مع الكلمة** (بند ص٢/ب ١): كان الحرفُ
+    // يملأ شبكتَه فنسبتُه واحد، **وصار يجلس على السطر بنسبته** — فيُبنى كرمُ
+    // الدعم على مقياسه هو، وإلا حُكم على `د` بسماحة حرفٍ يملأ اللوح.
+    const aid = easeFor(unit.ref?.tolerance,
       step.kind ? progress.skillBox(unit.letter, unit.form, step.kind) : 0);
     state.aided = aid.aided;
 

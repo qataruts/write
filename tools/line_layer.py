@@ -3,6 +3,7 @@
 
     python3 tools/line_layer.py            # مواصفةُ السطر مطبوعةً
     python3 tools/line_layer.py --table    # جدولُ الأشكال: نسبتُها إلى الألف قبل/بعد
+    python3 tools/line_layer.py --self-test # الحارس: مقياسٌ واحد، ولا شكلَ يملأ خليّتَه
 
 ## العلّة — أمرُ مالكٍ منتهٍ (١٩ أغسطس ٢٠٢٦)
 
@@ -63,6 +64,7 @@ const scale = span / Math.max(width, height);   // ← لكلِّ حرفٍ مق�
   تُنقَل إلى السطر بحجمها القائم (إزاحةٌ بلا مقياس) وتُعلن الخليّةَ نفسَها.
 """
 
+import argparse
 import json
 import re
 import sys
@@ -264,7 +266,112 @@ def restep(points: list, tol: dict) -> dict:
     return stroke
 
 
+# ————— **الحارس**: مقياسٌ عامٌّ واحد، ولا شكلَ يملأ خليّتَه بغير حقّ —————
+#
+# **وهو حارسُ أمرٍ منتهٍ** (أمرُ المالك ١٩ أغسطس ٢٠٢٦: «يجب حفظ النسبة… ولو ظهر
+# حرفُ الدال صغيراً لا مشكلة»)، فيقيس ثلاثاً على الوحدة المولَّدة:
+#   ١) **خليّةٌ واحدةٌ وسطرٌ واحد** للهجاء كلِّه — فما اختلف صندوقُه فقد فارق السطر.
+#   ٢) **نسبةُ ارتفاع كلِّ شكلٍ إلى الألف عينُ ما يقوله المرجع** بهامشٍ معلَن.
+#   ٣) **ولا شكلَ يجاوز أطولَ المرجع مدىً ولا أعرضَه** — وهو معنى «يملأ خليّتَه»:
+#      لا يُقاس بحدٍّ مذوقٍ بل **بأقصى ما في صفوف المرجع نفسِها**.
+MARGIN_OF_FIT = 0.03      # هامشُ المطابقة من ارتفاع الألف — تُعلَن ولا تُخفى
+
+
+def audit(paths: dict = None) -> list:
+    """`(شكاوى، ملاحظاتٌ مقيسة)` — فما أوقف البناءَ غيرُ ما يُبلَّغ ويُعَدّ."""
+    paths = paths or read_paths()
+    sp = spec(paths)
+    table, unit, cell, base = sp["table"], sp["unit"], sp["cell"], sp["base"]
+    tallest = max(r["up"] + r["down"] for r in table.values())
+    widest = sp["widest"]
+    bad, notes = [], []
+    for ch, forms in paths.items():
+        for form, shape in forms.items():
+            tag = f"«{ch}» {form}"
+            box = shape.get("box")
+            if not box or [round(float(box[0]), 1), round(float(box[1]), 1)] != [cell, cell]:
+                bad.append(f"{tag}: خليّتُه {box} وخليّةُ السطر [{cell}, {cell}]"
+                           " — واللوحُ لا يصغُر لصِغَر الحرف")
+            if round(float(shape.get("line") or 0), 1) != base:
+                bad.append(f"{tag}: سطرُه {shape.get('line')} وخطُّ الأساس {base}"
+                           " — سطرٌ واحدٌ للهجاء كلِّه")
+            kin = SISTERS.get(ch)
+            x0, x1, y0, y1 = ink(shape, body_only=bool(kin))
+            got, wide = (y1 - y0) / unit, (x1 - x0) / unit
+            row = table.get((kin or ch, form))
+            if row is not None:
+                want = row["up"] + row["down"]
+                if abs(got - want) > MARGIN_OF_FIT:
+                    bad.append(f"{tag}: ارتفاعُه {got:.3f} من الألف والمرجعُ {want:.3f}"
+                               f" (فوق الهامش {MARGIN_OF_FIT})")
+                if abs((base - y0) / unit - row["up"]) > MARGIN_OF_FIT:
+                    bad.append(f"{tag}: فوق السطر {(base - y0) / unit:.3f}"
+                               f" والمرجعُ {row['up']:.3f} — لا يجلس حيث يجلس")
+            # **ومِلءُ الخليّة يُقاس بحرفه**: حبرٌ يبلغ ضلعَ الخليّة إلا هامشَها.
+            room = cell - 2 * sp["margin"]
+            if (y1 - y0) >= room or (x1 - x0) >= room:
+                bad.append(f"{tag}: حبرُه {x1 - x0:.0f}×{y1 - y0:.0f} وسعةُ الخليّة"
+                           f" {room:.0f} — شكلٌ يملأ خليّتَه، ولا يُكبَّر حرفٌ وحدَه")
+            if got > tallest + MARGIN_OF_FIT:
+                bad.append(f"{tag}: مداه {got:.3f} من الألف وأطولُ المرجع {tallest:.3f}"
+                           " — أطولُ من أطول الهجاء، والمقياسُ واحد")
+            # **والعرضُ يُبلَّغ ولا يُحمَّر**: الجلوسُ صحَّح الارتفاعَ بالحساب،
+            # **وأمّا العرضُ فشهادةُ الشكل نفسِه** — لا يصلحه مقياسٌ منتظم بل
+            # اشتقاقُ الشكل من المرجع (ص٢/ج). فيُعَدّ ويُطبع ولا يُوقِف بناءً.
+            if wide > widest + MARGIN_OF_FIT:
+                notes.append(f"{tag}: عرضُه {wide:.3f} وأعرضُ المرجع {widest:.3f}")
+    return bad, notes
+
+
+def self_test() -> int:
+    fails = 0
+
+    def ok(cond, msg):
+        nonlocal fails
+        if not cond:
+            fails += 1
+        print(("  ✓ " if cond else "  ✗ ") + msg)
+
+    paths = read_paths()
+    sp = spec(paths)
+    ok(bool(paths), f"الوحدةُ المولَّدة مقروءةٌ ({sum(len(v) for v in paths.values())} شكلاً)")
+    bad, notes = audit(paths)
+    ok(not bad, f"وكلُّ شكلٍ على سطره ونسبته ({len(bad)} شكوى)"
+       + ("" if not bad else " — " + " · ".join(bad[:3])))
+    print(f"  ○ وأوسعُ من صفِّه في المرجع {len(notes)} شكلاً — يُبلَّغ ولا يُحمَّر،"
+          " فالعرضُ شهادةُ الشكل واشتقاقُه من المرجع بندُ ص٢/ج"
+          + (f" (أوسعُها {notes[0].split(':')[0]})" if notes else ""))
+    ok(sp["cell"] > sp["unit"] * 2,
+       f"وخليّةُ السطر أوسعُ من خليّة الألف ({sp['cell']} من {sp['unit']})"
+       " — فالسبعةُ الطوال تسعُها")
+
+    # **ومجرَّبٌ سالباً**: شكلٌ يُكبَّر حتى يملأ خليّتَه — وهو العطبُ بعينه
+    grown = json.loads(json.dumps(paths))
+    shape = grown["د"]["isolated"]
+    x0, x1, y0, y1 = ink(shape)
+    blow = (sp["cell"] - 2 * sp["margin"]) / max(y1 - y0, 1e-6)
+    for stroke in shape["strokes"]:
+        stroke["points"] = [[x0 + (p[0] - x0) * blow, y0 + (p[1] - y0) * blow]
+                            for p in stroke["points"]]
+    ok(any("يملأ خليّتَه" in one for one in audit(grown)[0]),
+       "ويُمسِك دالاً كُبِّرت حتى ملأت خليّتَها — وهي علّةُ العهد بعينها")
+    shrunk = json.loads(json.dumps(paths))
+    shrunk["ب"]["isolated"]["line"] = sp["base"] + 100
+    ok(any("سطرٌ واحد" in one for one in audit(shrunk)[0]),
+       "ويُمسِك شكلاً جلس على سطرٍ غير سطر إخوته")
+
+    print(f"\n{fails} فشل" if fails else "\nالسطرُ واحدٌ والنسبةُ محفوظة")
+    return 1 if fails else 0
+
+
 def main() -> int:
+    ap = argparse.ArgumentParser(description="سطرُ الكتابة: مواصفتُه وحارسُه")
+    ap.add_argument("--table", action="store_true", help="جردُ الأشكال ونِسَبها")
+    ap.add_argument("--self-test", action="store_true",
+                    help="الحارس: مقياسٌ واحد، ولا شكلَ يملأ خليّتَه")
+    args = ap.parse_args()
+    if args.self_test:
+        return self_test()
     paths = read_paths()
     sp = spec(None)
     print(f"وحدةُ السطر (ارتفاعُ الألف): {sp['unit']}")
@@ -272,7 +379,7 @@ def main() -> int:
           f" {round(sp['base'] + sp['descent'] * sp['unit'], 1)} · الخليّة {sp['cell']}²")
     print(f"أعلى الهجاء {sp['top']} ({sp['ascent']}) · وأنزلُه {sp['low']} ({sp['descent']})"
           f" · وأعرضُه {sp['widest']} من الألف")
-    if paths and "--table" in sys.argv:
+    if paths and args.table:
         _, rep = seat(paths)
         rows = [r for r in rep["shapes"] if r["ref"]]
         rows.sort(key=lambda r: -abs(r["got_width"] - r["ref_width"]))

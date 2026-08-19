@@ -133,11 +133,15 @@ function watchNetwork(win) {
     let pointerId = 1;
     const surfaceEl = () => doc.querySelector('.pen-surface');
     const toClient = ([x, y]) => {
-      const rect = surfaceEl().getBoundingClientRect();
-      const size = Math.min(rect.width, rect.height);
+      const el = surfaceEl();
+      const rect = el.getBoundingClientRect();
+      // **وخليّةُ المادّة تُقرأ من اللوح** (بند ص٢/ب ٢): ما أعلن صندوقَه قِيس به،
+      // ومَن لم يُعلن فشبكتُه ١٠٠٠×١٠٠٠ — وهو `toGrid` في `pen.js` معكوساً.
+      const cell = (el.getAttribute('viewBox') || '0 0 1000 1000').split(/\s+/).map(Number);
+      const unit = Math.min(rect.width / cell[2], rect.height / cell[3]);
       return {
-        clientX: rect.left + (rect.width - size) / 2 + (x / 1000) * size,
-        clientY: rect.top + (rect.height - size) / 2 + (y / 1000) * size,
+        clientX: rect.left + (rect.width - cell[2] * unit) / 2 + x * unit,
+        clientY: rect.top + (rect.height - cell[3] * unit) / 2 + y * unit,
       };
     };
     const fire = (type, point, id) => {
