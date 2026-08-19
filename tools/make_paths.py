@@ -606,6 +606,25 @@ MERGES = {
     "ظ/final": 2,
 }
 
+# ————— 🔑 **وأربعٌ لها هدفٌ بيد المالك** (`NASKH_CROSS §٥`، ١٩ أغسطس ٢٠٢٦) —————
+#
+# > «`ص/ابتدائي` بضربةٍ واحدة — كنبرةٍ بعد الصاد مباشرةً بلا انقطاع · `ص/وسطي`
+# > بضربتين: واحدةٌ قبل الصاد، وجسمُ الصاد مثلُ الابتدائية · `ض/ابتدائي` و`ض/وسطي`
+# > كالصاد التي قبلها.»
+#
+# **وحكمُه أدقُّ من قراءة الإدارة** (§٢ قالت الوسطيَّ ضربةً واحدة): **مدخلُ الوصل
+# ضربةٌ مستقلّة** — فلا تُدمَج ثلاثٌ في واحدة بل **ثلاثٌ في اثنتين**، والملتحمُ
+# **آخِرُ الضربتين** لا أوّلُهما. ⇐ فالوصلُ يُسمّى بموضعه: `junction` رقمُ الفاصل
+# الذي يُغلَق (بين الضربة `i` والتي تليها).
+#
+# **وفيصلُ السماحة لا يحكم هنا**: هو ظنٌّ يفرّق الرفعةَ المزعومة من الوصل المخترَع
+# **حين لا يُعرَف الحقّ**، **وقد عُرف بنصِّه** — فتُطبع الفجوةُ ولا تَحجُب.
+# **و`ض` تتبع `ص` بلا نصٍّ ثانٍ**: أختان بجسمٍ واحد (بند ص٢/ب ٥) — تُشتقّ بعد هذا.
+OWNER_MERGES = {
+    "ص/initial": [0],      # صادٌ ثم نبرةٌ بلا انقطاع — ضربةٌ واحدة
+    "ص/medial": [1],       # [مدخلُ وصل] ثم [صاد + نبرة] — ضربتان
+}
+
 
 def merge_layer(paths: dict) -> dict:
     """يدمج ما فجوتُه دون ما يفرّقه المحرّك، **ويرفع ما سواه بأرقامه**.
@@ -623,8 +642,28 @@ def merge_layer(paths: dict) -> dict:
     يُشتقّ شكلُها من المرجع** (ص٢/ج)، وتُطبع هنا بأرقامها فلا تُنسى.
     """
     limit = owner_layer.tolerance()["lateral"]
-    done, raised = [], []
+    done, raised, named = [], [], []
+    # **حكمُ المالك أوّلاً**: فما سمّاه بعدده وموضعه لا يُعرَض على فيصل ظنٍّ.
+    for key, joints in OWNER_MERGES.items():
+        ch, form = key.split("/")
+        ref = (paths.get(ch) or {}).get(form)
+        if not ref:
+            continue
+        was = len(ref["strokes"])
+        for i in sorted(joints, reverse=True):
+            if i + 1 >= len(ref["strokes"]):
+                continue
+            head, nxt = ref["strokes"][i], ref["strokes"][i + 1]
+            gap = round(math.dist(head["points"][-1], nxt["points"][0]))
+            ref["strokes"] = (ref["strokes"][:i]
+                              + [{"start": head["start"],
+                                  "points": head["points"] + nxt["points"]}]
+                              + ref["strokes"][i + 2:])
+            named.append({"key": key, "from": was, "to": len(ref["strokes"]),
+                          "joint": i, "gap": gap})
     for key, want in MERGES.items():
+        if key in OWNER_MERGES:
+            continue
         ch, form = key.split("/")
         ref = (paths.get(ch) or {}).get(form)
         if not ref or len(ref["strokes"]) <= want:
@@ -644,6 +683,11 @@ def merge_layer(paths: dict) -> dict:
         ref["strokes"] = strokes
         done.append(row)
     raised.sort(key=lambda r: -max(r["bridges"]))
+    for row in named:
+        print(f"   🔑 {row['key']}: {row['from']} ⇐ {row['to']} ضربةً بحكم المالك"
+              f" (`NASKH_CROSS §٥`) — أُغلق الفاصلُ {row['joint']} وفجوتُه {row['gap']}"
+              + ("" if row["gap"] < limit else f" (فوق فيصل الظنّ {limit:.0f}،"
+                                               " وحكمُه مقدَّمٌ عليه)"))
     print(f"\n✂️  الرفعاتُ الزائدة بجدول `NASKH_CROSS §٢`: {len(MERGES)} شكلاً"
           f" — دُمج {len(done)} فجوتُه دون {limit:.0f}، ورُفع {len(raised)} إلى ص٢/ج")
     for row in done:
@@ -651,7 +695,7 @@ def merge_layer(paths: dict) -> dict:
               f" (فجوةٌ {'، '.join(str(b) for b in row['bridges'])} — رفعةٌ مزعومة)")
     print("   ○ ويبقى بلا دمجٍ (الوصلُ فيه اختراعُ حبرٍ لا ردُّ حركة): "
           + "، ".join(f"{r['key']} {max(r['bridges'])}" for r in raised))
-    return {"merged": done, "raised": raised, "limit": limit}
+    return {"merged": done, "raised": raised, "named": named, "limit": limit}
 
 
 # ————— **أمرا المالك في الشكل**: أختان بجسمٍ واحد (بند ص٢/ب ٥) —————
@@ -789,7 +833,7 @@ def seat_build() -> int:
     derived = derive_layer(paths)
     seating = seat_layer(paths)
     seating["derived"] = derived
-    seating["merged"] = merged["merged"]
+    seating["merged"] = merged["merged"] + merged["named"]
     seating["raised"] = [r["key"] for r in merged["raised"]]
     meta = dict(prior or {}, line=seating)
     meta["owner"] = dict(meta.get("owner") or {}, sha=owner["sha"],
@@ -927,7 +971,7 @@ def build(port: int, timeout: int, chunk: int = 100, fresh: bool = False) -> int
     derived = derive_layer(paths)
     seating = seat_layer(paths)
     seating["derived"] = derived
-    seating["merged"] = merged["merged"]
+    seating["merged"] = merged["merged"] + merged["named"]
     seating["raised"] = [r["key"] for r in merged["raised"]]
 
     meta = {
