@@ -745,7 +745,8 @@ def seat_layer(paths: dict) -> dict:
                " تجربةُ ميدانٍ ولا يُكتب أثرٌ بيد.",
         "tool": "tools/make_paths.py --seat",
         "spec": rep["spec"],
-        "shapes": {r["key"]: {"scale": r["scale"], "from": r["from"], "to": r["to"]}
+        "shapes": {r["key"]: {"scale": r["scale"], "from": r["from"], "to": r["to"],
+                              "kx": r["kx"], "capped": r["capped"]}
                    for r in rep["shapes"]},
     }, ensure_ascii=False), encoding="utf-8")
     return {

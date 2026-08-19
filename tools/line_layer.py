@@ -138,6 +138,97 @@ def metrics() -> dict:
 SISTERS = {"ش": "س", "ض": "ص"}
 
 
+# ————— **الحلقةُ واستدارتُها** — ثمنُ القياس الأفقيّ يُقاس ولا يُذاق —————
+#
+# **ومعيارُها ليس من عندنا**: `STROKE_ORDER:113` قاس عينَ الميم ٣٤١×٢٠٨ فسمّاها
+# «بيضاويّةً مفلطحة» باستدارةِ ٠٫٦١، **وحدُّ القبول هناك ٠٫٨٥** — فهو الرقمُ الذي
+# يُحكَم به هنا، لا رقمٌ يُخترَع لهذه الجلسة.
+ROUNDNESS = 0.85          # حدُّ استدارة الحلقة (`STROKE_ORDER:113`) — يُعلَن ولا يُخفى
+WIDTH_BAND = 0.15         # ما دونه من فرق العرض لا يُمَسّ — فلا يُشوَّه المطابق
+
+# **وأشكالٌ يُترَك عرضُها على حاله — بثمنٍ مقيسٍ لا بذوق** (بند ص٢/ج ١):
+# القياسُ الأفقيُّ يقرّب العرضَ من صفّه، **وثمنُه في هذه بعينها حارسٌ يحمرّ** —
+# فالعهدُ أنّ العرضَ لا يُشترى بحكمٍ على يد طفل. ويُملأ من القياس لا من الظنّ.
+WIDTH_KEEP = {"ي/final", "ك/isolated"}
+
+
+def _cross(p, q, r, s):
+    """نقطةُ تقاطع قطعتين، أو `None` — أساسُ كشف الحلقة."""
+    (x1, y1), (x2, y2), (x3, y3), (x4, y4) = p, q, r, s
+    den = (x2 - x1) * (y4 - y3) - (y2 - y1) * (x4 - x3)
+    if abs(den) < 1e-9:
+        return None
+    t = ((x3 - x1) * (y4 - y3) - (y3 - y1) * (x4 - x3)) / den
+    u = ((x3 - x1) * (y2 - y1) - (y3 - y1) * (x2 - x1)) / den
+    if 0 <= t <= 1 and 0 <= u <= 1:
+        return (x1 + t * (x2 - x1), y1 + t * (y2 - y1))
+    return None
+
+
+def roundness(shape: dict) -> list:
+    """**استدارةُ كلِّ حلقةٍ في الشكل** — `أقصرُ ضلعَي صندوقها ÷ أطولِهما`.
+
+    **وكلُّ حلقةٍ لا أكبرُها وحدَها**: أكبرُ الحلقات يتبدّل بالمقياس، فحارسٌ يتتبّع
+    واحدةً يمرّ من تحته الانكسار — **مقيسٌ في `ه/معزول`** (٠٫٧٠٨ ⇐ ٠٫٣٦٦ تحت حارسٍ
+    يقرأ الكبرى وحدَها، وهي غيرُ مقصوصة).
+    """
+    out = []
+    for stroke in shape["strokes"]:
+        pts = [[float(p[0]), float(p[1])] for p in stroke["points"]]
+        for i in range(len(pts) - 1):
+            for j in range(i + 2, len(pts) - 1):
+                hit = _cross(pts[i], pts[i + 1], pts[j], pts[j + 1])
+                if hit is None:
+                    continue
+                ring = [hit] + pts[i + 1:j + 1] + [hit]
+                xs = [p[0] for p in ring]
+                ys = [p[1] for p in ring]
+                w, h = max(xs) - min(xs), max(ys) - min(ys)
+                if w * h < 400:           # حبرٌ لا حلقة: تقاطعُ رأسٍ لا بطنُ حرف
+                    continue
+                out.append(min(w, h) / max(w, h, 1e-9))
+    return out
+
+
+def stretch(shape: dict, k: float, cx: float) -> dict:
+    """نسخةٌ من الشكل بمقياسٍ أفقيٍّ `k` حول `cx` — للقياس قبل الاعتماد."""
+    return {
+        "strokes": [{"points": [[cx + (p[0] - cx) * k, p[1]] for p in s["points"]]}
+                    for s in shape["strokes"]],
+        "dots": [{**d, "at": [cx + (d["at"][0] - cx) * k, d["at"][1]]}
+                 for d in shape["dots"]],
+    }
+
+
+def widen(shape: dict, want: float, cx: float, x0: float, x1: float) -> tuple:
+    """**كم يُقرَّب عرضُ الشكل إلى عرض صفّه — بلا كسرِ حلقة**: `(k، أقُصَّ)`.
+
+    الفرضيّةُ التي تُجرَّب هنا: **الارتفاعُ صار عينَ المرجع بالمقياس المنتظم،
+    والعرضُ وحدَه بقي** — فيُجرَّب مقياسٌ أفقيٌّ مستقلٌّ عن الرأسيّ. **وثمنُه
+    الحلقات**: كلُّ تقريبٍ أفقيٍّ يفلطح البطون، فيُبحَث على **مقدار الاقتراب**
+    (`t` من صفرٍ إلى واحد) أكبرُ ما لا تنزل به استدارةُ حلقةٍ عن حدِّها —
+    **وحدُّها `ROUNDNESS`، أو ما كانت عليه إن كانت دونه** فلا يُطلَب من الشكل
+    ما لم يكن فيه. **والآمنُ دائماً `t = 0`** فالبحثُ لا يقفز في المجهول.
+    """
+    cur = x1 - x0
+    if cur < 1e-6:
+        return 1.0, False
+    k = want / cur
+    rings = roundness(shape)
+    if not rings:
+        return k, False
+    floor = min(ROUNDNESS, min(rings))
+    lo, hi = 0.0, 1.0
+    for _ in range(24):
+        mid = (lo + hi) / 2
+        got = roundness(stretch(shape, 1 + mid * (k - 1), cx))
+        if got and min(got) < floor - 1e-4:
+            hi = mid
+        else:
+            lo = mid
+    return 1 + lo * (k - 1), abs(lo - 1.0) > 1e-3
+
+
 def ink(shape: dict, body_only: bool = False) -> tuple:
     """صندوقُ حبر الشكل — الضرباتُ ومواضعُ نقطه (وهو ما يقيسه المرجع في `up/down`)."""
     pts = [p for s in shape["strokes"] for p in s["points"]]
@@ -224,15 +315,59 @@ def seat(paths: dict, unit: float = None) -> tuple:
                 scale = (row["up"] + row["down"]) * unit / max(y1 - y0, 1e-6)
                 top = base - row["up"] * unit
             cx = (x0 + x1) / 2
+            # ————— **العرضُ: قياسٌ أفقيٌّ مستقلٌّ عن الرأسيّ** (بند ص٢/ج ١) —————
+            #
+            # الجلوسُ صحّح الارتفاعَ بمقياسٍ منتظم فصار عينَ المرجع، **وبقي العرضُ
+            # ٥١ شكلاً فوق ٠٫١٥ من الألف** — والفرضيّةُ أنّ مقياساً أفقيّاً مستقلاً
+            # يُدخلها. **ولا يُمَسّ ما هو في نطاقه** (`WIDTH_BAND`) فلا يُشوَّه
+            # مطابقٌ لأجل رقمٍ أدقّ، **ولا تُكسَر حلقةٌ** لأجل عرض.
+            kx, capped = 1.0, False
+            if row is not None:
+                got_w = (x1 - x0) * scale / unit
+                if (abs(got_w - row["width"]) > WIDTH_BAND
+                        and f"{ch}/{form}" not in WIDTH_KEEP):
+                    kx, capped = widen(shape, row["width"] * unit / scale, cx, x0, x1)
             # **جلوسُ المعزول في وسط خليّته** (أمرُ المالك: ي/معزول · ر/معزول)،
             # **والموصولُ على إزاحته** — فما كان مدخلُ وصله يميناً بقي يميناً.
             # **وما لا مرجعَ له يتوسّط بأشكاله الأربعة**: لا مدخلَ وصلٍ للرقم
             # يُحفَظ، **وأشكالُه الأربعة مسارٌ واحد** — فلو تُرك كلٌّ على إزاحته
             # لَافترقت أربعتُه بمقدار إزاحتها، والسطرُ الواحد يحكمها معاً.
-            nx = (cell / 2 if form == "isolated" or row is None
-                  else cell / 2 + (cx - 500.0) * scale)
-            move = (lambda p: [round(nx + (p[0] - cx) * scale, 1),
-                               round(top + (p[1] - y0) * scale, 1)])
+            def place(k, _cx=cx, _x0=x0, _y0=y0, _scale=scale, _top=top,
+                      _shape=shape, _row=row, _form=form):
+                nx = (cell / 2 if _form == "isolated" or _row is None
+                      else cell / 2 + (_cx - 500.0) * _scale * k)
+                wide = _scale * k
+                mv = (lambda p: [round(nx + (p[0] - _cx) * wide, 1),
+                                 round(_top + (p[1] - _y0) * _scale, 1)])
+                return nx, mv
+
+            # **ولا يُقرَّب عرضٌ على حساب ارتفاعٍ يخرج عن هامشه**: التوسيعُ يُطيل
+            # المسار فتكبُر خطوةُ المحرّك (`stepFor`) فتُقتطَع رؤوسٌ بين عيّنتين —
+            # **مقيسٌ في `س/نهائي`** (٠٫٧٨٧ ⇐ ٠٫٧٣١ من الألف). فيُقصَّر الاقترابُ
+            # حتى يعود الارتفاعُ إلى هامشه، **والارتفاعُ مقدَّمٌ فهو المحسوم**.
+            if row is not None and abs(kx - 1.0) > 1e-3:
+                want_h = row["up"] + row["down"]
+
+                def tall(k):
+                    _, mv = place(k)
+                    got = {"strokes": [restep([mv(p) for p in st["points"]],
+                                              scaled(tol, scale))
+                                       for st in shape["strokes"]],
+                           "dots": [{**d, "at": mv(d["at"])} for d in shape["dots"]]}
+                    a0, a1, b0, b1 = ink(got, body_only=bool(kin))
+                    return abs((b1 - b0) / unit - want_h)
+
+                if tall(kx) > MARGIN_OF_FIT:
+                    lo, hi = 0.0, 1.0
+                    for _ in range(16):
+                        mid = (lo + hi) / 2
+                        if tall(1 + mid * (kx - 1)) > MARGIN_OF_FIT:
+                            hi = mid
+                        else:
+                            lo = mid
+                    kx, capped = 1 + lo * (kx - 1), True
+
+            nx, move = place(kx)
             out[ch][form] = {
                 "strokes": [restep([move(p) for p in s["points"]], scaled(tol, scale))
                             for s in shape["strokes"]],
@@ -259,6 +394,9 @@ def seat(paths: dict, unit: float = None) -> tuple:
                 "ref_width": round(row["width"], 4) if row else None,
                 "basis": (f"جسمُه إلى صفِّ {kin}" if kin else None),
                 "got_width": round((nx1 - nx0) / unit, 4),
+                # **والقياسُ الأفقيُّ يُقيَّد بأرقامه**: كم قُرِّب، وهل قُصَّ لأجل حلقة.
+                "kx": round(kx, 4),
+                "capped": capped,
                 "up": round((base - ny0) / unit, 4),
                 "down": round((ny1 - base) / unit, 4),
             })
