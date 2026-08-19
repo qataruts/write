@@ -31,6 +31,7 @@
 
 import argparse
 import json
+import math
 import re
 import subprocess
 import sys
@@ -50,6 +51,20 @@ FORM_AR = {"isolated": "معزول", "initial": "ابتدائي", "medial": "و�
 
 sys.path.insert(0, str(TOOLS))
 import browser_test  # noqa: E402  (مُشغِّلُ Chrome — تبعيةٌ معلَنة كما في `make_paths.py`)
+import line_layer  # noqa: E402  (أقربُ نقطةٍ من الجسم — عدّةٌ واحدة لا نسختان)
+
+
+def guide(name: str, fallback: float) -> float:
+    """مقياسُ إرشادٍ من `GUIDE` في `pen.js` بعينه — فما يُرسَم هنا ما يراه الطفلُ.
+
+    **ومن كتلته وحدَها**: في `pen.js` جدولان فيهما `dot` — سماحةُ قبول النقرة
+    (`TOLERANCE`) ومقياسُ رسمها (`GUIDE`)، **وأخذُ الأول رسماً يجعل النقطةَ أربعةَ
+    أضعافها**. فيُقصّ الجدولُ باسمه ثم يُقرأ منه.
+    """
+    src = (ROOT / "app" / "js" / "pen.js").read_text(encoding="utf-8")
+    block = re.search(r"export const GUIDE = \{(.*?)\};", src, re.S)
+    hit = re.search(rf"\b{name}:\s*([\d.]+)", block.group(1)) if block else None
+    return float(hit.group(1)) if hit else fallback
 
 
 def paths() -> dict:
@@ -110,6 +125,40 @@ def tag(at: list, number: int, kind: str, zoom: float = 1.0) -> str:
             f' style="font-size:{70 * zoom:.0f}px">{number}</text>')
 
 
+def aside(ref: dict, at: list, dot_r: float, zoom: float) -> list:
+    """مقعدُ رقم النقطة: **بجانبها في ضدّ جهة جسمها** — فلا يبتلعها ولا يبتلع أختَها.
+
+    وبُعدُه محسوب: نصفُ قطر النقطة + نصفُ قطر القرص + فُرجةٌ بينهما — فما رُسم
+    التصق، وما التصق قُرئ حكماً على الشكل وليس منه.
+
+    **والعنقودُ الثلاثيّ يفرض دورانَ المقعد** (ث · ش · ق · ي): الجهةُ المضادّةُ
+    للجسم واحدةٌ لنقاطه كلِّها، فقرصُ الرقم يقع على نقطة أختِه. **فيُدار المقعدُ
+    حول نقطته حتى يخلو من كلِّ نقطةٍ في الشكل** — أوّلُ زاويةٍ تخلو، فلا يبعد
+    الرقمُ عن نقطته أكثرَ ممّا يلزم.
+    """
+    _, foot = line_layer.nearest_on_body(ref, at)
+    dx, dy = (at[0] - foot[0], at[1] - foot[1]) if foot else (0.0, -1.0)
+    length = (dx * dx + dy * dy) ** 0.5 or 1.0
+    dx, dy = dx / length, dy / length
+    step = dot_r + (52 + 14) * zoom
+    clear = dot_r + 52 * zoom
+    others = [d["at"] for d in ref.get("dots") or []]
+    seat = None
+    for turn in range(0, 181, 15):
+        for sign in ((1, -1) if turn else (1,)):
+            rad = math.radians(turn * sign)
+            ux = dx * math.cos(rad) - dy * math.sin(rad)
+            uy = dx * math.sin(rad) + dy * math.cos(rad)
+            here = [at[0] + ux * step, at[1] + uy * step]
+            if all((here[0] - o[0]) ** 2 + (here[1] - o[1]) ** 2 >= clear ** 2
+                   for o in others if o is not at):
+                seat = here
+                break
+        if seat:
+            break
+    return seat or [at[0] + dx * step, at[1] + dy * step]
+
+
 def cell(ch: str, form: str, ref: dict) -> str:
     """خانةُ شكلٍ واحد: **سطرُه** · مسارُه · بدايتُه · سهمُه · أرقامُ أجزائه بترتيبها.
 
@@ -139,12 +188,23 @@ def cell(ch: str, form: str, ref: dict) -> str:
         # **ورقمُ الضربة خلفَ حركتها**: لو وُضع على المبدأ لَغطّى السهمَ الذي يليه —
         # فيُزاح إلى الوراء بقدر قطره في عكس جهة المضيّ، **فيُقرأ الرقمُ ويُرى السهم**.
         body.append(tag(behind(a, b, 74.0 * zoom), order, "stroke", zoom))
+    # ————— **النقطةُ بحجمها الحقيقيّ، ورقمُها بجانبها لا فوقها** —————
+    #
+    # 🔧 **عيبُ عدّةٍ انكشف في حكم فرجة النقطة** (`STROKE_ORDER §٩د`): كانت النقطةُ
+    # تُرسَم قرصاً نصفُ قطره ٣٠ **ثم يُوضَع قرصُ الرقم ونصفُ قطره ٥٢ على مركزها
+    # نفسِه** — فيبتلعها ويلامس الجسمَ، **فيُرى التصاقٌ ليس في الرسم**. وعلى هذا
+    # اللوح تُبنى أحكامُ عين، **فلوحٌ بُني ليُري الحقيقةَ لا يجوز أن يزيّفها**.
+    #
+    # **والعلاجُ شقّان**: **حجمُها من المحرّك** (`GUIDE.dot` × مقياس المادّة) لا
+    # رقمٌ في هذا الملفّ — فما يراه المالكُ هو ما يراه الطفلُ · **ورقمُها يُزاح
+    # عنها في ضدّ جهة الجسم**، كما يُزاح رقمُ الضربة خلفَ حركتها.
+    dot_r = guide("dot", 34.0) * (ref.get("tolerance") or 1.0)
     for dot in ref.get("dots") or []:
         at = dot["at"]
         body.append(f'<circle class="dot" cx="{at[0]:.1f}" cy="{at[1]:.1f}"'
-                    f' r="{30 * zoom:.0f}"/>')
+                    f' r="{dot_r:.0f}"/>')
         order += 1
-        body.append(tag(at, order, "dot", zoom))
+        body.append(tag(aside(ref, at, dot_r, zoom), order, "dot", zoom))
     name = f"{ch} · {FORM_AR.get(form, form)}"
     # **وللّوح فُسحةٌ حول الخليّة**: أرقامُ الترتيب تُرسَم **خلف** مبدأ الضربة، فمن
     # بدأ عند سقف الخليّة (`ك/ابتدائي`، أعلى الهجاء) خرج رقمُه عنها. وهي فُسحةُ
@@ -254,6 +314,32 @@ def self_test() -> int:
     #   · **على مسارٍ مستقيمٍ معكوس**: ينقلب رأساً على عقب (امتحانٌ سالبٌ صريح).
     #   · **وعلى أشكال البيان كلِّها**: يوافق أوّلَ خطوةٍ حقيقية في الضربة — فلو
     #     رُسم من عيّنةٍ ثابتة لَخالف أوّلَ الحركة في المنحنيات.
+    # **ولا يبتلع رقمُ النقطة نقطتَه** (`STROKE_ORDER §٩د`): كان قرصُ الرقم
+    # (٥٢) يجلس على مركز النقطة (٣٠) فيخفيها ويلامس الجسمَ — **فيُرى التصاقٌ ليس
+    # في الرسم**. والامتحانُ قياسٌ: بُعدُ القرص عن مركز النقطة يسع القرصين معاً.
+    hidden = []
+    for ch, form in shapes:
+        ref = built[ch][form]
+        zoom = float((ref.get("box") or [GRID, GRID])[1]) / GRID
+        dot_r = guide("dot", 34.0) * (ref.get("tolerance") or 1.0)
+        for dot in ref.get("dots") or []:
+            seat = aside(ref, dot["at"], dot_r, zoom)
+            # **ولا نقطةَ في الشكل يبتلعها** — لا نقطتَه وحدَها: عنقودُ الثلاث
+            # يجعل رقمَ إحداهنّ على أختها، وهو التزييفُ نفسُه بوجهٍ آخر.
+            for other in ref["dots"]:
+                span = ((seat[0] - other["at"][0]) ** 2
+                        + (seat[1] - other["at"][1]) ** 2) ** 0.5
+                if span < dot_r + 52 * zoom:
+                    hidden.append(f"{ch}/{form}")
+    ok(not hidden, f"ولا يبتلع رقمُ النقطة نقطتَه — {parts and len(shapes)} شكلاً"
+       f" وقرصُ كلِّ رقمٍ بجانب نقطته" + ("" if not hidden else " — " + "، ".join(hidden[:3])))
+    # **والنقطةُ بحجمها الحقيقيّ**: نصفُ قطرها من `pen.js` × مقياس مادّتها، فما
+    # يراه المالكُ في اللوح هو ما يراه الطفلُ في النموذج — ولا رقمَ يُكتب هنا.
+    ok(f'r="{guide("dot", 34.0) * (built["ب"]["isolated"].get("tolerance") or 1.0):.0f}"'
+       in html,
+       f"ونقطةُ الحرف بحجمها الحقيقيّ من `pen.js` (GUIDE.dot {guide('dot', 34.0):.0f}"
+       " × مقياس مادّتها) — لا بحجمٍ يُكتب في اللوح")
+
     line = [[100.0, 500.0], [300.0, 500.0], [500.0, 500.0], [700.0, 500.0]]
     a, b = head_of(line)
     ra, rb = head_of(list(reversed(line)))

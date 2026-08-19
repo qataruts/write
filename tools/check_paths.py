@@ -36,6 +36,9 @@ import re
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import line_layer  # noqa: E402  (فرجةُ النقطة تُقاس بعدّة بانيها لا بنسخةٍ ثانية)
+
 ROOT = Path(__file__).resolve().parent.parent
 PATHS_JS = ROOT / "app" / "js" / "paths.js"
 WORD_PATHS_JS = ROOT / "app" / "js" / "word_paths.js"
@@ -234,6 +237,61 @@ def check_dot_count(dots: list, want: int, tag: str) -> list:
             bad.append(f"{tag} نقطة {j}: عدّتُها {dot.get('count')} — ولكلّ نقطةٍ قيدُها"
                        " بموضعها، فلا تُضَمّ نقطتان في واحدة")
     return bad
+
+
+# ————— **فرجةُ النقطة عن جسم حرفها** — حكمُ المالك (`STROKE_ORDER §٩`) —————
+#
+# > «**يجب أن تكون هناك مسافةٌ واضحة بين الحرف والنقطة، ولا يجب أن يكونا قريبين
+# > من بعض**» (١٩ أغسطس ٢٠٢٦).
+#
+# **وهذا الحارسُ ثمرةُ الحكم لا تنفيذُه**: التنفيذُ رفعةٌ في `line_layer.lift_dots`
+# تُعاد مع كلِّ بناء، **وهذا يمسك ما يجدّ** — نقطةً تقترب من جسمها بتبدّل شكلٍ أو
+# مقياسٍ أو مرجع، فلا يُعاد اكتشافُ العطب بالعين مرّةً ثانية.
+#
+# **وحدُّه محسوبٌ لا مكتوب**: `DOT_CLEARANCE` من بانيها × وحدةِ السطر المعلَنة في
+# الوحدة المولَّدة نفسِها — فمن بدّل الحدَّ يوماً بدّله في موضعٍ واحد.
+#
+# **ونقطٌ خارج نصّ الحكم — معلَنةٌ بأرقامها لا مسكوتٌ عنها**: حكمُ المالك في
+# «الحرف ونقطته» وموضعُه نقطٌ **فوق** جسمها؛ ونقطُ الياء تجلس **تحت** جسمها
+# وفرجتُها أضيقُ من كلِّ ما فوق. **وخفضُها حكمُ شكلٍ لم يصدر** — فلا تُحرَّك بلا
+# أمر. **ولا تمرّ صامتةً**: تُطبع بعددها كلَّ مرّة، **وتُحمَّر إن ضاقت عمّا هي
+# عليه اليوم** — فالمعلومُ مثبَّتٌ لا يزداد سوءاً، والمجهولُ ممنوع.
+DOT_RULE_EXEMPT = {
+    ("ي", "isolated"): 116.9,   # نقطتاها تحت جسمها — بُلِّغت للمدير في بند فرجة النقطة
+}
+DOT_EXEMPT_SLACK = 0.5          # هامشُ التقريب: ما دونه ليس تفاقماً
+
+
+def check_dot_clearance(paths: dict, unit: float) -> tuple:
+    """`(شكاوى، مبلَّغات)` — أفرجةُ كلِّ نقطةٍ عن جسم حرفها تبلغ حدَّ المالك؟"""
+    want = line_layer.DOT_CLEARANCE * unit
+    bad, told = [], []
+    for ch, shapes in sorted(paths.items()):
+        for form, ref in shapes.items():
+            dots, strokes = ref.get("dots") or [], ref.get("strokes") or []
+            if not dots or not strokes:
+                continue          # نقرةٌ بلا جسم: لا جسمَ تُقاس إليه الفرجة
+            gap = min(line_layer.dot_gap(ref, d["at"]) for d in dots)
+            spared = DOT_RULE_EXEMPT.get((ch, form))
+            tag = f"«{ch}» {form}"
+            if spared is not None:
+                told.append(f"{tag}: فرجتُه {gap:.1f} — خارجَ نصّ الحكم (نقطُه تحت جسمه)")
+                if gap < spared - DOT_EXEMPT_SLACK:
+                    bad.append(f"{tag}: فرجةُ نقطته {gap:.1f} وكانت {spared}"
+                               " — المعفوُّ مثبَّتٌ لا يزداد ضيقاً")
+            elif gap < want:
+                bad.append(f"{tag}: فرجةُ نقطته عن جسمه {gap:.1f} ودونها الحدُّ"
+                           f" {want:.0f} ({line_layer.DOT_CLEARANCE} من الألف)"
+                           " — «مسافةٌ واضحة بين الحرف والنقطة» (حكمُ المالك)")
+    return bad, told
+
+
+def load_unit() -> float:
+    """**وحدةُ السطر** (ارتفاعُ الألف) — من الوحدة المولَّدة نفسِها لا من رقمٍ يُكتب."""
+    src = PATHS_JS.read_text(encoding="utf-8")
+    hit = re.search(r'export const PATHS_SOURCE = (\{.*\});', src, re.S)
+    meta = json.loads(hit.group(1)) if hit else {}
+    return float((meta.get("line") or {}).get("unit") or 0.0)
 
 
 def check(paths: dict, tol: dict, forms: list, letters=None) -> list:
@@ -580,6 +638,23 @@ def run(quiet: bool) -> int:
 
     bad = check(paths, tol, forms, letters)
 
+    # **وفرجةُ النقطة تُقاس مع كلّ فحص** (حكمُ المالك، `STROKE_ORDER §٩`): الوحدةُ
+    # تُقرأ من الملفّ المولَّد، **فإن لم يُعلنها الملفُّ طالبت من نفسها** ولم تمرّ
+    # صامتة — نمطُ «التعليقُ يُطالِب من نفسه».
+    unit = load_unit()
+    if not unit:
+        bad.append("لم تُعلَن وحدةُ السطر في `PATHS_SOURCE.line.unit`"
+                   " — فلا تُقاس فرجةُ النقطة، وحكمُ المالك بلا حارس")
+    else:
+        dot_bad, dot_told = check_dot_clearance(paths, unit)
+        bad += dot_bad
+        if not quiet:
+            want = line_layer.DOT_CLEARANCE * unit
+            print(f"فرجةُ النقطة عن جسمها: حدُّها {want:.0f} وحدة"
+                  f" ({line_layer.DOT_CLEARANCE} من ألفِ {unit:.1f}) — حكمُ المالك")
+        for line in dot_told:
+            print("  ○ " + line)
+
     # **وبابُ الكلمات يُطالِب يومَ تُبنى وحدتُه** (نمطُ «التعليقُ يُطالِب من نفسه»):
     # ما دامت `word_paths.js` غيرَ مبنيّةٍ فلا مطالبة، ويومَ تُبنى يصير كلُّ ما في
     # محطة الوصل مطالَباً بمساره بلا سطرٍ يُعدَّل هنا.
@@ -819,6 +894,27 @@ def self_test() -> int:
     src = PEN_JS.read_text(encoding="utf-8")
     ok(f"back: {int(tol['back'])}" in src and f"start: {int(tol['start'])}" in src,
        f"وسماحاتُه مقروءةٌ من `pen.js` نفسِه (بداية {tol['start']:.0f} · ارتداد {tol['back']:.0f})")
+
+    # ١٠) **وفرجةُ النقطة مجرَّبةٌ سالبةً** (حكمُ المالك، `STROKE_ORDER §٩`):
+    #     حارسٌ لم يُجرَّب على ما وُضع له ليس حارساً — فتُنزَّل نقطةُ شكلٍ سليمٍ
+    #     حتى تلامس جسمَه ويُنظر أيحمرّ.
+    unit = load_unit()
+    near = one(sound())
+    near["ب"]["isolated"]["dots"][0]["at"] = [500.0, 900.0]      # على الخطّ نفسِه
+    hot, _ = check_dot_clearance(near, unit)
+    ok(any("مسافةٌ واضحة" in b for b in hot),
+       "ويُمسِك نقطةً لصقت بجسم حرفها — «مسافةٌ واضحة بين الحرف والنقطة»")
+    far = one(sound())
+    far["ب"]["isolated"]["dots"][0]["at"] = [500.0 + line_layer.DOT_CLEARANCE * unit + 1, 950.0]
+    ok(not check_dot_clearance(far, unit)[0],
+       f"ويمرّ ما بلغ الحدَّ ({line_layer.DOT_CLEARANCE * unit:.0f} وحدة = "
+       f"{line_layer.DOT_CLEARANCE} من الألف) — فلا يحمرّ على السليم")
+    # **والمعفوُّ مثبَّتٌ لا يزداد ضيقاً**: تُقرَّب نقطةُ ياءٍ معفوّةٍ عمّا هي عليه
+    tight = json.loads(json.dumps(load_paths()))
+    ref = tight["ي"]["isolated"]
+    ref["dots"] = [{**d, "at": [d["at"][0], d["at"][1] - 20]} for d in ref["dots"]]
+    ok(any("المعفوُّ مثبَّتٌ" in b for b in check_dot_clearance(tight, unit)[0]),
+       "ويُمسِك معفوّاً ضاقت فرجتُه عمّا أُعلنت — فالإعفاءُ تثبيتٌ لا رخصةُ تفاقم")
 
     print(f"\n{fails} فشل" if fails else "\nالفاحصُ يمسك كلَّ ما وُضع له")
     return 1 if fails else 0

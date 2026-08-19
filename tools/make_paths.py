@@ -816,6 +816,20 @@ def seat_layer(paths: dict) -> dict:
     for r in moved:
         was = (before[r["key"]][3] - before[r["key"]][2]) / unit
         print(f"   ⤷ {r['key']}: {was:.2f} ⇐ {r['ref']:.2f} من الألف")
+    # **وفرجةُ النقطة عن جسمها** (حكمُ المالك، `STROKE_ORDER §٩`): ما رُفع يُسمّى
+    # بمقداره، وأضيقُ فرجةٍ بقيت تُطبع — **فلا يُدَّعى استيفاءٌ ولا يُخفى ناقص**.
+    lifted = [r for r in rep["shapes"] if r.get("dots_lift")]
+    gaps = sorted((r["dot_gap"], r["key"]) for r in rep["shapes"]
+                  if r.get("dot_gap") is not None)
+    want = line_layer.DOT_CLEARANCE * unit
+    print(f"⚫ فرجةُ النقطة (حدُّها {want:.0f} = {line_layer.DOT_CLEARANCE} من الألف):"
+          f" رُفع نقطُ {len(lifted)} من {len(gaps)} شكلاً منقوطاً"
+          + ("" if not lifted else " — "
+             + "، ".join(f"{r['key']} +{r['dots_lift']} ⇐ {r['dot_gap']}" for r in lifted)))
+    below = [g for g in gaps if g[0] < want]
+    print(f"   وأضيقُ ما بقي {gaps[0][1]} ({gaps[0][0]}) · ودون الحدّ {len(below)}"
+          + ("" if not below else " — " + "، ".join(f"{k} {v}" for v, k in below)
+             + " (نقطٌ تحت جسمها: خارجَ نصّ الحكم، تُبلَّغ ولا تُحرَّك)"))
     for ch, forms in seated.items():
         paths[ch] = forms
     SEATING.write_text(json.dumps({
@@ -836,6 +850,12 @@ def seat_layer(paths: dict) -> dict:
         "top": sp["top"], "low": sp["low"],
         "measured": len(measured), "unsupported": len(rep["shapes"]) - len(measured),
         "off": round(off, 4), "far": len(far), "farLimit": 0.15,
+        # **فرجةُ النقطة**: حدُّها ومن رُفع لأجله وأضيقُ ما بقي — حكمُ المالك
+        # (`STROKE_ORDER §٩`) مقيَّدٌ في الوحدة المولَّدة بأرقامه.
+        "dotClearance": line_layer.DOT_CLEARANCE,
+        "dotsLifted": [{"key": r["key"], "by": r["dots_lift"], "gap": r["dot_gap"]}
+                       for r in lifted],
+        "dotGapLow": {"key": gaps[0][1], "gap": gaps[0][0]},
         "widthMedian": round(wide[len(wide) // 2], 4),
         "why": "النسبةُ بين الحروف تُحفَظ (أمرُ المالك ١٩ أغسطس ٢٠٢٦): مقياسٌ عامٌّ"
                " واحدٌ للهجاء كلِّه وثلاثةُ خطوطٍ ثابتة، وكلُّ شكلٍ يأخذ نصيبَه من"

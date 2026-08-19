@@ -152,6 +152,89 @@ WIDTH_BAND = 0.15         # ما دونه من فرق العرض لا يُمَس
 WIDTH_KEEP = {"ي/final", "ك/isolated"}
 
 
+# ————— **فرجةُ النقطة عن جسم حرفها** — حكمُ المالك (`STROKE_ORDER §٩`) —————
+#
+# > «**يجب أن تكون هناك مسافةٌ واضحة بين الحرف والنقطة، ولا يجب أن يكونا قريبين
+# > من بعض**» — وأقرّه المالكُ **بعد أن عُرض عليه قياسٌ يخالفه** (نقطتُنا أبعدُ من
+# > المرجع أصلاً)، فحكمُه هو النافذ. **والمرجعُ ورقٌ لا حَكَمَ فيه، ولوحُنا فيه
+# > دائرةُ قبولٍ للنقطة** — فالفرجةُ عندنا مطلبٌ وظيفيّ لا زينة.
+#
+# **وسندُه رقمٌ لا ذوق**: نصفُ قطر قبول النقطة في `pen.js` **١٤٠**، وأضيقُ فرجةٍ
+# عندنا كانت دونه — **فدائرةُ القبول تدخل جسمَ الحرف، فنقطةٌ يضعها الطفلُ على
+# الحلقة تُقبَل**. ويُؤخَذ للحدّ هامشٌ فيصير **٠٫٢٥ من الألف**.
+DOT_CLEARANCE = 0.25      # من ارتفاع الألف — حكمُ مالكٍ يُعلَن ولا يُخفى
+
+
+def _pt_seg(p, a, b) -> tuple:
+    """`(بُعدٌ، أقربُ نقطةٍ)` عن قطعةٍ مستقيمة — لا عن رؤوسها وحدَها."""
+    dx, dy = b[0] - a[0], b[1] - a[1]
+    span = dx * dx + dy * dy
+    t = 0.0 if span < 1e-12 else max(0.0, min(1.0, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / span))
+    foot = (a[0] + t * dx, a[1] + t * dy)
+    return math.hypot(p[0] - foot[0], p[1] - foot[1]), foot
+
+
+def nearest_on_body(shape: dict, at) -> tuple:
+    """`(بُعدٌ، أقربُ نقطةٍ من حبر الجسم)` — أو `(inf, None)` لشكلٍ لا جسمَ له.
+
+    **وموضعُ الأقرب يُعطى لا بُعدُه وحدَه**: به يعرف لوحُ الاتجاه **جهةَ الجسم**
+    فيُزيح رقمَ النقطة إلى ضدِّها، فلا يبتلع الرقمُ النقطةَ ولا يلامس الحبر.
+    """
+    best, foot = math.inf, None
+    for stroke in shape.get("strokes") or []:
+        pts = stroke.get("points") or []
+        if len(pts) == 1:
+            span = math.hypot(at[0] - pts[0][0], at[1] - pts[0][1])
+            if span < best:
+                best, foot = span, tuple(pts[0])
+        for a, b in zip(pts, pts[1:]):
+            span, here = _pt_seg(at, a, b)
+            if span < best:
+                best, foot = span, here
+    return best, foot
+
+
+def dot_gap(shape: dict, at) -> float:
+    """**فرجةُ النقطة**: أقصرُ مسافةٍ بين مركزها وحبرِ جسم حرفها.
+
+    **ولِمَ أقصرُ مسافةٍ لا فرجةٌ رأسيّةٌ في عمودها؟** لأنّ ما يُقاس بها **دائرةٌ**:
+    `pen.js` يقبل نقرةَ الطفل بنصف قطرٍ حول موضع النقطة، فالمهمُّ ألّا تبلغ تلك
+    الدائرةُ الجسمَ **من أيّ جهة**. والفرجةُ الرأسيّةُ لا تقلّ عنها أبداً، فمن
+    استوفى هذه استوفى تلك.
+    """
+    return nearest_on_body(shape, at)[0]
+
+
+def lift_dots(shape: dict, want: float) -> float:
+    """يرفع نقطَ الشكل **معاً** حتى تبلغ أضيقُ فرجةٍ فيها `want` — ويعيد مقدارَ الرفع.
+
+    وقيودُه من نصّ الحكم:
+      · **رفعٌ لا إزاحة** — الموضعُ الأفقيّ من جدول الحقيقة الإملائية فلا يُمَسّ.
+      · **ونقاطُ الشكل الواحد ترتفع معاً** بمقدارٍ واحد، فلا يختلّ ترتيبُها.
+      · **ولا تُرفَع نقطةٌ ليست فوق جسمها**: حكمُ المالك في «الحرف ونقطته» فوقه،
+        وما جلس تحت جسمه (نقطُ الياء) **يُقاس ويُبلَّغ ولا يُحرَّك** — فخفضُه حكمُ
+        شكلٍ لم يصدر.
+    """
+    dots = shape.get("dots") or []
+    if not dots or not (shape.get("strokes") or []):
+        return 0.0
+    body_top = min(p[1] for s in shape["strokes"] for p in s["points"])
+    if any(d["at"][1] >= body_top for d in dots):
+        return 0.0
+    lift = 0.0
+    for _ in range(64):
+        short = want - min(dot_gap(shape, [d["at"][0], d["at"][1] - lift]) for d in dots)
+        if short <= 0:
+            break
+        lift += short
+    if lift <= 0:
+        return 0.0
+    lift = round(lift + 0.05, 1)      # ودرجةُ التقريب لا تُنقص الفرجةَ عن حدِّها
+    for dot in dots:
+        dot["at"] = [dot["at"][0], round(dot["at"][1] - lift, 1)]
+    return lift
+
+
 def _cross(p, q, r, s):
     """نقطةُ تقاطع قطعتين، أو `None` — أساسُ كشف الحلقة."""
     (x1, y1), (x2, y2), (x3, y3), (x4, y4) = p, q, r, s
@@ -410,6 +493,10 @@ def seat(paths: dict, unit: float = None) -> tuple:
                 # على ما كانت** فلا يتبدّل بالنسبة حكمٌ على أثر طفل.
                 "tolerance": round(scale, 4),
             }
+            # **وفرجةُ النقطة عن جسمها حكمٌ نافذ** (`STROKE_ORDER §٩`): بعد أن
+            # جلس الشكلُ على سطره ونُزِّل نقطُه على موضعه من صفِّه، **تُرفَع نقطتُه
+            # إن ضاقت فرجتُها** — رفعاً بلا إزاحةٍ أفقيّة، ومقدارُه يُقيَّد ويُطبع.
+            up_dots = lift_dots(out[ch][form], DOT_CLEARANCE * unit)
             nx0, nx1, ny0, ny1 = ink(out[ch][form], body_only=bool(kin))
             report.append({
                 "key": f"{ch}/{form}", "letter": ch, "form": form,
@@ -429,6 +516,12 @@ def seat(paths: dict, unit: float = None) -> tuple:
                 "capped": capped,
                 # **وإنزالُ النقط يُقيَّد برقمه** (ملاحظةُ المالك ٢): كم وحدةً نزلت.
                 "dots_drop": drop,
+                # **ورفعُ النقطة يُقيَّد برقمه** (حكمُ المالك، `STROKE_ORDER §٩`)،
+                # وفرجتُها بعده — فما رُفع معلومٌ وما بلغ معلوم.
+                "dots_lift": up_dots,
+                "dot_gap": (round(min(dot_gap(out[ch][form], d["at"])
+                                      for d in out[ch][form]["dots"]), 1)
+                            if out[ch][form]["dots"] and out[ch][form]["strokes"] else None),
                 "up": round((base - ny0) / unit, 4),
                 "down": round((ny1 - base) / unit, 4),
             })
