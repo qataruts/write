@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ساحةُ الحصاد — «اُكْتُبْ»</title>
+<meta name="description" content="اكتب عشرَ كتاباتٍ في ثلاث دقائق فتُعايِر يدُك محرّكَ الكتابة في «اُكْتُبْ». بلا حسابٍ ولا اسم، وما تكتبه يبقى على جهازك.">
+<meta name="robots" content="noindex">
+<!--
+  **ساحةُ الحصاد** (جلسة ص٣) — صفحةٌ مستقلّة **خارج تطبيق الطفل**: لا تسجّل عاملَ
+  خدمة، ولا تستورد قشرةً، ولا تدخلها رحلةُ طفل. بابُها سطرٌ هادئ في ذيل التعريفية.
+
+  🔒 **ولا عنوانَ خارجيّاً في هذه الصفحة ولا في `arena.js`**: بابُ الإرسال وحدَه
+  (`send.js`) يحمل رابطَي واتساب والبريد — سنّةُ `feedback.js` نفسُها، فلا يُثقَب
+  حارسُ الخصوصية باستثناء.
+-->
+<link rel="stylesheet" href="arena.css">
+</head>
+<body>
+<main id="arena" role="main"></main>
+<noscript>
+  <p style="text-align:center;padding:2rem">هذه الصفحةُ تحتاج جافاسكربت لتعمل — فالكتابةُ فيها بالإصبع أو بالقلم.</p>
+</noscript>
+<script type="module">
+  import { startArena } from './arena.js';
+  startArena();
+</script>
+</body>
+</html>

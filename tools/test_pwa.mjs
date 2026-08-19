@@ -54,6 +54,10 @@ const wanted = onDisk.filter((p) => !p.startsWith('audio/')
     || p === 'audio/manifest.json' || p === 'audio/versions.json')
   .filter((p) => !p.startsWith('emoji/') || p === 'emoji/index.json')
   .filter((p) => !p.startsWith('welcome/'))
+  // **وساحةُ الحصاد كذلك خارج القشرة عمداً** (جلسة ص٣، قيدُها الأول): صفحةُ جمعٍ
+  // يفتحها متطوّعٌ من التعريفية، **لا تدخلها رحلةُ طفل** — فتخزينُها في قشرة الطفل
+  // تخزينُ ما لا يطلبه جهازُه، وإدخالُها القشرةَ يجعلها من التطبيق وهي ليست منه.
+  .filter((p) => !p.startsWith('arena/'))
   // **و`CNAME` توجيهُ نشرٍ لا موردَ تطبيق**: يقرؤه GitHub Pages من جذر النشر ليعرف
   // النطاقَ المخصَّص، ولا يطلبه متصفّحُ الطفل أبداً — فتخزينُه في القشرة تخزينُ ما
   // لا يُطلَب. (دخل الشجرةَ في `754bc2f` مع النطاق، وأمسكه هذا الحارسُ يومَها.)
@@ -72,6 +76,11 @@ ok(sw.includes("'./'") && /index\.html/.test(sw), 'وتشمل جذر التطب�
 const inShell = shell.filter((p) => p.startsWith('welcome/'));
 ok(inShell.length === 0,
   `ولا تشمل الصفحة التعريفية (خارج القشرة عمداً)${inShell.length ? ' — دخلت: ' + inShell.join('، ') : ''}`);
+
+const arenaInShell = shell.filter((p) => p.startsWith('arena/'));
+ok(arenaInShell.length === 0,
+  `ولا تشمل ساحةَ الحصاد (صفحةٌ خارج تطبيق الطفل — قيدُها الأول)${
+    arenaInShell.length ? ' — دخلت: ' + arenaInShell.join('، ') : ''}`);
 
 // كل وحدة جافاسكربت مستوردة فعلاً من شجرة main.js (لا ملف ميت في القائمة)
 const modules = onDisk.filter((p) => p.startsWith('js/'));

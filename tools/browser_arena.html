@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>ساحةُ الحصاد: الدورةُ الأربع ومقاسُ اللوح وصفرُ الطلبات — جلسة ص٣</title>
+<!--
+  **مشهدُ ساحة الحصاد في متصفّحٍ حقيقيّ** — ما لا يقوله نصٌّ ولا `node`:
+
+    · **الدورةُ الأربع تمشي كاملةً**: شاهِدْ ← اكتب ← «أكتبتَها صحيحة؟» ← يُكشَف
+      الحكم ← التالي، والعدّادُ يتقدّم.
+    · 🔴 **والتسميةُ عمياءُ في الشجرة نفسِها**: قبل أن يُضغط أحدُ الزرّين **لا نصَّ
+      حكمٍ واحدٍ في DOM** — ولا في سمةٍ ولا في صنف. وهذا هو الوجهُ الذي لا يمسكه
+      حارسُ `node` (ذاك يحرس الذاكرة، وهذا يحرس ما تراه العين).
+    · **واللوحُ هو الشاشة**: يُقاس على مقاس آيباد طولاً وعرضاً — ≥٦٠٪ ارتفاعاً.
+    · **وأهدافُ اللمس ≥٦٤ بكسل** في الشاشات الثلاث.
+    · **وصفرُ طلباتٍ شبكية** في الدورة كلِّها — **ومجرَّبٌ سالباً** في آخره.
+-->
+<style>
+  body { font: 15px/1.7 system-ui, sans-serif; margin: 0; background: #111; color: #eee; }
+  #log { padding: 1rem; white-space: pre-wrap; max-width: 55%; }
+  iframe { width: 768px; height: 1024px; border: 0; position: fixed; inset-inline-end: 0; top: 0;
+    transform: scale(.42); transform-origin: top left; }
+  .ok { color: #7ec97e; } .bad { color: #e08a80; }
+</style>
+</head>
+<body>
+<div id="log"></div>
+<iframe id="app" src="/arena/"></iframe>
+<script type="module">
+const results = [];
+const log = document.getElementById('log');
+const frame = document.getElementById('app');
+
+function ok(cond, msg) {
+  results.push({ ok: !!cond, msg });
+  const line = document.createElement('div');
+  line.className = cond ? 'ok' : 'bad';
+  line.textContent = (cond ? '✓ ' : '✗ ') + msg;
+  log.append(line);
+}
+
+const errors = [];
+window.addEventListener('error', (e) => errors.push(String(e.message)));
+window.addEventListener('unhandledrejection', (e) => errors.push(String(e.reason)));
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const send = () => fetch('/result', {
+  method: 'POST', body: JSON.stringify({ from: 'write', rows: results }),
+});
+
+// ————— حارسُ الشبكة على إطار الساحة —————
+const netCalls = [];
+function watchNetwork(win) {
+  const realFetch = win.fetch.bind(win);
+  win.fetch = (input, init) => { netCalls.push(`fetch:${input}`); return realFetch(input, init); };
+  const realOpen = win.XMLHttpRequest.prototype.open;
+  win.XMLHttpRequest.prototype.open = function (method, url, ...rest) {
+    netCalls.push(`xhr:${url}`);
+    return realOpen.call(this, method, url, ...rest);
+  };
+  Object.defineProperty(win.navigator, 'sendBeacon', {
+    configurable: true, value: (url) => { netCalls.push(`beacon:${url}`); return false; },
+  });
+  win.WebSocket = class { constructor(url) { netCalls.push(`ws:${url}`); } };
+  win.EventSource = class { constructor(url) { netCalls.push(`sse:${url}`); } };
+}
+const resources = (win) => win.performance.getEntriesByType('resource').map((e) => e.name);
+
+/** **ألفاظُ الحكم**: ما لا يجوز أن يظهر قبل أن يحكم الإنسان. */
+const VERDICT_WORDS = ['اتَّفَقْنَا', 'اخْتَلَفْنَا', 'مقبول', 'ردَّه المحرّك', 'قبلها', 'accepted'];
+
+(async () => {
+  try {
+    await new Promise((r) => frame.addEventListener('load', r, { once: true }));
+    const win = frame.contentWindow;
+    const doc = frame.contentDocument;
+    win.addEventListener('error', (e) => errors.push(String(e.message)));
+    win.addEventListener('unhandledrejection', (e) => errors.push(String(e.reason)));
+    watchNetwork(win);
+    await wait(500);
+
+    const text = () => doc.body.innerText || '';
+    const seek = (label) => [...doc.querySelectorAll('button, a')]
+      .find((b) => b.textContent.replace(/\s+/g, ' ').includes(label));
+    const netMark = netCalls.length;
+    const resMark = resources(win).length;
+
+    // ————— ١) شاشةُ البدء: ثلاثةُ أسئلةٍ وسطرُ إذن —————
+    ok(/سَاحَةُ الحَصَاد/.test(text()), 'شاشةُ البدء مفتوحة');
+    ok(/مَن يكتب؟/.test(text()) && /بأيّ شيء يكتب؟/.test(text()) && /بأيّ يد؟/.test(text()),
+      'وفيها ثلاثةُ أسئلةٍ لا أكثر: مَن يكتب · بأيّ شيء · بأيّ يد');
+    // **ولا حسابَ ولا اسمَ ولا بريد — بنيةً لا وعداً**: لا حقلَ إدخالٍ واحداً في
+    // الصفحة سوى مربّع الإذن. (وقراءةُ النصّ لا تصلح شاهداً: الصفحةُ تَعِد بهذا نصّاً.)
+    const fields = [...doc.querySelectorAll('input, textarea, select')]
+      .filter((f) => f.type !== 'checkbox');
+    ok(fields.length === 0,
+      `ولا حسابَ ولا اسمَ ولا بريد — لا حقلَ إدخالٍ في الصفحة (${fields.length})`);
+
+    const start = seek('ابْدَأْ');
+    ok(start && start.disabled, 'وزرُّ البدء مقفلٌ حتى تُجاب الأسئلة');
+    seek('طِفْل').click();
+    await wait(60);
+    ok(/كم عمرُه؟/.test(text()), 'واختيارُ «طفل» يفتح نطاقَ العمر بأزرار');
+    seek('٦–٧').click();
+    await wait(60);
+    ok(/وليُّ أمره/.test(text()), 'ويُطلَب إذنُ الوليّ لأنه طفل');
+    ok(seek('ابْدَأْ').disabled, '**ومجرَّبٌ سالباً**: البدءُ يبقى مقفلاً بلا إذنِ وليّ');
+    doc.querySelector('.arena-consent__mark').click();
+    await wait(60);
+    ok(!seek('ابْدَأْ').disabled, 'وبالإذن يُفتَح');
+
+    // أهدافُ اللمس في شاشة البدء
+    const smallOnIntro = [...doc.querySelectorAll('button, a.arena-btn, label.arena-consent')]
+      .map((b) => b.getBoundingClientRect())
+      .filter((r) => r.height < 64 - 0.5 || r.width < 64 - 0.5);
+    ok(smallOnIntro.length === 0,
+      `وأهدافُ اللمس في شاشة البدء ≥٦٤ بكسل (${smallOnIntro.length} دونها)`);
+
+    seek('ابْدَأْ').click();
+    await wait(120);
+
+    // ————— ٢) الجولة: العدّادُ واللوحُ الذي هو الشاشة —————
+    ok(/١ من ١٠/.test(text()), `العدّادُ ظاهرٌ من أوّل جولة (${(text().match(/\d+ من \d+|[٠-٩]+ من [٠-٩]+/) || [''])[0]})`);
+    ok(!doc.querySelector('.arena-ask'), 'ولا شبكةَ حروفٍ ولا مبدّلَ أنماطٍ في شاشة الكتابة');
+
+    const board = doc.querySelector('.arena-board');
+    const surface = doc.querySelector('.arena-ink');
+    ok(!!board && !!surface, 'واللوحُ على الشاشة');
+    const boardBox = board.getBoundingClientRect();
+    ok(boardBox.height >= win.innerHeight * 0.6,
+      `واللوحُ يملأ ${Math.round(boardBox.height / win.innerHeight * 100)}٪ من ارتفاع الآيباد الطوليّ`
+      + ` (${Math.round(boardBox.width)}×${Math.round(boardBox.height)} من ${win.innerWidth}×${win.innerHeight})`);
+    ok(doc.documentElement.scrollWidth <= win.innerWidth + 1,
+      `ولا فائضَ أفقيّ (${doc.documentElement.scrollWidth} ≤ ${win.innerWidth})`);
+
+    // ————— ٣) الدورةُ الأربع: شاهِدْ ← اكتب ← احكم ← يُكشَف —————
+    await wait(2600);                                   // «شاهِدْ»: النموذجُ يُرسَم ثم يغيب
+    ok(/اكْتُبْهَا هُنَا/.test(text()), 'وبعد «شاهِدْ» يُدعى إلى الكتابة — خطوةٌ واحدةٌ في الشاشة');
+    const model = doc.querySelector('.arena-model');
+    ok(model.classList.contains('is-gone'),
+      'والنموذجُ يغيب ساعةَ الكتابة — صندوقٌ فارغ، وهو عينُ النمط الحرّ الذي نعايره');
+
+    // يدٌ تمشي مسارَ الشكل المعروض — من `paths.js` بعينه
+    const { PATHS } = await import('/js/paths.js');
+    const pen = await import('/js/pen.js');
+    const [shapeCh, shapeForm] = (board.dataset.shape || '').split('/');
+    const ref = PATHS[shapeCh]?.[shapeForm];
+    ok(!!ref, `والشكلُ المعروض من paths.js بعينه (${board.dataset.shape})`);
+    const cell = (surface.getAttribute('viewBox') || '0 0 1000 1000').split(/\s+/).map(Number);
+    const toClient = ([x, y]) => {
+      const rect = surface.getBoundingClientRect();
+      const unit = Math.min(rect.width / cell[2], rect.height / cell[3]);
+      return {
+        clientX: rect.left + (rect.width - cell[2] * unit) / 2 + x * unit,
+        clientY: rect.top + (rect.height - cell[3] * unit) / 2 + y * unit,
+      };
+    };
+    let pointerId = 1;
+    const fire = (type, point) => surface.dispatchEvent(new win.PointerEvent(type, {
+      bubbles: true, cancelable: true, composed: true,
+      pointerId, pointerType: 'touch', isPrimary: true, ...toClient(point),
+    }));
+    async function writeStroke(points) {
+      pointerId++;
+      fire('pointerdown', points[0]);
+      for (const p of points.slice(1)) fire('pointermove', p);
+      await wait(40);
+      fire('pointerup', points[points.length - 1]);
+      await wait(40);
+    }
+    const walkPoly = (poly, step = 26) => {
+      const out = [];
+      for (let at = 0; at < poly.len; at += step) out.push(pen.pointAt(poly, at).at);
+      out.push(poly.pts[poly.pts.length - 1]);
+      return out;
+    };
+    for (const part of pen.partsOf(ref)) {
+      if (part.kind === 'stroke') await writeStroke(walkPoly(part.poly));
+      else for (let i = 0; i < (part.count || 1); i++) await writeStroke([part.at, part.at]);
+    }
+    ok(doc.querySelectorAll('.arena-line').length >= 1, 'وحبرُ اليد يظهر على اللوح كما كُتب');
+    await wait(700);
+
+    // 🔴 القيدُ الأخصّ: **لا حكمَ في الشجرة قبل أن يُسأل الإنسان**
+    ok(/أَكَتَبْتَهَا صَحِيحَة؟/.test(text()), 'وبعد الكتابة يُسأل الإنسانُ أوّلاً: «أكتبتَها صحيحة؟»');
+    const leakedWords = VERDICT_WORDS.filter((w) => doc.body.innerHTML.includes(w));
+    ok(leakedWords.length === 0,
+      `🔴 **ولا أثرَ لحكم المحرّك في الشجرة قبل حكم الإنسان**${leakedWords.length ? ` — ظهر: ${leakedWords.join('، ')}` : ''}`);
+    const ask = [...doc.querySelectorAll('.arena-bar button')];
+    ok(ask.length === 2 && /نَعَمْ/.test(ask[0].textContent) && /لَا/.test(ask[1].textContent),
+      `وزرّان كبيران بترتيبٍ ثابت: «${ask[0].textContent.trim()}» ثم «${ask[1].textContent.trim()}»`);
+    const small = ask.map((b) => b.getBoundingClientRect()).filter((r) => r.height < 64 - 0.5);
+    ok(small.length === 0, `وهما ≥٦٤ بكسل (${Math.round(ask[0].getBoundingClientRect().height)} بكسلاً)`);
+
+    ask[0].click();
+    await wait(120);
+    const shown = VERDICT_WORDS.filter((w) => (doc.body.innerText || '').includes(w));
+    ok(shown.length > 0, `وبعد حكم الإنسان يُكشَف حكمُ المحرّك بعبارةٍ مفهومة («${shown[0]}»)`);
+    ok(!/انحراف|تغطية|maxLateral|start-far/.test(text()),
+      'ولا رقمَ تقنيّاً ولا رمزَ شكوى على الشاشة — لغةُ ناسٍ لا مهندسين');
+
+    const next = seek('التَّالِي');
+    ok(!!next, 'وزرُّ «التالي» حاضر');
+    next.click();
+    await wait(200);
+    ok(/٢ من ١٠/.test(text()), 'والعدّادُ يتقدّم إلى «٢ من ١٠» — الدورةُ الأربع تمشي كاملة');
+
+    // ————— ٤) الخصوصية: صفرُ طلباتٍ في الدورة كلِّها —————
+    const cycleNet = netCalls.slice(netMark);
+    ok(cycleNet.length === 0,
+      `**صفرُ طلباتٍ شبكية** في دورة الساحة كلِّها${cycleNet.length ? ` — ${cycleNet.slice(0, 5).join('، ')}` : ''}`);
+    const cycleRes = resources(win).slice(resMark)
+      .filter((url) => !url.startsWith('blob:') && !url.startsWith('data:'))
+      .filter((url) => !/\/(fonts|arena|js)\//.test(url));
+    ok(cycleRes.length === 0,
+      `ولا موردَ في سجلّ شبكة الصفحة سوى وحداتها وخطوطها${cycleRes.length ? ` — ${cycleRes.slice(0, 4).join('، ')}` : ''}`);
+    const external = (url) => /^https?:\/\//.test(url) && !url.startsWith(win.location.origin);
+    ok(!netCalls.some(external) && !resources(win).some(external),
+      `ولا موردَ من مضيفٍ آخر (${resources(win).length} مورداً كلُّها ملفاتُنا)`);
+    const before = netCalls.length;
+    try { await win.fetch('/arena/arena.css'); } catch { /* لا يهمّ ردُّه */ }
+    ok(netCalls.length > before,
+      `**والعدّادُ مجرَّبٌ سالباً**: طلبٌ متعمَّد بعد الدورة يُمسَك (${netCalls.length - before})`);
+
+    // ————— ٥) المقاسُ العرضيّ: اللوحُ يبقى ≥٦٠٪ —————
+    frame.style.width = '1024px';
+    frame.style.height = '768px';
+    await wait(400);
+    const wide = doc.querySelector('.arena-board').getBoundingClientRect();
+    ok(wide.height >= win.innerHeight * 0.6,
+      `وعلى الآيباد العرضيّ يملأ اللوحُ ${Math.round(wide.height / win.innerHeight * 100)}٪ من الارتفاع`
+      + ` (${Math.round(wide.width)}×${Math.round(wide.height)} من ${win.innerWidth}×${win.innerHeight})`);
+    ok(doc.documentElement.scrollWidth <= win.innerWidth + 1,
+      `ولا فائضَ أفقيّ عرضياً (${doc.documentElement.scrollWidth} ≤ ${win.innerWidth})`);
+
+    ok(errors.length === 0,
+      errors.length ? `أخطاءُ جافاسكربت: ${errors.join(' · ')}` : 'لا أخطاء جافاسكربت');
+  } catch (e) {
+    ok(false, `استثناء: ${e && e.message}`);
+  }
+  await send();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>لقطاتُ ساحة الحصاد — بعين المالك</title>
+<!--
+  **صفحةُ لقطاتٍ للمالك** (بند ص٣/٨: «يُعرَض المُصيَّر على المالك قبل الإقرار»):
+  تفتح الساحةَ في إطارٍ **بمقاس آيباد بعينه** وتسوقها إلى الخطوة المطلوبة، ثم يلتقط
+  كرومُ الصفحةَ كلَّها — فالصورةُ هي ما يراه المتطوّع على جهازه لا نافذةَ سطح مكتب.
+
+    python3 tools/browser_test.py --suite arena --shots out.png --size 768,1024 --screen write
+
+  الخطواتُ: `intro` · `write` (اللوحُ فارغٌ ينتظر اليد) · `ask` (السؤالُ بزرّيه)
+  · `reveal` (الحكمُ مكشوفاً) · `done` (الحفظُ والخطواتُ الثلاث).
+-->
+<style>
+  html, body { margin: 0; padding: 0; background: #fff; overflow: hidden; }
+  iframe { border: 0; display: block; }
+</style>
+</head>
+<body>
+<script type="module">
+const q = new URLSearchParams(location.search);
+const at = q.get('at') || 'intro';
+const frame = document.createElement('iframe');
+frame.width = q.get('w') || String(window.innerWidth);
+frame.height = q.get('h') || String(window.innerHeight);
+frame.src = '/arena/';
+document.body.append(frame);
+
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
+frame.addEventListener('load', async () => {
+  const win = frame.contentWindow;
+  const doc = frame.contentDocument;
+  const seek = (label) => [...doc.querySelectorAll('button, a')]
+    .find((b) => b.textContent.replace(/\s+/g, ' ').includes(label));
+  const bar = () => [...doc.querySelectorAll('.arena-bar button')];
+  const asking = () => bar().length === 2 && /نَعَمْ/.test(bar()[0].textContent);
+
+  const { PATHS } = await import('/js/paths.js');
+  const pen = await import('/js/pen.js');
+
+  /** يدٌ تكتب الشكلَ المعروض من مساره — فاللقطةُ تُري حبراً حقيقياً لا خطّاً مرسوماً. */
+  async function writeShape() {
+    const surface = doc.querySelector('.arena-ink');
+    const board = doc.querySelector('.arena-board');
+    const [ch, form] = (board.dataset.shape || '').split('/');
+    const ref = PATHS[ch]?.[form];
+    if (!ref) return;
+    const cell = surface.getAttribute('viewBox').split(/\s+/).map(Number);
+    const toClient = ([x, y]) => {
+      const rect = surface.getBoundingClientRect();
+      const unit = Math.min(rect.width / cell[2], rect.height / cell[3]);
+      return {
+        clientX: rect.left + (rect.width - cell[2] * unit) / 2 + x * unit,
+        clientY: rect.top + (rect.height - cell[3] * unit) / 2 + y * unit,
+      };
+    };
+    let id = Date.now() % 1000;
+    const fire = (type, p) => surface.dispatchEvent(new win.PointerEvent(type, {
+      bubbles: true, cancelable: true, composed: true,
+      pointerId: id, pointerType: 'touch', isPrimary: true, ...toClient(p),
+    }));
+    const walk = (poly, step = 26) => {
+      const out = [];
+      for (let a = 0; a < poly.len; a += step) out.push(pen.pointAt(poly, a).at);
+      out.push(poly.pts[poly.pts.length - 1]);
+      return out;
+    };
+    for (const part of pen.partsOf(ref)) {
+      const pts = part.kind === 'stroke' ? walk(part.poly) : [part.at, part.at];
+      id++;
+      fire('pointerdown', pts[0]);
+      for (const p of pts.slice(1)) fire('pointermove', p);
+      await wait(30);
+      fire('pointerup', pts[pts.length - 1]);
+      await wait(30);
+    }
+  }
+
+  await wait(300);
+  if (at === 'intro') return;
+
+  seek('طِفْل').click();
+  await wait(50);
+  seek('٦–٧').click();
+  await wait(50);
+  doc.querySelector('.arena-consent__mark').click();
+  await wait(50);
+  seek('ابْدَأْ').click();
+
+  for (let round = 0; round < 12; round++) {
+    await wait(3300);                       // «شاهِدْ» يتمّ ثم يُدعى إلى الكتابة
+    if (at === 'write' && round === 0) return;
+    await writeShape();
+    await wait(900);
+    if (at === 'ask' && round === 0) return;
+    if (!asking()) break;
+    bar()[0].click();
+    await wait(200);
+    if (at === 'reveal' && round === 0) return;
+    const next = seek('التَّالِي') || seek('انْتَهَيْنَا');
+    if (!next) break;
+    next.click();
+    await wait(200);
+    if (doc.querySelector('.arena-screen--done')) return;
+  }
+});
+</script>
+</body>
+</html>

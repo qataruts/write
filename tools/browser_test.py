@@ -59,6 +59,8 @@ PAGES = {
     "/__support.html": TOOLS / "browser_support.html",
     "/__welcome.html": TOOLS / "browser_welcome.html",
     "/__device.html": TOOLS / "browser_device.html",
+    "/__arena.html": TOOLS / "browser_arena.html",
+    "/__arena_shots.html": TOOLS / "arena_shots.html",
 }
 # سَوقةُ الصفحات: `--suite <اسم>` يختار أيَّها يُشغَّل، والافتراضُ فحصُ القشرة.
 SUITES = {
@@ -76,6 +78,7 @@ SUITES = {
     "catchup": "/__catchup.html",  # الجلسة ل: بوابةُ اللحاق — بابُها من اللوحة، وفتحُها بما أثبتته اليد
     "support": "/__support.html",  # الجلسة د: وضعُ الدعم — المؤشّرُ على الشاشة بلا زحزحةِ بكسل
     "welcome": "/__welcome.html",  # الجلسة ١١: الصفحاتُ الأربع على مقاسات الجهاز الخمسة
+    "arena": "/__arena.html",      # الجلسة ص٣: ساحةُ الحصاد — الدورةُ الأربع وتسميتُها العمياء
 }
 # نافذة Chrome بلا واجهة تحجز ٨٧ بكسلاً لإطارٍ وهميّ فوق المنظور — فلولا تعويضها لقِسنا
 # جهازاً أقصر من الجهاز. والصفحة تعيد منظورها الحقيقي، والعدّاء يرفض أي انحرافٍ عن المطلوب.
@@ -524,10 +527,25 @@ def main():
             out.unlink(missing_ok=True)   # وإلا لعُدَّت لقطةُ تشغيلٍ سابق نجاحاً فوريّاً
             # اللقطةُ تتبع السَّوقة: لقطةُ القلم لوحُه لا خريطتُه
             where = ("/#/warmup/" + (warmup_parts() or ["lines-h"])[0] if args.suite == "warmup"
-                     else "/?dev=1#/pen" if args.suite in ("pen", "paths") else "/?dev=1")
-            proc = run_chrome(f"{base}{where}", profile,
-                              [f"--screenshot={out}", "--window-size=980,1400", "--hide-scrollbars"],
-                              args.show)
+                     else "/?dev=1#/pen" if args.suite in ("pen", "paths")
+                     # **وساحةُ الحصاد صفحةٌ مستقلّة**: لقطتُها من بابها هي لا من
+                     # التطبيق، وتُساق إلى خطوتها بـ`--screen` (شاشةُ لقطاتها تسوقها)
+                     else f"/__arena_shots.html?at={args.screen or 'intro'}"
+                     f"&w={(args.size or '768,1024').split(',')[0]}"
+                     f"&h={(args.size or '768,1024').split(',')[1]}"
+                     if args.suite == "arena" else "/?dev=1")
+            size = args.size or "980,1400"
+            # **ونافذةُ كروم تحجز ٨٧ بكسلاً لإطارٍ وهميّ**: فلو طُلب مقاسُ آيباد كما
+            # هو لَخرجت اللقطةُ أقصرَ من الجهاز — يُعوَّض كما يُعوَّض في عدّة الأجهزة.
+            if args.suite == "arena" and args.size:
+                w, h = args.size.split(",")
+                size = f"{w},{int(h) + VIEWPORT_PAD}"
+            extra = [f"--screenshot={out}", f"--window-size={size}", "--hide-scrollbars"]
+            # **والوقتُ الافتراضيّ للساحة**: لقطتُها بعد سَوقٍ يمشي بمهلٍ حقيقية،
+            # فيُمنَح كرومُ ميزانيةَ وقتٍ افتراضيّ تكفي الدورةَ (لا صوتَ فيها ولا جلب).
+            if args.suite == "arena":
+                extra.append("--virtual-time-budget=90000")
+            proc = run_chrome(f"{base}{where}", profile, extra, args.show)
             deadline = time.time() + args.timeout
             while time.time() < deadline and not out.exists():
                 time.sleep(0.5)
