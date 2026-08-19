@@ -61,15 +61,97 @@ export const STAGES = [
     ]
   },
   {
+    "id": "g1-forms",
+    "kind": "form",
+    "title": "أَشْكَالُ المجموعة الأولى",
+    "sub": "شكلُ الحرف حيث تطلبه كلمةٌ — أوّلَ الكلمة ووسطَها وآخرَها",
+    "nodes": [
+      {
+        "part": "initial",
+        "form": "initial",
+        "letters": ["ب", "م", "ل"],
+        "title": "الحَرْفُ أَوَّلَ الكَلِمَة",
+        "face": "بـ"
+      },
+      {
+        "part": "final",
+        "form": "final",
+        "letters": ["ا"],
+        "title": "الحَرْفُ آخِرَ الكَلِمَة",
+        "face": "ـا"
+      }
+    ]
+  },
+  {
+    "id": "g1-words",
+    "kind": "join",
+    "title": "كَلِمَاتُ المجموعة الأولى",
+    "sub": "يصل الحروفَ ثم ينسخ الكلمةَ كما يراها — والمسافةُ بين الكلمات والجلوسُ على السطر",
+    "nodes": [
+      { "part": "pair", "title": "وَصْلُ حَرْفَيْن", "joins": ["با", "ما", "لا"] },
+      {
+        "part": "w",
+        "title": "كَلِمَاتُ المجموعة الأولى",
+        "words": ["بَابَا", "مَامَا", "بَابْ", "مَالْ"],
+        "marks": ["َ", "ْ"]
+      },
+      { "part": "sign-tanween", "title": "التَّنوين", "words": ["بَابٌ"], "marks": ["ٌ"] }
+    ]
+  },
+  {
     "id": "g2",
     "kind": "letter",
     "title": "المجموعة الثانية",
     "sub": "كلُّ حرفٍ وحدَه: من أين يبدأ وإلى أين يتّجه",
     "nodes": [
+      { "part": "ت", "letter": "ت" },
       { "part": "ن", "letter": "ن" },
       { "part": "ر", "letter": "ر" },
-      { "part": "د", "letter": "د" },
-      { "part": "س", "letter": "س" }
+      { "part": "د", "letter": "د" }
+    ]
+  },
+  {
+    "id": "g2-forms",
+    "kind": "form",
+    "title": "أَشْكَالُ المجموعة الثانية",
+    "sub": "شكلُ الحرف حيث تطلبه كلمةٌ — أوّلَ الكلمة ووسطَها وآخرَها",
+    "nodes": [
+      {
+        "part": "initial",
+        "form": "initial",
+        "letters": ["ت", "ن"],
+        "title": "الحَرْفُ أَوَّلَ الكَلِمَة",
+        "face": "تـ"
+      },
+      {
+        "part": "medial",
+        "form": "medial",
+        "letters": ["ب", "م"],
+        "title": "الحَرْفُ وَسَطَ الكَلِمَة",
+        "face": "ـبـ"
+      },
+      {
+        "part": "final",
+        "form": "final",
+        "letters": ["ب", "ل", "ن", "ر"],
+        "title": "الحَرْفُ آخِرَ الكَلِمَة",
+        "face": "ـب"
+      }
+    ]
+  },
+  {
+    "id": "g2-words",
+    "kind": "join",
+    "title": "كَلِمَاتُ المجموعة الثانية",
+    "sub": "يصل الحروفَ ثم ينسخ الكلمةَ كما يراها — والمسافةُ بين الكلمات والجلوسُ على السطر",
+    "nodes": [
+      { "part": "pair", "title": "وَصْلُ حَرْفَيْن", "joins": ["نا"] },
+      { "part": "triple", "title": "وَصْلُ ثَلَاثَة", "joins": ["تمر"] },
+      {
+        "part": "w",
+        "title": "كَلِمَاتُ المجموعة الثانية",
+        "words": ["نَارْ", "دَارْ", "نَامْ", "تَمْرْ"]
+      }
     ]
   },
   {
@@ -78,10 +160,59 @@ export const STAGES = [
     "title": "المجموعة الثالثة",
     "sub": "كلُّ حرفٍ وحدَه: من أين يبدأ وإلى أين يتّجه",
     "nodes": [
-      { "part": "ت", "letter": "ت" },
-      { "part": "و", "letter": "و" },
-      { "part": "ي", "letter": "ي" },
-      { "part": "ه", "letter": "ه" }
+      { "part": "ث", "letter": "ث" },
+      { "part": "س", "letter": "س" },
+      { "part": "ز", "letter": "ز" },
+      { "part": "ذ", "letter": "ذ" }
+    ]
+  },
+  {
+    "id": "g3-forms",
+    "kind": "form",
+    "title": "أَشْكَالُ المجموعة الثالثة",
+    "sub": "شكلُ الحرف حيث تطلبه كلمةٌ — أوّلَ الكلمة ووسطَها وآخرَها",
+    "nodes": [
+      {
+        "part": "initial",
+        "form": "initial",
+        "letters": ["س"],
+        "title": "الحَرْفُ أَوَّلَ الكَلِمَة",
+        "face": "سـ"
+      },
+      {
+        "part": "medial",
+        "form": "medial",
+        "letters": ["ل", "ت", "ن", "س"],
+        "title": "الحَرْفُ وَسَطَ الكَلِمَة",
+        "face": "ـلـ"
+      },
+      {
+        "part": "final",
+        "form": "final",
+        "letters": ["م", "ز"],
+        "title": "الحَرْفُ آخِرَ الكَلِمَة",
+        "face": "ـم"
+      },
+      {
+        "part": "compare-final",
+        "form": "final",
+        "letters": ["ر", "ز"],
+        "compare": [["ر", "ز"]],
+        "title": "مَيِّزْ بَيْنَ المُتَشَابِهَاتِ آخِرَ الكَلِمَة",
+        "face": "ـر"
+      }
+    ]
+  },
+  {
+    "id": "g3-words",
+    "kind": "join",
+    "title": "كَلِمَاتُ المجموعة الثالثة",
+    "sub": "يصل الحروفَ ثم ينسخ الكلمةَ كما يراها — والمسافةُ بين الكلمات والجلوسُ على السطر",
+    "nodes": [
+      { "part": "pair", "title": "وَصْلُ حَرْفَيْن", "joins": ["سل"] },
+      { "part": "triple", "title": "وَصْلُ ثَلَاثَة", "joins": ["سلا"] },
+      { "part": "w", "title": "كَلِمَاتُ المجموعة الثالثة", "words": ["سَلَامْ", "دَرَسْ"] },
+      { "part": "sign-shadda", "title": "الشَّدّة", "words": ["سُلَّمْ"], "marks": ["ُ", "ّ"] }
     ]
   },
   {
@@ -90,10 +221,87 @@ export const STAGES = [
     "title": "المجموعة الرابعة",
     "sub": "كلُّ حرفٍ وحدَه: من أين يبدأ وإلى أين يتّجه",
     "nodes": [
-      { "part": "ك", "letter": "ك" },
-      { "part": "ع", "letter": "ع" },
-      { "part": "ف", "letter": "ف" },
-      { "part": "ق", "letter": "ق" }
+      { "part": "ش", "letter": "ش" },
+      { "part": "و", "letter": "و" },
+      { "part": "ي", "letter": "ي" },
+      { "part": "ه", "letter": "ه" }
+    ]
+  },
+  {
+    "id": "g4-forms",
+    "kind": "form",
+    "title": "أَشْكَالُ المجموعة الرابعة",
+    "sub": "شكلُ الحرف حيث تطلبه كلمةٌ — أوّلَ الكلمة ووسطَها وآخرَها",
+    "nodes": [
+      {
+        "part": "initial",
+        "form": "initial",
+        "letters": ["ث", "ش", "ي", "ه"],
+        "title": "الحَرْفُ أَوَّلَ الكَلِمَة",
+        "face": "ثـ"
+      },
+      {
+        "part": "compare-initial",
+        "form": "initial",
+        "letters": ["ب", "ت", "ن", "ث", "ي", "س", "ش"],
+        "compare": [["ب", "ت", "ن", "ث", "ي"], ["س", "ش"]],
+        "title": "مَيِّزْ بَيْنَ المُتَشَابِهَاتِ أَوَّلَ الكَلِمَة",
+        "face": "بـ"
+      },
+      {
+        "part": "medial",
+        "form": "medial",
+        "letters": ["ش", "ي", "ه"],
+        "title": "الحَرْفُ وَسَطَ الكَلِمَة",
+        "face": "ـشـ"
+      },
+      {
+        "part": "compare-medial",
+        "form": "medial",
+        "letters": ["س", "ش"],
+        "compare": [["س", "ش"]],
+        "title": "مَيِّزْ بَيْنَ المُتَشَابِهَاتِ وَسَطَ الكَلِمَة",
+        "face": "ـسـ"
+      },
+      {
+        "part": "final",
+        "form": "final",
+        "letters": ["ت", "د", "س", "ذ", "ش", "و", "ي", "ه"],
+        "title": "الحَرْفُ آخِرَ الكَلِمَة",
+        "face": "ـت"
+      },
+      {
+        "part": "compare-final",
+        "form": "final",
+        "letters": ["ب", "ت", "د", "ذ", "س", "ش"],
+        "compare": [["ب", "ت"], ["د", "ذ"], ["س", "ش"]],
+        "title": "مَيِّزْ بَيْنَ المُتَشَابِهَاتِ آخِرَ الكَلِمَة",
+        "face": "ـب"
+      }
+    ]
+  },
+  {
+    "id": "g4-words",
+    "kind": "join",
+    "title": "كَلِمَاتُ المجموعة الرابعة",
+    "sub": "يصل الحروفَ ثم ينسخ الكلمةَ كما يراها — والمسافةُ بين الكلمات والجلوسُ على السطر",
+    "nodes": [
+      { "part": "triple", "title": "وَصْلُ ثَلَاثَة", "joins": ["بيت", "تين", "هلا"] },
+      {
+        "part": "w-1",
+        "title": "كَلِمَاتُ المجموعة الرابعة ١",
+        "words": ["بَيْتْ", "تُوتْ", "يَدْ", "وَلَدْ", "تِينْ"],
+        "marks": ["ِ"]
+      },
+      {
+        "part": "w-2",
+        "title": "كَلِمَاتُ المجموعة الرابعة ٢",
+        "words": ["هِلَالْ", "شَمْسْ", "زَيْتْ", "ذَهَبْ"]
+      },
+      { "part": "sign-tanween", "title": "التَّنوين", "words": ["وَلَدٌ"] },
+      { "part": "sign-lam", "title": "اللام الشمسية والقمرية", "words": ["الشَّمْسْ"] },
+      { "part": "sign-hamza", "title": "الهَمْزَة", "words": ["أُمِّي"], "marks": ["أ"] },
+      { "part": "prep", "title": "كَلِمَاتٌ لِلْجُمَل", "words": ["مُنِيرْ", "تَدُورْ"] }
     ]
   },
   {
@@ -102,9 +310,81 @@ export const STAGES = [
     "title": "المجموعة الخامسة",
     "sub": "كلُّ حرفٍ وحدَه: من أين يبدأ وإلى أين يتّجه",
     "nodes": [
-      { "part": "ح", "letter": "ح" },
-      { "part": "ج", "letter": "ج" },
-      { "part": "خ", "letter": "خ" }
+      { "part": "ك", "letter": "ك" },
+      { "part": "ع", "letter": "ع" },
+      { "part": "ف", "letter": "ف" },
+      { "part": "غ", "letter": "غ" }
+    ]
+  },
+  {
+    "id": "g5-forms",
+    "kind": "form",
+    "title": "أَشْكَالُ المجموعة الخامسة",
+    "sub": "شكلُ الحرف حيث تطلبه كلمةٌ — أوّلَ الكلمة ووسطَها وآخرَها",
+    "nodes": [
+      {
+        "part": "initial",
+        "form": "initial",
+        "letters": ["ك", "ع", "ف", "غ"],
+        "title": "الحَرْفُ أَوَّلَ الكَلِمَة",
+        "face": "كـ"
+      },
+      {
+        "part": "compare-initial",
+        "form": "initial",
+        "letters": ["ع", "غ"],
+        "compare": [["ع", "غ"]],
+        "title": "مَيِّزْ بَيْنَ المُتَشَابِهَاتِ أَوَّلَ الكَلِمَة",
+        "face": "عـ"
+      },
+      {
+        "part": "medial",
+        "form": "medial",
+        "letters": ["ك", "ع", "ف", "غ"],
+        "title": "الحَرْفُ وَسَطَ الكَلِمَة",
+        "face": "ـكـ"
+      },
+      {
+        "part": "compare-medial",
+        "form": "medial",
+        "letters": ["ع", "غ"],
+        "compare": [["ع", "غ"]],
+        "title": "مَيِّزْ بَيْنَ المُتَشَابِهَاتِ وَسَطَ الكَلِمَة",
+        "face": "ـعـ"
+      },
+      {
+        "part": "final",
+        "form": "final",
+        "letters": ["ك", "ع", "ف"],
+        "title": "الحَرْفُ آخِرَ الكَلِمَة",
+        "face": "ـك"
+      }
+    ]
+  },
+  {
+    "id": "g5-words",
+    "kind": "join",
+    "title": "كَلِمَاتُ المجموعة الخامسة",
+    "sub": "يصل الحروفَ ثم ينسخ الكلمةَ كما يراها — والمسافةُ بين الكلمات والجلوسُ على السطر",
+    "nodes": [
+      {
+        "part": "w-1",
+        "title": "كَلِمَاتُ المجموعة الخامسة ١",
+        "words": ["عَيْنْ", "فِيلْ", "كَلْبْ"]
+      },
+      {
+        "part": "w-2",
+        "title": "كَلِمَاتُ المجموعة الخامسة ٢",
+        "words": ["عِنَبْ", "ثَعْلَبْ", "غُرَابْ"]
+      },
+      { "part": "sign-shadda", "title": "الشَّدّة", "words": ["سُكَّرْ", "دُكَّانْ"] },
+      { "part": "sign-lam", "title": "اللام الشمسية والقمرية", "words": ["السَّمَكْ"] },
+      {
+        "part": "prep",
+        "title": "كَلِمَاتٌ لِلْجُمَل",
+        "words": ["وَاسِعَةْ", "كَبِيرْ", "كَبِيرَةْ", "نَاعِمَةْ"],
+        "marks": ["ة"]
+      }
     ]
   },
   {
@@ -113,10 +393,86 @@ export const STAGES = [
     "title": "المجموعة السادسة",
     "sub": "كلُّ حرفٍ وحدَه: من أين يبدأ وإلى أين يتّجه",
     "nodes": [
-      { "part": "ش", "letter": "ش" },
-      { "part": "ص", "letter": "ص" },
-      { "part": "ز", "letter": "ز" },
-      { "part": "ط", "letter": "ط" }
+      { "part": "ق", "letter": "ق" },
+      { "part": "ح", "letter": "ح" },
+      { "part": "ج", "letter": "ج" },
+      { "part": "خ", "letter": "خ" }
+    ]
+  },
+  {
+    "id": "g6-forms",
+    "kind": "form",
+    "title": "أَشْكَالُ المجموعة السادسة",
+    "sub": "شكلُ الحرف حيث تطلبه كلمةٌ — أوّلَ الكلمة ووسطَها وآخرَها",
+    "nodes": [
+      {
+        "part": "initial",
+        "form": "initial",
+        "letters": ["ق", "ح", "ج", "خ"],
+        "title": "الحَرْفُ أَوَّلَ الكَلِمَة",
+        "face": "قـ"
+      },
+      {
+        "part": "compare-initial",
+        "form": "initial",
+        "letters": ["ف", "ق", "ح", "ج", "خ"],
+        "compare": [["ف", "ق"], ["ح", "ج", "خ"]],
+        "title": "مَيِّزْ بَيْنَ المُتَشَابِهَاتِ أَوَّلَ الكَلِمَة",
+        "face": "فـ"
+      },
+      {
+        "part": "medial",
+        "form": "medial",
+        "letters": ["ث", "ق", "ح", "ج", "خ"],
+        "title": "الحَرْفُ وَسَطَ الكَلِمَة",
+        "face": "ـثـ"
+      },
+      {
+        "part": "compare-medial",
+        "form": "medial",
+        "letters": ["ب", "ت", "ن", "ث", "ي", "ف", "ق", "ح", "ج", "خ"],
+        "compare": [["ب", "ت", "ن", "ث", "ي"], ["ف", "ق"], ["ح", "ج", "خ"]],
+        "title": "مَيِّزْ بَيْنَ المُتَشَابِهَاتِ وَسَطَ الكَلِمَة",
+        "face": "ـبـ"
+      },
+      {
+        "part": "final",
+        "form": "final",
+        "letters": ["ق", "ح", "ج"],
+        "title": "الحَرْفُ آخِرَ الكَلِمَة",
+        "face": "ـق"
+      }
+    ]
+  },
+  {
+    "id": "g6-words",
+    "kind": "join",
+    "title": "كَلِمَاتُ المجموعة السادسة",
+    "sub": "يصل الحروفَ ثم ينسخ الكلمةَ كما يراها — والمسافةُ بين الكلمات والجلوسُ على السطر",
+    "nodes": [
+      {
+        "part": "w-1",
+        "title": "كَلِمَاتُ المجموعة السادسة ١",
+        "words": ["قَلَمْ", "حُوتْ", "جَمَلْ"]
+      },
+      {
+        "part": "w-2",
+        "title": "كَلِمَاتُ المجموعة السادسة ٢",
+        "words": ["جَبَلْ", "حَلِيبْ", "خَرُوفْ"]
+      },
+      { "part": "sign-tanween", "title": "التَّنوين", "words": ["قَلَمٌ"] },
+      { "part": "sign-lam", "title": "اللام الشمسية والقمرية", "words": ["الْقَمَرْ"] },
+      {
+        "part": "sign-hamza",
+        "title": "الهَمْزَة",
+        "words": ["إِبْرِيقْ", "قِرَاءَةْ"],
+        "marks": ["إ", "ء"]
+      },
+      {
+        "part": "prep",
+        "title": "كَلِمَاتٌ لِلْجُمَل",
+        "words": ["مَفْتُوحَةْ", "جَمِيلَةْ", "حَادَّةْ", "سَاخِنْ"]
+      }
     ]
   },
   {
@@ -125,11 +481,77 @@ export const STAGES = [
     "title": "المجموعة السابعة",
     "sub": "كلُّ حرفٍ وحدَه: من أين يبدأ وإلى أين يتّجه",
     "nodes": [
-      { "part": "ث", "letter": "ث" },
-      { "part": "ذ", "letter": "ذ" },
+      { "part": "ص", "letter": "ص" },
       { "part": "ض", "letter": "ض" },
-      { "part": "ظ", "letter": "ظ" },
-      { "part": "غ", "letter": "غ" }
+      { "part": "ط", "letter": "ط" },
+      { "part": "ظ", "letter": "ظ" }
+    ]
+  },
+  {
+    "id": "g7-forms",
+    "kind": "form",
+    "title": "أَشْكَالُ المجموعة السابعة",
+    "sub": "شكلُ الحرف حيث تطلبه كلمةٌ — أوّلَ الكلمة ووسطَها وآخرَها",
+    "nodes": [
+      {
+        "part": "initial",
+        "form": "initial",
+        "letters": ["ص", "ض", "ط", "ظ"],
+        "title": "الحَرْفُ أَوَّلَ الكَلِمَة",
+        "face": "صـ"
+      },
+      {
+        "part": "compare-initial",
+        "form": "initial",
+        "letters": ["ص", "ض", "ط", "ظ"],
+        "compare": [["ص", "ض"], ["ط", "ظ"]],
+        "title": "مَيِّزْ بَيْنَ المُتَشَابِهَاتِ أَوَّلَ الكَلِمَة",
+        "face": "صـ"
+      },
+      {
+        "part": "medial",
+        "form": "medial",
+        "letters": ["ص", "ض", "ط", "ظ"],
+        "title": "الحَرْفُ وَسَطَ الكَلِمَة",
+        "face": "ـصـ"
+      },
+      {
+        "part": "compare-medial",
+        "form": "medial",
+        "letters": ["ص", "ض", "ط", "ظ"],
+        "compare": [["ص", "ض"], ["ط", "ظ"]],
+        "title": "مَيِّزْ بَيْنَ المُتَشَابِهَاتِ وَسَطَ الكَلِمَة",
+        "face": "ـصـ"
+      },
+      {
+        "part": "final",
+        "form": "final",
+        "letters": ["غ", "خ", "ص", "ض", "ط"],
+        "title": "الحَرْفُ آخِرَ الكَلِمَة",
+        "face": "ـغ"
+      },
+      {
+        "part": "compare-final",
+        "form": "final",
+        "letters": ["ع", "غ", "ح", "ج", "خ", "ص", "ض"],
+        "compare": [["ع", "غ"], ["ح", "ج", "خ"], ["ص", "ض"]],
+        "title": "مَيِّزْ بَيْنَ المُتَشَابِهَاتِ آخِرَ الكَلِمَة",
+        "face": "ـع"
+      }
+    ]
+  },
+  {
+    "id": "g7-words",
+    "kind": "join",
+    "title": "كَلِمَاتُ المجموعة السابعة",
+    "sub": "يصل الحروفَ ثم ينسخ الكلمةَ كما يراها — والمسافةُ بين الكلمات والجلوسُ على السطر",
+    "nodes": [
+      {
+        "part": "w",
+        "title": "كَلِمَاتُ المجموعة السابعة",
+        "words": ["مَطَرْ", "صَارُوخْ", "قِطَارْ", "ضِفْدَعْ", "ظَرْفْ"]
+      },
+      { "part": "prep", "title": "كَلِمَاتٌ لِلْجُمَل", "words": ["نَظِيفْ", "صَغِيرْ"] }
     ]
   },
   {
@@ -148,310 +570,6 @@ export const STAGES = [
       { "part": "٨", "letter": "٨", "title": "ثَمَانِيَةْ" },
       { "part": "٩", "letter": "٩", "title": "تِسْعَةْ" },
       { "part": "٠", "letter": "٠", "title": "صِفْرْ" }
-    ]
-  },
-  {
-    "id": "initial",
-    "kind": "form",
-    "title": "الحَرْفُ أَوَّلَ الكَلِمَة",
-    "sub": "شكلُه حين يبدأ الكلمة ويتصل بما بعده",
-    "nodes": [
-      {
-        "part": "g1",
-        "form": "initial",
-        "letters": ["ب", "م", "ل"],
-        "title": "المجموعة الأولى",
-        "face": "بـ"
-      },
-      {
-        "part": "g2",
-        "form": "initial",
-        "letters": ["ن", "س"],
-        "title": "المجموعة الثانية",
-        "face": "نـ"
-      },
-      {
-        "part": "g3",
-        "form": "initial",
-        "letters": ["ت", "ي", "ه"],
-        "title": "المجموعة الثالثة",
-        "face": "تـ"
-      },
-      {
-        "part": "g4",
-        "form": "initial",
-        "letters": ["ك", "ع", "ف", "ق"],
-        "title": "المجموعة الرابعة",
-        "face": "كـ"
-      },
-      {
-        "part": "g5",
-        "form": "initial",
-        "letters": ["ح", "ج", "خ"],
-        "title": "المجموعة الخامسة",
-        "face": "حـ"
-      },
-      {
-        "part": "g6",
-        "form": "initial",
-        "letters": ["ش", "ص", "ط"],
-        "title": "المجموعة السادسة",
-        "face": "شـ"
-      },
-      {
-        "part": "g7",
-        "form": "initial",
-        "letters": ["ث", "ض", "ظ", "غ"],
-        "title": "المجموعة السابعة",
-        "face": "ثـ"
-      },
-      {
-        "part": "compare",
-        "form": "initial",
-        "letters": ["ب", "ن", "ت", "ي", "ث", "س", "ش", "ع", "غ", "ف", "ق", "ح", "ج", "خ", "ص", "ض", "ط", "ظ"],
-        "compare": [["ب", "ن", "ت", "ي", "ث"], ["س", "ش"], ["ع", "غ"], ["ف", "ق"], ["ح", "ج", "خ"], ["ص", "ض"], ["ط", "ظ"]],
-        "title": "مَيِّزْ بَيْنَ المُتَشَابِهَات",
-        "face": "بـ"
-      }
-    ]
-  },
-  {
-    "id": "medial",
-    "kind": "form",
-    "title": "الحَرْفُ وَسَطَ الكَلِمَة",
-    "sub": "شكلُه حين يتصل بما قبله وما بعده",
-    "nodes": [
-      {
-        "part": "g1",
-        "form": "medial",
-        "letters": ["ب", "م", "ل"],
-        "title": "المجموعة الأولى",
-        "face": "ـبـ"
-      },
-      {
-        "part": "g2",
-        "form": "medial",
-        "letters": ["ن", "س"],
-        "title": "المجموعة الثانية",
-        "face": "ـنـ"
-      },
-      {
-        "part": "g3",
-        "form": "medial",
-        "letters": ["ت", "ي", "ه"],
-        "title": "المجموعة الثالثة",
-        "face": "ـتـ"
-      },
-      {
-        "part": "g4",
-        "form": "medial",
-        "letters": ["ك", "ع", "ف", "ق"],
-        "title": "المجموعة الرابعة",
-        "face": "ـكـ"
-      },
-      {
-        "part": "g5",
-        "form": "medial",
-        "letters": ["ح", "ج", "خ"],
-        "title": "المجموعة الخامسة",
-        "face": "ـحـ"
-      },
-      {
-        "part": "g6",
-        "form": "medial",
-        "letters": ["ش", "ص", "ط"],
-        "title": "المجموعة السادسة",
-        "face": "ـشـ"
-      },
-      {
-        "part": "g7",
-        "form": "medial",
-        "letters": ["ث", "ض", "ظ", "غ"],
-        "title": "المجموعة السابعة",
-        "face": "ـثـ"
-      },
-      {
-        "part": "compare",
-        "form": "medial",
-        "letters": ["ب", "ن", "ت", "ي", "ث", "س", "ش", "ع", "غ", "ف", "ق", "ح", "ج", "خ", "ص", "ض", "ط", "ظ"],
-        "compare": [["ب", "ن", "ت", "ي", "ث"], ["س", "ش"], ["ع", "غ"], ["ف", "ق"], ["ح", "ج", "خ"], ["ص", "ض"], ["ط", "ظ"]],
-        "title": "مَيِّزْ بَيْنَ المُتَشَابِهَات",
-        "face": "ـبـ"
-      }
-    ]
-  },
-  {
-    "id": "final",
-    "kind": "form",
-    "title": "الحَرْفُ آخِرَ الكَلِمَة",
-    "sub": "شكلُه حين يتصل بما قبله ثم يقف",
-    "nodes": [
-      {
-        "part": "g1",
-        "form": "final",
-        "letters": ["ا", "ب", "م", "ل"],
-        "title": "المجموعة الأولى",
-        "face": "ـا"
-      },
-      {
-        "part": "g2",
-        "form": "final",
-        "letters": ["ن", "ر", "د", "س"],
-        "title": "المجموعة الثانية",
-        "face": "ـن"
-      },
-      {
-        "part": "g3",
-        "form": "final",
-        "letters": ["ت", "و", "ي", "ه"],
-        "title": "المجموعة الثالثة",
-        "face": "ـت"
-      },
-      {
-        "part": "g4",
-        "form": "final",
-        "letters": ["ك", "ع", "ف", "ق"],
-        "title": "المجموعة الرابعة",
-        "face": "ـك"
-      },
-      {
-        "part": "g5",
-        "form": "final",
-        "letters": ["ح", "ج", "خ"],
-        "title": "المجموعة الخامسة",
-        "face": "ـح"
-      },
-      {
-        "part": "g6",
-        "form": "final",
-        "letters": ["ش", "ص", "ز", "ط"],
-        "title": "المجموعة السادسة",
-        "face": "ـش"
-      },
-      {
-        "part": "g7",
-        "form": "final",
-        "letters": ["ث", "ذ", "ض", "ظ", "غ"],
-        "title": "المجموعة السابعة",
-        "face": "ـث"
-      },
-      {
-        "part": "compare",
-        "form": "final",
-        "letters": ["ب", "ت", "ث", "ر", "ز", "د", "ذ", "س", "ش", "ع", "غ", "ح", "ج", "خ", "ص", "ض", "ط", "ظ"],
-        "compare": [["ب", "ت", "ث"], ["ر", "ز"], ["د", "ذ"], ["س", "ش"], ["ع", "غ"], ["ح", "ج", "خ"], ["ص", "ض"], ["ط", "ظ"]],
-        "title": "مَيِّزْ بَيْنَ المُتَشَابِهَات",
-        "face": "ـب"
-      }
-    ]
-  },
-  {
-    "id": "join",
-    "kind": "join",
-    "title": "الوَصْلُ وَالنَّسْخ",
-    "sub": "يصل الحروفَ ثم ينسخ الكلمةَ كما يراها — والمسافةُ بين الكلمات والجلوسُ على السطر",
-    "nodes": [
-      {
-        "part": "pair",
-        "sect": "وَصْلُ الحُرُوف",
-        "title": "وَصْلُ حَرْفَيْن",
-        "joins": ["با", "ما", "نا", "سل", "لا"]
-      },
-      {
-        "part": "triple",
-        "sect": "وَصْلُ الحُرُوف",
-        "title": "وَصْلُ ثَلَاثَة",
-        "joins": ["سلا", "بيت", "تين", "تمر", "هلا"]
-      },
-      {
-        "part": "w-g1",
-        "sect": "كَلِمَاتُ المَجْمُوعَات",
-        "title": "كَلِمَاتُ المجموعة الأولى",
-        "words": ["بَابَا", "مَامَا", "بَابْ", "مَالْ"],
-        "marks": ["َ", "ْ"]
-      },
-      {
-        "part": "w-g2",
-        "sect": "كَلِمَاتُ المَجْمُوعَات",
-        "title": "كَلِمَاتُ المجموعة الثانية",
-        "words": ["نَارْ", "دَارْ", "نَامْ", "سَلَامْ", "دَرَسْ"]
-      },
-      {
-        "part": "w-g3",
-        "sect": "كَلِمَاتُ المَجْمُوعَات",
-        "title": "كَلِمَاتُ المجموعة الثالثة",
-        "words": ["بَيْتْ", "تُوتْ", "يَدْ", "وَلَدْ", "تِينْ", "تَمْرْ", "هِلَالْ"],
-        "marks": ["ُ", "ِ"]
-      },
-      {
-        "part": "w-g4",
-        "sect": "كَلِمَاتُ المَجْمُوعَات",
-        "title": "كَلِمَاتُ المجموعة الرابعة",
-        "words": ["عَيْنْ", "فِيلْ", "كَلْبْ", "قَلَمْ", "عِنَبْ"]
-      },
-      {
-        "part": "w-g5",
-        "sect": "كَلِمَاتُ المَجْمُوعَات",
-        "title": "كَلِمَاتُ المجموعة الخامسة",
-        "words": ["حُوتْ", "جَمَلْ", "جَبَلْ", "حَلِيبْ", "خَرُوفْ"]
-      },
-      {
-        "part": "w-g6",
-        "sect": "كَلِمَاتُ المَجْمُوعَات",
-        "title": "كَلِمَاتُ المجموعة السادسة",
-        "words": ["شَمْسْ", "مَطَرْ", "زَيْتْ", "صَارُوخْ", "قِطَارْ"]
-      },
-      {
-        "part": "w-g7",
-        "sect": "كَلِمَاتُ المَجْمُوعَات",
-        "title": "كَلِمَاتُ المجموعة السابعة",
-        "words": ["ثَعْلَبْ", "ذَهَبْ", "ضِفْدَعْ", "غُرَابْ", "ظَرْفْ"]
-      },
-      {
-        "part": "sign-shadda",
-        "sect": "كَلِمَاتُ العَلَامَات",
-        "title": "الشَّدّة",
-        "words": ["سُكَّرْ", "سُلَّمْ", "دُكَّانْ"],
-        "marks": ["ّ"]
-      },
-      {
-        "part": "sign-tanween",
-        "sect": "كَلِمَاتُ العَلَامَات",
-        "title": "التَّنوين",
-        "words": ["بَابٌ", "قَلَمٌ", "وَلَدٌ"],
-        "marks": ["ٌ"]
-      },
-      {
-        "part": "sign-lam",
-        "sect": "كَلِمَاتُ العَلَامَات",
-        "title": "اللام الشمسية والقمرية",
-        "words": ["الْقَمَرْ", "الشَّمْسْ", "السَّمَكْ"]
-      },
-      {
-        "part": "sign-hamza",
-        "sect": "كَلِمَاتُ العَلَامَات",
-        "title": "الهَمْزَة",
-        "words": ["أُمِّي", "إِبْرِيقْ", "قِرَاءَةْ"],
-        "marks": ["أ", "إ", "ء", "ة"]
-      },
-      {
-        "part": "prep-1",
-        "sect": "كَلِمَاتٌ لِلْجُمَلِ القَصِيرَة",
-        "title": "كَلِمَاتٌ لِلْجُمَل ١",
-        "words": ["وَاسِعَةْ", "نَظِيفْ", "مَفْتُوحَةْ", "صَغِيرْ"]
-      },
-      {
-        "part": "prep-2",
-        "sect": "كَلِمَاتٌ لِلْجُمَلِ القَصِيرَة",
-        "title": "كَلِمَاتٌ لِلْجُمَل ٢",
-        "words": ["جَمِيلَةْ", "مُنِيرْ", "كَبِيرْ", "حَادَّةْ"]
-      },
-      {
-        "part": "prep-3",
-        "sect": "كَلِمَاتٌ لِلْجُمَلِ القَصِيرَة",
-        "title": "كَلِمَاتٌ لِلْجُمَل ٣",
-        "words": ["كَبِيرَةْ", "نَاعِمَةْ", "تَدُورْ", "سَاخِنْ"]
-      }
     ]
   },
   {
@@ -2318,51 +2436,57 @@ export const GATES = [
  * لمن يرسمه: حرفٌ مدروسٌ وعليه علامة، لا حرفٌ جديد.
  */
 export const MARKS = [
-  { "mark": "َ", "title": "فَتحة", "word": "بَابَا", "node": "join:w-g1", "base": null },
-  { "mark": "ْ", "title": "السُّكون", "word": "بَابْ", "node": "join:w-g1", "base": null },
-  { "mark": "ُ", "title": "ضَمّة", "word": "تُوتْ", "node": "join:w-g3", "base": null },
-  { "mark": "ِ", "title": "كَسرة", "word": "تِينْ", "node": "join:w-g3", "base": null },
-  {
-    "mark": "ّ",
-    "title": "الشَّدّة",
-    "word": "سُكَّرْ",
-    "node": "join:sign-shadda",
-    "base": null
-  },
+  { "mark": "َ", "title": "فَتحة", "word": "بَابَا", "node": "g1-words:w", "base": null },
+  { "mark": "ْ", "title": "السُّكون", "word": "بَابْ", "node": "g1-words:w", "base": null },
   {
     "mark": "ٌ",
     "title": "التَّنوين",
     "word": "بَابٌ",
-    "node": "join:sign-tanween",
+    "node": "g1-words:sign-tanween",
     "base": null
   },
+  {
+    "mark": "ُ",
+    "title": "ضَمّة",
+    "word": "سُلَّمْ",
+    "node": "g3-words:sign-shadda",
+    "base": null
+  },
+  {
+    "mark": "ّ",
+    "title": "الشَّدّة",
+    "word": "سُلَّمْ",
+    "node": "g3-words:sign-shadda",
+    "base": null
+  },
+  { "mark": "ِ", "title": "كَسرة", "word": "تِينْ", "node": "g4-words:w-1", "base": null },
   {
     "mark": "أ",
     "title": "همزةٌ فوق الألف",
     "word": "أُمِّي",
-    "node": "join:sign-hamza",
+    "node": "g4-words:sign-hamza",
     "base": "ا"
+  },
+  {
+    "mark": "ة",
+    "title": "تاءٌ مربوطة",
+    "word": "وَاسِعَةْ",
+    "node": "g5-words:prep",
+    "base": "ه"
   },
   {
     "mark": "إ",
     "title": "همزةٌ تحت الألف",
     "word": "إِبْرِيقْ",
-    "node": "join:sign-hamza",
+    "node": "g6-words:sign-hamza",
     "base": "ا"
   },
   {
     "mark": "ء",
     "title": "همزةٌ مفردة",
     "word": "قِرَاءَةْ",
-    "node": "join:sign-hamza",
+    "node": "g6-words:sign-hamza",
     "base": null
-  },
-  {
-    "mark": "ة",
-    "title": "تاءٌ مربوطة",
-    "word": "قِرَاءَةْ",
-    "node": "join:sign-hamza",
-    "base": "ه"
   }
 ];
 
@@ -2397,6 +2521,12 @@ export const WORDS = {
     "from": "g1",
     "letters": [["م", "initial"], ["ا", "final"], ["ل", "isolated"]]
   },
+  "بَابٌ": {
+    "say": "بَابٌ",
+    "emoji": "🚪",
+    "from": "tanween",
+    "letters": [["ب", "initial"], ["ا", "final"], ["ب", "isolated"]]
+  },
   "نَارْ": {
     "say": "نار",
     "emoji": "🔥",
@@ -2415,6 +2545,12 @@ export const WORDS = {
     "from": "g2",
     "letters": [["ن", "initial"], ["ا", "final"], ["م", "isolated"]]
   },
+  "تَمْرْ": {
+    "say": "تمر",
+    "emoji": "🌴",
+    "from": "g3",
+    "letters": [["ت", "initial"], ["م", "medial"], ["ر", "final"]]
+  },
   "سَلَامْ": {
     "say": "سلام",
     "emoji": "👋",
@@ -2426,6 +2562,12 @@ export const WORDS = {
     "emoji": "📖",
     "from": "g2",
     "letters": [["د", "isolated"], ["ر", "isolated"], ["س", "isolated"]]
+  },
+  "سُلَّمْ": {
+    "say": "سُلَّمْ",
+    "emoji": "🪜",
+    "from": "shadda",
+    "letters": [["س", "initial"], ["ل", "medial"], ["م", "final"]]
   },
   "بَيْتْ": {
     "say": "بيت",
@@ -2452,17 +2594,59 @@ export const WORDS = {
     "from": "g3",
     "letters": [["ت", "initial"], ["ي", "medial"], ["ن", "final"]]
   },
-  "تَمْرْ": {
-    "say": "تمر",
-    "emoji": "🌴",
-    "from": "g3",
-    "letters": [["ت", "initial"], ["م", "medial"], ["ر", "final"]]
-  },
   "هِلَالْ": {
     "say": "هلال",
     "emoji": "🌙",
     "from": "g3",
     "letters": [["ه", "initial"], ["ل", "medial"], ["ا", "final"], ["ل", "isolated"]]
+  },
+  "شَمْسْ": {
+    "say": "شمس",
+    "emoji": "☀️",
+    "from": "g6",
+    "letters": [["ش", "initial"], ["م", "medial"], ["س", "final"]]
+  },
+  "زَيْتْ": {
+    "say": "زيت",
+    "emoji": "🫗",
+    "from": "g6",
+    "letters": [["ز", "isolated"], ["ي", "initial"], ["ت", "final"]]
+  },
+  "ذَهَبْ": {
+    "say": "ذهب",
+    "emoji": "🥇",
+    "from": "g7",
+    "letters": [["ذ", "isolated"], ["ه", "initial"], ["ب", "final"]]
+  },
+  "وَلَدٌ": {
+    "say": "وَلَدٌ",
+    "emoji": "👦",
+    "from": "tanween",
+    "letters": [["و", "isolated"], ["ل", "initial"], ["د", "final"]]
+  },
+  "الشَّمْسْ": {
+    "say": "الشَّمْسْ",
+    "emoji": "☀️",
+    "from": "lam",
+    "letters": [["ا", "isolated"], ["ل", "initial"], ["ش", "medial"], ["م", "medial"], ["س", "final"]]
+  },
+  "أُمِّي": {
+    "say": "أُمِّي",
+    "emoji": "👩",
+    "from": "lex:family",
+    "letters": [["أ", "isolated"], ["م", "initial"], ["ي", "final"]]
+  },
+  "مُنِيرْ": {
+    "say": null,
+    "emoji": null,
+    "from": "support",
+    "letters": [["م", "initial"], ["ن", "medial"], ["ي", "medial"], ["ر", "final"]]
+  },
+  "تَدُورْ": {
+    "say": null,
+    "emoji": null,
+    "from": "support",
+    "letters": [["ت", "initial"], ["د", "final"], ["و", "isolated"], ["ر", "isolated"]]
   },
   "عَيْنْ": {
     "say": "عين",
@@ -2482,17 +2666,71 @@ export const WORDS = {
     "from": "g4",
     "letters": [["ك", "initial"], ["ل", "medial"], ["ب", "final"]]
   },
-  "قَلَمْ": {
-    "say": "قلم",
-    "emoji": "✏️",
-    "from": "g4",
-    "letters": [["ق", "initial"], ["ل", "medial"], ["م", "final"]]
-  },
   "عِنَبْ": {
     "say": "عنب",
     "emoji": "🍇",
     "from": "g4",
     "letters": [["ع", "initial"], ["ن", "medial"], ["ب", "final"]]
+  },
+  "ثَعْلَبْ": {
+    "say": "ثعلب",
+    "emoji": "🦊",
+    "from": "g7",
+    "letters": [["ث", "initial"], ["ع", "medial"], ["ل", "medial"], ["ب", "final"]]
+  },
+  "غُرَابْ": {
+    "say": "غراب",
+    "emoji": "🐦‍⬛",
+    "from": "g7",
+    "letters": [["غ", "initial"], ["ر", "final"], ["ا", "isolated"], ["ب", "isolated"]]
+  },
+  "سُكَّرْ": {
+    "say": "سُكَّرْ",
+    "emoji": "🍬",
+    "from": "shadda",
+    "letters": [["س", "initial"], ["ك", "medial"], ["ر", "final"]]
+  },
+  "دُكَّانْ": {
+    "say": "دُكَّانْ",
+    "emoji": "🏪",
+    "from": "shadda",
+    "letters": [["د", "isolated"], ["ك", "initial"], ["ا", "final"], ["ن", "isolated"]]
+  },
+  "السَّمَكْ": {
+    "say": "السَّمَكْ",
+    "emoji": "🐟",
+    "from": "lam",
+    "letters": [["ا", "isolated"], ["ل", "initial"], ["س", "medial"], ["م", "medial"], ["ك", "final"]]
+  },
+  "وَاسِعَةْ": {
+    "say": "وَاسِعَةْ",
+    "emoji": null,
+    "from": "support",
+    "letters": [["و", "isolated"], ["ا", "isolated"], ["س", "initial"], ["ع", "medial"], ["ة", "final"]]
+  },
+  "كَبِيرْ": {
+    "say": "كَبِيرْ",
+    "emoji": null,
+    "from": "support",
+    "letters": [["ك", "initial"], ["ب", "medial"], ["ي", "medial"], ["ر", "final"]]
+  },
+  "كَبِيرَةْ": {
+    "say": "كَبِيرَةْ",
+    "emoji": null,
+    "from": "support",
+    "letters": [["ك", "initial"], ["ب", "medial"], ["ي", "medial"], ["ر", "final"], ["ة", "isolated"]]
+  },
+  "نَاعِمَةْ": {
+    "say": "نَاعِمَةْ",
+    "emoji": null,
+    "from": "support",
+    "letters": [["ن", "initial"], ["ا", "final"], ["ع", "initial"], ["م", "medial"], ["ة", "final"]]
+  },
+  "قَلَمْ": {
+    "say": "قلم",
+    "emoji": "✏️",
+    "from": "g4",
+    "letters": [["ق", "initial"], ["ل", "medial"], ["م", "final"]]
   },
   "حُوتْ": {
     "say": "حوت",
@@ -2524,125 +2762,17 @@ export const WORDS = {
     "from": "g5",
     "letters": [["خ", "initial"], ["ر", "final"], ["و", "isolated"], ["ف", "isolated"]]
   },
-  "شَمْسْ": {
-    "say": "شمس",
-    "emoji": "☀️",
-    "from": "g6",
-    "letters": [["ش", "initial"], ["م", "medial"], ["س", "final"]]
-  },
-  "مَطَرْ": {
-    "say": "مطر",
-    "emoji": "🌧️",
-    "from": "g6",
-    "letters": [["م", "initial"], ["ط", "medial"], ["ر", "final"]]
-  },
-  "زَيْتْ": {
-    "say": "زيت",
-    "emoji": "🫗",
-    "from": "g6",
-    "letters": [["ز", "isolated"], ["ي", "initial"], ["ت", "final"]]
-  },
-  "صَارُوخْ": {
-    "say": "صاروخ",
-    "emoji": "🚀",
-    "from": "g6",
-    "letters": [["ص", "initial"], ["ا", "final"], ["ر", "isolated"], ["و", "isolated"], ["خ", "isolated"]]
-  },
-  "قِطَارْ": {
-    "say": "قطار",
-    "emoji": "🚆",
-    "from": "g6",
-    "letters": [["ق", "initial"], ["ط", "medial"], ["ا", "final"], ["ر", "isolated"]]
-  },
-  "ثَعْلَبْ": {
-    "say": "ثعلب",
-    "emoji": "🦊",
-    "from": "g7",
-    "letters": [["ث", "initial"], ["ع", "medial"], ["ل", "medial"], ["ب", "final"]]
-  },
-  "ذَهَبْ": {
-    "say": "ذهب",
-    "emoji": "🥇",
-    "from": "g7",
-    "letters": [["ذ", "isolated"], ["ه", "initial"], ["ب", "final"]]
-  },
-  "ضِفْدَعْ": {
-    "say": "ضفدع",
-    "emoji": "🐸",
-    "from": "g7",
-    "letters": [["ض", "initial"], ["ف", "medial"], ["د", "final"], ["ع", "isolated"]]
-  },
-  "غُرَابْ": {
-    "say": "غراب",
-    "emoji": "🐦‍⬛",
-    "from": "g7",
-    "letters": [["غ", "initial"], ["ر", "final"], ["ا", "isolated"], ["ب", "isolated"]]
-  },
-  "ظَرْفْ": {
-    "say": "ظرف",
-    "emoji": "✉️",
-    "from": "g7",
-    "letters": [["ظ", "initial"], ["ر", "final"], ["ف", "isolated"]]
-  },
-  "سُكَّرْ": {
-    "say": "سُكَّرْ",
-    "emoji": "🍬",
-    "from": "shadda",
-    "letters": [["س", "initial"], ["ك", "medial"], ["ر", "final"]]
-  },
-  "سُلَّمْ": {
-    "say": "سُلَّمْ",
-    "emoji": "🪜",
-    "from": "shadda",
-    "letters": [["س", "initial"], ["ل", "medial"], ["م", "final"]]
-  },
-  "دُكَّانْ": {
-    "say": "دُكَّانْ",
-    "emoji": "🏪",
-    "from": "shadda",
-    "letters": [["د", "isolated"], ["ك", "initial"], ["ا", "final"], ["ن", "isolated"]]
-  },
-  "بَابٌ": {
-    "say": "بَابٌ",
-    "emoji": "🚪",
-    "from": "tanween",
-    "letters": [["ب", "initial"], ["ا", "final"], ["ب", "isolated"]]
-  },
   "قَلَمٌ": {
     "say": "قَلَمٌ",
     "emoji": "✏️",
     "from": "tanween",
     "letters": [["ق", "initial"], ["ل", "medial"], ["م", "final"]]
   },
-  "وَلَدٌ": {
-    "say": "وَلَدٌ",
-    "emoji": "👦",
-    "from": "tanween",
-    "letters": [["و", "isolated"], ["ل", "initial"], ["د", "final"]]
-  },
   "الْقَمَرْ": {
     "say": "الْقَمَرْ",
     "emoji": "🌕",
     "from": "lam",
     "letters": [["ا", "isolated"], ["ل", "initial"], ["ق", "medial"], ["م", "medial"], ["ر", "final"]]
-  },
-  "الشَّمْسْ": {
-    "say": "الشَّمْسْ",
-    "emoji": "☀️",
-    "from": "lam",
-    "letters": [["ا", "isolated"], ["ل", "initial"], ["ش", "medial"], ["م", "medial"], ["س", "final"]]
-  },
-  "السَّمَكْ": {
-    "say": "السَّمَكْ",
-    "emoji": "🐟",
-    "from": "lam",
-    "letters": [["ا", "isolated"], ["ل", "initial"], ["س", "medial"], ["م", "medial"], ["ك", "final"]]
-  },
-  "أُمِّي": {
-    "say": "أُمِّي",
-    "emoji": "👩",
-    "from": "lex:family",
-    "letters": [["أ", "isolated"], ["م", "initial"], ["ي", "final"]]
   },
   "إِبْرِيقْ": {
     "say": "إِبْرِيقْ",
@@ -2656,29 +2786,11 @@ export const WORDS = {
     "from": "lex:school",
     "letters": [["ق", "initial"], ["ر", "final"], ["ا", "isolated"], ["ء", "isolated"], ["ة", "isolated"]]
   },
-  "وَاسِعَةْ": {
-    "say": "وَاسِعَةْ",
-    "emoji": null,
-    "from": "support",
-    "letters": [["و", "isolated"], ["ا", "isolated"], ["س", "initial"], ["ع", "medial"], ["ة", "final"]]
-  },
-  "نَظِيفْ": {
-    "say": "نَظِيفْ",
-    "emoji": null,
-    "from": "support",
-    "letters": [["ن", "initial"], ["ظ", "medial"], ["ي", "medial"], ["ف", "final"]]
-  },
   "مَفْتُوحَةْ": {
     "say": "مَفْتُوحَةْ",
     "emoji": null,
     "from": "support",
     "letters": [["م", "initial"], ["ف", "medial"], ["ت", "medial"], ["و", "final"], ["ح", "initial"], ["ة", "final"]]
-  },
-  "صَغِيرْ": {
-    "say": "صَغِيرْ",
-    "emoji": null,
-    "from": "support",
-    "letters": [["ص", "initial"], ["غ", "medial"], ["ي", "medial"], ["ر", "final"]]
   },
   "جَمِيلَةْ": {
     "say": "جَمِيلَةْ",
@@ -2686,47 +2798,59 @@ export const WORDS = {
     "from": "support",
     "letters": [["ج", "initial"], ["م", "medial"], ["ي", "medial"], ["ل", "medial"], ["ة", "final"]]
   },
-  "مُنِيرْ": {
-    "say": null,
-    "emoji": null,
-    "from": "support",
-    "letters": [["م", "initial"], ["ن", "medial"], ["ي", "medial"], ["ر", "final"]]
-  },
-  "كَبِيرْ": {
-    "say": "كَبِيرْ",
-    "emoji": null,
-    "from": "support",
-    "letters": [["ك", "initial"], ["ب", "medial"], ["ي", "medial"], ["ر", "final"]]
-  },
   "حَادَّةْ": {
     "say": "حَادَّةْ",
     "emoji": null,
     "from": "support",
     "letters": [["ح", "initial"], ["ا", "final"], ["د", "isolated"], ["ة", "isolated"]]
   },
-  "كَبِيرَةْ": {
-    "say": "كَبِيرَةْ",
-    "emoji": null,
-    "from": "support",
-    "letters": [["ك", "initial"], ["ب", "medial"], ["ي", "medial"], ["ر", "final"], ["ة", "isolated"]]
-  },
-  "نَاعِمَةْ": {
-    "say": "نَاعِمَةْ",
-    "emoji": null,
-    "from": "support",
-    "letters": [["ن", "initial"], ["ا", "final"], ["ع", "initial"], ["م", "medial"], ["ة", "final"]]
-  },
-  "تَدُورْ": {
-    "say": null,
-    "emoji": null,
-    "from": "support",
-    "letters": [["ت", "initial"], ["د", "final"], ["و", "isolated"], ["ر", "isolated"]]
-  },
   "سَاخِنْ": {
     "say": "سَاخِنْ",
     "emoji": null,
     "from": "support",
     "letters": [["س", "initial"], ["ا", "final"], ["خ", "initial"], ["ن", "final"]]
+  },
+  "مَطَرْ": {
+    "say": "مطر",
+    "emoji": "🌧️",
+    "from": "g6",
+    "letters": [["م", "initial"], ["ط", "medial"], ["ر", "final"]]
+  },
+  "صَارُوخْ": {
+    "say": "صاروخ",
+    "emoji": "🚀",
+    "from": "g6",
+    "letters": [["ص", "initial"], ["ا", "final"], ["ر", "isolated"], ["و", "isolated"], ["خ", "isolated"]]
+  },
+  "قِطَارْ": {
+    "say": "قطار",
+    "emoji": "🚆",
+    "from": "g6",
+    "letters": [["ق", "initial"], ["ط", "medial"], ["ا", "final"], ["ر", "isolated"]]
+  },
+  "ضِفْدَعْ": {
+    "say": "ضفدع",
+    "emoji": "🐸",
+    "from": "g7",
+    "letters": [["ض", "initial"], ["ف", "medial"], ["د", "final"], ["ع", "isolated"]]
+  },
+  "ظَرْفْ": {
+    "say": "ظرف",
+    "emoji": "✉️",
+    "from": "g7",
+    "letters": [["ظ", "initial"], ["ر", "final"], ["ف", "isolated"]]
+  },
+  "نَظِيفْ": {
+    "say": "نَظِيفْ",
+    "emoji": null,
+    "from": "support",
+    "letters": [["ن", "initial"], ["ظ", "medial"], ["ي", "medial"], ["ف", "final"]]
+  },
+  "صَغِيرْ": {
+    "say": "صَغِيرْ",
+    "emoji": null,
+    "from": "support",
+    "letters": [["ص", "initial"], ["غ", "medial"], ["ي", "medial"], ["ر", "final"]]
   },
   "غُرْفَةْ": {
     "say": "غُرْفَةْ",
@@ -6998,10 +7122,10 @@ export const FORMS = {
 
 /** اسمُ شكل الموقع كما يُقرأ في اللوحة والعناوين. */
 export const FORM_NAMES = {
-  [FORMS.ISOLATED]: 'معزول',
-  [FORMS.INITIAL]: 'ابتدائي',
-  [FORMS.MEDIAL]: 'وسطي',
-  [FORMS.FINAL]: 'نهائي',
+  "isolated": "معزول",
+  "initial": "ابتدائي",
+  "medial": "وسطي",
+  "final": "نهائي"
 };
 
 /** مسارُ حرفٍ بشكلِ موضعٍ بعينه — `null` إن لم يُؤلَّف بعد. */

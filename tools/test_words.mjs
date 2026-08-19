@@ -67,8 +67,10 @@ const trace = (ref, opts = {}) => [
 // ————— ١) التغطية: مادّةُ النسخ كلُّها مؤلَّفة —————
 
 console.log('\n— ١) التغطية: لكلِّ ما يُنسَخ مسارُه —');
-const stage = curriculum.STAGES.find((s) => s.kind === 'join');
-const material = (stage?.nodes || []).flatMap((n) => [...(n.joins || []), ...(n.words || [])]);
+// **ومحطاتُ النسخ سبعٌ لا واحدة** (الجلسة م١): مُناوبةُ الكلمات وزّعتها على
+// المجموعات — فتُجمع كلُّها بنوعها لا يُؤخذ أوّلُها، وإلا حرس الفاحصُ سُبعَ المادّة.
+const material = curriculum.STAGES.filter((s) => s.kind === 'join')
+  .flatMap((s) => s.nodes || []).flatMap((n) => [...(n.joins || []), ...(n.words || [])]);
 /** وجملُ المحطة الأخيرة مادّةٌ كمادّة النسخ (الجلسة ٩) — تُنسَخ ثم تُملى. */
 const sentences = curriculum.STAGES
   .filter((s) => s.kind === 'sentence')
@@ -77,7 +79,7 @@ ok(entries.length > 0, `مساراتُ النسخ ${entries.length} — منها
   + ` و${sentences.length} محطةُ الجمل`);
 
 const missing = [...material, ...sentences].filter((text) => !words.WORD_PATHS[text]);
-ok(missing.length === 0, 'ولا مادّةَ في محطتَي الوصل والجمل بلا مسار'
+ok(missing.length === 0, 'ولا مادّةَ في محطات النسخ والجمل بلا مسار'
   + (missing.length ? ` — ناقص: ${missing.join('، ')}` : ''));
 
 // **وكلماتُ الجداول كلُّها** (تحتاجها المراجعةُ والبوابةُ والجلستان ٩ و١٠)

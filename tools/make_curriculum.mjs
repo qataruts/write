@@ -185,6 +185,14 @@ const joinsAfter = (ch) => (isLetter(ch) ? LETTERS[ch].joins : VARIANTS[ch]?.joi
 /** أشكالُ الموقع الأربعة — أسماؤها ثابتةٌ لأنها تدخل مفاتيح ليتنر (`METHOD.md §٦`). */
 const FORMS = { ISOLATED: 'isolated', INITIAL: 'initial', MEDIAL: 'medial', FINAL: 'final' };
 
+/** اسمُ الشكل كما يُقرأ — **مصدرٌ واحد**: يُصدَّر في الوحدة (`FORM_NAMES`) ويُطبع في الجرد. */
+const FORM_LABEL = {
+  [FORMS.ISOLATED]: 'معزول',
+  [FORMS.INITIAL]: 'ابتدائي',
+  [FORMS.MEDIAL]: 'وسطي',
+  [FORMS.FINAL]: 'نهائي',
+};
+
 /**
  * **رسمُ نصٍّ**: كلُّ محرفٍ في موضعه بشكله — قاعدةُ العربية نفسُها ولا خيارَ فيها:
  * يتصل بما قبله إن كان ما قبله واصلاً، وبما بعده إن كان هو واصلاً وبعده حرف.
@@ -429,19 +437,22 @@ for (const family of rc.ROOTS) {
 // جوار الحروف في كلمات المجموعات، أوّلاً فأوّلاً. فما يتدرّب عليه الطفلُ وصلاً هو
 // عينُ ما سيكتبه كلمةً بعد قليل.
 
-const groupWords = rc.GROUPS.map((g) => ({ group: g, words: g.words.map((w) => w.tiles.join('')) }));
+// **وتُقرأ من الكلمات التي صارت في يده** (الجلسة م١): كانت تُقرأ من كلمات المجموعات
+// كلِّها لأنّ الوصل كان محطةً واحدة بعد الهجاء كلِّه — وقد صار الوصلُ في موضع الحاجة،
+// فوصلتُه من كلمات مجموعته وحدَها.
 
-function ligatures(size) {
+/** كلماتُ مجموعات اقرأ كلُّها بترتيبه — مادّةٌ لا ترتيب: توزيعُها على المجموعات محسوبٌ أدناه. */
+const GROUP_WORDS = rc.GROUPS.flatMap((g) => g.words.map((w) => w.tiles.join('')));
+
+function ligatures(size, words) {
   const out = [];
-  for (const { words } of groupWords) {
-    for (const text of words) {
-      const chars = [...text].filter((ch) => isLetter(ch) || isVariant(ch));
-      for (let i = 0; i + size <= chars.length; i++) {
-        const run = chars.slice(i, i + size);
-        if (!run.slice(0, -1).every(joinsAfter)) continue;   // الوصلةُ ما اتّصل
-        const joined = run.join('');
-        if (!out.includes(joined)) out.push(joined);
-      }
+  for (const text of words) {
+    const chars = [...text].filter((ch) => isLetter(ch) || isVariant(ch));
+    for (let i = 0; i + size <= chars.length; i++) {
+      const run = chars.slice(i, i + size);
+      if (!run.slice(0, -1).every(joinsAfter)) continue;   // الوصلةُ ما اتّصل
+      const joined = run.join('');
+      if (!out.includes(joined)) out.push(joined);
     }
   }
   return out.slice(0, BUNDLE);
@@ -468,7 +479,7 @@ const skillSigns = rc.SKILLS
 const Q3 = ['ّ', 'ً', 'ٌ', 'ٍ', ...Object.keys(VARIANTS).filter((ch) => VARIANTS[ch].mark.includes('همزة'))];
 
 const covered = new Set([
-  ...groupWords.flatMap(({ words }) => words),
+  ...GROUP_WORDS,
   ...skillSigns.flatMap((s) => s.words),
 ].flatMap(marksOf));
 
@@ -523,6 +534,179 @@ for (const mark of Q3) {
   markRuling.push({ mark, where: found.surface.title, word: found.bearer });
 }
 
+// ————— ٥ج. ترتيبُ الكتابة: تقريبُ الأخوات ومناوبةُ الكلمات (الجلسة م١) —————
+//
+// **وهذان قرارا ترتيبٍ لا مادّة** — فموضعُهما هنا لا في اقرأ: مادّتُه بحالها حرفاً
+// وكلمةً وجملة، والمؤلَّفُ عندنا ترتيبُها كتابةً (رأسُ هذا الملفّ).
+//
+// **١) تقريبُ الأخوات** — حكمُ المالك (`PEDAGOGY_STUDY §١ز`، ١٩ أغسطس ٢٠٢٦): ترتيبُ
+// اقرأ يؤخّر الأخواتِ المنقوطة (ز ذ ث ض ظ غ) لئلّا تلتبس **بالعين**، والكتابةُ لا
+// تعنيها هذه العلّة: **جسمُ الأخت جسمُ أختها**، فمن كتب `ر` يكتب `ز` بنقطة. فتقرب كلُّ
+// أختٍ من أختها: **وسطُ مدى الأسرة ١١٫٦ محطة ⇐ ٣٫٠**، و«بابا» و«ماما» بحالهما،
+// **وكلفتُه على بنوك الكلمات صفر**. **ولا إلصاقَ فيه**: `ب` ثمّ `ت` بعد ثلاث، ثمّ `ث`
+// بعد أربع — فالتمييزُ البصريّ محفوظ.
+//
+// **٢) ومناوبةُ الكلمات** — **مجموعةٌ ← الأشكالُ التي تحتاجها كلماتُها ← كلماتُها**،
+// سبعَ مرّات بدل صفٍّ واحد. **وعلّتُها مقيسة** (`§١ح`): كانت أوّلُ كلمةٍ في العقدة
+// ٧١ من ٣٦٣ — بعد ٢٨ حرفاً و١٠ أرقام و٢٤ شكلَ موقع. **والمبدأُ الحاكم** (`§١ك`):
+// **الشكلُ يُدرَّس حين تحتاجه كلمة — لا قبله، ولا دفعةً واحدة.**
+//
+// **وهو الترتيبُ الوحيد المُعلَن نصّاً في هذا الملفّ** — كالتهيئة الحركية: اقرأ لا
+// يعرفه لأنه حكمُ يدٍ لا حكمُ عين. **ويحرسه فحصان**: أنّه **تبديلُ ترتيبٍ لا تبديلُ
+// مادّة** (حروفُه حروفُ اقرأ الثمانيةُ والعشرون بلا زيادةٍ ولا نقصان)، وأنّ كلَّ
+// شكلٍ تطلبه كلمةٌ مدروسٌ قبلها (`check_writable.py`).
+const WRITING_ORDER = [
+  'ا ب م ل', 'ت ن ر د', 'ث س ز ذ', 'ش و ي ه', 'ك ع ف غ', 'ق ح ج خ', 'ص ض ط ظ',
+].map((row) => row.split(' '));
+
+/** المجموعاتُ السبع: حروفُها من ترتيب الكتابة، وعناوينُها عناوينُ مجموعات اقرأ برُتَبها. */
+const GROUPS = WRITING_ORDER.map((letters, i) => ({
+  id: rc.GROUPS[i]?.id ?? `g${i + 1}`,
+  title: rc.GROUPS[i]?.title ?? `المجموعة ${arabicOrdinal(i)}`,
+  letters,
+}));
+
+function arabicOrdinal(i) { return String(i + 1); }
+
+// **وأوّلُ ما يُقاس: أهو ترتيبٌ أم مادّة؟** — حروفُ المجموعات السبع يجب أن تكون حروفَ
+// اقرأ بأعيانها: لا حرفَ يُخترع ولا حرفَ يسقط ولا حرفَ يتكرّر.
+{
+  const flat = WRITING_ORDER.flat();
+  const theirs = Object.keys(rc.LETTERS);
+  const missing = theirs.filter((ch) => !flat.includes(ch));
+  const alien = flat.filter((ch) => !Object.hasOwn(rc.LETTERS, ch));
+  if (flat.length !== new Set(flat).size || missing.length || alien.length
+      || GROUPS.length !== rc.GROUPS.length) {
+    console.error('ترتيبُ الكتابة ليس تبديلَ ترتيبٍ لحروف اقرأ:\n'
+      + (missing.length ? `  ساقطة: ${missing.join(' ')}\n` : '')
+      + (alien.length ? `  دخيلة: ${alien.join(' ')}\n` : '')
+      + (flat.length !== new Set(flat).size ? '  ومكرَّرةٌ فيه\n' : '')
+      + `  مجموعاتُه ${GROUPS.length} ومجموعاتُ اقرأ ${rc.GROUPS.length}`);
+    process.exit(2);
+  }
+}
+
+const GROUP_OF = new Map();
+GROUPS.forEach((group, i) => group.letters.forEach((ch) => GROUP_OF.set(ch, i)));
+
+/** أصلُ المحرف الذي يُرسم عليه — المتغيّرُ على أصله (أ ← ا · ة ← ه)، والهمزةُ المفردةُ بلا أصل. */
+const rootOf = (ch) => (isVariant(ch) ? VARIANTS[ch].base : ch);
+
+/**
+ * **أوّلُ مجموعةٍ يصير النصُّ بعدها مكتوباً** — أقصى مجموعةِ حرفٍ من حروفه.
+ * **والمتغيّرُ يُحسب بأصله** لا بنفسه: `ة` تنتظر الهاء و`أ` تنتظر الألف — فالفاحصُ
+ * يطلب رسمَ الأصل قبل بطاقة العلامة، فلا تُفتح البطاقةُ قبل حرفها.
+ */
+function availableAt(text) {
+  let at = 0;
+  for (const [ch] of shape(text)) {
+    const base = rootOf(ch);
+    if (base === null) continue;                 // الهمزةُ المفردة لا أصلَ لها ترسم عليه
+    at = Math.max(at, GROUP_OF.get(base));
+  }
+  return at;
+}
+
+/** أشكالُ المواقع التي يطلبها نصّ — بأصول محارفه. */
+function shapesNeeded(text) {
+  const out = [];
+  for (const [ch, form] of shape(text)) {
+    const base = rootOf(ch);
+    if (base !== null) out.push(`${base}|${form}`);
+  }
+  return out;
+}
+
+// ——— أ) الكلماتُ توزَّع على المجموعات بحصيلة حروفها ———
+//
+// **والبساتينُ ليست منها**: أميالُ النسخ حزمةٌ بعد بوابتها (`EXPANSION §٧`: «لا تدخل
+// حزمةٌ من الأميال قبل بوابتها»)، فتبقى في موضعها بعد الحروف كلِّها — والمناوبةُ
+// تنقل **كلماتِ المنهج** (مجموعاتِه وعلاماتِه وكلماتِ جمله) إلى مواضع حاجتها.
+const WORD_SOURCES = [
+  { part: 'w', name: (group) => `كَلِمَاتُ ${group.title}`, words: GROUP_WORDS },
+  ...skillSigns.map((sign) => ({ part: `sign-${sign.id}`, name: () => sign.title, words: sign.words })),
+  { part: 'sign-hamza', name: () => 'الهَمْزَة', words: hamzaWords },
+  { part: 'prep', name: () => 'كَلِمَاتٌ لِلْجُمَل', words: supports },
+];
+
+/** كلماتُ كلِّ مجموعةٍ من كلِّ منبع، بترتيب منبعها — ولا تُنسَخ كلمةٌ مرّتين. */
+const groupPool = GROUPS.map(() => WORD_SOURCES.map(() => []));
+{
+  const placed = new Set();
+  for (const [s, source] of WORD_SOURCES.entries()) {
+    for (const text of source.words) {
+      if (placed.has(text)) continue;
+      placed.add(text);
+      groupPool[availableAt(text)][s].push(text);
+    }
+  }
+}
+
+// ——— ب) والوصلاتُ كلٌّ في مجموعة حروفها ———
+//
+// **ومادّتُها هي هي** (وصلاتُ كلمات المجموعات أوّلاً فأوّلاً كما كانت): لم تتبدّل
+// وصلةٌ ولا سقطت — **وإنّما تفرّقت على مواضع حاجتها**، فلا تُطلب وصلةٌ فيها حرفٌ لم
+// يُدرَّس، ولا تُكتب كلمةٌ موصولةٌ قبل أن يُوصَل حرفان.
+const LIGATURE_KINDS = [
+  { part: 'pair', title: 'وَصْلُ حَرْفَيْن', size: 2 },
+  { part: 'triple', title: 'وَصْلُ ثَلَاثَة', size: 3 },
+];
+const ligatureAt = GROUPS.map(() => []);
+for (const kind of LIGATURE_KINDS) {
+  const all = ligatures(kind.size, GROUP_WORDS);
+  for (const [at] of GROUPS.entries()) {
+    const joins = all.filter((run) => availableAt(run) === at);
+    if (joins.length) ligatureAt[at].push({ part: kind.part, title: kind.title, joins });
+  }
+}
+
+// ——— ج) والأشكالُ تُدرَّس في أوّل مجموعةٍ تطلبها فيها مادّة ———
+//
+// **المادّةُ كلُّها لا كلماتُ المجموعة وحدَها**: البستانُ والجملةُ والجذرُ بعد
+// المجموعات كلِّها، فشكلٌ تطلبه إحداها يُدرَّس في المجموعة التي تصير بعدها مكتوبة —
+// **فلا يبقى شكلٌ بلا موضع، ولا يُدرَّس شكلٌ قبل أن تطلبه مادّة**.
+const shapeAt = new Map();
+const needShape = (text, at) => {
+  for (const key of shapesNeeded(text)) {
+    if (!shapeAt.has(key) || shapeAt.get(key) > at) shapeAt.set(key, at);
+  }
+};
+for (const text of [...GROUP_WORDS, ...WORD_SOURCES.flatMap((s) => s.words),
+  ...GARDENS.flatMap((garden) => garden.words), ...ladderSupports,
+  ...roots.flatMap((family) => family.members)]) needShape(text, availableAt(text));
+for (const text of [...sentences.map((s) => s.text), ...ladder.map((s) => s.text)]) {
+  needShape(text, availableAt(text));
+}
+for (const [at, specs] of ligatureAt.entries()) {
+  for (const spec of specs) for (const text of spec.joins) needShape(text, at);
+}
+
+/**
+ * أشكالُ الموقع التي تُدرَّس في مجموعةٍ بعينها، مرتَّبةً بترتيب حروف المجموعات —
+ * **والمعزولُ ليس منها**: محطةُ الحرف نفسُها تعلّمه. **وغيرُ الواصل كذلك**:
+ * ابتدائيُّه عينُ معزوله ووسطيُّه عينُ نهائيّه (أثبتته عدّةُ الجلسة ٢ بمقابلة
+ * بصمتَي القناعين) — فلا يُطلب من طفلٍ أن يتعلّم شكلاً تعلّمه.
+ */
+const ORDERED_LETTERS = GROUPS.flatMap((group) => group.letters);
+function formLetters(at, form) {
+  if (form === FORMS.ISOLATED) return [];
+  return ORDERED_LETTERS.filter((ch) => shapeAt.get(`${ch}|${form}`) === at
+    && (form === FORMS.FINAL || LETTERS[ch].joins));
+}
+
+/**
+ * **وأسرةُ المتشابهات تُقارَن حين تكتمل** (`METHOD.md §٤`: «متباعدةٌ ثم تُقارَن»):
+ * موضعُ المقارنة المجموعةُ التي يُدرَّس فيها **آخِرُ أعضائها** في ذلك الشكل — فهناك
+ * وحدَه تجتمع الأخواتُ وقد كُتبت كلُّهنّ. **وأسرُها تُقرأ من نسب الرسم** لا تُكتب
+ * هنا، **وأعضاؤها من دُرِّس منهنّ في ذلك الشكل** — فشكلٌ لا تطلبه مادّةٌ لا يُدرَّس
+ * ولا يدخل مقارنة.
+ */
+function compareAt(at, form) {
+  const taught = ORDERED_LETTERS.filter((ch) => shapeAt.has(`${ch}|${form}`));
+  return kinFamilies(taught, form)
+    .filter((family) => Math.max(...family.map((ch) => shapeAt.get(`${ch}|${form}`))) === at);
+}
+
 // ————— ٦. المحطات: جدولُ `METHOD.md §٤` مرحلةً مرحلة —————
 
 /** قسمةُ المادّة محطاتٍ بحِمْل باقةِ اقرأ، موزَّعةً بالسواء — فلا محطةٌ ببقيّةٍ يتيمة. */
@@ -566,15 +750,25 @@ stages.push({
   ],
 });
 
-// ——— المراحل ٢–٨: الحرفُ المعزول — مجموعةٌ لكل محطة، وحرفٌ لكل عقدة ———
+// ——— المراحل ٢–١٢: المجموعاتُ السبع — **حروفُها ثم أشكالُها ثم كلماتُها** ———
 //
-// **ولا تُعاد الحروفُ في السطر الثاني** (مراجعة هـ٢، بند م٢.٦): كان `sub` يقول
-// «حروفُها: ا ب م ل» يومَ كان عنوانُ المحطة اسمَ مجموعتها — ثم حكم المالكُ في باب
-// الأسماء أن تُسمّى المحطةُ **بحروفها** (`REVIEW_IDENTITY §٣ب`: «الاسمُ يقول ما في
-// المحطة بعينه: حروفُها **في عنوانها لا في سطرٍ تحته**»)، فصار `stageTitle` يحسبها
-// «حُرُوفُ ا ب م ل» — وبقي السطرُ يعيدها تحتها. فالسطرُ الثاني يقول ما لا يقوله
-// العنوان: **ما يفعله الطفل في المحطة**، كأخواته في المواقع والوصل والخفوت.
-for (const { group } of groupWords) {
+// **وهي المناوبة بعينها** (الجلسة م١): كانت المراحلُ مصفوفةً — الحروفُ الثمانيةُ
+// والعشرون كلُّها، ثم الأشكالُ الأربعةُ والعشرون كلُّها، ثم الكلمات — **فأوّلُ كلمةٍ
+// في العقدة ٧١**. فصارت المجموعةُ الواحدة ثلاثَ محطاتٍ متتابعة: حروفُها، ثم
+// **الأشكالُ التي تطلبها مادّتُها وحدَها**، ثم كلماتُها — **فبأربعة حروفٍ يكتب
+// «مَامَا»**.
+//
+// **ولا تُعاد الحروفُ في السطر الثاني** (مراجعة هـ٢، بند م٢.٦): عنوانُ محطة الحروف
+// يحسبه `stageTitle` من حروفها («حُرُوفُ ا ب م ل»، `REVIEW_IDENTITY §٣ب`) — فالسطرُ
+// الثاني يقول **ما يفعله الطفل في المحطة** لا ما في عنوانها.
+const FORM_NODES = [
+  { form: FORMS.INITIAL, place: 'أَوَّلَ الكَلِمَة' },
+  { form: FORMS.MEDIAL, place: 'وَسَطَ الكَلِمَة' },
+  { form: FORMS.FINAL, place: 'آخِرَ الكَلِمَة' },
+];
+
+for (const [at, group] of GROUPS.entries()) {
+  // (١) حروفُ المجموعة معزولةً — حرفٌ لكل عقدة
   stages.push({
     id: group.id,
     kind: 'letter',
@@ -582,12 +776,87 @@ for (const { group } of groupWords) {
     sub: 'كلُّ حرفٍ وحدَه: من أين يبدأ وإلى أين يتّجه',
     nodes: group.letters.map((ch) => ({ part: ch, letter: ch })),
   });
+
+  // (٢) ثم أشكالُ المواقع **التي تطلبها مادّتُها** — عقدةٌ لكلِّ شكل
+  //
+  // **وأشكالُ الموقع تُجمَّع بالحرف لا بالموقع** (`PEDAGOGY_STUDY §١ط`): مرجعُنا
+  // `docs/naskh/` **يعرض الحرفَ صفّاً من أربعة أشكال** لا عموداً من الابتدائيات —
+  // فمجموعةُ الحرف تجمع أشكالَه، ومحطةُ الشكل الواحدة للهجاء كلِّه هي المخالف.
+  //
+  // **وتمييزُ المتشابهات حيث تكتمل الأسرة** («متباعدةٌ ثم تُقارَن»، `METHOD.md §٤`):
+  // ملاصقاً لشكلها لا في ذيل مرحلةٍ بعيدة — وأسرُها تُقرأ من نسب الرسم
+  // (`tools/path_anchors.json: kin`) لا تُكتب هنا.
+  const formNodes = [];
+  for (const { form, place } of FORM_NODES) {
+    const letters = formLetters(at, form);
+    if (letters.length) {
+      formNodes.push({
+        part: form,
+        form,
+        letters,
+        title: `الحَرْفُ ${place}`,
+        face: rc.letterForms(letters[0])[form],   // وجهُ العقدة شكلُ أوّل حروفها — من اقرأ
+      });
+    }
+    const families = compareAt(at, form);
+    if (families.length) {
+      formNodes.push({
+        part: `compare-${form}`,
+        form,
+        letters: families.flat(),
+        compare: families,
+        title: `مَيِّزْ بَيْنَ المُتَشَابِهَاتِ ${place}`,
+        face: rc.letterForms(families[0][0])[form],
+      });
+    }
+  }
+  if (formNodes.length) {
+    stages.push({
+      id: `${group.id}-forms`,
+      kind: 'form',
+      title: `أَشْكَالُ ${group.title}`,
+      sub: 'شكلُ الحرف حيث تطلبه كلمةٌ — أوّلَ الكلمة ووسطَها وآخرَها',
+      nodes: formNodes,
+    });
+  }
+
+  // (٣) ثم كلماتُها — **وأوّلُ وصلةٍ حيث أوّلُ كلمةٍ موصولة**
+  //
+  // ترتيبُ عقدها ترتيبُ منابعها: وصلاتُها إن كانت أوّلَ وصلةٍ في الرحلة، ثم كلماتُ
+  // مجموعات اقرأ، ثم كلماتُ العلامات بمهاراتها فالهمزة، ثم ما تحتاجه جملُ المرحلة
+  // ١٤ من كلماتٍ مساندة — كلٌّ منها **ما صار مكتوباً بحروف هذه المجموعة**.
+  const wordNodes = [];
+  for (const spec of ligatureAt[at]) {
+    wordNodes.push({ part: spec.part, title: spec.title, joins: spec.joins });
+  }
+  for (const [s, source] of WORD_SOURCES.entries()) {
+    const parts = batches(groupPool[at][s]);
+    for (const [i, words] of parts.entries()) {
+      wordNodes.push({
+        part: parts.length > 1 ? `${source.part}-${i + 1}` : source.part,
+        title: parts.length > 1 ? `${source.name(group)} ${arNum(i + 1)}` : source.name(group),
+        words,
+      });
+    }
+  }
+  if (wordNodes.length) {
+    stages.push({
+      id: `${group.id}-words`,
+      kind: 'join',
+      title: `كَلِمَاتُ ${group.title}`,
+      sub: 'يصل الحروفَ ثم ينسخ الكلمةَ كما يراها — والمسافةُ بين الكلمات والجلوسُ على السطر',
+      nodes: wordNodes,
+    });
+  }
 }
 
 // ——— ت٥: الأرقام ٠–٩ — **بعد بوابة الحروف** (`EXPANSION.md §٧`) ———
 //
 // **علّةُ الموضع منهجٌ لا ميدان**: «الرقمُ لا يتصل ولا يتشكّل، فحركتُه أخفُّ من
-// الحرف — فترةُ راحةٍ ومكسبٍ قبل أشكال المواقع، وحروفُ التطبيق أولاً فهو اُكْتُبْ».
+// الحرف — فترةُ راحةٍ ومكسبٍ … وحروفُ التطبيق أولاً فهو اُكْتُبْ». **وموضعُها بعد
+// المجموعات السبع** (الجلسة م١): كانت «قبل أشكال المواقع» يومَ كانت الأشكالُ صفّاً
+// واحداً بعد الهجاء — وقد صارت الأشكالُ في المجموعات، **فبقيت الراحةُ حيث تمّ
+// الهجاءُ كلُّه**: بعد آخر مجموعةٍ وقبل أميال النسخ.
 //
 // **وعقدةٌ لكلِّ رقم** كما لكلِّ حرفٍ عقدتُه: الرسمُ حركةٌ مستقلّة تُدرَّس وتُقاس
 // وحدَها في ليتنر — والترتيبُ ترتيبُ احسب (والصفرُ آخِراً بحكمهم). **وعنوانُ العقدة
@@ -600,91 +869,6 @@ stages.push({
   nodes: Object.entries(DIGITS).map(([glyph, info]) => ({
     part: glyph, letter: glyph, title: info.name,
   })),
-});
-
-// ——— المراحل ٩–١١: أشكالُ المواقع — شكلٌ لكل محطة، ومجموعةٌ لكل عقدة ———
-//
-// **ولا تدخل العقدةَ إلا حروفٌ شكلُها جديد**: الحرفُ الذي لا يصل بما بعده (ا ر د و ز
-// ذ) ابتدائيُّه عينُ معزوله ووسطيُّه عينُ نهائيّه — أثبتته عدّةُ الجلسة ٢ بمقابلة
-// بصمتَي القناعين لا بدعوى. فلا يُطلب من طفلٍ أن يتعلّم شكلاً تعلّمه.
-const FORM_STAGES = [
-  { form: FORMS.INITIAL, title: 'الحَرْفُ أَوَّلَ الكَلِمَة', sub: 'شكلُه حين يبدأ الكلمة ويتصل بما بعده' },
-  { form: FORMS.MEDIAL, title: 'الحَرْفُ وَسَطَ الكَلِمَة', sub: 'شكلُه حين يتصل بما قبله وما بعده' },
-  { form: FORMS.FINAL, title: 'الحَرْفُ آخِرَ الكَلِمَة', sub: 'شكلُه حين يتصل بما قبله ثم يقف' },
-];
-for (const { form, title, sub } of FORM_STAGES) {
-  const nodes = [];
-  for (const { group } of groupWords) {
-    const letters = group.letters.filter((ch) => form === FORMS.FINAL || LETTERS[ch].joins);
-    if (!letters.length) continue;
-    nodes.push({
-      part: group.id,
-      form,
-      letters,
-      title: group.title,
-      face: rc.letterForms(letters[0])[form],     // وجهُ العقدة شكلُ أوّل حروفها — من اقرأ
-    });
-  }
-  // ——— وخاتمةُ المحطة: **تمييزُ المتشابهات رسماً** (`METHOD.md §٤`) ———
-  //
-  // «المتشابهاتُ رسماً (ب ت ث · ج ح خ) **متباعدةٌ ثم تُقارَن**»: التباعدُ وقع من نفسه
-  // — ترتيبُ اقرأ فرّق الباءَ عن التاء عن الثاء في ثلاث مجموعات — **والمقارنةُ عقدةٌ
-  // في ذيل محطة الشكل**: هنا وحدَه تجتمع الأخواتُ اللواتي باعدهنّ المنهجُ قصداً، وقد
-  // كُتب كلُّ شكلٍ منهنّ قبل قليل في هذه المحطة نفسِها.
-  //
-  // **وأسرُ الشبه تُقرأ من نسب الرسم لا تُكتب هنا** (`tools/path_anchors.json: kin`):
-  // «جسمُ هذا الشكل جسمُ ذاك والفارقُ علامتُه» — وهي **لكلِّ شكلِ موقعٍ على حدة**،
-  // فسنّةُ ن وي جسمُ الباء ابتدائيةً ووسطيةً ولا تجتمعان بها نهائيةً (بطنُ النون
-  // وذيلُ الياء جسمان آخران)، وحلقةُ ق حلقةُ الفاء ابتدائيةً ووسطيةً لا نهائيةً.
-  // فأسرةٌ تدخل أو تخرج بتبدّل نسب الرسم بلا سطرٍ يُعدَّل هنا.
-  const families = kinFamilies(nodes.flatMap((node) => node.letters), form);
-  if (families.length) {
-    nodes.push({
-      part: 'compare',
-      form,
-      letters: families.flat(),
-      compare: families,
-      title: 'مَيِّزْ بَيْنَ المُتَشَابِهَات',
-      face: rc.letterForms(families[0][0])[form],
-    });
-  }
-  stages.push({ id: form, kind: 'form', title, sub, nodes });
-}
-
-// ——— المرحلة ١٢: الوصلُ والنسخ ———
-//
-// ترتيبُها: وصلتان، ثم كلماتُ كلِّ مجموعةٍ محطةً (عينُ عقدة «لعبة الكلمات» عند اقرأ
-// في موضعها من رحلته)، ثم كلماتُ العلامات بمهاراتها فالهمزة، ثم ما تحتاجه جملُ
-// المرحلة ١٤ من كلماتٍ مساندة.
-// **و`sect` مفصلُ المحتوى الطبيعيّ** (الجلسة ش): اسمُ المحطة التي تجمع العقدَ
-// المتجاورة حين تُشقّ المرحلةُ — يقوله محتواها لا نصٌّ يُكتب للعرض (وصلُ الحروف ·
-// كلماتُ المجموعات · كلماتُ العلامات · كلماتٌ للجمل). **والحدُّ ليس هنا**: هذا
-// يُعلن المفاصل، و`MAX_NODES` في `progress.js` يفرض السقفَ فوقها.
-const joinNodes = [
-  { part: 'pair', sect: 'وَصْلُ الحُرُوف', title: 'وَصْلُ حَرْفَيْن', joins: ligatures(2) },
-  { part: 'triple', sect: 'وَصْلُ الحُرُوف', title: 'وَصْلُ ثَلَاثَة', joins: ligatures(3) },
-];
-for (const { group, words } of groupWords) {
-  joinNodes.push({ part: `w-${group.id}`, sect: 'كَلِمَاتُ المَجْمُوعَات', title: `كَلِمَاتُ ${group.title}`, words });
-}
-for (const sign of skillSigns) {
-  joinNodes.push({ part: `sign-${sign.id}`, sect: 'كَلِمَاتُ العَلَامَات', title: sign.title, words: sign.words });
-}
-if (hamzaWords.length) {
-  joinNodes.push({ part: 'sign-hamza', sect: 'كَلِمَاتُ العَلَامَات', title: 'الهَمْزَة', words: hamzaWords });
-}
-for (const [i, words] of batches(supports).entries()) {
-  joinNodes.push({
-    part: `prep-${i + 1}`, sect: 'كَلِمَاتٌ لِلْجُمَلِ القَصِيرَة',
-    title: `كَلِمَاتٌ لِلْجُمَل ${arNum(i + 1)}`, words,
-  });
-}
-stages.push({
-  id: 'join',
-  kind: 'join',
-  title: 'الوَصْلُ وَالنَّسْخ',
-  sub: 'يصل الحروفَ ثم ينسخ الكلمةَ كما يراها — والمسافةُ بين الكلمات والجلوسُ على السطر',
-  nodes: joinNodes,
 });
 
 // ——— ت١أ + ت٣: بساتينُ النسخ واسمُ الطفل — **بعد بوابة النسخ مباشرةً** ———
@@ -1178,10 +1362,7 @@ export const FORMS = {
 
 /** اسمُ شكل الموقع كما يُقرأ في اللوحة والعناوين. */
 export const FORM_NAMES = {
-  [FORMS.ISOLATED]: 'معزول',
-  [FORMS.INITIAL]: 'ابتدائي',
-  [FORMS.MEDIAL]: 'وسطي',
-  [FORMS.FINAL]: 'نهائي',
+${table(FORM_LABEL)}
 };
 
 /** مسارُ حرفٍ بشكلِ موضعٍ بعينه — \`null\` إن لم يُؤلَّف بعد. */
@@ -1358,9 +1539,54 @@ console.log(`  · بوابات   ${String(GATES.length).padStart(2)} عقدة   
 
 // **وأسرُ التمييز تُطبع كما قُرئت** من نسب الرسم — لا رقمَ لها مكتوبٌ ولا قائمة
 for (const stage of stages.filter((s) => s.kind === 'form')) {
-  const node = stage.nodes.find((n) => n.compare);
-  console.log(`  · تمييزُ ${stage.title}: `
-    + (node ? node.compare.map((f) => f.join('')).join(' · ') : 'لا أسرةَ متشابهاتٍ فيه'));
+  const families = stage.nodes.filter((n) => n.compare)
+    .map((n) => `${FORM_LABEL[n.form]}: ${n.compare.map((f) => f.join('')).join(' · ')}`);
+  console.log(`  · تمييزُ ${stage.title}: ` + (families.join('  |  ') || 'لا أسرةَ متشابهاتٍ فيه'));
+}
+
+// ————— جردُ المناوبة: حِمْلُ كلِّ مجموعةٍ محسوباً لا مقدَّراً (الجلسة م١) —————
+//
+// **ولا رقمَ منتظَرٍ مكتوبٌ هنا** يُقابَل به: تُطبع أرقامُ البنية كما هي، ويُقابلها
+// المديرُ بجدول `PEDAGOGY_STUDY §١ك` — فرقمٌ يتغيّر بتغيّر بياناته ليس انحرافاً.
+console.log('\n— مناوبةُ الكلمات: حِمْلُ كلِّ مجموعةٍ —');
+{
+  const writable = GROUPS.map(() => []);
+  for (const text of usedWords) writable[availableAt(text)].push(text);
+  const fresh = GROUPS.map(() => []);
+  for (const [key, at] of shapeAt) fresh[at].push(key);
+  const medial = (keys) => keys.filter((k) => k.endsWith(`|${FORMS.MEDIAL}`)).length;
+  console.log('   مجموعة   حروفُها      صارت مكتوبة   تُنسَخ في محطتها   أشكالٌ جديدة (وسطيّ)');
+  for (const [at, group] of GROUPS.entries()) {
+    console.log(`   ${arNum(at + 1)}         ${group.letters.join(' ')}`
+      + `   ${String(writable[at].length).padStart(6)}`
+      + `   ${String(groupPool[at].flat().length).padStart(12)}`
+      + `   ${String(fresh[at].length).padStart(12)} (${medial(fresh[at])})`);
+  }
+  console.log(`   المجموع${String(usedWords.length).padStart(19)}`
+    + `   ${String(groupPool.flat(2).length).padStart(12)}   ${String(shapeAt.size).padStart(12)}`
+    + `   — وباقي الكلمات أميالُ البساتين بعد الحروف كلِّها`);
+
+  // **وأشكالٌ لا تطلبها مادّةٌ تُجرَد ولا تُدرَّس** (بندُ الجلسة م١): من الأربعة
+  // والعشرين ومئةٍ اسماً (٢٨ حرفاً × ٤ مواقع) ما تطلبه المادّة وما لا تطلبه —
+  // **والصامتُ صنفان**: عينُ شكلٍ آخر (غيرُ الواصل: ابتدائيُّه معزولُه ووسطيُّه
+  // نهائيُّه — أثبتته عدّةُ الجلسة ٢ بمقابلة البصمتين)، وشكلٌ لا يقع في مادّةٍ قطّ.
+  const ALL_FORMS = [FORMS.ISOLATED, FORMS.INITIAL, FORMS.MEDIAL, FORMS.FINAL];
+  const nominal = Object.keys(LETTERS).flatMap((ch) => ALL_FORMS.map((form) => [ch, form]));
+  const idle = nominal.filter(([ch, form]) => !shapeAt.has(`${ch}|${form}`));
+  const twin = idle.filter(([ch, form]) => !LETTERS[ch].joins
+    && (form === FORMS.INITIAL || form === FORMS.MEDIAL));
+  const silent = idle.filter((pair) => !twin.includes(pair));
+  console.log(`\n— جردُ الأشكال: ${shapeAt.size} من ${nominal.length}`
+    + ` تطلبها المادّة، و${idle.length} لا تطلبها —`);
+  console.log(`  · ${twin.length} منها **عينُ شكلٍ آخر** فلا تُدرَّس مرّتين: `
+    + `${[...new Set(twin.map(([ch]) => ch))].join(' ')} (غيرُ الواصل)`);
+  console.log(`  · و${silent.length} لا تقع في كلمةٍ ولا جملةٍ في المنهج كلِّه: `
+    + silent.map(([ch, form]) => `${ch} ${FORM_LABEL[form]}`).join(' · '));
+  const stillTaught = silent.filter(([, form]) => form === FORMS.ISOLATED);
+  if (stillTaught.length) {
+    console.log(`    ⚠ و${stillTaught.length} منها **تُدرَّس ولا تُستعمل** — معزولُها في محطة حرفه: `
+      + `${stillTaught.map(([ch]) => ch).join(' ')} — ويُرفع الحكمُ فيها للمدير`);
+  }
 }
 
 const nodeCount = stages.reduce((sum, s) => sum + s.nodes.length, 0) + GATES.length;

@@ -309,6 +309,16 @@ def self_test() -> int:
     def stage_of(clone, stage_id):
         return next(stage for stage in clone["STAGES"] if stage["id"] == stage_id)
 
+    def first_node(clone, want):
+        """أوّلُ عقدةٍ يصدق عليها الشرط — **ولا يُكتب معرّفُها بيد**: مناوبةُ الكلمات
+        (الجلسة م١) فرّقت كلماتِ العلامات والجملِ على المجموعات السبع، فموضعُ كلٍّ
+        ثمرةُ حصيلة الحروف — يُبحَث عنه ولا يُملى، فلا يشيخ الفحصُ الذاتي بترتيب."""
+        for stage in clone["STAGES"]:
+            for node in stage["nodes"]:
+                if want(stage, node):
+                    return stage, node
+        raise SystemExit("لم تُوجد عقدةٌ للزرع — الفحصُ الذاتي على غير مادّته")
+
     # ————— ١) الحرف: كلمةٌ فيها حرفٌ لم يُدرَّس كتابةً (معيارُ قبول الجلسة ٣) —————
     def plant_unwritable(clone):
         # «ضِفْدَعْ» من المجموعة السابعة تُدَسّ في درس الباء (المجموعة الأولى): الضادُ
@@ -320,44 +330,45 @@ def self_test() -> int:
 
     # ————— ٢) شكلُ الموقع: قبل درسه، وقبل معزوله —————
     def plant_form_before_letter(clone):
-        # تُقدَّم محطةُ الشكل الابتدائيّ إلى ما قبل الحروف — وهو عينُ ما يمنعه
+        # تُقدَّم محطةُ أشكال المجموعة الأولى إلى ما قبل حروفها — وهو عينُ ما يمنعه
         # `METHOD §٤`: «أشكالُ المواقع **بعد إتقان المعزول فقط**».
         stages = clone["STAGES"]
-        initial = next(stage for stage in stages if stage["id"] == INITIAL)
-        stages.remove(initial)
-        stages.insert(next(i for i, s in enumerate(stages) if s["id"] == "g1"), initial)
+        forms = stage_of(clone, "g1-forms")
+        stages.remove(forms)
+        stages.insert(next(i for i, s in enumerate(stages) if s["id"] == "g1"), forms)
     ok(any("ولم يُدرَّس معزولاً" in line for line in with_(plant_form_before_letter)),
        "ويُمسِك شكلَ موقعٍ يُدرَّس قبل معزوله")
 
     def plant_word_before_form(clone):
-        # تُنقَل محطةُ النسخ كلُّها إلى ما قبل أشكال المواقع: كلماتُها موصولةٌ فتطلب
-        # أشكالاً لم تُدرَّس — وهي علّةُ ترتيب المراحل نفسِها.
+        # تُنقَل محطةُ كلمات المجموعة الأولى إلى ما قبل أشكال مواقعها: كلماتُها
+        # موصولةٌ فتطلب أشكالاً لم تُدرَّس — وهي علّةُ ترتيب المحطات الثلاث نفسِها.
         stages = clone["STAGES"]
-        join = next(stage for stage in stages if stage["id"] == "join")
-        stages.remove(join)
-        stages.insert(next(i for i, s in enumerate(stages) if s["id"] == INITIAL), join)
+        words_stage = stage_of(clone, "g1-words")
+        stages.remove(words_stage)
+        stages.insert(next(i for i, s in enumerate(stages) if s["id"] == "g1-forms"), words_stage)
     ok(any("ولم يُدرَّس" in line and FORM_NAMES[INITIAL] in line
            for line in with_(plant_word_before_form)),
        "ويُمسِك كلمةً تطلب شكلَ موقعٍ لم يُدرَّس بعد")
 
     # ————— ٣) الوصلة: كلمةٌ موصولةٌ قبل محطة الوصل —————
     def plant_join_before_ligature(clone):
-        # تُنزَع الوصلاتُ من محطتيهما فلا يُدرَّس الوصل، والكلماتُ بعدهما موصولة
-        node_of(clone, "join", "pair").pop("joins")
-        node_of(clone, "join", "triple").pop("joins")
+        # تُنزَع الوصلاتُ من عقدها كلِّها فلا يُدرَّس الوصل، والكلماتُ بعدها موصولة
+        for stage in clone["STAGES"]:
+            for node in stage["nodes"]:
+                node.pop("joins", None)
     ok(any("موصولةٌ وتُطلب قبل محطة الوصل" in line for line in with_(plant_join_before_ligature)),
        "ويُمسِك كلمةً موصولةً بلا محطة وصلٍ قبلها")
 
     # ————— ٤) الكلمة: جملةٌ فيها كلمةٌ لم تُنسَخ —————
     def plant_unwritten_word(clone):
-        node = node_of(clone, "join", "prep-1")
+        _, node = first_node(clone, lambda st, n: str(n["part"]).startswith("prep"))
         node["words"] = node["words"][1:]
     ok(any("ولم تُنسَخ كلمةً قبلها" in line for line in with_(plant_unwritten_word)),
        "ويُمسِك جملةً فيها كلمةٌ لم تُنسَخ قبلها")
 
     # ————— ٥) العلامة: بلا بطاقةِ تعريف، وبطاقةٌ في غير موضعها —————
     def plant_markless(clone):
-        node_of(clone, "join", "sign-shadda").pop("marks")
+        first_node(clone, lambda st, n: n["part"] == "sign-shadda")[1].pop("marks")
     bad = with_(plant_markless)
     ok(any("بلا بطاقةِ تعريفٍ قبلها" in line for line in bad),
        "ويُمسِك علامةً تُكتب بلا بطاقةِ تعريف")
@@ -365,7 +376,7 @@ def self_test() -> int:
     def plant_moved_card(clone):
         for entry in clone["MARKS"]:
             if entry["mark"] == "ّ":
-                entry["node"] = "join:w-g1"
+                entry["node"] = "g1-words:w"
     ok(any("مقيَّدةٌ عند" in line for line in with_(plant_moved_card)),
        "ويُمسِك بطاقةً مقيَّدةً عند غير عقدتها — فتفصيلُ ق٣ لا يُكتب بيد")
 
@@ -375,7 +386,7 @@ def self_test() -> int:
     def plant_mark_before_card(clone):
         # «سُكَّرْ» (وفيها الشدّة) تُقدَّم إلى محطة كلمات المجموعة الأولى، وبطاقتُها
         # باقيةٌ في موضعها المتأخّر — فتُطلب كتابةُ علامةٍ لم يعرفها الطفلُ بعد.
-        node = node_of(clone, "join", "w-g1")
+        node = node_of(clone, "g1-words", "w")
         node["words"] = [*node["words"], "سُكَّرْ"]
     bad = with_(plant_mark_before_card)
     ok(any("بلا بطاقةِ تعريفٍ قبلها" in line and "ّ" in line for line in bad),
@@ -384,7 +395,7 @@ def self_test() -> int:
     # **والحرفُ المتغيّر علامةٌ كذلك** (ق٣ في الرسم): همزةٌ أو تاءٌ مربوطة تُطلب قبل
     # بطاقتها تُمسَك بعينها — فلا تمرّ «قِرَاءَةْ» في محطةٍ قبل أن تُعرَّف همزتُها.
     def plant_variant_before_card(clone):
-        node = node_of(clone, "join", "w-g2")
+        node = node_of(clone, "g2-words", "w")
         node["words"] = [*node["words"], "قِرَاءَةْ"]
     ok(any("بلا بطاقةِ تعريفٍ قبلها" in line for line in with_(plant_variant_before_card)),
        "ويُمسِك حرفاً متغيّراً (همزةً أو تاءً مربوطة) قبل بطاقة تعريفه")
@@ -420,7 +431,7 @@ def self_test() -> int:
        "ويُمسِك مادّةً في الجداول لا تصل إلى طفل")
 
     def plant_alien_word(clone):
-        node = node_of(clone, "join", "w-g1")
+        node = node_of(clone, "g1-words", "w")
         node["words"] = [*node["words"], "بَابَاتْ"]
     ok(any("ولا كلمةَ من خارج بنك اقرأ" in line for line in with_(plant_alien_word)),
        "ويُمسِك كلمةً من خارج بنك اقرأ")
