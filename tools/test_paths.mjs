@@ -98,19 +98,27 @@ console.log('\n— ٣) الحكم: على كل مسارٍ صحيحاً ومعك�
 // تُقبَل في موضعها وتُردّ بعيدةً عنه. **والقائمةُ معلَنة** فلا يفلت شكلٌ من امتحان
 // الاتجاه صامتاً بأن يفرغ من ضرباته.
 const walkers = shapes.filter(({ ch }) => !TAP_ONLY.has(ch));
+// **ومَن مادّتُه نقرةٌ يخرج من عهد الانعكاس** — الصفرُ بحكم المالك: **النقرةُ لا
+// جهةَ لها فمعكوسُها هي**، فاشتراطُ ردِّها اشتراطُ ما لا يكون (وهو عينُ ما استُثني
+// في `test_direction` و`browser_paths`). **ولا يُستثنى إلا من لا ضربةَ له.**
+const drawn = walkers.filter(({ ref }) => (ref.strokes || []).length > 0);
 const tappers = shapes.filter(({ ch }) => TAP_ONLY.has(ch));
 for (const { ch, form, ref } of walkers) {
   const good = pen.judge(ref, trace(ref));
   const back = pen.judge(ref, trace(ref, { from: 1, to: 0 }));
-  ok(good.accepted && !back.accepted,
-    `${ch} ${curriculum.FORM_NAMES[form]}: الصحيحُ ${good.accepted ? 'يُقبَل' : `يُرفَض «${good.primary}»`}`
-    + ` · المعكوسُ ${back.accepted ? 'يُقبَل — وهو خطأ!' : `يُرفَض «${back.primary}»`}`);
+  // **وهذا عهدُ حَكَم الطريقة لا عهدُ القبول** (أمرُ المالك، ٢٠ أغسطس ٢٠٢٦: «لا
+  // يجبر الطفلَ بالكتابة بطريقةٍ واحدة»): الاتجاهُ يبقى **مادّةً مدرَّسةً محروسة**،
+  // فيُقاس على `exact` — الحكمُ الصارم كما كان — **ولا يُقاس على `accepted` الذي صار
+  // يقبل ما اختلفت طريقتُه واستقام شكلُه**. فالحارسُ على قوّته، في موضعه الصحيح.
+  ok(good.exact && !back.exact,
+    `${ch} ${curriculum.FORM_NAMES[form]}: الصحيحُ ${good.exact ? 'يُقبَل' : `يُرفَض «${good.primary}»`}`
+    + ` · المعكوسُ ${back.exact ? 'يُقبَل — وهو خطأ!' : `يُرفَض «${back.primary}»`}`);
 }
 
 // **والمعكوسُ مرفوضٌ باتجاهه لا بدقّته**: تُضاعَف السماحةُ ثلاثاً فيبقى مرفوضاً.
-const loose = walkers.filter(({ ref }) => !pen.judge(ref, trace(ref, { from: 1, to: 0 }), { tolerance: 3 }).accepted);
-ok(loose.length === walkers.length,
-  `والمعكوسُ يُرفَض في الأشكال كلِّها ولو ضوعفت السماحةُ ثلاثاً (${loose.length}/${walkers.length})`);
+const loose = drawn.filter(({ ref }) => !pen.judge(ref, trace(ref, { from: 1, to: 0 }), { tolerance: 3 }).exact);
+ok(loose.length === drawn.length,
+  `والمعكوسُ يُرفَض في الأشكال كلِّها ولو ضوعفت السماحةُ ثلاثاً (${loose.length}/${drawn.length})`);
 
 // **ومَن مادّتُه نقرة**: تُقبَل نقرتُه في موضعها، وتُردّ إن نُقرت بعيداً عنه بضعف
 // سماحة النقطة — فالمقياسُ مقياسُ نقطةٍ (نقرةٌ داخل نصف قطرها) لا شروطَ المسار.
