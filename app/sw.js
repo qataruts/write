@@ -137,7 +137,7 @@
 //   مبدأ ط، وف المعزولة ترتفع أوّلاً. **ووحدةٌ تبدّلت تحت اسمها فبلا الرفعة يبقى
 //   جهازٌ مثبَّتٌ يرسم القديمَ** — وهو ما وقع فعلاً: رأى المالكُ ٢ و٣ من اليسار بعد
 //   النشر لأنّ قشرتَه المخزونة v32 تحمل `paths.js` القديم. **الرفعةُ شرطُ الوصول.**
-const VERSION = 'v37';
+const VERSION = 'v38';
 const SHELL_CACHE = `uktub-shell-${VERSION}`;
 const AUDIO_CACHE = 'uktub-audio';          // ثابتٌ عمداً — لا يحمل VERSION
 const KEEP = [SHELL_CACHE, AUDIO_CACHE];
@@ -401,8 +401,19 @@ self.addEventListener('message', (event) => {
 self.addEventListener('install', (event) => {
   event.waitUntil((async () => {
     const cache = await caches.open(SHELL_CACHE);
+    // 🔴 **والقشرةُ تُجلَب من الشبكة لا من مخزن المتصفّح** (بلاغُ ميدانٍ من المالك،
+    // ٢٠ أغسطس ٢٠٢٦: «الحبرُ والميمُ ما زالا كالسابق» بعد ثلاثة دفعات).
+    //
+    // **والعلّةُ مقيسة**: `cache.add(url)` يمرّ بمخزن المتصفّح، **وترويسةُ أصولنا
+    // `max-age=14400`** — أربعُ ساعات. فيترقّى العاملُ إلى نسخةٍ جديدة **ثم يخزن
+    // القديمَ بعينه**، فيلتقي محرّكٌ جديدٌ بتنسيقٍ قديم: `pen.js` يكتب `--ink-scale`
+    // و`app.css` لا يعرفها. ⇐ **فرفعُ `VERSION` وحدَه لا يكفي ما دام الجلبُ مخزوناً.**
+    //
+    // **وهي علّةُ العائلة نفسُها** («الحافّةُ تحبس `sw.js` أربعَ ساعات») — غير أنّ
+    // موضعَها هنا **الأصولُ لا العامل**، فلا يُمسكها رفعُ نسخة.
     await Promise.all(SHELL.map((path) =>
-      cache.add(new URL(path, self.registration.scope)).catch(() => {})));
+      cache.add(new Request(new URL(path, self.registration.scope), { cache: 'reload' }))
+        .catch(() => {})));
     await precacheEmoji();
     await precacheAudio();
     await self.skipWaiting();
