@@ -1397,7 +1397,7 @@ button {
 .pen-stroke {
   fill: none;
   stroke: var(--ink);
-  stroke-width: calc(26 * var(--ink-weight, 1));
+  stroke-width: calc(26 * var(--ink-weight, 1) * var(--ink-scale, 1));
   stroke-linecap: round;
   stroke-linejoin: round;
   opacity: .18;
@@ -1429,7 +1429,7 @@ button {
 .pen-line {
   fill: none;
   stroke: var(--pen-accent);
-  stroke-width: calc(22 * var(--ink-weight, 1));
+  stroke-width: calc(22 * var(--ink-weight, 1) * var(--ink-scale, 1));
   stroke-linecap: round;
   stroke-linejoin: round;
   transition: opacity .5s ease;

@@ -411,6 +411,9 @@ function makeBoard(ref) {
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   svg.setAttribute('class', 'arena-ink');
   svg.setAttribute('viewBox', `0 0 ${bw} ${bh}`);
+  // **وسُمكُ الحبر نسبةٌ من اللوح** (بلاغُ ميدانٍ من المالك، ١٩ أغسطس ٢٠٢٦): رقمٌ
+  // مطلقٌ كُتب يومَ كانت الشبكةُ ١٠٠٠ يرقّ إلى الثلث يومَ صارت الخليّةُ ٢١٦٣٫٥.
+  svg.style.setProperty('--ink-scale', String(Math.max(bw, bh) / 1000));
   svg.setAttribute('role', 'img');
   svg.setAttribute('aria-label', 'لوحُ الكتابة — اكتب هنا بإصبعك أو بقلمك');
   box.append(model, svg);

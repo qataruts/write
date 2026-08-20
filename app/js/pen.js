@@ -1309,6 +1309,12 @@ export function penSurface(config) {
   // صنفاً ونسبةَ أبعادٍ معاً، فيرسم المتصفّحُ سطراً حيث المادّةُ سطر.
   box.className = `pen-box pen-box--${mode}${bw !== bh ? ' pen-box--line' : ''}`;
   if (bw !== bh) box.style.setProperty('--pen-ratio', String(bw / bh));
+  // **وسُمكُ الحبر نسبةٌ من اللوح لا رقمٌ مطلق** (بلاغُ ميدانٍ من المالك على آيباد،
+  // ١٩ أغسطس ٢٠٢٦: «الخطُّ رقيقٌ جداً والطفلُ لا يستطيع بإصبعه»). **وعلّتُه مقيسة**:
+  // عرضُ الحبر ٢٢ كُتب يومَ كانت الشبكةُ ١٠٠٠، **فلمّا صارت خليّةُ السطر ٢١٦٣٫٥**
+  // (بند ص٢/ب) بقي الرقمُ وانكسرت نسبتُه إلى **١/٢٫١٦** — وعينُ المالك قالت
+  // «ضعفين» فأصابت المقدار. ⇐ فيُشتقّ من الخليّة فلا يشيخ برقمٍ مكتوب.
+  box.style.setProperty('--ink-scale', String(Math.max(bw, bh) / GRID));
   const svg = sv('svg', {
     class: 'pen-surface', viewBox: `0 0 ${bw} ${bh}`, role: 'img', 'aria-label': label,
   });

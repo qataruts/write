@@ -177,12 +177,12 @@ body {
 
 .arena-model { color: var(--model); transition: opacity .35s ease; }
 .arena-model.is-gone { opacity: 0; }
-.arena-model .ref-stroke { fill: none; stroke: currentColor; stroke-width: 26; stroke-linecap: round; stroke-linejoin: round; }
+.arena-model .ref-stroke { fill: none; stroke: currentColor; stroke-width: calc(26 * var(--ink-scale, 1)); stroke-linecap: round; stroke-linejoin: round; }
 .arena-model .ref-dot { fill: currentColor; opacity: 0; transition: opacity .2s ease; }
 .arena-model .ref-dot.is-on { opacity: 1; }
 
 .arena-ink { touch-action: none; }
-.arena-line { fill: none; stroke: var(--accent); stroke-width: 30; stroke-linecap: round; stroke-linejoin: round; }
+.arena-line { fill: none; stroke: var(--accent); stroke-width: calc(30 * var(--ink-scale, 1)); stroke-linecap: round; stroke-linejoin: round; }
 
 .arena-bar { width: 100%; display: flex; flex-wrap: wrap; gap: .7rem; justify-content: center; align-items: center; }
 
