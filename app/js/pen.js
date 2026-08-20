@@ -1326,16 +1326,37 @@ export function penSurface(config) {
    */
   const rule = sv('g', { class: 'pen-rule', 'aria-hidden': 'true' });
   const seat = baseline ?? ref?.line ?? null;
+  const hair = Math.max(1, Math.round(bh / GRID * 3));
   if (seat != null) {
     // **وغِلَظُ السطر بمقياس لوحه** (بند ص٢/ب ٤): خليّةُ الحرف صارت مربّعَ السطر
     // (٢٠٣٥ وحدة) وخليّةُ الكلمة ألفٌ — **فخيطٌ بغِلَظٍ ثابتٍ يدقّ في أحدهما
     // ويغلُظ في الآخر**. فيُقرأ من الصندوق نفسِه كما تُقرأ مقاييسُ الإرشاد.
-    const hair = Math.max(1, Math.round(bh / GRID * 3));
     rule.append(sv('line', {
       class: 'pen-baseline', x1: 0, y1: seat, x2: bw, y2: seat,
       'stroke-width': hair, 'stroke-dasharray': `${hair * 5} ${hair * 4}`,
     }));
   }
+  /**
+   * **حزامُ الحجم** — سطران خافتان عند قمّة النموذج وقاعه (بلاغُ ميدانٍ من المالك،
+   * ١٩ أغسطس ٢٠٢٦: «الميمُ لا تقبل الرسمَ ولا بحال»).
+   *
+   * **والعلّةُ مقيسةٌ لا مظنونة**: حدُّ الحجم سليمٌ ومعايَر (حبرُ النموذج × `FREE.ease`)،
+   * **لكنّ الطفلَ في الصندوق الفارغ لا يرى مقياساً** — فيكتب بحجمٍ مريحٍ في لوحٍ واسع،
+   * **فيُردّ لحجمه قبل أن يُنظَر في رسمه**. وأشدُّه على الحلقات (عينُ الميم يكبّرها
+   * الإصبعُ طبعاً). ⇐ **فيُرى الحدُّ قبل أن يُحكَم به** — وهو عهدُ «لا يُردّ صامتاً».
+   *
+   * **ومُشتقٌّ من المرجع بعينه** فلا يحتاج بياناً جديداً ولا استيراداً: قمّةُ حبره
+   * وقاعُه — أي **«اكتبْ بهذا الطول»** مرسوماً، كما تقول الكرّاسةُ بسطورها.
+   */
+  const band = inkBox([refPoints(ref)]);
+  if (band) {
+    for (const y of [band.y0, band.y0 + band.h]) {
+      rule.append(sv('line', {
+        class: 'pen-band', x1: 0, y1: y, x2: bw, y2: y, 'stroke-width': hair,
+      }));
+    }
+  }
+
   const fence = sv('g', { class: 'pen-bounds' });      // ممرُّ السماحة (اختياريّ)
   const model = sv('g', { class: 'pen-model' });
   const trailed = sv('g', { class: 'pen-trail' });     // ما تلوّن تحت القلم
