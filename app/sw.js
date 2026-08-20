@@ -137,7 +137,7 @@
 //   مبدأ ط، وف المعزولة ترتفع أوّلاً. **ووحدةٌ تبدّلت تحت اسمها فبلا الرفعة يبقى
 //   جهازٌ مثبَّتٌ يرسم القديمَ** — وهو ما وقع فعلاً: رأى المالكُ ٢ و٣ من اليسار بعد
 //   النشر لأنّ قشرتَه المخزونة v32 تحمل `paths.js` القديم. **الرفعةُ شرطُ الوصول.**
-const VERSION = 'v35';
+const VERSION = 'v36';
 const SHELL_CACHE = `uktub-shell-${VERSION}`;
 const AUDIO_CACHE = 'uktub-audio';          // ثابتٌ عمداً — لا يحمل VERSION
 const KEEP = [SHELL_CACHE, AUDIO_CACHE];
@@ -196,7 +196,14 @@ const AUDIO_RE = /\/audio\/(wbw-)?[0-9a-f]{12}\.mp3$/;
 
 // مسار الصفحة التعريفية (`app/welcome/`) — ليست من التطبيق: لا في SHELL ولا في
 // المخزون ولا في ردّ التنقّل. مشتقٌّ من النطاق فيصحّ في أي مجلدٍ نُشر فيه التطبيق.
-const WELCOME = new URL('welcome/', self.registration.scope).pathname;
+// **الصفحاتُ الجاراتُ خارجَ القشرة** — لكلٍّ `index.html` خاصّتُها ومساراتٌ نسبية،
+// **فردُّ التنقّل إلى قشرة التطبيق يفتح التطبيقَ مكانَها فلا تُبلَغ أبداً**.
+// وكانت `welcome/` وحدَها مستثناة، **فسقطت `arena/` في العلّة نفسِها** (بلاغُ ميدانٍ
+// من المالك، ١٩ أغسطس ٢٠٢٦: «الويب أرينا لا يفتح»). ⇐ **قائمةٌ تُقرأ لا سطرٌ يُكرَّر**،
+// ويحرسها `test_pwa`: كلُّ مجلّدٍ في `app/` له `index.html` يجب أن يكون فيها.
+const OUTSIDE = ['welcome/', 'arena/']
+  .map((dir) => new URL(dir, self.registration.scope).pathname);
+const WELCOME = OUTSIDE[0];
 
 const json = (path) => fetch(new URL(path, self.registration.scope))
   .then((r) => (r.ok ? r.json() : null))
@@ -477,7 +484,7 @@ self.addEventListener('fetch', (event) => {
   // الصفحة التعريفية خارج القشرة عمداً (جلسة الصفحة التعريفية): لا تُخزَّن، ولا
   // يبتلعها ردُّ التنقّل أدناه — ولولا هذا السطر لفُتح التطبيقُ مكانَها على كل جهازٍ
   // ثبّته، فلا يبلغ المعلّمُ الصفحةَ أصلاً. تُترك للشبكة كأنّ لا عاملَ خدمةٍ هنا.
-  if (url.pathname.startsWith(WELCOME)) return;
+  if (OUTSIDE.some((dir) => url.pathname.startsWith(dir))) return;
 
   if (AUDIO_RE.test(url.pathname)) {
     event.respondWith(cacheFirst(request));

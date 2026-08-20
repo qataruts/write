@@ -391,5 +391,24 @@ for (const page of welcomePages) {
     `${page}: تبقى قابلةً للتكبير — صفحةُ كبارٍ والتكبيرُ فيها حقّ`);
 }
 
+// ————— **الجاراتُ تمرّ ولا يبتلعها ردُّ التنقّل** (بلاغُ ميدان، ١٩ أغسطس ٢٠٢٦) —————
+//
+// **العلّة**: كلُّ مجلّدٍ في `app/` له `index.html` صفحةٌ قائمةٌ بنفسها بمساراتٍ
+// نسبية. وعاملُ الخدمة يردّ **كلَّ تنقّلٍ** إلى قشرة التطبيق — **فيفتح التطبيقُ
+// مكانَها وتنكسر مساراتُها، فلا تُبلَغ أبداً**. وكان `welcome/` مستثنىً بسطرٍ مكتوب
+// **وسقطت `arena/`**: «الويب أرينا لا يفتح». ⇐ **فتُقرأ الجاراتُ من الشجرة**
+// وتُقابَل بما استثناه العامل، فجارةٌ تُكتب غداً تُطالِب من نفسها.
+{
+  const appDir = APP;
+  const siblings = readdirSync(appDir, { withFileTypes: true })
+    .filter((e) => e.isDirectory() && existsSync(new URL(`${e.name}/index.html`, appDir)))
+    .map((e) => `${e.name}/`);
+  const listed = (sw.match(/const OUTSIDE = \[([^\]]*)\]/) || [, ''])[1];
+  const missing = siblings.filter((dir) => !listed.includes(`'${dir}'`));
+  ok(siblings.length > 0 && missing.length === 0,
+    `والجاراتُ ذواتُ الصفحة تمرّ بلا ابتلاع (${siblings.join('، ')})`
+    + (missing.length ? ` — 🔴 يبتلعها: ${missing.join('، ')}` : ''));
+}
+
 console.log(fails ? `\n${fails} فشل` : '\nكل اختبارات العمل دون إنترنت ناجحة');
 process.exit(fails ? 1 : 0);
