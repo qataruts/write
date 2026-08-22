@@ -1175,6 +1175,276 @@ export function judgeFree(ref, strokes, options = {}) {
 }
 
 /**
+ * ————— **الحَكَمُ الكلّيّ: الشكلُ الناتج** (`SHAPE_JUDGE.md` · `ENGINE_RESCUE.md §٣`) —————
+ *
+ * **علّتُه مقيسةٌ لا مذهب**: الحَكَمان فوق (`judge` و`judgeFree`) **يمشيان المسار**،
+ * فيفترضان الترتيبَ والاتجاهَ والتقطيعَ **ليقيسا**. ومَن كتب بغير ترتيبنا انحرف
+ * المشيُ عنده **فقاس البقيّةَ على غير أجزائها** — فصارت `wander` و`incomplete`
+ * **أثرَ الانحراف لا وصفَ الحبر**. وموافقتُهما عينَ الأب على ستّين كتابةً من يدَي
+ * طفلتين: **٢٤/٦٠**، وهذا حَكَمٌ آخرُ يبلغ **٥٦/٦٠** على البيانات نفسِها.
+ *
+ * ⇐ **فالقبولُ يُحكَم هنا: بالحبر الناتج، بلا مشيٍ ولا زمن** — لا يرى أيَّ ضربةٍ
+ * سبقت. **والماشي يبقى معلّماً** (بدايةٌ واتجاهٌ وترتيبٌ في التتبّع والخافت) **ولا
+ * يبوّب**. وحكمُ المالك أصلُ هذا (١٩ أغسطس ٢٠٢٦): «**الحرفُ مقبولٌ ولو كُتب بطريقةٍ
+ * غير طريقتنا ولكن شكلُه صحيح**» ⇐ **الطريقةُ تُدرَّس ولا تُشترَط، والشكلُ يُشترَط
+ * ولا يُدرَّس**.
+ *
+ * **وحدُّ القبول حدُّ القراءة لا حدُّ الإتقان** (`SHAPE_JUDGE §٢ب`): يُردّ ما لا يُقرأ
+ * الحرفَ الذي طُلب أو يُقرأ حرفاً غيرَه — **وما دون ذلك تفاوتُ يدٍ يُرشَد إليه ولا
+ * يُردّ به**. ولذلك الحجمُ إرشادٌ، والرجفةُ درجةٌ، **والردُّ للشكل وحدَه**.
+ */
+
+/**
+ * **عتباتُ الشكل — تُعلَن ولا تُدفَن**، فتقرؤها العدّةُ من المحرّك نفسِه ولا تكتبها
+ * بيدها (وإلّا حرست عدّةٌ رقماً غيرَ الذي يحكم). ومَقيسةٌ على حصاد ٢٠ أغسطس ٢٠٢٦:
+ * عند `recall` ٠٫٧٠ الموافقةُ **٥٦/٦٠** ومصفوفةُ الأخوات **١٢٤/١٢٤**، وكلُّ شدٍّ
+ * فوقها يشتري ردوداً كاذبةً بلا مكسب (٠٫٧٤ ⇐ ٥٤/٦٠ · ٠٫٧٨ ⇐ ٥٣/٦٠).
+ */
+export const SHAPE_LIMITS = {
+  recall: 0.70,     // كم من النموذج تحت حبر الطفل — «أكتبتَ الحرفَ كلَّه؟»
+  part: 0.55,       // وأدنى جزءٍ منه — فلا يُقبَل نصفُ حرف
+  precision: 0.55,  // وكم من حبر الطفل على النموذج — «أزدتَ ما ليس منه؟»
+  shakyBand: 0.08,  // وهامشٌ فوق العتبة يُقال فيه «صحيحٌ ويدُك ترتجف» — درجةٌ لا ردّ
+};
+
+/**
+ * **قواعدُ العلامة** — نِسَبٌ من **السماحة العاملة** لا مسافاتٍ مكتوبة:
+ * `merge` ما تقارب مركزاه فتجمّعٌ واحد · `near` مدى نسبة العلامة إلى موضع النقطة ·
+ * `tap` ما دونه من طولٍ نقرةٌ لا ضربة · `hesitate` نقرةُ التردّد · و`span`/`apex`
+ * مدُّ الشَّرْطة ورأسُ الزاوية (`SHAPE_JUDGE §٢ج`).
+ */
+export const SHAPE_DOTS = {
+  points: 4, tap: 0.5, merge: 0.45, near: 1.8, hesitate: 0.35,
+  spanLow: 0.5, spanHigh: 2.4, apex: 0.28,
+};
+
+/** توفيقُ الشكل: مقياسٌ مقصوص، وخطوةُ تسويةٍ **واحدة** — لا دورانَ ولا التواء. */
+const SHAPE_FIT = { min: 0.25, max: 4, settle: 2.5 };
+
+/**
+ * خطوةُ تكثيف العيّنة — **دقّةُ قياسٍ لا عتبةُ حكم** (فلا يمسّها «الحدُّ العامل»):
+ * التغطيةُ تُقاس سحابةً متقاربةً لا رؤوسَ قطعٍ متباعدة.
+ */
+const SHAPE_STEP = 14;
+
+/** تكثيفُ مضلَّعٍ نقاطاً متقاربةً بخطوةٍ ثابتة. */
+function shapeCloud(pts, step = SHAPE_STEP) {
+  if (!pts || !pts.length) return [];
+  const out = [];
+  for (let i = 0; i < pts.length - 1; i++) {
+    const a = pts[i]; const b = pts[i + 1];
+    const n = Math.max(1, Math.round(dist(a, b) / step));
+    for (let k = 0; k < n; k++) out.push([a[0] + (b[0] - a[0]) * k / n, a[1] + (b[1] - a[1]) * k / n]);
+  }
+  out.push([pts[pts.length - 1][0], pts[pts.length - 1][1]]);
+  return out;
+}
+
+const shapeNear = (p, cloud, tol) => {
+  const span = tol * tol;
+  for (const q of cloud) {
+    const dx = p[0] - q[0]; const dy = p[1] - q[1];
+    if (dx * dx + dy * dy <= span) return true;
+  }
+  return false;
+};
+
+/** نسبةُ سحابةٍ تقع ضمن سماحةٍ من أخرى — وهي التغطيةُ في أيّ اتجاهٍ سُئلت. */
+const shapeCover = (cloud, target, tol) => (cloud.length
+  ? cloud.filter((p) => shapeNear(p, target, tol)).length / cloud.length : 0);
+
+const shapeGap = (p, cloud) => {
+  let best = Infinity;
+  for (const q of cloud) { const d = dist(p, q); if (d < best) best = d; }
+  return best;
+};
+
+const shapeLen = (pts) => { let s = 0; for (let i = 1; i < pts.length; i++) s += dist(pts[i - 1], pts[i]); return s; };
+const shapeMidY = (pts) => (pts.length ? pts.reduce((s, p) => s + p[1], 0) / pts.length : 0);
+const shapeSeat = (pts) => [pts.reduce((s, p) => s + p[0], 0) / pts.length, shapeMidY(pts)];
+
+/**
+ * **التطبيع — فالحجمُ والموضعُ لا يبدّلان الشكل**: مقياسٌ واحدٌ من نسبة أكبر بُعدَي
+ * الصندوقين مقصوصٌ في مداه، وإزاحةُ مركزٍ إلى مركز، ثم **خطوةُ تسويةٍ واحدة**
+ * (وسيطُ فروق أقرب جارٍ ضمن مدىً من السماحة) تزيح الكلَّ إزاحةً صلبة.
+ *
+ * **ولِمَ وسيطٌ لا متوسّط؟** لأنّ حبراً زائداً بعيداً يجرّ المتوسّطَ إليه فيزيح
+ * الحرفَ كلَّه عن نموذجه — **والوسيطُ لا يجرّه شاذّ**. **ولِمَ خطوةٌ واحدة؟** لأنّ
+ * التكرارَ يزحف حتى يوفّق ما لا يوافق، **فيقبل الشكلَ الخطأ في موضعه الصحيح**.
+ */
+function shapeNormal(strokes, model, tol) {
+  const child = inkBox(strokes);
+  const box = inkBox([model]);
+  if (!child || !box) return strokes.map((s) => shapeCloud(s));
+  const raw = Math.max(child.w, child.h) > 1
+    ? Math.max(box.w, box.h) / Math.max(child.w, child.h) : 1;
+  const scale = Math.min(SHAPE_FIT.max, Math.max(SHAPE_FIT.min, raw));
+  const put = (p) => [box.cx + (p[0] - child.cx) * scale, box.cy + (p[1] - child.cy) * scale];
+  const dense = strokes.map((s) => shapeCloud(s.map((p) => put(p))));
+  const reach = (SHAPE_FIT.settle * tol) ** 2;
+  const dx = []; const dy = [];
+  const sample = dense.flat().filter((_, i) => i % 3 === 0);
+  for (const q of sample) {
+    let seat = null; let gap = Infinity;
+    for (const m of model) {
+      const d = (q[0] - m[0]) ** 2 + (q[1] - m[1]) ** 2;
+      if (d < gap) { gap = d; seat = m; }
+    }
+    if (seat && gap < reach) { dx.push(seat[0] - q[0]); dy.push(seat[1] - q[1]); }
+  }
+  const mid = (a) => (a.length ? [...a].sort((x, y) => x - y)[(a.length / 2) | 0] : 0);
+  const ox = mid(dx); const oy = mid(dy);
+  return (ox || oy) ? dense.map((s) => s.map((q) => [q[0] + ox, q[1] + oy])) : dense;
+}
+
+/**
+ * **الحَكَمُ الكلّيّ** — يُعطى مرجعاً وحبرَ طفلٍ نهائياً، ويُعيد قبولاً أو ردّاً
+ * **بسببٍ واحدٍ أوّل** يُشار به على اللوح (`SHAPE_JUDGE §٦`: «فلا يُردّ صامتاً»).
+ *
+ * **وأربعُ لبناتٍ لا خامسة**: تطبيعٌ · تغطيةٌ باتجاهين · أدنى تغطيةِ جزء · قاعدةُ
+ * نقاط. **والحجمُ خامسٌ يُرشِد ولا يردّ**.
+ *
+ * **ولا يعرف**: شبكةً ولا شاشةً ولا منهجاً ولا زمناً — فهو أوّلُ ما يصلح للباكج
+ * المستقلّ، وهو ما سيحتاجه «أتقن».
+ *
+ * @param {object} ref المسارُ المرجعيّ — وهو نفسُه المعروض (**النموذجُ هو المقياس**)
+ * @param {Array<Array<[number, number]>>} strokes حبرُ الطفل، **بلا ترتيبٍ مضمون**
+ * @param {{tolerance?: number|object}} [options] وسماحةُ المحطة إن نصّت غلبت
+ * @returns {{ok: boolean, why: string|null, guides: string[],
+ *   metrics: {recall: number, part: number, precision: number}, shaky: boolean}}
+ */
+export function judgeShape(ref, strokes, options = {}) {
+  /**
+   * 🔴 **الحدُّ العامل لا الثابتُ المكتوب** (عهدُ ١٩ أغسطس ٢٠٢٦): السماحةُ تُطلَب
+   * من الدالّتين اللتين تحكمان بها — `resolveTolerance` تضربها في مقياس المادّة،
+   * و`easeTolerance` في كرم الخطوة الحرّة — **ولا تُقرأ من `TOLERANCE` ولا من وثيقة**.
+   */
+  const base = resolveTolerance(options.tolerance ?? ref?.tolerance);
+  const tol = easeTolerance(base).lateral;
+  const guides = [];
+  const parts = partsOf(ref);
+  const bodyParts = parts.filter((p) => p.kind === 'stroke');
+  const dotParts = parts.filter((p) => p.kind === 'dot');
+  const dots = dotParts.reduce((n, p) => n + (p.count || 1), 0);
+  const partClouds = bodyParts.map((p) => shapeCloud(p.poly.pts.map((q) => [q[0], q[1]])));
+  const modelBody = partClouds.flat();
+  const modelDots = dotParts.map((p) => [p.at[0], p.at[1]]);
+  const model = [...modelBody, ...modelDots];
+  const ink = (strokes || []).filter((s) => s && s.length).map((s) => s.map((p) => [p[0], p[1]]));
+  if (!ink.length || !model.length) {
+    return {
+      ok: false, why: 'body-coverage', guides, shaky: false,
+      metrics: { recall: 0, part: 0, precision: 0 },
+    };
+  }
+
+  // **الحجمُ إرشادٌ لا ردّ**: يُقاس على الحبر كما كُتب (قبل التطبيع) — فالتطبيعُ يمحوه.
+  const size = sizeOf(ref, ink, base);
+  if (size) guides.push(size);
+
+  const child = shapeNormal(ink, model, tol);
+  const isTap = (s) => s.length <= SHAPE_DOTS.points || shapeLen(s) < SHAPE_DOTS.tap * tol;
+
+  /**
+   * **نقرةُ التردّد ليست علامة** — إصبعٌ يعود فيلمس **حبرَه هو**: مركزُها قريبٌ من
+   * جسم النموذج **ومن حبر الطفل الصلب معاً**.
+   *
+   * 🔴 **والشرطُ الثاني ليس زينة، وثمنُه مقيس**: بالقرب من النموذج وحدَه (كما نصّت
+   * خطّةُ الإنقاذ) تُقبَل **نقطةُ غين على عين** (بُعدُها ٠٫٠٠٨ سماحة بعد التطبيع)
+   * **ونقطةُ خاء على حاء** (٠٫٢٢٠) — فتسقط مصفوفةُ الأخوات إلى ١٢٢/١٢٤. **وحبرُ
+   * الطفل يفصلهما بفجوةٍ لا تُخطَأ**: نقرةُ التردّد في `د/معزول` من الحصاد بُعدُها
+   * عن حبر صاحبها **صفر**، وأقربُ نقطةِ أختٍ **٠٫٩٧ سماحة**. ⇐ فالتردّدُ **لمسُ
+   * ما كُتب**، والنقطةُ **مَعْلَمٌ في فراغه**.
+   */
+  const solid = child.filter((s) => !isTap(s)).flat();
+  const hesitates = (s) => {
+    const seat = shapeSeat(s);
+    return solid.length > 0
+      && shapeGap(seat, modelBody) <= SHAPE_DOTS.hesitate * tol
+      && shapeGap(seat, solid) <= SHAPE_DOTS.hesitate * tol;
+  };
+
+  // **فرزُ الحبر: جسمٌ أم علامة** — بقربه من جسم النموذج ومن مواضع النقاط.
+  const marks = []; const bodyInk = [];
+  for (const s of child) {
+    const tap = isTap(s);
+    if (dots && tap && hesitates(s)) { bodyInk.push(s); continue; }
+    const onBody = shapeCover(s, modelBody, tol);
+    const toDots = dots ? shapeCover(s, modelDots, tol * SHAPE_DOTS.near) : 0;
+    if (dots && (tap || toDots > onBody)) marks.push(s); else bodyInk.push(s);
+  }
+  const childBody = bodyInk.flat();
+  const childMarks = marks.flat();
+
+  // ١) **الجسم: تغطيةٌ باتجاهين وأدنى تغطيةِ جزء** — فالخربشةُ فوق النموذج تغطّيه ١٠٠٪.
+  const recall = modelBody.length ? shapeCover(modelBody, childBody, tol) : 1;
+  const part = partClouds.length
+    ? Math.min(...partClouds.map((c) => shapeCover(c, childBody, tol))) : 1;
+  const precision = childBody.length ? shapeCover(childBody, model, tol) : 0;
+
+  /**
+   * ٢) **قاعدةُ النقاط ثلاثيّةٌ لا ثنائية** (`SHAPE_JUDGE §٢ج`، ودرسٌ نُقض في ليلته):
+   * **العددُ** حقيقةٌ إملائية تُحرَس — فالجهةُ وحدَها تُقبِل `ث` عن `ت` و`ي` عن `ب`.
+   * **والمتّصلُ يُقاس مدّاً**: مَن كتب نقطتَي «ت» شَرْطةً واحدةً لم يكتب نقطةً واحدة،
+   * **وللثلاث رأسٌ يعلو** (زاويةٌ رأسُها لفوق — عامٌّ عند الكبار وأحياناً الصغار).
+   * **وما بين النقاط لا يُحاسَب** — ولذلك قيسَت العلامةُ مجموعةً لا نقطةً نقطة.
+   */
+  let dotFail = null;
+  if (dots === 0) {
+    // **وحرفٌ بلا نقاطٍ لا يقبل نقرة** — إلا نقرةَ تردّدٍ على حبرٍ مكتوب.
+    if (child.some((s) => isTap(s) && !hesitates(s))) dotFail = 'dots-count';
+  } else if (!marks.length) {
+    dotFail = 'no-marks';
+  } else {
+    const seats = marks.map((s) => shapeSeat(s));
+    const taken = new Array(marks.length).fill(false);
+    let clusters = 0;
+    for (let i = 0; i < marks.length; i++) {
+      if (taken[i]) continue;
+      clusters++; taken[i] = true;
+      for (let j = i + 1; j < marks.length; j++) {
+        if (!taken[j] && dist(seats[i], seats[j]) < SHAPE_DOTS.merge * tol) taken[j] = true;
+      }
+    }
+    const runs = marks.filter((s) => !isTap(s));
+    const spread = inkBox([childMarks]);
+    const spanX = spread ? spread.w : 0;
+    const spanY = spread ? spread.h : 0;
+    const dotSpan = modelDots.length > 1
+      ? Math.max(...modelDots.map((d) => d[0])) - Math.min(...modelDots.map((d) => d[0])) : 0;
+    // **والجهةُ شرطٌ قاطع**: فوق الجسم أم تحته — وهي التي تفصل `ن` من `ب`.
+    const sideModel = modelDots.length && modelBody.length
+      ? Math.sign(shapeMidY(modelDots) - shapeMidY(modelBody)) : 0;
+    const sideChild = childBody.length
+      ? Math.sign(shapeMidY(childMarks) - shapeMidY(childBody)) : sideModel;
+    if (sideModel !== 0 && sideChild !== sideModel) dotFail = 'dots-side';
+    else if (clusters === dots) dotFail = null;
+    else if (clusters < dots && runs.length) {
+      const spanOk = dots > 1 && spanX >= SHAPE_DOTS.spanLow * dotSpan
+        && spanX <= SHAPE_DOTS.spanHigh * Math.max(dotSpan, tol);
+      const apexOk = dots < 3 || spanY >= SHAPE_DOTS.apex * spanX;
+      dotFail = spanOk && apexOk ? null : 'dots-span';
+    } else dotFail = 'dots-count';  // **وزيادةُ التجمّعات عن العدد ردٌّ** كنقصانها
+  }
+
+  /** **سببٌ واحدٌ أوّل** يُقال للطفل: الجسمُ قبل جزئه، وجزؤه قبل الزائد، ثم العلامة. */
+  const why = recall < SHAPE_LIMITS.recall ? 'body-coverage'
+    : part < SHAPE_LIMITS.part ? 'part-missing'
+      : precision < SHAPE_LIMITS.precision ? 'stray-ink'
+        : dotFail;
+
+  /**
+   * **«صحيحٌ ويدُك ترتجف»** — الهامشُ فوق العتبة مباشرةً: حرفٌ يُقرأ ويده ترتعش،
+   * **درجةٌ لليتنر وجملةٌ تُقال، لا ردّ** (`ENGINE_RESCUE §٣`: الجودةُ غيرُ القبول).
+   */
+  const shaky = recall >= SHAPE_LIMITS.recall
+    && recall <= SHAPE_LIMITS.recall + SHAPE_LIMITS.shakyBand;
+  if (shaky) guides.push('shaky');
+
+  return { ok: !why, why: why || null, guides, metrics: { recall, part, precision }, shaky };
+}
+
+/**
  * **محاولةٌ حرّةٌ تُمشى لمسةً لمسة** — آلةُ الخطوة الحرّة كاملةً، **بلا شاشة**.
  *
  * **ولِمَ خارج اللوح؟** لأنّ العهدَ «لا تدريسَ بلا قياس» (`METHOD.md §٦`) يقع على
