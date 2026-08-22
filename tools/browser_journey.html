@@ -200,7 +200,22 @@ function hurryAudio(win) {
       const ds = [...el.querySelectorAll('.pen-model .pen-stroke')]
         .map((p) => (p.getAttribute('d') || '').match(/-?\d+(\.\d+)?/g) || []);
       const dots = el.querySelectorAll('.pen-model .pen-dot').length;
-      if (!ds.length) return null;
+      // **ومادّةُ النقرة الخالصة تُعرَف بنقرتها** (مراجعة ن٢): الصفرُ بلا ضربةٍ
+      // أصلاً — فمطالبتُه بقطعٍ تُسقطه «مادّةً لا تُعرَف» وتسدّ الرحلةَ عنده.
+      if (!ds.length) {
+        if (!dots) return null;
+        const cs = [...el.querySelectorAll('.pen-model .pen-dot')]
+          .map((c) => [Number(c.getAttribute('cx')), Number(c.getAttribute('cy'))]);
+        for (const item of library) {
+          if ((item.ref.strokes || []).length) continue;
+          const want = (item.ref.dots || []);
+          if (want.length !== cs.length) continue;
+          const hit = want.every((d, i) => Math.abs(d.at[0] - cs[i][0]) < 0.5
+            && Math.abs(d.at[1] - cs[i][1]) < 0.5);
+          if (hit) return item;
+        }
+        return null;
+      }
       const near = (a, b) => Math.abs(a - b) < 0.2;
       for (const item of library) {
         const strokes = item.ref.strokes || [];

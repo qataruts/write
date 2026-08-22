@@ -234,7 +234,7 @@ ok(/classList\.toggle\('calm', support\.calm\(\)\)/.test(mainSrc)
   && /\.calm \*, \.calm \*::before/.test(css),
   'والهدوءُ صنفٌ على الجذر يستدعي قواعدَ خفض الحركة القائمة (والوحدةُ لا تعرف DOM)');
 ok(/removeProperty\('--ink-weight'\)/.test(mainSrc)
-  && /calc\(22 \* var\(--ink-weight, 1\)\)/.test(css),
+  && /calc\(22 \* var\(--ink-weight, 1\) \* var\(--ink-scale, 1\)\)/.test(css),
   'وسُمكُ الخطّ خاصّيةٌ **تُحذَف** عند القائم ولا تُكتب بقيمتها — فلا فرقَ ببايت');
 ok(/\.pen-fence \{[^}]*\}/.test(css) && !/--ink-weight/.test(css.match(/\.pen-fence \{[^}]*\}/)[0]),
   'ولا يمسّ سُمكُ الخطّ **ممرَّ السماحة** — عرضُه من `trial.tolerance` بيد المحرّك');

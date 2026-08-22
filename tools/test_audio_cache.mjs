@@ -115,9 +115,9 @@ const bare = (url) => url.split('?')[0];
 class FakeCache {
   constructor() { this.entries = new Map(); }        // رابط ← نصّ الجسم
   async add(url) {
-    const res = await fakeFetch(String(url));
+    const res = await fakeFetch(url);
     if (!res.ok) throw new Error(`add ${url}`);
-    this.entries.set(String(url), await res.text());
+    this.entries.set(urlOf(url), await res.text());
   }
   async put(req, res) { this.entries.set(urlOf(req), await res.text()); }
   async match(req, opts = {}) {

@@ -192,7 +192,12 @@ const NEGATIVE = [
   // **ونصفُ «ح» يسقط بالتغطية وحدَها** (دقّتُه ١٠٠٪) — فهو بابُ العتبة السالب النظيف.
   ['نصفُ الحرف الأول (ح — بالتغطية وحدَها)', HHA, halved(HHA), 'body-coverage'],
   ['نقطةٌ في غير جهتها (ن ⇐ تحت)', NOON, flipped(NOON), 'dots-side'],
-  ['نقطةٌ في غير جهتها (ج ⇐ فوق)', JEEM, flipped(JEEM), 'dots-side'],
+  // **وقلبُ نقطة الجيم حول مركز جسمها يُبقيها داخل حِضنه** — وجيمٌ نقطتُها في أعلى
+  // الحِضن تُقرأ جيماً (حكمُ المناطق الثلاث، مراجعة ن٢): فالمصنوعةُ الصادقة لاسمها
+  // «ج ⇐ فوق» ترفع النقطةَ **فوق الجسم كلِّه** (موضعَ الخاء) — وتلك تُرَدّ جهةً.
+  ['نقطةٌ في غير جهتها (ج ⇐ فوق)', JEEM, [...bodyStrokes(JEEM),
+    tapAt([dotSeats(JEEM)[0][0],
+      pen.inkBox(bodyStrokes(JEEM)).y0 - 0.3 * pen.inkBox(bodyStrokes(JEEM)).h])], 'dots-side'],
   ['عددُ نقاطٍ ناقص (ت بنقطة)', TA, [...bodyStrokes(TA), tapAt(dotSeats(TA)[0])], 'dots-count'],
   ['عددُ نقاطٍ زائد (ت بثلاث)', TA, [...traceOf(TA),
     tapAt([dotSeats(TA)[0][0] + tolOf(TA), dotSeats(TA)[0][1]])], 'dots-count'],
@@ -296,7 +301,18 @@ console.log('\n٦) التجريبُ السالب — تُعطَّل القاعد
 const nth = (i) => NEGATIVE[i];
 const [, HALF_REF, HALF_INK] = nth(2);   // نصفُ «ح» — يسقط بالتغطية ولا شيءَ غيرِها
 const [, SCRIB_REF, SCRIB_INK] = nth(0);
-const [, FLIP_REF, FLIP_INK] = nth(3);
+// **وشاهدُ الجهة انزياحٌ محكومٌ لا قلبٌ تامّ** (مراجعة ن٢): القلبُ التامُّ صار
+// يمسكه **سقفُ المزاوجة** أيضاً (دفاعٌ ثانٍ فوق الجهة)، فسالبةُ «عطّل الجهةَ»
+// تحتاج شاهداً **داخل السقف** لا يمسكه إلا حارسُ الجهة: نقطةُ «ن» تُنزَل نحو
+// مرآتها بثمانية أعشار السقف — تعبر منطقتَها (فوقُ ⇐ داخلُ الجسم) ويبقى زواجُها.
+const FLIP_REF = PATHS['ن'].isolated;
+const FLIP_INK = (() => {
+  const body = FLIP_REF.strokes.map((st) => st.points.map((q) => [q[0], q[1]]));
+  const d = FLIP_REF.dots[0].at;
+  const cap = 2.5 * pen.easeTolerance(pen.resolveTolerance(FLIP_REF.tolerance)).lateral;
+  const at = [d[0], d[1] + 0.8 * cap];
+  return [...body, [at, at, at]];
+})();
 const [, OVER_REF, OVER_INK] = nth(6);
 const [, PART_REF, PART_INK] = nth(7);
 const [, STRAY_REF, STRAY_INK] = nth(8);
@@ -309,7 +325,7 @@ await negative('أدنى تغطيةِ جزء (ك بلا شولتها تُقبَ�
 await negative('الدقّةُ (الخربشةُ فوق النموذج تُقبَل)',
   'precision: 0.55,', 'precision: 0,', (alt) => alt.judgeShape(SCRIB_REF, SCRIB_INK).ok);
 await negative('جهةُ النقطة (المقلوبةُ تُقبَل)',
-  "if (sideModel !== 0 && sideChild !== sideModel) dotFail = 'dots-side';",
+  "if (sideBad) dotFail = 'dots-side';",
   "if (false) dotFail = 'dots-side';",
   (alt) => alt.judgeShape(FLIP_REF, FLIP_INK).ok);
 await negative('عددُ التجمّعات (ت بثلاثِ نقاطٍ تُقبَل)',
@@ -346,7 +362,7 @@ await negative('نقرةُ التردّد (يُردّ «د» المعزولةُ 
   'hesitate: 0.35,', 'hesitate: 0,',
   (alt) => onField(alt).agree === field.agree - 1);
 await negative('وشرطُها الثاني — القربُ من حبر الطفل (تختلط الأخوات بدونه)',
-  '&& shapeGap(seat, solid) <= SHAPE_DOTS.hesitate * tol', '&& true',
+  '&& shapeGap(seat, solid) <= 0.12 * tol', '&& true',
   async (alt) => {
     const loose = onSisters(alt);
     console.log(`      · بالقرب من النموذج وحدَه: الأخوات ${loose.pass}/${loose.total}`

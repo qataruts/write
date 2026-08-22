@@ -82,8 +82,9 @@ for (const [name, text] of Object.entries(PAGES)) {
 
 const shellList = sw.match(/const SHELL = \[([\s\S]*?)\];/)?.[1] || '';
 ok(!/welcome/.test(shellList), 'قائمةُ SHELL في عامل الخدمة لا تحمل صفحةَ تعريفٍ واحدة');
-ok(/const WELCOME =/.test(sw) && /pathname\.startsWith\(WELCOME\)/.test(sw),
-  'وعاملُ الخدمة يتنحّى عن مسار `welcome/` صراحةً (فلا يبتلعها ردُّ التنقّل)');
+ok(/const OUTSIDE = \[[^\]]*'welcome\/'/.test(sw)
+  && /OUTSIDE\.some\(\(dir\) => url\.pathname\.startsWith\(dir\)\)/.test(sw),
+  'وعاملُ الخدمة يتنحّى عن مسار `welcome/` صراحةً (قائمةُ OUTSIDE — فلا يبتلعها ردُّ التنقّل)');
 
 // ————— ٢. صفرُ موردٍ خارجيّ، والبريدُ واحد —————
 

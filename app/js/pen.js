@@ -1236,6 +1236,16 @@ export const SHAPE_LIMITS = {
 export const SHAPE_DOTS = {
   points: 4, tap: 0.5, merge: 0.45, near: 1.8, hesitate: 0.35,
   spanLow: 0.5, spanHigh: 2.4, apex: 0.28,
+  /**
+   * 🔴 **ونصفُ قطر الدمج يُقرأ من فجوة نقاط المرجع لا من السماحة وحدَها** (إصلاحُ
+   * صيد ن٢ في مراجعة الإدارة، ٢١ أغسطس ٢٠٢٦): «ش/نهائي» سماحتُها العاملة ٣١٢
+   * **وفجوةُ نقاطها ١١٠** — فدمجُ ٠٫٤٥ × السماحة (١٤٠) يبتلع نقاطَها الثلاث نقطتين
+   * **ولو كُتبت على نموذجها حرفاً بحرف** ⇒ `dots-count` أبداً. **والمرجعُ يعلم كم
+   * تتباعد نقاطُه**: فالحدُّ الأدنى بين تجمّعين هو الأضيقُ من (٠٫٤٥ × السماحة)
+   * و(`gapShare` × أضيق فجوةٍ بين نقاط المرجع) — قاعدةُ «الحدُّ من مالكه»،
+   * ولا تُمَسّ الحروفُ الواسعةُ الفجوات (حدُّها الأول أضيقُ أصلاً).
+   */
+  gapShare: 0.6,
 };
 
 /** توفيقُ الشكل: مقياسٌ مقصوص، وخطوةُ تسويةٍ **واحدة** — لا دورانَ ولا التواء. */
@@ -1381,16 +1391,26 @@ export function judgeShape(ref, strokes, options = {}) {
   const solid = child.filter((s) => !isTap(s)).flat();
   const hesitates = (s) => {
     const seat = shapeSeat(s);
+    /**
+     * 🔴 **والتردّدُ لمسُ الحبر لا جوارُه** (إصلاحُ مراجعة ن٢): شرطُ حبر الطفل
+     * كان بسعة شرط النموذج (٠٫٣٥ سماحة) **فابتلع نقاطاً حقيقيةً لصيقةً بأجسامها**
+     * — ونقاطُ الكلمات كذلك طبعاً («هلال شمس»: نقطةُ الشين الوسطى على ~٥٠ من
+     * أسنانها فبُلعت واختلّ العدّ، و٥٦ وحدةً معها). **وقياسُ ن١ هو الفيصل**:
+     * تردّدُ «د» الميدانيّ بُعدُه عن حبر صاحبه **صفر** وأقربُ نقطةِ أختٍ ٠٫٩٧ —
+     * فحدُّ اللمس ٠٫١٢ سماحةً يفصلهما بفجوةٍ لا تُخطَأ، وشرطُ النموذج على سعته.
+     */
     return solid.length > 0
       && shapeGap(seat, modelBody) <= SHAPE_DOTS.hesitate * tol
-      && shapeGap(seat, solid) <= SHAPE_DOTS.hesitate * tol;
+      && shapeGap(seat, solid) <= 0.12 * tol;
   };
 
   // **فرزُ الحبر: جسمٌ أم علامة** — بقربه من جسم النموذج ومن مواضع النقاط.
   const marks = []; const bodyInk = [];
   for (const s of child) {
     const tap = isTap(s);
-    if (dots && tap && hesitates(s)) { bodyInk.push(s); continue; }
+    // **ولا تُبلَع نقرةٌ قبل العدّ** (تتمّةُ المراجعة): كانت نقرةُ التردّد تُطوى
+    // هنا فتأكل — تحت الرجفة — علامةً حقيقيةً لمست حبرَ جسمها (قِيس: ١٣ من ١٤
+    // ونقطةٌ خاوية). **فالتردّدُ يُحكَم به على الفاضل بعد المزاوجة لا قبلها.**
     const onBody = shapeCover(s, modelBody, tol);
     const toDots = dots ? shapeCover(s, modelDots, tol * SHAPE_DOTS.near) : 0;
     if (dots && (tap || toDots > onBody)) marks.push(s); else bodyInk.push(s);
@@ -1431,14 +1451,61 @@ export function judgeShape(ref, strokes, options = {}) {
     marksShort = true;
   } else {
     const seats = marks.map((s) => shapeSeat(s));
-    const taken = new Array(marks.length).fill(false);
-    let clusters = 0;
-    for (let i = 0; i < marks.length; i++) {
-      if (taken[i]) continue;
-      clusters++; taken[i] = true;
-      for (let j = i + 1; j < marks.length; j++) {
-        if (!taken[j] && dist(seats[i], seats[j]) < SHAPE_DOTS.merge * tol) taken[j] = true;
+    let mergeR = SHAPE_DOTS.merge * tol;
+    if (modelDots.length > 1) {
+      let least = Infinity;
+      for (let i = 0; i < modelDots.length; i++)
+        for (let j = i + 1; j < modelDots.length; j++)
+          least = Math.min(least, dist(modelDots[i], modelDots[j]));
+      mergeR = Math.min(mergeR, SHAPE_DOTS.gapShare * least);
+    }
+    /**
+     * 🔴 **العدُّ بالإسناد لا بالتجميع** (إصلاحُ مراجعة ن٢ الرابع — وبه صار العدُّ
+     * ثابتاً تحت الرجفة): تجميعُ المسافات هشٌّ للأزواج المتقاربة — رجفةُ ±٤٥ على
+     * زوجٍ فجوتُه ١٠٠ قد تُدنيهما دون نصف قطر الدمج **فيُقرآن نقطةً ويُرَدّ
+     * المصيب** (قِيس: أضيقُ جملةٍ هبطت ٣٣ من أرضية العهد ٤٥). ⇐ **فكلُّ علامةٍ
+     * تُسنَد إلى أقرب نقطةِ مرجعٍ بالنِّسَب** (إطارُ كلِّ طرفٍ جسمُه — كقاعدة
+     * الجهة)، **والعددُ عددُ النقاط المخدومة**: نقطةٌ بلا خادمٍ نقصٌ، **وعلاماتٌ
+     * تتزاحم على نقطةٍ وبينها فوق نصف قطر الدمج زيادةٌ** (ت على مرجع ن) —
+     * والمتلاصقتان نقرُ توكيدٍ على النقطة نفسِها (كما كان الدمجُ يقرؤهما).
+     */
+    /**
+     * **مزاوجةٌ حصريّةٌ بالمسافة المطلقة** (التتمّةُ الثالثة والحاسمة): المقاعدُ
+     * **مطبَّعةٌ أصلاً إلى فضاء النموذج** في رأس الحَكَم — فالنِّسَبُ هنا تضخّم
+     * أثرَ فرقِ الإطارين في الجُمل العريضة حتى يفوق أيَّ سقف (قِيس: علامتان
+     * صحيحتان بلا زوجٍ وسقفُ ٠٫٢٧ نسبيّاً). **الأقربُ فالأقربُ حصريّاً بالوحدات
+     * كما هي**: كلُّ نقطةٍ تُزوَّج بعلامةٍ واحدة، ومن سُبق إلى نقطته مضى إلى
+     * الخاوية — فرجفةُ ±٤٥ لا تفكّ زوجاً فجوتُه ≥ الرجفة. **والفاضلُ بعد
+     * التزويج**: ملاصقٌ لمزوَّجةٍ فنقرُ توكيدٍ يُطوى، وإلا فزيادةٌ صريحة
+     * (ت على مرجع ن). وسقفُ الزواج ٢٫٥ سماحة فلا يُزوَّج شارد.
+     */
+    const cap = 2.5 * tol;
+    const pairs = [];
+    for (let i = 0; i < seats.length; i++)
+      for (let j = 0; j < modelDots.length; j++) {
+        const dd = dist(seats[i], modelDots[j]);
+        if (dd <= cap) pairs.push([dd, i, j]);
       }
+    pairs.sort((a, b) => a[0] - b[0]);
+    const markOf = new Array(seats.length).fill(-1);
+    const dotOf = new Array(modelDots.length).fill(-1);
+    for (const [, i, j] of pairs) {
+      if (markOf[i] < 0 && dotOf[j] < 0) { markOf[i] = j; dotOf[j] = i; }
+    }
+    let clusters = dotOf.filter((i) => i >= 0).length;
+    let crowded = false;
+    for (let i = 0; i < seats.length; i++) {
+      if (markOf[i] >= 0) continue;
+      // فاضلٌ بعد الزواج: توكيدٌ إن لاصق علامةً مزوَّجة، أو تردّدٌ إن لمس حبرَه —
+      // وإلا فزيادةٌ صريحة (ت على مرجع ن).
+      const confirms = dotOf.some((k) => k >= 0 && dist(seats[i], seats[k]) < mergeR);
+      if (!confirms && !hesitates(marks[i])) { crowded = true; break; }
+    }
+    if (crowded) clusters = dots + marks.length;    // زيادةٌ صريحة — تدخل بابَ العدد
+    if (options.probe) {
+      options.probe.dots = { D: dots, marks: marks.length, clusters, crowded,
+        unmatched: markOf.filter((j) => j < 0).length,
+        emptyDots: dotOf.filter((i) => i < 0).length, cap };
     }
     const runs = marks.filter((s) => !isTap(s));
     const spread = inkBox([childMarks]);
@@ -1452,7 +1519,66 @@ export function judgeShape(ref, strokes, options = {}) {
     const sideChild = childBody.length
       ? Math.sign(shapeMidY(childMarks) - shapeMidY(childBody)) : sideModel;
     marksShort = clusters < dots;
-    if (sideModel !== 0 && sideChild !== sideModel) dotFail = 'dots-side';
+    /**
+     * 🔴 **والجهةُ تُقاس لكلِّ تجمّعٍ على أقرب نقطةِ مرجعٍ إليه — لا على المتوسّط
+     * العامّ** (إصلاحُ مراجعة ن٢، ٢١ أغسطس ٢٠٢٦): الكلمةُ تجمع جهتين («بَيْتْ
+     * تُوتْ»: نقاطُ الياء تحت ونقاطُ التاءات فوق) **فمتوسّطُها يكذب** — وقد كذب:
+     * في منتصف الكتابة (نقاطُ «بيت» وحدَها) حُكم `dots-side` قاطعاً ثلاثاً فعُدّت
+     * تعثّراتٍ وفُتح المخرجُ وماتت الوحدة (انسدادُ `journey` عند g4-words:w-1).
+     * **والمرجعُ يعلم جهةَ كلِّ نقطةٍ من نقاطه**: فيُسأل أقربُها إلى التجمّع،
+     * ويُغتفَر خلافُ الجهة إذا كان الفارقُ الرأسيُّ دون ٠٫٦ سماحة (نقطةٌ تلاصق
+     * السطر لا تُقلَب حكماً). **والحرفُ المفرد على حاله**: نقطتُه الوحيدةُ هي
+     * أقربُها، فتمييزُ ب/ن قائمٌ بعينه — مجرَّبٌ سالباً في العدّة.
+     */
+    /**
+     * 🔴 **وجهةُ العلامة ثلاثُ مناطقَ لا إشارتان — وتُقاس لكلِّ علامةٍ على أقرب
+     * نقطةِ مرجعٍ إليها** (إصلاحُ مراجعة ن٢، ٢١ أغسطس ٢٠٢٦، على مرحلتين):
+     *
+     * **العلّةُ الأولى — المتوسّطُ العامّ يكذب في الكلمة**: «بَيْتْ تُوتْ» نقاطُها
+     * جهتان، ففي منتصف الكتابة حُكم `dots-side` قاطعاً ثلاثاً فعُدّت تعثّراتٍ
+     * وماتت الوحدة (انسدادُ `journey` عند g4-words:w-1). ⇐ فكلُّ علامةٍ تُسأل
+     * **أقربَ نقطةِ مرجعٍ إليها** لا متوسّطاً عامّاً.
+     *
+     * **والعلّةُ الثانية — الإشارةُ الثنائية تُخطئ نقطةَ الجيم**: نقطةُ ج داخلَ
+     * حِضن الحرف تلاصق منتصفَه فتتقلّب إشارتُها، **فقُبلت خاءٌ على جيم** (نقطتها
+     * فوق). ⇐ **والعينُ تفرّق بثلاث مناطق**: فوقَ الجسم · داخلَه · تحتَه —
+     * فتُقاس منطقةُ العلامة (بحدَّي ١٥٪ من ارتفاع الجسم) على منطقة أقرب نقطةٍ
+     * في المرجع، **ويُعفى قربٌ مباشر** (فرقٌ رأسيّ ≤ ٠٫٩ سماحة): نقطةٌ نزلت
+     * حيث نزلت نقطةُ المرجع لا تُحاكَم بمنطقةٍ حسابية.
+     */
+    let sideBad = false;
+    if (modelDots.length && modelBody.length) {
+      /**
+       * **وكلُّ طرفٍ يُقاس في إطار جسمه هو، ثم تُقارَن النِّسَبُ لا الإحداثيات**
+       * (الإصلاحُ الثالث والحاسم): مقعدُ الطفل مُطبَّعٌ ونقطةُ المرجع خام، وفي
+       * منتصف الكلمة يفترق الإطاران (نقاطٌ لم تُكتب بعدُ تُطوّل صندوقَ المرجع)
+       * فكانت المناطقُ تنقلب على نقاطٍ مطابقةٍ حرفاً بحرف («قلب» و«بيض» قاطعتين
+       * `dots-side` على نموذجهما). النسبةُ العموديّة `ry = (y−y0)/h` لا يبدّلها
+       * مقياسٌ ولا إزاحة: **فوقُ** ≤ ٠٫١٥ · **داخلُ** بينهما · **تحتُ** ≥ ٠٫٨٥ —
+       * والقرينُ أقربُ نقطةِ مرجعٍ **بالنِّسَب**، ويُعفى فرقٌ رأسيٌّ نسبيٌّ ≤ ٠٫١٢
+       * (رجفةُ الحدود لا قلبُ الجهة).
+       */
+      const cBox = inkBox([childBody.length ? childBody : modelBody]);
+      const mBox = inkBox([modelBody]);
+      const rel = (pt, box) => [
+        (pt[0] - box.x0) / Math.max(box.w, 1e-6),
+        (pt[1] - box.y0) / Math.max(box.h, 1e-6),
+      ];
+      const zoneOf = (ry) => (ry <= 0.15 ? -1 : (ry >= 0.85 ? 1 : 0));
+      const relDots = modelDots.map((d) => rel(d, mBox));
+      for (const seat of seats) {
+        const rs = rel(seat, cBox);
+        let bestD = Infinity; let best = null;
+        for (const rd of relDots) {
+          const dd = (rs[0] - rd[0]) ** 2 + (rs[1] - rd[1]) ** 2;
+          if (dd < bestD) { bestD = dd; best = rd; }
+        }
+        if (!best) continue;
+        if (Math.abs(rs[1] - best[1]) <= 0.12) continue;
+        if (zoneOf(rs[1]) !== zoneOf(best[1])) { sideBad = true; break; }
+      }
+    }
+    if (sideBad) dotFail = 'dots-side';
     else if (clusters === dots) dotFail = null;
     else if (clusters < dots && runs.length) {
       const spanOk = dots > 1 && spanX >= SHAPE_DOTS.spanLow * dotSpan
