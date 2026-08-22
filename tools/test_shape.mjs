@@ -186,6 +186,30 @@ const flatThree = (ref) => {
   return [...bodyStrokes(ref), lineBetween([Math.min(...xs), y], [Math.max(...xs), y], 14)];
 };
 
+/**
+ * **علامةٌ مستعارةٌ من أختٍ** (شهودُ م٨): مدُّ نقاط حرفٍ **مانحٍ** يُرسم في منطقة
+ * نقاط حرفٍ آخر — شَرطةً مسطّحةً أو زاويةً رأسُها لفوق. **وهي عينُ ما يفعله الطفل**:
+ * يكتب علامةَ «ت» فوق جسم «ن»، أو علامةَ «ث» فوق جسم «ت» — فالسؤالُ عن العدّ لا عن
+ * الموضع، ولذلك بقيت العلامةُ في منطقتها الصحيحة وجهتِها الصحيحة.
+ */
+const markLike = (ref, donor, kind) => {
+  const give = [...dotSeats(donor)].sort((a, b) => a[0] - b[0]);
+  const w = give[give.length - 1][0] - give[0][0];
+  const own = dotSeats(ref);
+  const hub = [own.reduce((s, p) => s + p[0], 0) / own.length,
+    own.reduce((s, p) => s + p[1], 0) / own.length];
+  const l = [hub[0] - w / 2, hub[1]]; const r = [hub[0] + w / 2, hub[1]];
+  if (kind === 'dash') return [...bodyStrokes(ref), lineBetween(l, r, 14)];
+  if (kind === 'angle') {
+    const apex = [hub[0], hub[1] - w / 2];
+    return [...bodyStrokes(ref), [...lineBetween(l, apex, 8), ...lineBetween(apex, r, 8).slice(1)]];
+  }
+  // **الاصطلاحُ الثالث للثلاث: شَرطةٌ ونقرةٌ فوقها** — ٢ + ١ = ٣، يجيء به القانونُ
+  // مجّاناً (لا قاعدةَ له خاصّة). **وهو الذي كشف أنّ التوكيدَ نقرةٌ لا ضربة.**
+  const up = [hub[0], hub[1] - w * 0.45];
+  return [...bodyStrokes(ref), lineBetween(l, r, 14), tapAt(up)];
+};
+
 const NEGATIVE = [
   ['خربشةٌ كثيفةٌ فوق نموذجٍ صحيح', HA, scribbled(HA), 'stray-ink'],
   ['نصفُ الحرف الأول (م)', MEEM, halved(MEEM), 'part-missing'],
@@ -205,6 +229,15 @@ const NEGATIVE = [
   ['نقرةٌ زائدةٌ على حرفٍ بلا نقاط', HA, [...bodyStrokes(HA),
     tapAt([pen.inkBox([pen.refPoints(HA)]).x1 + 2 * tolOf(HA), bodyMidY(HA)])], 'dots-count'],
   ['ثلاثٌ شَرْطةً مسطّحةً بلا رأس', THA, flatThree(THA), 'dots-span'],
+  // ————— شهودُ قانون العدّ (م٨): **الشَّرطةُ اثنتان بأعيانهما والزاويةُ ثلاثٌ بأعيانها** —————
+  // **والقانونُ ثنائيُّ الاتجاه**: لا يكفي أن تُشبِع الشَّرطةُ مقعدَي «ت» — يجب أن
+  // **لا تُشبِع** مقعدَ «ن» الواحد ولا مقاعدَ «ث» الثلاثة، وأن لا تُشبع الزاويةُ «ت».
+  ['شَرْطةٌ فوق «ن» (نقطتان مكان واحدة)', NOON, markLike(NOON, TA, 'dash'), 'dots-count'],
+  ['زاويةٌ فوق «ت» (ثلاثٌ مكان نقطتين)', TA, markLike(TA, THA, 'angle'), 'dots-count'],
+  ['شَرْطةٌ فوق «ث» لا تُشبِع الثلاث', THA, markLike(THA, TA, 'dash'), 'dots-span'],
+  // **والاصطلاحُ الثالث (شَرطةٌ ونقرةٌ فوقها = ٣) يُرَدّ عن ذات النقطة الواحدة** —
+  // وهذا الشاهدُ هو الذي كشف أنّ الشَّرطةَ الفاضلة كانت تُطوى «توكيداً» بلا عدّ.
+  ['شَرْطةٌ ونقرةٌ فوق «ن» (ثلاثٌ مكان واحدة)', NOON, markLike(NOON, THA, 'dashtap'), 'dots-count'],
 ];
 for (const [label, ref, strokes, why] of NEGATIVE) {
   const v = pen.judgeShape(ref, strokes);
@@ -262,8 +295,17 @@ const POSITIVE = [
   ['النقاطُ قبل الجسم (ث)', THA, [...dotSeats(THA).map(tapAt), ...bodyStrokes(THA)]],
   ['نقطتا شَرْطةٍ واحدة (ت)', PATHS['ت'].initial, dashTwo(PATHS['ت'].initial)],
   ['نقطتا شَرْطةٍ واحدة (ي وسطيّة)', PATHS['ي'].medial, dashTwo(PATHS['ي'].medial)],
+  // **وشَرْطةٌ تلاصق جسمَها** (ي/معزول: بُعدُها ١٢٥ والسماحةُ ١٦٨) — تُقرأ علامةً
+  // بالمتوسّط لا جسماً بالمساواة (صيدُ جدول حقيقة م٨).
+  ['نقطتا شَرْطةٍ واحدة (ي معزولة — تلاصق جسمَها)', PATHS['ي'].isolated,
+    dashTwo(PATHS['ي'].isolated)],
   ['ثلاثٌ زاويةً رأسُها فوق (ث)', THA, angleThree(THA)],
   ['ثلاثٌ زاويةً رأسُها فوق (ش أوّليّة)', PATHS['ش'].initial, angleThree(PATHS['ش'].initial)],
+  // **والاصطلاحُ الثالث: شَرطةٌ ونقرةٌ فوقها** (٢ + ١) — لا قاعدةَ له خاصّة، يجيء
+  // به مجموعُ القيم مجّاناً في المواقع الأربعة.
+  ['شَرْطةٌ ونقرةٌ فوقها مكان ثلاث (ث)', THA, markLike(THA, THA, 'dashtap')],
+  ['شَرْطةٌ ونقرةٌ فوقها مكان ثلاث (ش وسطيّة)', PATHS['ش'].medial,
+    markLike(PATHS['ش'].medial, PATHS['ش'].medial, 'dashtap')],
 ];
 for (const [label, ref, strokes] of POSITIVE) {
   const v = pen.judgeShape(ref, strokes);
@@ -352,20 +394,57 @@ await negative('جهةُ النقطة (المقلوبةُ تُقبَل)',
   "if (false) dotFail = 'dots-side';",
   (alt) => alt.judgeShape(FLIP_REF, FLIP_INK).ok);
 await negative('عددُ التجمّعات (ت بثلاثِ نقاطٍ تُقبَل)',
-  "      dotFail = 'dots-count';  // **وزيادةُ",
-  '      dotFail = null;  // **وزيادةُ',
+  "    else if (crowded) dotFail = 'dots-count';",
+  '    else if (crowded) dotFail = null;',
   (alt) => alt.judgeShape(OVER_REF, OVER_INK).ok);
 await negative('نقرةٌ على حرفٍ بلا نقاط (تُقبَل)',
   "if (child.some((s) => isTap(s) && !hesitates(s))) dotFail = 'dots-count';",
   "if (false) dotFail = 'dots-count';",
   (alt) => alt.judgeShape(STRAY_REF, STRAY_INK).ok);
+// 🔴 **وقاعدةُ ن٢ في المدّ والرأس انتقلت من قرار `dotFail` إلى قيمة العلامة** (م٨):
+// كانت `spanOk && apexOk` تُغتفَر بها التجمّعاتُ الناقصة، فصارت **الشَّرطةُ تساوي
+// اثنتين والزاويةُ ثلاثاً** — والشاهدان بحالهما، وموضعُ تعطيلهما سطرُ القيمة.
 await negative('رأسُ الثلاث (الشَّرْطةُ المسطّحةُ تُقبَل ثاءً)',
-  'const apexOk = dots < 3 || spanY >= SHAPE_DOTS.apex * spanX;',
-  'const apexOk = true;',
+  'return h >= SHAPE_DOTS.apex * w ? 3 : 2;',
+  'return 3;',
   (alt) => alt.judgeShape(FLAT_REF, FLAT_INK).ok);
 await negative('مدُّ الشَّرْطة (نقطتا «ت» شَرْطةً تُرَدّان)',
-  "dotFail = spanOk && apexOk ? null : 'dots-span';", "dotFail = 'dots-span';",
+  'return h >= SHAPE_DOTS.apex * w ? 3 : 2;',
+  'return h >= SHAPE_DOTS.apex * w ? 3 : 1;',
   (alt) => !alt.judgeShape(PATHS['ت'].initial, dashTwo(PATHS['ت'].initial)).ok);
+
+// ————— 🔴 **قانونُ العدّ (م٨) مجرَّبٌ سالباً في اتّجاهيه** —————
+const [, DASH_N_REF, DASH_N_INK] = nth(10);
+const [, ANGLE_T_REF, ANGLE_T_INK] = nth(11);
+const [, DASH_TH_REF, DASH_TH_INK] = nth(12);
+await negative('الشَّرطةُ اثنتان لا واحدة (شَرْطةٌ فوق «ن» تُقبَل نوناً)',
+  '      if (isTap(s)) return 1;', '      if (true) return 1;',
+  (alt) => alt.judgeShape(DASH_N_REF, DASH_N_INK).ok);
+await negative('والزاويةُ ثلاثٌ لا اثنتان (زاويةٌ فوق «ت» تُقبَل تاءً)',
+  'return h >= SHAPE_DOTS.apex * w ? 3 : 2;', 'return 2;',
+  (alt) => alt.judgeShape(ANGLE_T_REF, ANGLE_T_INK).ok);
+await negative('ولا تُشبِع الشَّرطةُ الثلاث (شَرْطةٌ فوق «ث» تُقبَل ثاءً)',
+  'return h >= SHAPE_DOTS.apex * w ? 3 : 2;', 'return 3;',
+  (alt) => alt.judgeShape(DASH_TH_REF, DASH_TH_INK).ok);
+// **ومسطرةُ المدّ محلّيّةٌ لا سماحةٌ وحدَها** — وثمنُها مقيسٌ على الميدان: شَرطةُ
+// «ي/وسطيّ» من يدِ طفلةٍ عرضُها ٢٥٣ والسماحةُ ١٠٣، فبالسماحة وحدَها تُرَدّ ظلماً.
+await negative('مسطرةُ المدّ المحلّيّة (تنقص موافقةُ الميدان بالسماحة وحدَها)',
+  'return Math.max(hi > lo ? hi - lo : 0, tol);', 'return tol;',
+  (alt) => onField(alt).agree < field.agree);
+// **وتمييزُ العلامة من الجسم عند تشبّع التغطيتين** — بلا المتوسّط تُبلَع شَرطةُ
+// «ي/معزول» في جسمها فيُقال `no-marks` لحرفٍ نُقّط.
+// **والتوكيدُ نقرةٌ لا ضربة** — بدونها تُطوى الشَّرطةُ الفاضلةُ فلا تُعَدّ قيمتُها.
+const [, DT_REF, DT_INK] = nth(13);
+await negative('التوكيدُ نقرةٌ لا ضربة (شَرْطةٌ ونقرةٌ فوق «ن» تُقبَل نوناً)',
+  'const confirms = isTap(marks[i])\n        && dotOf.some(',
+  'const confirms = (true)\n        && dotOf.some(',
+  (alt) => alt.judgeShape(DT_REF, DT_INK).ok);
+await negative('فصلُ العلامة بالمتوسّط عند التشبّع (شَرْطةُ «ي/معزول» تُقرأ جسماً)',
+  '|| nearerDots)) marks.push(s);', '|| false)) marks.push(s);',
+  (alt) => {
+    const v = alt.judgeShape(PATHS['ي'].isolated, dashTwo(PATHS['ي'].isolated));
+    return !v.ok && v.why === 'no-marks';
+  });
 await negative('مقياسُ التطبيع (الصغيرُ المزاحُ يُرَدّ)',
   'const scale = Math.min(SHAPE_FIT.max, Math.max(SHAPE_FIT.min, raw));', 'const scale = 1;',
   (alt) => !alt.judgeShape(NOON, shift(traceOf(NOON), 900, 700, 0.32)).ok);

@@ -1305,6 +1305,10 @@ const shapeGap = (p, cloud) => {
   return best;
 };
 
+/** متوسّطُ بُعد سحابةٍ عن أقرب ما يقابلها — يفصل حين تتشبّع التغطيتان معاً. */
+const shapeMeanGap = (pts, cloud) => (pts.length && cloud.length
+  ? pts.reduce((s, p) => s + shapeGap(p, cloud), 0) / pts.length : Infinity);
+
 const shapeLen = (pts) => { let s = 0; for (let i = 1; i < pts.length; i++) s += dist(pts[i - 1], pts[i]); return s; };
 const shapeMidY = (pts) => (pts.length ? pts.reduce((s, p) => s + p[1], 0) / pts.length : 0);
 const shapeSeat = (pts) => [pts.reduce((s, p) => s + p[0], 0) / pts.length, shapeMidY(pts)];
@@ -1435,7 +1439,16 @@ export function judgeShape(ref, strokes, options = {}) {
     // ونقطةٌ خاوية). **فالتردّدُ يُحكَم به على الفاضل بعد المزاوجة لا قبلها.**
     const onBody = shapeCover(s, modelBody, tol);
     const toDots = dots ? shapeCover(s, modelDots, tol * SHAPE_DOTS.near) : 0;
-    if (dots && (tap || toDots > onBody)) marks.push(s); else bodyInk.push(s);
+    /**
+     * 🔴 **وحين تتشبّع التغطيتان يفصل المتوسّطُ لا المساواة** (صيدُ جدول حقيقة م٨):
+     * شَرطةُ نقطتَي «ي/معزول» تلاصق جسمَها (بُعدُها عنه ١٢٥ والسماحةُ ١٦٨) فتغطيتُها
+     * على الجسم ١٠٠٪ وعلى النقاط ١٠٠٪ — **والمساواةُ تُرجّح الجسم**، فتُبلَع الشَّرطةُ
+     * فيُقال `no-marks` **لحرفٍ نُقّط**. (وكذلك «ق/معزول».) **والمتوسّطُ يفصلهما بلا
+     * لبس**: بُعدُها المتوسّط عن مقاعد النقاط ٥٥ وعن الجسم ١٢٥ — وضربةُ الجسم بعكسها.
+     */
+    const nearerDots = dots && toDots >= onBody
+      && shapeMeanGap(s, modelDots) < shapeMeanGap(s, modelBody);
+    if (dots && (tap || toDots > onBody || nearerDots)) marks.push(s); else bodyInk.push(s);
   }
   const childBody = bodyInk.flat();
   const childMarks = marks.flat();
@@ -1584,7 +1597,15 @@ export function judgeShape(ref, strokes, options = {}) {
       if (markOf[i] >= 0) continue;
       // فاضلٌ بعد الزواج: توكيدٌ إن لاصق علامةً مزوَّجة، أو تردّدٌ إن لمس حبرَه —
       // وإلا فزيادةٌ صريحة (ت على مرجع ن).
-      const confirms = dotOf.some((k) => k >= 0 && dist(seats[i], seats[k]) < mergeR);
+      /**
+       * 🔴 **والتوكيدُ نقرةٌ لا ضربة** (صيدُ قانون العدّ، م٨): كان الاغتفارُ يُقاس
+       * بالمسافة وحدَها، فشَرطةٌ فاضلةٌ وقعت داخل نصف قطر الدمج **طُويت توكيداً
+       * فلم تُعَدّ قيمتُها** — فقُبل اصطلاحُ «شَرطة + نقرةٌ فوقها» (٣) على «ن» (١).
+       * **ونصُّ القاعدة نفسِه يقولها**: «المتلاصقتان **نقرُ** توكيدٍ على النقطة
+       * نفسِها» — فالضربةُ علامةٌ لها قيمةٌ تُعَدّ، لا تكرارُ نقرة.
+       */
+      const confirms = isTap(marks[i])
+        && dotOf.some((k) => k >= 0 && dist(seats[i], seats[k]) < mergeR);
       if (!confirms && !hesitates(marks[i])) { crowded = true; break; }
     }
     if (crowded) clusters = dots + marks.length;    // زيادةٌ صريحة — تدخل بابَ العدد
@@ -1595,17 +1616,64 @@ export function judgeShape(ref, strokes, options = {}) {
         far: pairs.reduce((m, [dd, i, j]) => (markOf[i] === j ? Math.max(m, dd) : m), 0) };
     }
     const runs = marks.filter((s) => !isTap(s));
-    const spread = inkBox([childMarks]);
-    const spanX = spread ? spread.w : 0;
-    const spanY = spread ? spread.h : 0;
-    const dotSpan = modelDots.length > 1
-      ? Math.max(...modelDots.map((d) => d[0])) - Math.min(...modelDots.map((d) => d[0])) : 0;
+    /**
+     * ————— 🔴 **قانونُ العدّ: نقرةٌ = ١ · شَرطةٌ = ٢ · زاويةٌ = ٣** (م٨) —————
+     *
+     * **بلاغا المالك**: «الثلاثُ نقاطٍ تُكتب زاويةً رأسُها لفوق» · «النقطتان نكتبها
+     * مثل «–» أحياناً أو غالباً للكبار». ⇐ **فوحدةُ العدّ شكلُ العلامة لا عددُ
+     * النقرات** — والقانونُ **ثنائيُّ الاتجاه**: الشَّرطةُ تُشبِع مقعدَي الاثنتين
+     * **ولا تُشبِع الواحدةَ ولا الثلاث**، والزاويةُ تُشبِع الثلاثَ **وحدَها**.
+     *
+     * **وكان العدُّ قبله عددَ المقاعد المخدومة**، فشَرطةٌ واحدةٌ تخدم مقعداً واحداً:
+     * فهي تُقبَل على «ت» (نقصٌ يغتفره المدّ) **وتُقبَل على «ن» أيضاً** لأنّ مقعدَها
+     * الوحيد خُدم — **فقُرئت النقطتان نقطةً** (جدولُ الحقيقة قبلَ م٨: ٨٨ قبولاً
+     * كاذباً من ٣٢٠، منها شَرطةٌ على كلّ ذات نقطةٍ واحدة وزاويةٌ على كلّ ذات نقطتين).
+     *
+     * 🔴 **والمسطرةُ محلّيّةٌ من مالكها — لا سماحةٌ وحدَها ولا مدُّ الكلمة كلِّه**
+     * (عهدُ «الحدُّ العامل»، وصيدُ الميدان أمسك أوّلَ صياغةٍ لها): السماحةُ وحدَها
+     * ضيّقة — طفلةٌ من الحصاد كتبت نقطتَي «ي/وسطيّ» شَرطةً **عرضُها ٢٥٣ وسماحةُ
+     * المحطة ١٠٣**، فسقفُ ٢٫٤ × السماحة يردّ ما أراد المالكُ قبولَه. **و`dotSpan`
+     * العامُّ أوسعُ من اللازم**: في الكلمة يمتدّ من أوّل نقطةٍ إلى آخرها فيصير
+     * مسطرةَ سطرٍ. ⇐ **فالمسطرةُ نقاطُ المرجع التي تنالها العلامةُ نفسُها**: مدُّ
+     * ما وقع منها في **سقف الزواج** (`cap` — وهو الحدُّ الحاكمُ في المزاوجة فوق)،
+     * وإلّا فالسماحة. وسماحاتُ الشكل نفسُها التي حكمت المدَّ والرأسَ في ن٢
+     * (`spanLow`/`spanHigh`/`apex`).
+     *
+     * **وأثرٌ أقصرُ من نصف المسطرة نقطةٌ سمينةٌ لا شَرطة** (وإلّا رُدَّ طفلٌ لطّخ
+     * نقطتَه)، **وقائمٌ لا يمتدّ عرضاً بلا شكل** (٠) فيُرَدّ مدّاً — كما كان.
+     */
+    const rulerAt = (seat) => {
+      let lo = Infinity; let hi = -Infinity;
+      for (const d of modelDots) {
+        if (Math.abs(d[0] - seat[0]) > cap || Math.abs(d[1] - seat[1]) > cap) continue;
+        lo = Math.min(lo, d[0]); hi = Math.max(hi, d[0]);
+      }
+      return Math.max(hi > lo ? hi - lo : 0, tol);
+    };
+    const valueOf = (s, seat) => {
+      if (isTap(s)) return 1;
+      const b = inkBox([s]);
+      const w = b ? b.w : 0;
+      const h = b ? b.h : 0;
+      const ruler = rulerAt(seat);
+      if (Math.max(w, h) < SHAPE_DOTS.spanLow * ruler) return 1;   // نقطةٌ سمينةٌ لا مدّ
+      if (w < SHAPE_DOTS.spanLow * ruler || w > SHAPE_DOTS.spanHigh * ruler) return 0;
+      return h >= SHAPE_DOTS.apex * w ? 3 : 2;
+    };
     // **والجهةُ شرطٌ قاطع**: فوق الجسم أم تحته — وهي التي تفصل `ن` من `ب`.
     const sideModel = modelDots.length && modelBody.length
       ? Math.sign(shapeMidY(modelDots) - shapeMidY(modelBody)) : 0;
     const sideChild = childBody.length
       ? Math.sign(shapeMidY(childMarks) - shapeMidY(childBody)) : sideModel;
-    marksShort = clusters < dots;
+    /**
+     * **والمجموعُ يُحسب على المزوَّجات وحدَها** — فالفاضلُ عن الزواج حُكم عليه في
+     * باب الزيادة (`crowded`) قبلَ هذا: توكيدٌ يُطوى، أو تردّدٌ يُغتفَر، أو زيادةٌ
+     * صريحةٌ تُرَدّ عدداً. **فلا تُجمَع قيمةُ علامةٍ مرّتين ولا تُهمَل زيادة.**
+     */
+    let counted = 0;
+    for (let i = 0; i < marks.length; i++) if (markOf[i] >= 0) counted += valueOf(marks[i], seats[i]);
+    if (options.probe) options.probe.dots.counted = counted;
+    marksShort = !crowded && counted < dots;
     /**
      * 🔴 **والجهةُ تُقاس لكلِّ تجمّعٍ على أقرب نقطةِ مرجعٍ إليه — لا على المتوسّط
      * العامّ** (إصلاحُ مراجعة ن٢، ٢١ أغسطس ٢٠٢٦): الكلمةُ تجمع جهتين («بَيْتْ
@@ -1665,16 +1733,19 @@ export function judgeShape(ref, strokes, options = {}) {
         if (zoneOf(rs[1]) !== zoneOf(best[1])) { sideBad = true; break; }
       }
     }
+    /**
+     * **والحكمُ بمجموع القيم في مقاعد المنطقة — بالضبط**: النقصُ نقصٌ والزيادةُ زيادة.
+     * **واسمُ العطب بحاله**: نقصٌ ومعه مدٌّ (شَرطةٌ لم تبلغ ثلاثاً، أو قائمٌ لا شكلَ
+     * له) عيبُ **مدٍّ ورأسٍ** ⇒ `dots-span` — وهو نفسُ ما كان يقوله فحصُ ن٢ للشَّرطة
+     * المسطّحة على «ث». **وما عداه عيبُ عددٍ** ⇒ `dots-count`.
+     */
     if (sideBad) dotFail = 'dots-side';
-    else if (clusters === dots) dotFail = null;
-    else if (clusters < dots && runs.length) {
-      const spanOk = dots > 1 && spanX >= SHAPE_DOTS.spanLow * dotSpan
-        && spanX <= SHAPE_DOTS.spanHigh * Math.max(dotSpan, tol);
-      const apexOk = dots < 3 || spanY >= SHAPE_DOTS.apex * spanX;
-      dotFail = spanOk && apexOk ? null : 'dots-span';
-    } else {
+    else if (crowded) dotFail = 'dots-count';   // زيادةٌ صريحةٌ فاضلةٌ عن الزواج
+    else if (counted === dots) dotFail = null;
+    else if (counted < dots && runs.length) dotFail = 'dots-span';
+    else {
       dotFail = 'dots-count';  // **وزيادةُ التجمّعات عن العدد ردٌّ** كنقصانها
-      dotShort = clusters < dots;
+      dotShort = counted < dots;
     }
   }
 
