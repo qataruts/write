@@ -1230,6 +1230,17 @@ export const SHAPE_LIMITS = {
    * بفرجةٍ من الجانبين. **فالنقصُ الحقيقيُّ متّصلٌ والرجفةُ منتشرة.**
    */
   missGap: 3.5,
+  /**
+   * 🔴 **سدُّ البُعد المتوسّط** (عيادةُ ٢٢ أغسطس، من هجوم المالك الحيّ): العدُّ
+   * الثنائيّ (داخل الممرّ/خارجه) يمرّر خربشةً أقلُّها داخلٌ وأبعدُها شاسع —
+   * **والمتوسّطُ يفضحها**: **آلةٌ نائمةٌ بانتظار معايرة ن٣**:
+   * بعد التطبيع أقصى أطفال الحصاد ٠٫٦٨ وهجومُ المالك ٠٫٨٩ — **والفاصلُ ٠٫١٠
+   * هشٌّ على بيانات ماوس** (حدُّ ٠٫٧٨ عضّ دائرةَ التمرين المترنّحة المشروعة).
+   * فالحدُّ الآمنُ ١٫٢ لا يعضّ أحداً اليوم، **ويُشَدُّ في ن٣ بأصابعَ حقيقية**.
+   * وشهادةُ الليلة الكاملة: الالتفافُ فشل، والمتوسّطُ الخامُّ يذوب بالتطبيع،
+   * والمطبَّعُ هامشُه شعرة ⇒ **الخربشةُ المحاذيةُ لا يصدّها إلا حَكَمُ البنية (م٩).**
+   */
+  meanFit: 1.2,
 };
 
 /**
@@ -1310,12 +1321,13 @@ const shapeSeat = (pts) => [pts.reduce((s, p) => s + p[0], 0) / pts.length, shap
 function shapeNormal(strokes, model, tol) {
   const child = inkBox(strokes);
   const box = inkBox([model]);
-  if (!child || !box) return strokes.map((s) => shapeCloud(s));
+  if (!child || !box) { const bare = strokes.map((s) => shapeCloud(s)); bare.scale = 1; return bare; }
   const raw = Math.max(child.w, child.h) > 1
     ? Math.max(box.w, box.h) / Math.max(child.w, child.h) : 1;
   const scale = Math.min(SHAPE_FIT.max, Math.max(SHAPE_FIT.min, raw));
   const put = (p) => [box.cx + (p[0] - child.cx) * scale, box.cy + (p[1] - child.cy) * scale];
   const dense = strokes.map((s) => shapeCloud(s.map((p) => put(p))));
+  dense.scale = scale;   // يقرؤه سدُّ البُعد المتوسّط لتعويض الضغط
   const reach = (SHAPE_FIT.settle * tol) ** 2;
   const dx = []; const dy = [];
   const sample = dense.flat().filter((_, i) => i % 3 === 0);
@@ -1329,7 +1341,12 @@ function shapeNormal(strokes, model, tol) {
   }
   const mid = (a) => (a.length ? [...a].sort((x, y) => x - y)[(a.length / 2) | 0] : 0);
   const ox = mid(dx); const oy = mid(dy);
-  return (ox || oy) ? dense.map((s) => s.map((q) => [q[0] + ox, q[1] + oy])) : dense;
+  if (ox || oy) {
+    const settled = dense.map((s) => s.map((q) => [q[0] + ox, q[1] + oy]));
+    settled.scale = scale;
+    return settled;
+  }
+  return dense;
 }
 
 /**
@@ -1465,6 +1482,33 @@ export function judgeShape(ref, strokes, options = {}) {
     }
   }
   const precision = childBody.length ? shapeCover(childBody, model, tol) : 0;
+  /** البُعدُ المتوسّطُ باتجاهين — انظر `SHAPE_LIMITS.meanFit`. */
+  const meanOf = (a, b) => {
+    if (!a.length || !b.length) return Infinity;
+    let sum = 0;
+    for (const q of a) {
+      let best = Infinity;
+      for (const c of b) {
+        const dx = q[0] - c[0]; const dy = q[1] - c[1];
+        const dd = dx * dx + dy * dy;
+        if (dd < best) best = dd;
+      }
+      sum += Math.sqrt(best);
+    }
+    return sum / a.length;
+  };
+  /**
+   * 🔴 **ويُعوَّض أثرُ ضغط التطبيع** (صيدُ ليلة العيادة الأخير): شتاتٌ واسعُ
+   * الصندوق يُضغَط نحو النموذج (مقياسٌ < ١) **فيذوب متوسّطُه** — هجومُ المالك
+   * ٣٫١٧ خاماً بدا ~١ بعد الضغط. فالمتوسّطُ يُقسَم على المقياس حين يكون ضاغطاً
+   * (sc < ١)، ولا يُكافأ به الموسَّع — فكتابةُ الطفل الصغيرةُ الموسَّعةُ لا تُمَسّ.
+   */
+  const rawMean = childBody.length && modelBody.length
+    ? (meanOf(childBody, modelBody) + meanOf(modelBody, childBody)) / 2 / tol : Infinity;
+  // **بلا تعويضِ مقياس**: القسمةُ على المقياس عاقبت من كتب كبيراً بحقّ
+  // (طفلُ الحصاد بمقياس ٠٫٤٤ ليس مهاجماً) — فالمتوسّطُ كما هو في فضاء الحكم.
+  const meanFit = rawMean;
+  if (options.probe) { options.probe.meanFit = +meanFit.toFixed(2); options.probe.scale = +(child.scale ?? 1).toFixed(2); }
 
   /**
    * ٢) **قاعدةُ النقاط ثلاثيّةٌ لا ثنائية** (`SHAPE_JUDGE §٢ج`، ودرسٌ نُقض في ليلته):
@@ -1547,7 +1591,8 @@ export function judgeShape(ref, strokes, options = {}) {
     if (options.probe) {
       options.probe.dots = { D: dots, marks: marks.length, clusters, crowded,
         unmatched: markOf.filter((j) => j < 0).length,
-        emptyDots: dotOf.filter((i) => i < 0).length, cap };
+        emptyDots: dotOf.filter((i) => i < 0).length, cap,
+        far: pairs.reduce((m, [dd, i, j]) => (markOf[i] === j ? Math.max(m, dd) : m), 0) };
     }
     const runs = marks.filter((s) => !isTap(s));
     const spread = inkBox([childMarks]);
@@ -1634,7 +1679,11 @@ export function judgeShape(ref, strokes, options = {}) {
   }
 
   /** **سببٌ واحدٌ أوّل** يُقال للطفل: الجسمُ قبل جزئه، وجزؤه قبل الزائد، ثم العلامة. */
+  /** شاردُ المتوسّط يُستأنف بعده (حبرٌ قديمٌ بعيدٌ ثم إعادةٌ صحيحة)، وخربشةُ
+   *  الدقّة لا يُطوى ما قبلها — فيُوسمان وإن اتّحد الاسمُ المعروض. */
+  const softStray = meanFit > SHAPE_LIMITS.meanFit && precision >= SHAPE_LIMITS.precision;
   const why = missing ? 'part-missing'
+    : meanFit > SHAPE_LIMITS.meanFit ? 'stray-ink'
     : recall < SHAPE_LIMITS.recall ? 'body-coverage'
     : part < SHAPE_LIMITS.part ? 'part-missing'
       : precision < SHAPE_LIMITS.precision ? 'stray-ink'
@@ -1666,7 +1715,8 @@ export function judgeShape(ref, strokes, options = {}) {
     || (why === FAULTS.STRAY_INK && marksShort));
 
   return {
-    ok: !why, why: why || null, pending, guides, metrics: { recall, part, precision }, shaky,
+    ok: !why, why: why || null, pending, guides, metrics: { recall, part, precision }, softStray,
+    shaky,
   };
 }
 
@@ -1828,6 +1878,15 @@ export function createFreeRun(ref, options = {}) {
      * فيُحتفَظ بالحبر ويُنتظَر بصمت (`pending` في `judgeShape`).
      */
     push(points) {
+      /**
+       * 🔴 **الكتابةُ بعد القبول محاولةٌ جديدةٌ من صفحةٍ بيضاء** (صيدُ عيادة المالك،
+       * ٢٢ أغسطس: «يقبل أيَّ شيء!» — بعد قبول صادٍ صحيحةٍ بقيت في ذاكرة الآلة،
+       * فكلُّ خربشةٍ بعدها حُكمت مضمومةً إليها: التغطيةُ من القديمة والدقّةُ تذوب
+       * ببطءٍ فيدوم القبولُ كذباً). الشاشاتُ تستبدل اللوحَ بعد القبول فلا ترى هذا —
+       * **والآلةُ لا تفترض شاشةً**: فأوّلُ لمسةٍ بعد الاكتمال تطوي المقبولَ وتفتح
+       * محاولةً نظيفة.
+       */
+      if (done) { touches = []; done = false; waits = 0; stumbles = 0; }
       touches.push(points);
       /**
        * **ومادّةُ النقرة تُحكَم بالماشي** (انظر `bodyless` أعلاه): يُصاغ منه حكمُ
@@ -1872,7 +1931,7 @@ export function createFreeRun(ref, options = {}) {
        * نقطتان لشكلٍ نقطتُه واحدة. فالاستئنافُ لهذا لا لذاك — **وهو مقيسٌ لا مبدأ**:
        * بدونه تُقبَل خربشةٌ فوق حرفٍ صحيح، لأنّ الخربشةَ وحدَها تغطّي النموذجَ.
        */
-      if (shape.why !== FAULTS.STRAY_INK && touches.length > whole) {
+      if ((shape.why !== FAULTS.STRAY_INK || shape.softStray) && touches.length > whole) {
         for (let k = 1; k < touches.length; k++) {
           const tail = touches.slice(k);
           const fresh = judgeShape(ref, tail, options);

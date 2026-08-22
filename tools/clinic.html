@@ -70,8 +70,9 @@ function mount() {
       if (!r.ok && !r.pending) show({ accepted: false, primary: r.fault?.code, guides: raw?.guides }, '');
       if (r.pending) { sel('verdict').className = ''; sel('verdict').textContent = '… انتظارٌ صامت (pending)'; }
     },
-    onDone: (v) => { show(v); report('done', { ch, form, mode, ok: true,
-      exact: !!v.exact, guides: v.guides || [], metrics: v.shape?.metrics || null }); },
+    onDone: (v) => { show(v, ' — لوحٌ جديدٌ بعد لحظة'); report('done', { ch, form, mode, ok: true,
+      exact: !!v.exact, guides: v.guides || [], metrics: v.shape?.metrics || null });
+      setTimeout(mount, 900); },
     onFault: (f) => report('fault', { ch, form, mode, code: f.code }),
   });
   // نلتقط الضربات الخام من اللوح نفسه لنرسلها كاملةً
