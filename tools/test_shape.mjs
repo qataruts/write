@@ -188,9 +188,9 @@ const flatThree = (ref) => {
 
 const NEGATIVE = [
   ['خربشةٌ كثيفةٌ فوق نموذجٍ صحيح', HA, scribbled(HA), 'stray-ink'],
-  ['نصفُ الحرف الأول (م)', MEEM, halved(MEEM), 'body-coverage'],
+  ['نصفُ الحرف الأول (م)', MEEM, halved(MEEM), 'part-missing'],
   // **ونصفُ «ح» يسقط بالتغطية وحدَها** (دقّتُه ١٠٠٪) — فهو بابُ العتبة السالب النظيف.
-  ['نصفُ الحرف الأول (ح — بالتغطية وحدَها)', HHA, halved(HHA), 'body-coverage'],
+  ['نصفُ الحرف الأول (ح — بقاعدة الغياب)', HHA, halved(HHA), 'part-missing'],
   ['نقطةٌ في غير جهتها (ن ⇐ تحت)', NOON, flipped(NOON), 'dots-side'],
   // **وقلبُ نقطة الجيم حول مركز جسمها يُبقيها داخل حِضنه** — وجيمٌ نقطتُها في أعلى
   // الحِضن تُقرأ جيماً (حكمُ المناطق الثلاث، مراجعة ن٢): فالمصنوعةُ الصادقة لاسمها
@@ -318,12 +318,30 @@ const [, PART_REF, PART_INK] = nth(7);
 const [, STRAY_REF, STRAY_INK] = nth(8);
 const [, FLAT_REF, FLAT_INK] = nth(9);
 
-await negative('عتبةُ التغطية (نصفُ الحرف يُقبَل بلا عتبة)',
-  'recall: 0.70,', 'recall: 0,', (alt) => alt.judgeShape(HALF_REF, HALF_INK).ok);
-await negative('أدنى تغطيةِ جزء (ك بلا شولتها تُقبَل)',
-  'part: 0.55,', 'part: 0,', (alt) => alt.judgeShape(PART_REF, PART_INK).ok);
-await negative('الدقّةُ (الخربشةُ فوق النموذج تُقبَل)',
-  'precision: 0.55,', 'precision: 0,', (alt) => alt.judgeShape(SCRIB_REF, SCRIB_INK).ok);
+await negative('قاعدةُ الغياب المتّصل (وصلةٌ بلا عينِ الميم تُقبَل بتعطيلها)',
+  '|| (len > 2.5 * tol && worst > 0.45 * len)) missing = true;',
+  '|| false) missing = false;',
+  (alt) => {
+    const pts = MEEM.strokes[0].points.map((q) => [q[0], q[1]]);
+    return alt.judgeShape(MEEM, [pts.slice(Math.floor(pts.length * 0.35))]).ok;
+  });
+await negative('عتبتا التغطية والجزء (حبرٌ مخرَّمٌ يُقبَل بتعطيلهما)',
+  'recall: 0.70, part: 0.55,', 'recall: 0, part: 0,',
+  (alt) => {
+    // حبرٌ مخرَّم: من كلّ عشرين نقطةً تسعٌ — رقيقٌ منتشرٌ لا غيابَ متّصلَ فيه
+    const holey = HHA.strokes.map((st) => st.points.filter((_, i) => i % 20 < 9).map((q) => [q[0], q[1]]));
+    return alt.judgeShape(HHA, holey).ok;
+  });
+await negative('أدنى تغطيةِ جزء (شولةُ الكاف مُخرَّمةً تُقبَل بتعطيله)',
+  'part: 0.55,', 'part: 0,',
+  (alt) => {
+    // **الشاهدُ خاصٌّ بحارسه**: شولةٌ حاضرةٌ مُخرَّمةٌ (٤٠٪ شرائطَ) — لا غيابَ
+    // متّصلَ فيها يمسكه حدُّ الغياب، وأدنى تغطيةِ جزءٍ وحدَه يراها.
+    const body = KAF.strokes.map((st) => st.points.map((q) => [q[0], q[1]]));
+    const last = body[body.length - 1];
+    body[body.length - 1] = last.filter((_, i) => i % 5 < 2);
+    return alt.judgeShape(KAF, body).ok;
+  });
 await negative('جهةُ النقطة (المقلوبةُ تُقبَل)',
   "if (sideBad) dotFail = 'dots-side';",
   "if (false) dotFail = 'dots-side';",

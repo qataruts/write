@@ -1,0 +1,104 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>عيادةُ المحرّك — اُكْتُبْ</title>
+<link rel="stylesheet" href="/app/css/app.css">
+<style>
+  body { max-width: 720px; margin: 0 auto; padding: 1rem; font-family: system-ui; }
+  .row { display: flex; gap: .6rem; align-items: center; flex-wrap: wrap; margin: .6rem 0; }
+  select, button { font-size: 1.15rem; padding: .45rem .8rem; border-radius: .6rem; }
+  #verdict { font-size: 1.05rem; padding: .7rem; border-radius: .8rem; background: #f2efe6; min-height: 3.2rem; white-space: pre-wrap; }
+  .ok { background: #e3f4e3 !important; } .bad { background: #fae3e3 !important; }
+</style></head><body>
+<h2>🩺 عيادةُ المحرّك — اكتب وأنا أرى</h2>
+<div class="row">
+  <select id="letter"></select>
+  <select id="form">
+    <option value="isolated">معزول</option><option value="initial">ابتدائي</option>
+    <option value="medial">وسطي</option><option value="final">نهائي</option>
+  </select>
+  <select id="mode">
+    <option value="free">حُرّ (صندوقٌ فارغ)</option>
+    <option value="guided">تتبّع (النموذجُ ظاهر)</option>
+    <option value="faint">خافت</option>
+  </select>
+  <button id="reload">🔄 لوحٌ جديد</button>
+</div>
+<div id="board"></div>
+<div id="verdict">اكتب على اللوح — كلُّ رفعِ قلمٍ يُحكَم ويصلني.</div>
+<script type="module">
+import * as pen from '/app/js/pen.js';
+import { PATHS } from '/app/js/paths.js';
+
+const sel = (id) => document.getElementById(id);
+for (const ch of Object.keys(PATHS)) {
+  const o = document.createElement('option'); o.value = o.textContent = ch; sel('letter').append(o);
+}
+sel('letter').value = 'ص';
+let strokes = [];
+let attempt = 0;
+// خبيئةُ الرجوع تعيد الصفحةَ بحالها القديم — فتُقطَع
+window.addEventListener('pageshow', (e) => { if (e.persisted) location.reload(); });
+
+function report(kind, payload) {
+  fetch('/ink', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ at: new Date().toISOString().slice(11, 19), kind, ...payload }) }).catch(() => {});
+}
+
+function mount() {
+  const ch = sel('letter').value; const form = sel('form').value; const mode = sel('mode').value;
+  const ref = PATHS[ch]?.[form];
+  strokes = [];
+  const board = sel('board'); board.replaceChildren();
+  if (!ref) { sel('verdict').textContent = 'لا مرجعَ لهذا الشكل'; return; }
+  const show = (v, extra = '') => {
+    const el = sel('verdict');
+    el.className = v.accepted ? 'ok' : 'bad';
+    attempt += 1;
+    el.textContent = '#' + attempt + ' [' + new Date().toTimeString().slice(0, 8) + '] '
+      + (v.accepted ? '✅ مقبول' : '🔴 ' + (v.primary || '—'))
+      + (v.guides?.length ? ' · إرشاد: ' + v.guides.join('، ') : '') + extra;
+  };
+  const surface = pen.penSurface({
+    ref, mode: pen.MODES[mode.toUpperCase()] || mode, baseline: ref.line,
+    label: 'عيادة', 
+    onTry: (r) => {
+      const probe = {};
+      const raw = r.verdict?.shape || pen.judgeShape(ref, strokes, { probe });
+      report('try', { ch, form, mode, ok: !!r.ok, pending: !!r.pending,
+        why: raw?.why || null, metrics: raw?.metrics || null, dots: probe.dots || null,
+        fault: r.fault?.code || null, strokesN: strokes.length });
+      if (!r.ok && !r.pending) show({ accepted: false, primary: r.fault?.code, guides: raw?.guides }, '');
+      if (r.pending) { sel('verdict').className = ''; sel('verdict').textContent = '… انتظارٌ صامت (pending)'; }
+    },
+    onDone: (v) => { show(v); report('done', { ch, form, mode, ok: true,
+      exact: !!v.exact, guides: v.guides || [], metrics: v.shape?.metrics || null }); },
+    onFault: (f) => report('fault', { ch, form, mode, code: f.code }),
+  });
+  // نلتقط الضربات الخام من اللوح نفسه لنرسلها كاملةً
+  const svg = surface.el.querySelector('.pen-surface');
+  let cur = null;
+  svg.addEventListener('pointerdown', () => { cur = []; }, true);
+  svg.addEventListener('pointermove', (e) => { if (cur) {
+    const r = svg.getBoundingClientRect(); const vb = svg.viewBox.baseVal;
+    cur.push([(e.clientX - r.left) / r.width * vb.width, (e.clientY - r.top) / r.height * vb.height]);
+  } }, true);
+  window.addEventListener('pointerup', () => { if (cur?.length) { strokes.push(cur);
+    report('stroke', { ch, form, mode, n: strokes.length, pts: cur.length,
+      ink: cur.filter((_, i) => i % 3 === 0).map((p) => [p[0] | 0, p[1] | 0]) }); }
+    cur = null; }, true);
+  board.append(surface.el);
+}
+// **كلُّ تبديلٍ إعادةُ تحميلٍ كاملة** — تقطع كلَّ ذاكرةِ لوحٍ سابق (مآخذُ متراكمة)
+const remember = () => localStorage.setItem('clinic',
+  JSON.stringify({ l: sel('letter').value, f: sel('form').value, m: sel('mode').value }));
+const hard = () => { remember(); location.reload(); };
+sel('reload').onclick = hard;
+sel('letter').onchange = hard; sel('form').onchange = hard; sel('mode').onchange = hard;
+try {
+  const kept = JSON.parse(localStorage.getItem('clinic') || '{}');
+  if (kept.l) sel('letter').value = kept.l;
+  if (kept.f) sel('form').value = kept.f;
+  if (kept.m) sel('mode').value = kept.m;
+} catch {}
+mount();
+</script></body></html>

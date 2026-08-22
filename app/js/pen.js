@@ -1221,10 +1221,15 @@ export function judgeFree(ref, strokes, options = {}) {
  * فوقها يشتري ردوداً كاذبةً بلا مكسب (٠٫٧٤ ⇐ ٥٤/٦٠ · ٠٫٧٨ ⇐ ٥٣/٦٠).
  */
 export const SHAPE_LIMITS = {
-  recall: 0.70,     // كم من النموذج تحت حبر الطفل — «أكتبتَ الحرفَ كلَّه؟»
-  part: 0.55,       // وأدنى جزءٍ منه — فلا يُقبَل نصفُ حرف
-  precision: 0.55,  // وكم من حبر الطفل على النموذج — «أزدتَ ما ليس منه؟»
-  shakyBand: 0.08,  // وهامشٌ فوق العتبة يُقال فيه «صحيحٌ ويدُك ترتجف» — درجةٌ لا ردّ
+  recall: 0.70, part: 0.55, precision: 0.55, shakyBand: 0.08,
+  /**
+   * 🔴 **أطولُ غيابٍ متّصلٍ يُغتفَر — بوحدات السماحة** (عيادةُ ٢٢ أغسطس، بعين
+   * المالك حيّاً): وصلةُ الميم بلا عينها بلغت تغطيةً ٧٢٪ فقُبلت — **والعينُ عضوٌ
+   * كاملٌ غائب**. والفيصلُ المقيس: أقصى غيابٍ غفره الأبُ في الميدان **٣٫٢٩**
+   * سماحة، وأدنى عضوٍ حقيقيٍّ غائب **٣٫٧١** (ونصفُ الحاء ٥٫٧٩) — فالحدُّ **٣٫٥**
+   * بفرجةٍ من الجانبين. **فالنقصُ الحقيقيُّ متّصلٌ والرجفةُ منتشرة.**
+   */
+  missGap: 3.5,
 };
 
 /**
@@ -1422,6 +1427,43 @@ export function judgeShape(ref, strokes, options = {}) {
   const recall = modelBody.length ? shapeCover(modelBody, childBody, tol) : 1;
   const part = partClouds.length
     ? Math.min(...partClouds.map((c) => shapeCover(c, childBody, tol))) : 1;
+  /**
+   * **قاعدةُ الغياب المتّصل** (`SHAPE_LIMITS.missGap` — علّتُها المقيسة عنده):
+   * يُمشى كلُّ جزءٍ بترتيب نقاطه، وأطولُ مدىً متّصلٍ لا حبرَ قربه هو «الغياب» —
+   * فإن جاوز حدَّه فعضوٌ غائبٌ لا رجفةٌ، ويُرَدّ **ولو علت التغطيةُ الكلّية**
+   * (وصلةُ الميم ٧٢٪ وعينُها كلُّها غائبة).
+   */
+  let missing = false;
+  let missArc = 0;
+  {
+    const t2 = tol * tol;
+    for (const cloud of partClouds) {
+      let run = 0; let worst = 0;
+      for (const q of cloud) {
+        let hit = false;
+        for (const c of childBody) {
+          const dx = q[0] - c[0]; const dy = q[1] - c[1];
+          if (dx * dx + dy * dy <= t2) { hit = true; break; }
+        }
+        if (hit) { run = 0; continue; }
+        run += 14;
+        if (run > worst) worst = run;
+      }
+      if (worst > missArc) missArc = worst;
+      // **والشقُّ النسبيّ للحرف الصغير**: نصفُ حرفٍ قصيرٍ أقصرُ من ثلاث سماحاتٍ
+      // فيفلت من الحدّ المطلق (قِيس: ٩٩ من ١٧٢ نصفاً يمرّ) — وغيابُ نصفِ الجزء
+      // عضوٌ أيّاً كان طولُه. والرجفةُ المنتشرة لا تجمع غياباً متّصلاً كهذا.
+      const len = cloud.length * 14;
+      // وبوّابةُ الطول على الشقّ النسبيّ: وصلةٌ قصيرةٌ غيابُ نصفِها طبيعةُ رجفةٍ
+      // لا عضوٌ — وغيابُ الجزء القصير كلِّه يمسكه أدنى تغطيةِ جزء (`part`).
+      if (worst > SHAPE_LIMITS.missGap * tol
+        || (len > 2.5 * tol && worst > 0.45 * len)) missing = true;
+      if (options.probe) {
+        options.probe.gaps = options.probe.gaps || [];
+        options.probe.gaps.push({ arc: +(worst / tol).toFixed(2), frac: len ? +(worst / len).toFixed(2) : 0, len: +(len / tol).toFixed(1) });
+      }
+    }
+  }
   const precision = childBody.length ? shapeCover(childBody, model, tol) : 0;
 
   /**
@@ -1592,7 +1634,8 @@ export function judgeShape(ref, strokes, options = {}) {
   }
 
   /** **سببٌ واحدٌ أوّل** يُقال للطفل: الجسمُ قبل جزئه، وجزؤه قبل الزائد، ثم العلامة. */
-  const why = recall < SHAPE_LIMITS.recall ? 'body-coverage'
+  const why = missing ? 'part-missing'
+    : recall < SHAPE_LIMITS.recall ? 'body-coverage'
     : part < SHAPE_LIMITS.part ? 'part-missing'
       : precision < SHAPE_LIMITS.precision ? 'stray-ink'
         : dotFail;
@@ -2223,6 +2266,7 @@ export function penSurface(config) {
   let frame = 0;
   let inkPath = null;
   let inkPoints = [];
+  const written = [];   // ما ثبت على اللوح في الخطوات الموجَّهة — لحكم الشكل الكلّيّ
 
   /** إحداثيُّ الإصبع على شبكة المادّة — **بصندوقها هي** لا بمربّعٍ مفترَض. */
   function toGrid(event) {
@@ -2313,7 +2357,35 @@ export function penSurface(config) {
       return;
     }
     const result = trial.up();
+    /**
+     * 🔴 **والتتبّعُ يعلّم ولا يبوّب — حكمُ الشكل يفتح البابَ هنا أيضاً** (بلاغُ
+     * ميدان المالك، ٢٢ أغسطس ٢٠٢٦: صادٌ ابتدائيةٌ تُتُبِّعت على نموذجها بدقّةٍ
+     * ظاهرة **وخطوةُ التتبّع لا تتقدّم** — لأنّ الطفلة رسمتها ضربةً واحدةً والمرجعُ
+     * ضربتان، والماشي يوجب ترتيبَه). **ون٢ حرّرت الوضعَ الحرّ وحدَه وبقيت خطواتُ
+     * التعليم مبوَّبةً بالماشي** — وهو عينُ ما أبطله المالك: «يدرّب بالطريقة المثلى
+     * ولكن لا يجبر». ⇐ **فعند كلّ رفعِ قلمٍ في الموجَّه والخافت يُسأل حَكَمُ الشكل
+     * عن مجموع المكتوب**: إن قال صحيحاً قُبلت الخطوةُ كاملةً وثبت الحبرُ — **والماشي
+     * يبقى مرشداً حيّاً** (وميضُ البداية وتلوّنُ المسار وعدُّ الأجزاء) لا بوّاباً.
+     */
+    const attempt = [...written, inkPoints.map((q) => [q[0], q[1]])];
+    const shape = judgeShape(ref, attempt, { tolerance });
+    if (!result?.ok && shape.ok) {
+      inkPath?.classList.add('pen-line--kept');
+      inkPath = null;
+      for (let i = 0; i < parts.length; i++) paintProgress(i, 1);
+      paintGuide();
+      const method = judgeFree(ref, attempt, { tolerance });
+      onDone?.({
+        ...method,
+        accepted: true,
+        done: true,
+        guides: [...new Set([...(method.guides || []), ...shape.guides])],
+        shape,
+      });
+      return;
+    }
     if (result?.ok) {
+      written.push(inkPoints.map((q) => [q[0], q[1]]));
       onPart?.(result);
       paintProgress(trial.index - 1, 1);
       inkPath?.classList.add('pen-line--kept');

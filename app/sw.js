@@ -137,7 +137,7 @@
 //   مبدأ ط، وف المعزولة ترتفع أوّلاً. **ووحدةٌ تبدّلت تحت اسمها فبلا الرفعة يبقى
 //   جهازٌ مثبَّتٌ يرسم القديمَ** — وهو ما وقع فعلاً: رأى المالكُ ٢ و٣ من اليسار بعد
 //   النشر لأنّ قشرتَه المخزونة v32 تحمل `paths.js` القديم. **الرفعةُ شرطُ الوصول.**
-const VERSION = 'v41';
+const VERSION = 'v42';
 const SHELL_CACHE = `uktub-shell-${VERSION}`;
 const AUDIO_CACHE = 'uktub-audio';          // ثابتٌ عمداً — لا يحمل VERSION
 const KEEP = [SHELL_CACHE, AUDIO_CACHE];
