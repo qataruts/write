@@ -92,13 +92,29 @@ const refOf = (c) => (c.ref.includes('/')
   ? PATHS[c.ref.split('/')[0]]?.[c.ref.split('/')[1]]
   : traces.refs[c.ref]);
 
-/** الحكمُ بحَكَمه المعلَن: الخطوةُ الحرّة بالثاني وما سواها بالأول (كما في `test_pen.mjs`). */
+/**
+ * ————— 🔴 **حكمان لا حكم** (جلسة ن٢، `ENGINE_RESCUE §٣`) —————
+ *
+ * **القبولُ** بـ`judgeShape` الكلّيّ — وهو ما تعنيه هذه العدّةُ بـ«قُبل/رُدّ».
+ * **والطريقةُ** يقيسها الماشي (`exact` وشكواه) — **تُقاس ولا يُردّ بها**. فيُقيَّد
+ * الحكمان معاً في الأساس، فيُرى أثرُ أيّ تعديلٍ على كلٍّ منهما بعينه.
+ */
 const verdictOf = (c) => {
   const options = FACTOR ? { tolerance: FACTOR } : {};
   return c.expect.free
     ? pen.judgeFree(refOf(c), c.strokes, options)
     : pen.judge(refOf(c), c.strokes, options);
 };
+const shapeOf = (c) => pen.judgeShape(refOf(c), c.strokes, FACTOR ? { tolerance: FACTOR } : {});
+/** حكمُ القبول المنتظَر: `shape` في المصنوع، و`accept` في الميدانيّ (وسمُه يومَ التُقط). */
+const wantShape = (c) => (typeof c.expect.shape === 'boolean' ? c.expect.shape : c.expect.accept);
+/**
+ * 🔴 **وردٌّ ميدانيٌّ يحمل شكوى ماشٍ عهدُه على الماشي لا على الشكل** (`test_pen §٢`):
+ * `import_traces` لا يكتب `expect.fault` إلا لِما ردّه **المحرّكُ القديم** — «العينُ
+ * تحكم ولا تسمّي علّةَ محرّك». فمطالبةُ الحَكَم الكلّيّ بأن يردّ ما ردّه الماشي
+ * **حراسةٌ للعهد القديم** بعينها. ⇐ يُقاس ويُطبع ولا يُحكَم به، ويُراجَع في ن٣.
+ */
+const walkerOnly = (c) => c.origin === 'field' && wantShape(c) === false && Boolean(c.expect.fault);
 
 // ————— الأرقامُ تُقرأ من المحرّك، ولا يُكتب منها رقمٌ هنا —————
 //
@@ -123,6 +139,7 @@ if (FACTOR) console.log('  (تجربةٌ في الذاكرة — لم يُمَس
 
 const rows = all.map((c) => {
   const verdict = verdictOf(c);
+  const shape = shapeOf(c);
   return {
     id: c.id,
     origin: c.origin === 'field' ? 'field' : 'synthetic',
@@ -130,9 +147,16 @@ const rows = all.map((c) => {
     stale: c.stale || null,
     book: c.book,
     note: c.note,
-    wanted: Boolean(c.expect.accept),
+    wanted: Boolean(wantShape(c)),
+    wantedExact: typeof c.expect.exact === 'boolean' ? c.expect.exact : null,
     wantedFault: c.expect.fault || null,
-    accepted: verdict.accepted,
+    walkerOnly: walkerOnly(c),
+    accepted: shape.ok,
+    why: shape.why || null,
+    pending: shape.pending,
+    recall: Math.round(shape.metrics.recall * 100),
+    precision: Math.round(shape.metrics.precision * 100),
+    exact: Boolean(verdict.exact),
     primary: verdict.primary || null,
     size: verdict.size || null,
     limit: limitOf(c),
@@ -141,8 +165,9 @@ const rows = all.map((c) => {
     // **المطابقةُ حكمٌ وشكوى**: قبولٌ صحيحٌ بشكوى غير المنتظَرة ليس مطابقة
     // (نصُّ `test_pen.mjs`: «المطلوبُ أوّلُ خطأ لا وجودُه بين الأخطاء»).
     get match() {
+      if (this.walkerOnly) return !this.exact;       // عهدُه على الماشي وحدَه
       return this.accepted === this.wanted
-        && (this.wanted || !this.wantedFault || this.primary === this.wantedFault);
+        && (this.wantedExact === null || this.exact === this.wantedExact);
     },
   };
 });
@@ -172,6 +197,15 @@ console.log(`  · **تشويهٌ مصنوعٌ رُدّ: ${count(made, false, fal
   + ` (وقُبل كذباً ${count(made, false, true)})`);
 console.log(`  · وأثرٌ إنسانيّ خاطئٌ رُدّ: ${count(frozenHuman, false, false)} من ${of(frozenHuman, false)}`
   + ` · وكتابةٌ مصنوعةٌ صحيحةٌ قُبلت: ${count(made, true, true)} من ${of(made, true)}`);
+// 🔴 **ومنها ما وسمُه حكمُ الماشي القديم** — لا حكمُ عين: يُقاس ويُطبع ولا يُحكَم به
+// (`walkerOnly` أعلاه)، ويُراجَع بعين المالك في ن٣ كما نصّت خطّةُ الإنقاذ.
+const oldMarked = rows.filter((r) => r.walkerOnly);
+if (oldMarked.length) {
+  console.log(`  · ومنها ${oldMarked.length} وسمُها **حكمُ الماشي القديم** (لا عينُ إنسان):`
+    + ` ${oldMarked.map((r) => `${r.id} ⇐ ${r.accepted ? 'يقبله الشكل' : `يردّه «${r.why}»`}`
+      + `، والماشي ${r.exact ? 'يطابق' : `«${r.primary}»`}`).join(' · ')}`
+    + ' — عهدُها على الماشي، وتُراجَع بعين المالك في ن٣');
+}
 if (rawHuman.length) {
   console.log(`  · والخامُ الذي لم يُجمَّد (${rawHuman.length} من الآثار، ${books.join('، ')}):`
     + ` صحيحٌ قُبل ${count(rawHuman, true, true)} من ${of(rawHuman, true)}`
@@ -183,8 +217,8 @@ if (staleRows.length) {
   console.log(`\n  والموسومُ \`stale-reference\` (${staleRows.length}) — يُقاس ويُطبع ولا يُحكَم به:`);
   for (const r of staleRows) {
     console.log(`  · ${r.id}: المنتظَرُ ${r.wanted ? 'قبولٌ' : 'ردٌّ'}`
-      + ` والواقعُ ${r.accepted ? 'قبولٌ' : `ردٌّ بـ«${r.size || r.primary}»`}`
-      + ` (انحراف ${r.maxLateral}/${Math.round(r.limit)} · تغطية ${r.coverage}٪)`
+      + ` والواقعُ ${r.accepted ? 'قبولٌ' : `ردٌّ بـ«${r.why}»`}`
+      + ` (شكلٌ ${r.recall}٪/${r.precision}٪ · وطريقتُه ${r.exact ? 'مطابقة' : `«${r.primary}»`})`
       + ` — ${r.stale.why}`);
   }
   console.log(`  ⇐ وبديلُها: ${staleRows[0].stale.replacedBy}`);
@@ -195,9 +229,11 @@ if (missed.length) {
   console.log(`\n  وما خالف المنتظَر (${missed.length}) — بالاسم:`);
   for (const r of missed) {
     console.log(`  · ${r.id}${r.frozen ? '' : ' [خامٌ لم يُجمَّد]'}: المنتظَرُ `
-      + `${r.wanted ? 'قبولٌ' : `ردٌّ بـ«${r.wantedFault || 'أيّ شكوى'}»`}`
-      + ` والواقعُ ${r.accepted ? 'قبولٌ' : `ردٌّ بـ«${r.size || r.primary}»`}`
-      + ` (انحراف ${r.maxLateral}/${Math.round(r.limit)} · تغطية ${r.coverage}٪)`);
+      + `${r.wanted ? 'قبولٌ' : 'ردٌّ'}${r.wantedExact === null ? '' : ` وطريقةٌ ${
+        r.wantedExact ? 'مطابقة' : 'مخالفة'}`}`
+      + ` والواقعُ ${r.accepted ? 'قبولٌ' : `ردٌّ بـ«${r.why}»`}`
+      + ` وطريقتُه ${r.exact ? 'مطابقة' : `«${r.primary}»`}`
+      + ` (شكلٌ ${r.recall}٪/${r.precision}٪ · انحراف ${r.maxLateral}/${Math.round(r.limit)})`);
   }
 }
 
@@ -207,8 +243,8 @@ const acceptedHuman = human.filter((r) => r.accepted && !r.stale).map((r) => ({ 
 acceptedHuman.sort((a, b) => b.pct - a.pct);
 if (acceptedHuman.length) {
   const tight = acceptedHuman.filter((r) => r.pct >= 80).length;
-  console.log(`\n  وهوامشُ المقبولين من الآثار الإنسانية — ${tight} من ${acceptedHuman.length}`
-    + ' فوق ٨٠٪ من حدِّها العامل، وأقربُها إلى الردّ:');
+  console.log(`\n  وهوامشُ **الماشي** في الآثار الإنسانية المقبولة شكلاً — ${tight} من ${acceptedHuman.length}`
+    + ' فوق ٨٠٪ من حدّ الانحراف العامل. **وهي قياسُ طريقةٍ لا سببُ ردّ** منذ ن٢:');
   for (const r of acceptedHuman.slice(0, 5)) {
     console.log(`  · ${r.id}: ${r.maxLateral} من ${Math.round(r.limit)} = ${r.pct.toFixed(1)}٪`);
   }
@@ -229,7 +265,14 @@ const snapshot = {
     origin: r.origin,
     frozen: r.frozen,
     wanted: r.wanted,
+    walkerOnly: r.walkerOnly,
+    // **حكمُ القبول** (الحَكَم الكلّيّ) — وهو المقصودُ بـ`accepted` منذ ن٢
     accepted: r.accepted,
+    why: r.why,
+    recall: r.recall,
+    precision: r.precision,
+    // **وحكمُ الطريقة** (الماشي) — يُقاس ولا يُردّ به
+    exact: r.exact,
     primary: r.primary,
     size: r.size,
     match: r.match,
@@ -264,7 +307,8 @@ if (!existsSync(BASE_PATH)) {
     // **والموسومُ خارجَ المقابلة**: أساسُه قِيس على مرجعٍ تبدّل، فالفرقُ فرقُ
     // مرجعين لا فرقُ محرّكين — ويبقى في الأساس مقيَّداً حتى يُستبدَل أثرُه.
     if (staleIds.has(id)) continue;
-    if (was.accepted !== is.accepted || was.primary !== is.primary || was.size !== is.size) {
+    if (was.accepted !== is.accepted || was.why !== is.why
+      || was.exact !== is.exact || was.primary !== is.primary || was.size !== is.size) {
       changed.push({ id, was, is });
     }
   }
@@ -275,23 +319,34 @@ if (!existsSync(BASE_PATH)) {
     + ` بـ${pen.TOLERANCE.lateral} و×${pen.FREE.ease}.`);
 
   /** صنفُ التبدّل: ما الذي كسبناه وما الذي خسرناه — بالاسم لا بالعدد. */
-  const falseAccept = changed.filter(({ was, is }) => !is.wanted && is.accepted && !was.accepted);
-  const falseReject = changed.filter(({ was, is }) => is.wanted && !is.accepted && was.accepted);
+  /**
+   * 🔴 **والموسومُ بحكم الماشي القديم خارجَ هذا التصنيف** (ن٢): وسمُه ليس عهدَ قبولٍ
+   * على الحَكَم الكلّيّ — بل حكمُ المحرّك الذي قاسه يومَ التُقط. **فعدُّ قبوله كذباً
+   * حراسةٌ للعهد القديم**، وهو ما جاءت خطّةُ الإنقاذ لتنقضه. ويُطبَع بالاسم أدناه.
+   */
+  const oldWalker = changed.filter(({ is }) => is.walkerOnly);
+  const falseAccept = changed.filter(({ was, is }) =>
+    !is.walkerOnly && !is.wanted && is.accepted && !was.accepted);
+  const falseReject = changed.filter(({ was, is }) =>
+    !is.walkerOnly && is.wanted && !is.accepted && was.accepted);
   const fixed = changed.filter(({ was, is }) => is.wanted === is.accepted && was.accepted !== was.wanted);
 
   if (!changed.length && !gone.length && !fresh.length) {
     console.log('  · لا حالةَ تبدّل حكمُها — المحرّكُ اليومَ هو المحرّكُ يومَ ثُبِّت الأساس.');
   }
   for (const { id, was, is } of changed) {
-    const kind = falseAccept.some((c) => c.id === id) ? '🔴 **قبولٌ كاذبٌ جديد**'
+    const kind = oldWalker.some((c) => c.id === id) ? '○ وسمُه حكمُ الماشي القديم — يُقاس ولا يُحكَم به'
+      : falseAccept.some((c) => c.id === id) ? '🔴 **قبولٌ كاذبٌ جديد**'
       : falseReject.some((c) => c.id === id) ? '🔴 **ردٌّ كاذبٌ جديد**'
         : fixed.some((c) => c.id === id) ? '✔ صار موافقاً للمنتظَر'
           : '⚠ تبدّلت شكواه';
+    const shot = (r) => `${r.accepted ? 'مقبولاً' : `مردوداً بـ«${r.why || r.primary || '؟'}»`}`
+      + ` وطريقتُه ${r.exact ? 'مطابقة' : `«${r.primary || 'حجم'}»`}`;
     console.log(`  · ${kind} — ${id}${is.frozen ? '' : ' [خامٌ لم يُجمَّد]'}:`
-      + ` كان ${was.accepted ? 'مقبولاً' : `مردوداً بـ«${was.size || was.primary}»`}`
-      + ` (انحراف ${was.maxLateral}/${was.limit} · تغطية ${was.coverage}٪)`
-      + ` وصار ${is.accepted ? 'مقبولاً' : `مردوداً بـ«${is.size || is.primary}»`}`
-      + ` (انحراف ${is.maxLateral}/${Math.round(is.limit)} · تغطية ${is.coverage}٪)`);
+      + ` كان ${shot(was)} (شكلٌ ${was.recall ?? '؟'}٪/${was.precision ?? '؟'}٪`
+      + ` · انحراف ${was.maxLateral}/${was.limit})`
+      + ` وصار ${shot(is)} (شكلٌ ${is.recall}٪/${is.precision}٪`
+      + ` · انحراف ${is.maxLateral}/${Math.round(is.limit)})`);
   }
   for (const id of gone) console.log(`  · ⚠ حالةٌ في الأساس وليست في المادّة اليوم — ${id}`);
   for (const r of fresh) console.log(`  · ➕ حالةٌ جديدة لا أساسَ لها — ${r.id} (${r.match ? 'موافقةٌ للمنتظَر' : 'مخالفة'})`);
@@ -313,6 +368,10 @@ if (!existsSync(BASE_PATH)) {
     ok(gone.length === 0,
       gone.length ? `حالاتٌ غابت عن المادّة — ${gone.join('، ')}` : 'ولا حالةَ غابت — المادّةُ لم تنقص');
     if (fixed.length) console.log(`  (وصُلح ${fixed.length}: ${fixed.map((c) => c.id).join('، ')})`);
+    if (oldWalker.length) {
+      console.log(`  (و${oldWalker.length} أثراً ميدانياً وسمُه حكمُ الماشي القديم —`
+        + ` ${oldWalker.map((c) => c.id).join('، ')} — يُراجَع بعين المالك في ن٣)`);
+    }
   }
 }
 

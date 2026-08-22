@@ -10,6 +10,19 @@
 //      موصوفٌ** لمسارٍ مرجعيّ (انحرافٌ عرضيّ بمقدارٍ معلوم، عكسُ اتجاه، بدايةٌ من
 //      منتصف الطريق) — فيُقرأ منها ما تقيسه، ويعاد توليدُها فتخرج هي هي.
 //
+// ————— 🔴 **وكلُّ حالةٍ موسومةٌ بحكمَين لا بحكمٍ واحد** (جلسة ن٢) —————
+//
+// منذ صار القبولُ بالشكل الكلّيّ (حكمُ المالك ٢٠–٢١ أغسطس ٢٠٢٦، `ENGINE_RESCUE §٣`)
+// انفصل الحكمان **فلا يُوسَم بواحد**:
+//   · **`expect.shape`** — أيقبلها `judgeShape`؟ **وهو حَكَمُ القبول** وحدَه.
+//   · **`expect.exact`** — أتطابق الطريقةَ المثلى؟ يقيسه الماشي (`judge`/`judgeFree`)
+//     **ويُقاس ولا يُردّ به**، ومعه `expect.fault` أوّلُ شكواه بعينها.
+//
+// **والقاعدةُ في الوسم**: تشويهاتُ **الطريقة** (معكوسٌ · ترتيبٌ مقلوب · نقاطٌ قبل
+// الجسم · رجفةٌ عارمة) ⇒ `shape: true` و`exact: false` — **فحبرُها حبرُنا والحرفُ
+// يُقرأ**. وتشويهاتُ **الشكل** (خربشةٌ · ناقصٌ · نقاطٌ مقلوبةُ الجهة أو العدد)
+// ⇒ `shape: false`. **والحجمُ إرشادٌ لا ردّ** فيوسَم `expect.guide` لا `fault`.
+//
 // ⚠ **وهذه مساراتٌ مصنوعة لا مساراتُ أطفال** — والفرقُ مكتوبٌ في كل حالة (`origin`):
 // `synthetic` تُعاد كما هي بهذا المولّد، و`field` تأتي من **الجلسة ١٢** (ميدانُ
 // الطفل ومعايرةُ السماحة) فتدخل الملفَّ نفسَه ولا يعيد المولّدُ توليدَها — ولا
@@ -273,55 +286,55 @@ function build() {
   const clean = (rand, opts = {}) => BODY.map((poly) => walk(poly, { rand, ...opts }));
 
   let rand = rng(101);
-  add('clean', { accept: true }, 'كتابةٌ سليمة: بدايةٌ صحيحة واتجاهٌ صحيح وترتيبٌ صحيح',
+  add('clean', { shape: true, exact: true }, 'كتابةٌ سليمة: بدايةٌ صحيحة واتجاهٌ صحيح وترتيبٌ صحيح',
     [...clean(rand, { jitter: 4 }), dot(rand)]);
 
   rand = rng(202);
-  add('child-drift', { accept: true },
+  add('child-drift', { shape: true, exact: true },
     `يدُ طفلٍ تنحرف انحرافاً واسعاً داخل السماحة (± ${Math.round(TOLERANCE.lateral * 0.5)})`,
     [...clean(rand, { jitter: 5, sway: (r) => Math.sin(r * Math.PI * 2) * TOLERANCE.lateral * 0.5 }),
       dot(rand)]);
 
   rand = rng(303);
-  add('tremor-mild', { accept: true },
+  add('tremor-mild', { shape: true, exact: true },
     'رجفةٌ خفيفة — **تُقبَل**: سماحةٌ ضيّقةٌ تُحبِط طفلَ الخامسة (`METHOD.md §٣.٥`)',
     [...clean(rand, { jitter: 6, sway: (r) => Math.sin(r * Math.PI * 14) * TOLERANCE.lateral * 0.4 }),
       dot(rand)]);
 
   rand = rng(404);
-  add('tremor-wild', { accept: false, fault: 'wander' },
+  add('tremor-wild', { shape: true, exact: false, fault: 'wander' },
     `رجفةٌ عارمة تتجاوز السماحة (± ${Math.round(TOLERANCE.lateral * 2.2)}) — الشرط ٣`,
     [...clean(rand, { jitter: 6, sway: (r) => Math.sin(r * Math.PI * 14) * TOLERANCE.lateral * 2.2 }),
       dot(rand)]);
 
   rand = rng(505);
-  add('reversed', { accept: false, fault: 'start-end' },
+  add('reversed', { shape: true, exact: false, fault: 'start-end' },
     '**المسارُ معكوساً** — يبدأ من الطرف الآخر ويمشي رجوعاً (الشرطان ١ و٢)',
     [...BODY.map((poly) => walk(poly, { from: 1, to: 0, jitter: 4, rand })), dot(rand)]);
 
   rand = rng(606);
-  add('start-mid', { accept: false, fault: 'start-far' },
+  add('start-mid', { shape: true, exact: false, fault: 'start-far' },
     'بدايةٌ خاطئة: ينزل في منتصف المسار ثم يتمّه (الشرط ١)',
     [walk(BODY[0], { from: 0.45, to: 1, jitter: 4, rand }),
       walk(BODY[1], { jitter: 4, rand }), dot(rand)]);
 
   rand = rng(707);
-  add('dots-first', { accept: false, fault: 'dots-first' },
+  add('dots-first', { shape: true, exact: false, fault: 'dots-first' },
     '**النقطةُ قبل الجسم** — العادةُ الخاطئة التي يفرض الخطُّ المدرسيّ عكسَها (الشرط ٤)',
     [dot(rand), ...clean(rand, { jitter: 4 })]);
 
   rand = rng(808);
-  add('order-swapped', { accept: false, fault: 'order' },
+  add('order-swapped', { shape: true, exact: false, fault: 'order' },
     'ترتيبٌ مقلوب: يكتب الجزء الثاني قبل الأول (الشرط ٤)',
     [walk(BODY[1], { jitter: 4, rand }), walk(BODY[0], { jitter: 4, rand }), dot(rand)]);
 
   rand = rng(909);
-  add('stopped-short', { accept: false, fault: 'short' },
+  add('stopped-short', { shape: true, exact: false, fault: 'short', half: true },
     'يرفع القلم عند ٦٠٪ من الجزء الأول',
     [walk(BODY[0], { to: 0.6, jitter: 4, rand }), walk(BODY[1], { jitter: 4, rand }), dot(rand)]);
 
   rand = rng(1010);
-  add('backtrack', { accept: false, fault: 'reverse' },
+  add('backtrack', { shape: true, exact: false, fault: 'reverse' },
     'يتقدّم إلى ٧٠٪ ثم يرتدّ إلى ٣٠٪ ثم يُتمّ — ارتدادٌ على المسار (الشرط ٢)',
     [[...walk(BODY[0], { to: 0.7, jitter: 3, rand }),
       ...walk(BODY[0], { from: 0.7, to: 0.3, jitter: 3, rand }),
@@ -329,14 +342,14 @@ function build() {
       walk(BODY[1], { jitter: 4, rand }), dot(rand)]);
 
   rand = rng(1111);
-  add('no-dot', { accept: false, fault: 'incomplete' },
+  add('no-dot', { shape: false, exact: false, fault: 'incomplete' },
     'جسمان بلا نقطة — جزءٌ مقرَّرٌ لم يُكتب (الشرط ٤)',
     clean(rand, { jitter: 4 }));
 
   // ————— الشكلُ المغلق: حالتا مراجعة المدير (الجلسة ١) —————
 
   rand = rng(1212);
-  add('ring-clean', { accept: true },
+  add('ring-clean', { shape: true, exact: true },
     'دائرةٌ تامّةٌ صحيحة — شاهدُ أنّ إصلاحَ ثغرة الذيل لم يمنع كتابةَ الشكل المغلق',
     [walk(RING_POLY, { jitter: 4, rand })], 'ring');
 
@@ -349,7 +362,7 @@ function build() {
   // وقع على الحبر (ستّون وحدةً **قبل** البداية على الدائرة) والحركةُ رجوعٌ عليه —
   // وذلك انعكاسُ اتجاهٍ لا خروجٌ عن المسار. والمحروسُ فيها **التغطيةُ لا الاسم**
   // (`test_pen.mjs` يقيس ٠٫٠٠ لا ٠٫٩٧)، وهو قائمٌ كما كان.
-  add('closed-tail', { accept: false, fault: 'reverse' },
+  add('closed-tail', { shape: false, exact: false, fault: 'reverse' },
     '**ثغرةُ ذيل الشكل المغلق** (كشفتها مراجعةُ المدير): نزولٌ داخل دائرة البداية '
     + 'لكن على ذيل الدائرة، ثم حركةٌ ذرّية — كانت تُقبَل دائرةً كاملة',
     [walk(RING_POLY, {
@@ -361,7 +374,7 @@ function build() {
   // الدوائر): دائرةٌ تامّة تُدار **معكوسةً** من نقطة بدايتها. والرفضُ كان قائماً من
   // قبلُ، لكن باسم `wander` («يخرج عن المسار») — والطفلُ على الحبر تماماً يدور عكسَ
   // اتجاهه. فصار `reverse` («يعكس اتجاه الحركة»)، وهو ما تقرؤه لوحةُ وليّ الأمر.
-  add('ring-reversed', { accept: false, fault: 'reverse' },
+  add('ring-reversed', { shape: true, exact: false, fault: 'reverse' },
     '**دائرةٌ تُدار معكوسةً** من قمّتها — على الشكل المغلق يقع الرجوعُ في الطول قفزةً '
     + 'إلى الأمام فلا يمسّه شرطُ الرتابة، وكان يُسمَّى `wander` والحقُّ `reverse`',
     [walk(RING_POLY, { from: 1, to: 0, jitter: 4, rand })], 'ring');
@@ -370,7 +383,7 @@ function build() {
   // **والوجهُ الآخر للاسم على الشكل نفسِه**: يمضي في الاتجاه الصحيح ويدُه ترتجف
   // فوق السماحة ⇒ `wander` كما كان. فالاسمان يفترقان على الدائرة الواحدة
   // **بالاتجاه** لا بالبُعد — ولولا هذه لَجاز أن يبتلع الاسمُ الجديد الشرطَ الثالث.
-  add('ring-wander', { accept: false, fault: 'wander' },
+  add('ring-wander', { shape: true, exact: false, fault: 'wander' },
     'دائرةٌ في اتجاهها الصحيح ويدٌ ترتجف فوق السماحة — **تبقى** «يخرج عن المسار»',
     [walk(RING_POLY, {
       jitter: 6, sway: (r) => Math.sin(r * Math.PI * 14) * TOLERANCE.lateral * 2.2, rand,
@@ -379,7 +392,7 @@ function build() {
   // ————— الطيّةُ المعلَنة: حالاتُ الجلسة ٢ب (قرارُ المدير في مراجعة الجلسة ٢) —————
 
   rand = rng(1414);
-  add('fold-traced', { accept: true },
+  add('fold-traced', { shape: true, exact: true },
     `**سنّةٌ مطويّة تُتتبَّع** على ضلعَي النموذج برجفةٍ داخل السماحة (± ${
       Math.round(TOLERANCE.lateral * 0.5)}) — الشرط ٢ عبر الطيّة`,
     [walk(TOOTH_POLY, {
@@ -387,13 +400,13 @@ function build() {
     })], 'tooth');
 
   rand = rng(1515);
-  add('fold-single-line', { accept: true, needsFold: true },
+  add('fold-single-line', { shape: true, exact: true, needsFold: true },
     '**سنّةٌ على خطٍّ واحد** — كما تُكتب حقّاً في «اكتبه وحدك»: يصعد ثم يعود على أثره '
     + 'بين ضلعَي النموذج. كانت تُرفَض `reverse` قبل إعلان الطيّة',
     [walk(TOOTH_LINE, { jitter: 5, rand })], 'tooth');
 
   rand = rng(1616);
-  add('fold-reversed', { accept: false, fault: 'start-end' },
+  add('fold-reversed', { shape: true, exact: false, fault: 'start-end' },
     '**سنّةٌ معكوسة** — يبدأ من الذراع الخارجة ويمشي رجوعاً: الطيّةُ لا تُبيح عكسَ الحركة',
     [walk(TOOTH_POLY, { from: 1, to: 0, jitter: 4, rand })], 'tooth');
 
@@ -401,7 +414,7 @@ function build() {
   // **الحالةُ الحارسة للطيّة** (نظيرُ `closed-tail` للشكل المغلق): الطيّةُ رخصةٌ في
   // قراءة الموضع لا إعفاءٌ من كتابة السنّة — فمن دخل من المفرق ومضى إلى الذراع
   // الخارجة بلا صعودٍ ولا نزول لا يرث تغطيةَ ضلعين لم يمشِهما.
-  add('fold-skipped', { accept: false, fault: 'wander' },
+  add('fold-skipped', { shape: false, exact: false, fault: 'wander' },
     '**قفزٌ فوق السنّة**: من الذراع الداخلة إلى الخارجة مباشرةً بلا صعودٍ ولا نزول '
     + '— الطيّةُ لا تُمنَح بلا مشي',
     [[...walk(prepare(TOOTH_ARM_IN), { jitter: 3, rand }),
@@ -412,7 +425,7 @@ function build() {
   // «العمودُ الموصول ينزل من قمّته»): كان عمودُ ل/وسطي يُصعَد ثم يُنزَل على أثره
   // فكان مطويّاً، فصار ينزل من قمّته بلا عودة. **فالحالةُ تبقى ويسقط ادّعاءُ الطيّة
   // عنها** — وهي شاهدُ عهد `child-drift` على أطول عمودٍ موصول في المنهج.
-  add('lam-medial-drift', { accept: true },
+  add('lam-medial-drift', { shape: true, exact: true },
     `**ل/وسطي برجفة ${Math.round(TOLERANCE.lateral * 0.5)}** — الشكلُ الذي نقض عهدَ `
     + '`child-drift` في مراجعة المدير (سقط برجفة ٤٠) فعاد فوقه بإعلان الطيّة، '
     + '**ثم سقطت طيّتُه بحكم المالك في مرجعية الكرّاسة (§١)** فصار عموداً نازلاً '
@@ -426,25 +439,25 @@ function build() {
   // المنهج (١٦٠) وأضيقِ قوسٍ فيه — لا على السنّ الاصطناعية وحدَها.
 
   rand = rng(1919);
-  addRetrace('ba-medial-retrace', { accept: true, needsFold: true },
+  addRetrace('ba-medial-retrace', { shape: true, exact: true, needsFold: true },
     '**ب/وسطي: العودةُ على الأثر الرطب** — يصعد ضلعَ السنّة الصاعد وينزل عليه هو. '
     + 'كانت تُردّ `wander`: فجوةُ الضلعين ١٦٠ وسماحةُ الانحراف ٩٠',
     BA_MEDIAL, 'ba-medial', rand);
 
   rand = rng(2020);
-  add('ba-medial-reversed', { accept: false, fault: 'start-end' },
+  add('ba-medial-reversed', { shape: true, exact: false, fault: 'start-end' },
     'ب/وسطي معكوسةً — والطيّةُ لا تُبيح عكسَ الحركة ولو كان حبرُها واحداً',
     [walk(prepare(BA_MEDIAL.strokes[0].points), { from: 1, to: 0, jitter: 4, rand }),
       ...dotsOf(BA_MEDIAL, rand)], 'ba-medial');
 
   rand = rng(2121);
-  addRetrace('ba-final-retrace', { accept: true, needsFold: true },
+  addRetrace('ba-final-retrace', { shape: true, exact: true, needsFold: true },
     '**ب/نهائي: العودةُ على الأثر الرطب** على تُوَيْجها — أضيقُ قوسٍ في المنهج. '
     + 'كانت تُردّ `reverse` كاذباً وفجوةُ ضلعيها ٨٠ داخلَ السماحة',
     BA_FINAL, 'ba-final', rand);
 
   rand = rng(2222);
-  add('ba-final-reversed', { accept: false, fault: 'start-end' },
+  add('ba-final-reversed', { shape: true, exact: false, fault: 'start-end' },
     'ب/نهائي معكوسةً — تُوَيْجُها المطويّ لا يُبيح البدءَ من الطرف الآخر',
     [walk(prepare(BA_FINAL.strokes[0].points), { from: 1, to: 0, jitter: 4, rand }),
       ...dotsOf(BA_FINAL, rand)], 'ba-final');
@@ -462,9 +475,12 @@ function build() {
   // الحكمُ الأول (`judge`) ويقبلها الثاني (`judgeFree`) — فلو سقط الحكمُ الثاني يوماً
   // لَقُرئ الإخفاقُ هنا **ببلاغه**.
   //
-  // **ولا تنقلب الرحمةُ تسييباً**: معكوسةُ الاتجاه، ومرآةُ الشكل (وهي ليست نوناً وإن
-  // ملأت صندوقَها)، والنقطةُ قبل الجسم — **تُرَدّ ثلاثتُها بالحكم الثاني نفسِه**،
-  // فالبدايةُ والاتجاهُ والترتيبُ هي المادّةُ المدرَّسة ولا تتبدّل بتبدّل الموضع.
+  // 🔴 **وقد تبدّل وسمُ ثلاثٍ منها في ن٢**: معكوسةُ الاتجاه، ومرآةُ الشكل، والنقطةُ
+  // قبل الجسم — كانت تُرَدّ بالحكم الثاني، **وصارت `shape: true` و`exact: false`**:
+  // حبرُها حبرُنا والحرفُ يُقرأ، **والبدايةُ والاتجاهُ والترتيبُ مادّةُ تدريسٍ تُقاس
+  // ولا يُردّ بها** (حكمُ المالك). **ومرآةُ النون مقيسةٌ لا مظنونة**: كأسُها متناظرةٌ
+  // فمرآتُها هي هي — والمرآةُ التي تبدّل الشكلَ حقّاً محروسةٌ على الكاف
+  // (`kaf-mirrored`، وهي `shape: false`) وعلى مصفوفة الأخوات في `tools/test_shape.mjs`.
   const NOON = PATHS['ن'].isolated;
   const NOON_BOX = inkBox([refPoints(NOON)]);
   const NOON_POLY = prepare(NOON.strokes[0].points);
@@ -480,41 +496,42 @@ function build() {
   });
 
   rand = rng(4141);
-  field('noon-narrow', { accept: true, free: true, strict: false },
+  field('noon-narrow', { shape: true, exact: true, free: true, strict: false },
     '🏅 **نونُ الصورة**: كأسٌ أضيقُ من كأس النموذج (٦٠٪ عرضاً) — الشكلُ صحيحٌ '
     + 'والبدايةُ والاتجاهُ صحيحان، وكانت تُردّ `wander` فتركت الطفلةُ الجهاز',
     warp(noon(rand), about(0.6, 1)));
 
   rand = rng(4242);
-  field('noon-wide', { accept: true, free: true, strict: false },
+  field('noon-wide', { shape: true, exact: true, free: true, strict: false },
     'ونونٌ كأسُها **أوسعُ** من النموذج (١٤٠٪ عرضاً) — الوجهُ الآخر للبلاغ نفسِه',
     warp(noon(rand), about(1.4, 1)));
 
   rand = rng(4343);
-  field('noon-small', { accept: true, free: true, strict: false },
+  field('noon-small', { shape: true, exact: true, free: true, strict: false },
     'ونونٌ **أصغرُ حجماً** (٥٥٪ بنِسَبها) — حجمٌ معقولٌ في صندوقه، والنِّسَبُ سليمة',
     warp(noon(rand), about(0.55, 0.55)));
 
   rand = rng(4444);
-  field('noon-shifted', { accept: true, free: true, strict: false },
+  field('noon-shifted', { shape: true, exact: true, free: true, strict: false },
     `ونونٌ **مُزاحةٌ في الصندوق** (${Math.round(TOLERANCE.start * 1.2)} أفقياً — خارجَ `
     + 'دائرة البداية) — والموضعُ ليس مادّةً مدرَّسة',
     warp(noon(rand), nudge(TOLERANCE.start * 1.2, TOLERANCE.start * 0.8)));
 
   rand = rng(4545);
-  field('noon-reversed', { accept: false, free: true, fault: 'start-end' },
-    '**ونونٌ معكوسةُ الحركة** — تُرَدّ بالحكم الثاني كما تُرَدّ بالأول: الاتجاهُ '
-    + 'مادّةٌ مدرَّسة لا يبدّلها توفيقُ النموذج',
+  field('noon-reversed', { shape: true, exact: false, free: true, fault: 'start-end' },
+    '**ونونٌ معكوسةُ الحركة** — شكلُها شكلُنا فيقبلها الحَكَمُ الكلّيّ، **ويردّ '
+    + 'الماشي طريقَتها** `start-end`: الاتجاهُ مادّةٌ تُدرَّس وتُقاس ولا يُردّ بها',
     [walk(NOON_POLY, { from: 1, to: 0, jitter: 4, rand }), ...dotsOf(NOON, rand)]);
 
   rand = rng(4646);
-  field('noon-mirrored', { accept: false, free: true },
-    '**ومرآةُ النون** — تملأ صندوقَها بحجمٍ معقول، **وليست نوناً**: التوفيقُ إزاحةٌ '
-    + 'وتحجيمٌ منتظم لا انعكاس',
+  field('noon-mirrored', { shape: true, exact: false, free: true, fault: 'dots-first' },
+    '**ومرآةُ النون** — تملأ صندوقَها بحجمٍ معقول، **وكأسُها متناظرةٌ فمرآتُها هي '
+    + 'هي**: يقبلها الحَكَمُ الكلّيّ بحقّ، ويردّ الماشي طريقَتها. والمرآةُ التي تبدّل '
+    + 'الشكلَ حقّاً على الكاف (`kaf-mirrored`)',
     warp(noon(rand), about(-1, 1)));
 
   rand = rng(4747);
-  field('noon-dots-first', { accept: false, free: true, fault: 'dots-first' },
+  field('noon-dots-first', { shape: true, exact: false, free: true, fault: 'dots-first' },
     '**والنقطةُ قبل الجسم** — بدايةٌ مقلوبةُ الترتيب: العادةُ الخاطئة التي يفرض الخطُّ '
     + 'المدرسيّ عكسَها، ولا يفتحها كرمُ السماحة',
     (() => { const w = noon(rand); return [w[1], w[0]]; })());
@@ -523,12 +540,12 @@ function build() {
   // السماحة (`lateral × ٢`)، وأكبرُه أن يسعه صندوقُ المادّة وممرُّه من كل جهة —
   // وكلاهما **جملةٌ تُقال** لا ردٌّ صامت.
   rand = rng(4848);
-  field('noon-tiny', { accept: false, free: true, size: 'size-small' },
+  field('noon-tiny', { shape: true, exact: false, free: true, guide: 'size-small' },
     'ونونٌ **ضئيلة** (١٥٪) تغرق في ممرّ سماحتها — تُقال لها «اكْتُبْهُ أَكْبَرْ»',
     warp(noon(rand), about(0.15, 0.15)));
 
   rand = rng(4949);
-  field('noon-huge', { accept: false, free: true, size: 'size-big' },
+  field('noon-huge', { shape: true, exact: false, free: true, guide: 'size-big' },
     'ونونٌ **تفيض عن صندوقها** (٢٤٠٪) — تُقال لها «اكْتُبْهُ أَصْغَرْ»',
     warp(noon(rand), about(2.4, 2.4)));
 
@@ -554,7 +571,7 @@ function build() {
   // قليلاً — بين أرضيّة الجزء وعتبة الشكل — **تُقبَل بالإعلان وتُرَدّ بنزعه**
   // (`test_pen.mjs §٢د`). ولولا هذه الحالةُ لَكان التخفيفُ حبراً لا يمسّ يدَ طفل.
   rand = rng(6060);
-  kafCase('kaf-tail-short-eased', { accept: true, free: true, eased: true },
+  kafCase('kaf-tail-short-eased', { shape: true, exact: true, free: true, eased: true },
     '🏅 **شولةُ الكاف يقصّر عنها الطفلُ قليلاً** (٨٧٪ من طولها) — تُقبَل بسماحة الجزء '
     + 'المعلَنة في بيان الحرف (حكمُ المالك ١٧ أغسطس ٢٠٢٦: «لم تنضبط في يد الخامسة»)، '
     + '**وتُرَدّ `short` إن نُزع الإعلان** — فالقبولُ معلَّقٌ بالبيان لا بتسييبٍ عامّ',
@@ -565,27 +582,27 @@ function build() {
     })());
 
   rand = rng(6161);
-  kafCase('kaf-reversed', { accept: false, free: true, direction: true },
-    '**كافٌ تُكتب من طرفها الآخر**: جسمُها وشولتُها كلٌّ في اتجاهٍ معكوس — تُرَدّ '
-    + 'بالحكم الثاني، **ولا يفتحها تخفيفُ سماحة الشولة ولو ثُلِّث**: المرفوضُ فيها '
-    + 'الاتجاهُ لا الدقّة',
+  kafCase('kaf-reversed', { shape: true, exact: false, free: true, direction: true, fault: 'start-end' },
+    '**كافٌ تُكتب من طرفها الآخر**: جسمُها وشولتُها كلٌّ في اتجاهٍ معكوس — يقبل '
+    + 'الحَكَمُ الكلّيّ شكلَها **ويردّ الماشي طريقَتها**، ولا يفتح التخفيفُ بابَ '
+    + 'الاتجاه ولو ثُلِّث: المرفوضُ في الطريقة الاتجاهُ لا الدقّة',
     kaf(rand).map((s) => [...s].reverse()));
 
   rand = rng(6262);
-  kafCase('kaf-tail-first', { accept: false, free: true, direction: true },
+  kafCase('kaf-tail-first', { shape: true, exact: false, free: true, direction: true, fault: 'order' },
     'و**شولةٌ قبل جسمها**: الجزءُ الملحقُ يُكتب قبل ما يُلحَق به — وهي النقطةُ قبل '
     + 'الجسم بعينها في حرفٍ جزؤه الثاني ضربةٌ لا نقطة، **فالترتيبُ مادّةٌ مدرَّسة** '
     + 'لا تفتحها سماحةُ الجزء',
     (() => { const [body, tail] = kaf(rand); return [tail, body]; })());
 
   rand = rng(6363);
-  kafCase('kaf-tail-reversed', { accept: false, free: true, direction: true },
+  kafCase('kaf-tail-reversed', { shape: true, exact: false, free: true, direction: true, fault: 'start-end' },
     'وكافٌ **جسمُها مصيبٌ وشولتُها معكوسة**: تُرَدّ وحدَها — فالتخفيفُ يُغفَر به '
     + 'نقصانُ الشولة لا **عكسُ حركتها**، وهو أدقُّ ما يُحرَس هنا',
     (() => { const [body, tail] = kaf(rand); return [body, [...tail].reverse()]; })());
 
   rand = rng(6464);
-  kafCase('kaf-mirrored', { accept: false, free: true, direction: true },
+  kafCase('kaf-mirrored', { shape: false, exact: false, free: true, direction: true },
     'ومرآةُ الكاف — تملأ صندوقَها وليست كافاً: التوفيقُ إزاحةٌ وتحجيمٌ منتظم '
     + '**لا انعكاس**',
     kafWarp(kaf(rand), (p) => [2 * KAF_BOX.cx - p[0], p[1]]));
@@ -610,7 +627,7 @@ function build() {
   rand = rng(5151);
   cases.push({
     id: 'compare-sister-then-right',
-    expect: { accept: true, free: true, run: true },
+    expect: { shape: true, free: true, run: true },
     note: '**طريقُ التمييز**: جوابُ الأخت («ب» عن «ن» ابتدائيةً) — يُقبَل جسمُها إذ '
       + 'الجسمُ واحد، وتُرَدّ نقطتُها — **ثم الجوابُ الصحيح كاملاً**: يُستأنَف الشكلُ '
       + 'من أوّله فيبلغ الطريقُ آخرَه وتُكتب المهارة',
@@ -622,7 +639,7 @@ function build() {
   rand = rng(5252);
   cases.push({
     id: 'compare-sister-only',
-    expect: { accept: false, free: true, run: true },
+    expect: { shape: false, free: true, run: true },
     note: 'وجوابُ الأخت وحدَه **لا يبلغ آخرَ الطريق** — فلا تُختَم محطةٌ بجوابٍ خاطئ، '
       + 'ولا يخضرّ بابُ «المُعلَنُ يُنادى فعلاً» من فراغ',
     origin: 'synthetic',
@@ -646,19 +663,20 @@ function build() {
       .flatMap((d) => Array.from({ length: d.count || 1 }, () => tap(d.at, rand)));
 
     rand = rng(seed++);
-    add(`${id}-clean`, { accept: true, tolerance: ref.tolerance },
+    add(`${id}-clean`, { shape: true, exact: true, tolerance: ref.tolerance },
       `«${text}» أمينةً — والانطباقُ في حبر وصلها مُعلَنٌ طيّةً (حكمُ المدير)`,
       [...body(rand, { jitter: 2 }), ...dots(rand)], id);
 
     rand = rng(seed++);
-    add(`${id}-drift`, { accept: true, tolerance: ref.tolerance },
+    add(`${id}-drift`, { shape: true, exact: id !== 'word-3', tolerance: ref.tolerance },
       `«${text}» بيدٍ ترتجف بعهد أرضيتها (± ${Math.round(drift)} من سماحتها ${
         Math.round(TOLERANCE.lateral * ref.tolerance)}) — عهدُ \`child-drift\` على مادّة النسخ`,
       [...body(rand, { jitter: 2, sway: (r) => Math.sin(r * Math.PI * 2) * drift }), ...dots(rand)], id);
 
     rand = rng(seed++);
-    add(`${id}-reversed`, { accept: false, tolerance: ref.tolerance },
-      `«${text}» معكوسةً — **خصومةُ المعكوس لا تلين**: العودُ غيرُ المعلَن ارتدادٌ كما كان`,
+    add(`${id}-reversed`, { shape: true, exact: false, tolerance: ref.tolerance },
+      `«${text}» معكوسةً — شكلُها شكلُها فيقبله الحَكَمُ الكلّيّ، **وخصومةُ الماشي `
+      + `للمعكوس لا تلين**: العودُ غيرُ المعلَن ارتدادٌ كما كان`,
       [...[...ref.strokes].reverse().map((st) => walk(prepare(st.points), { from: 1, to: 0, jitter: 2, rand })),
         ...dots(rand)], id);
   }
@@ -679,7 +697,7 @@ function build() {
       + 'تُرَدّ بالحكمين. **و«noon-initial» طريقُ التمييز** (مراجعةُ المدير للجلسة م٣): حالتان '
       + 'تُمشيان في آلة المحاولة الحرّة لمسةً لمسة (createFreeRun) لا تُحكَمان دفعةً — '
       + 'جوابُ الأخت ثم الصحيح يبلغ آخرَ الطريق، وجوابُ الأخت وحدَه لا يبلغه. '
-      + 'وحكمُ المحرّك على مسارات الحروف كلِّها في tools/test_paths.mjs.',
+      + 'وحكمُ المحرّك على مسارات الحروف كلِّها في tools/test_paths.mjs. **وكلُّ حالةٍ موسومةٌ بحكمَين منذ ن٢**: `expect.shape` حكمُ القبول (judgeShape) و`expect.exact` مطابقةُ الطريقة (الماشي) — فتشويهُ الطريقة يُقبَل شكلاً ويُقاس طريقةً، وتشويهُ الشكل يُرَدّ.',
     generator: 'tools/make_pen_traces.mjs',
     warning: 'مساراتٌ مصنوعة لا مساراتُ أطفال — ميدانُ الطفل ومساراتُه الحقيقية في الجلسة ١٢',
     refs: {
@@ -743,8 +761,21 @@ if (process.argv.includes('--self-test')) {
   ok(saved.cases.every((c) => Array.isArray(c.strokes) && c.strokes.length
       && c.strokes.every((s) => s.length && s.every((p) => p.length === 2 && p.every(Number.isFinite)))),
     'وكلُّ حالةٍ — مصنوعةً كانت أو ميدانية — ضرباتٌ بنقاطٍ صحيحة على الشبكة');
-  ok(saved.cases.every((c) => c.expect && typeof c.expect.accept === 'boolean' && c.note && c.origin),
-    'ولكلِّ حالةٍ حكمُها المنتظَر وعلّتُها ومصدرُها');
+  /**
+   * **ولكلِّ حالةٍ حكمُ القبول باسمه** — `expect.shape` في المصنوع، **و`expect.accept`
+   * في الميدانيّ** (حكمُ العين أو حكمُ المحرّك ساعةَ الالتقاط، يكتبه `import_traces`
+   * ولا يمسّه هذا المولّد). فالاسمان وجهٌ واحد: **أيُقبَل هذا الأثر؟**
+   */
+  const wantShape = (c) => (typeof c.expect?.shape === 'boolean' ? c.expect.shape : c.expect?.accept);
+  ok(saved.cases.every((c) => c.expect && typeof wantShape(c) === 'boolean' && c.note && c.origin),
+    'ولكلِّ حالةٍ حكمُ القبول وعلّتُها ومصدرُها');
+  // **وحكمُ الطريقة الثاني معلَنٌ في كل حالةٍ مصنوعة تُحكَم دفعةً** — فلا يبقى
+  // الماشي بلا عهدٍ يُقاس عليه، ولا يُقرأ سكوتُه قبولاً.
+  const dealt = saved.cases.filter((c) => c.origin === 'synthetic' && !c.expect.run);
+  const noExact = dealt.filter((c) => typeof c.expect.exact !== 'boolean');
+  ok(noExact.length === 0,
+    `ولكلِّ حالةٍ مصنوعةٍ حكمُ الطريقة \`exact\` معه (${dealt.length} حالة)`
+    + (noExact.length ? ` — بلا وسم: ${noExact.map((c) => c.id).join('، ')}` : ''));
   // **مطالبةٌ تُطلقها العدّةُ على نفسها**: يومَ تدخل مساراتُ ميدانٍ حقيقية (الجلسة ١٢)
   // يصير الوصفُ أعلاه ناقصاً — فيُطالِب هذا السطرُ بتحديثه بلا انتباهٍ يُرجى.
   const field = saved.cases.filter((c) => c.origin === 'field');

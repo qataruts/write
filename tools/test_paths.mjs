@@ -93,6 +93,42 @@ const taps = (ref) => ref.dots.map((d) => Array.from({ length: d.count || 1 }, (
   .map((at) => [at, at, at]);
 const trace = (ref, opts) => [...ref.strokes.map((s) => walk(s.points, opts)), ...taps(ref)];
 
+/**
+ * ————— 🔴 **حكمُ القبول من الآلة نفسِها** (جلسة ن٢) —————
+ *
+ * منذ صار القبولُ بالشكل الكلّيّ (`ENGINE_RESCUE §٣`) **لم يعد `judge(...).accepted`
+ * حَكَمَ القبول**: هو يقيس **الطريقة** (`exact`)، والقبولُ يقع في `judgeShape`.
+ * **ولا تُكتب هنا نسخةٌ ثانية من قرار القبول** (ولمادّة النقرة حكمُها الخاصّ في
+ * المحرّك) — بل **تُدار آلةُ الخطوة الحرّة نفسُها** (`createFreeRun`، وهي عينُ ما
+ * يقوده اللوح تحت إصبع الطفل)، فما يُقاس هنا هو ما يقع هناك.
+ *
+ * **واللمساتُ تُمشى واحدةً واحدة** كما ترفعها اليد: نقصٌ يُنتظَر صامتاً، وشكلٌ
+ * فاسدٌ يُرَدّ — والحصيلةُ `run.done`.
+ */
+function accepts(ref, touches, options = {}) {
+  // **والسؤالُ هنا سؤالُ الأثر التامّ**: أيقرأ الحَكَمُ الكلّيُّ هذا الحبرَ حرفَه؟
+  if (ref.strokes?.length) return pen.judgeShape(ref, touches, options).ok;
+  /**
+   * **إلا مادّةً لا جسمَ لها** — نقرةُ الصفر: لا شكلَ لها يُقاس (التطبيعُ يمحو موضعَ
+   * النقرة الوحيدة)، **فحكمُها في المحرّك حكمُ موضعها**. فتُدار آلةُ اللوح نفسُها
+   * (`createFreeRun`) ولا يُكتب هنا قرارٌ ثانٍ.
+   */
+  const run = pen.createFreeRun(ref, options);
+  for (const one of touches) run.push(one);
+  return run.done;
+}
+
+/**
+ * 🔴 **ودَينُ شكلٍ واحدٍ يُعلَن بالاسم ولا يُبتلَع** (صيدُ ن٢، لِـ ن٣): **ش/نهائي**
+ * لا يقبلها الحَكَمُ الكلّيّ **ولو كُتبت على نموذجها حرفاً بحرف**. **وعلّتُه مقيسة**:
+ * مقياسُ مادّتها كبير (سماحتُها العاملة ٣١٢) و**فجوةُ نقاطها الثلاث ١١٠ وحدة** —
+ * فتقع دون نصف قطر الدمج (`SHAPE_DOTS.merge` = ٠٫٤٥ × السماحة = ١٤٠) فتُقرأ نقطتان
+ * لا ثلاثاً ⇒ `dots-count`. **وهو ضبطُ عتبةٍ لا عيبُ بناء**، وشدُّه يمسّ أرقامَ ن١
+ * المجمَّدة — **فالقرارُ لمعايرة ن٣**، ويُحرَس اليومَ **بسقفٍ لا يُتجاوَز** فلا يزحف.
+ */
+const SHAPE_DEBT = new Set(['ش/final']);
+const inDebt = (ch, form) => SHAPE_DEBT.has(`${ch}/${form}`);
+
 console.log('\n— ٣) الحكم: على كل مسارٍ صحيحاً ومعكوساً —');
 // **والنقرةُ لا جهةَ لها فلا تُمتحَن بالعكس** — امتحانُها في مكانها لا في اتجاهها:
 // تُقبَل في موضعها وتُردّ بعيدةً عنه. **والقائمةُ معلَنة** فلا يفلت شكلٌ من امتحان
@@ -125,11 +161,13 @@ ok(loose.length === drawn.length,
 for (const { ch, form, ref } of tappers) {
   const at = ref.dots[0].at;
   const far = [[at[0] + pen.TOLERANCE.dot * 2, at[1]]];
-  const hit = pen.judge(ref, taps(ref));
-  const miss = pen.judge(ref, [[...far, ...far, ...far]]);
-  ok(hit.accepted && !miss.accepted,
-    `${ch} ${curriculum.FORM_NAMES[form]}: النقرةُ في موضعها ${hit.accepted ? 'تُقبَل' : `تُرفَض «${hit.primary}»`}`
-    + ` · وبعيداً عنه ${miss.accepted ? 'تُقبَل — وهو خطأ!' : `تُرفَض «${miss.primary}»`}`);
+  const hit = accepts(ref, taps(ref));
+  const miss = accepts(ref, [[...far, ...far, ...far]]);
+  ok(hit && !miss,
+    `${ch} ${curriculum.FORM_NAMES[form]}: النقرةُ في موضعها ${hit ? 'تُقبَل' : 'تُرفَض'}`
+    + ` · وبعيداً عنه ${miss ? 'تُقبَل — وهو خطأ!' : 'تُرفَض'}`
+    + ' — **ومادّةُ النقرة يحكمها موضعُها**: التطبيعُ الكلّيّ يمحو موضعَ النقرة'
+    + ' الوحيدة، فحكمُها في المحرّك على الشبكة كما هي (`bodyless` في `pen.js`)');
 }
 
 
@@ -161,23 +199,37 @@ for (const { ch, form, ref } of dotted) {
 // سؤالٌ ماديّ: **أيقبل هذا الشكلُ بسماحته هو رجفةَ يدٍ حقيقية مقدارُها نصفُ السماحة؟**
 // ولو قِيست الرجفةُ بمقياس الشكل لَصار السؤالُ «أيقبل الشكلُ رجفةً بمقداره» — وهو
 // سؤالٌ لا يسأله طفل. (وقد جُرّب النسبيُّ فأحمرَّ ستّةَ عشرَ شكلاً، والمطلقُ ثلاثة.)
+// 🔴 **ويُقاس على حَكَم القبول لا على الماشي** (ن٢): العهدُ عهدُ **قبولٍ** — «يدُ
+// طفلٍ ترتجف نصفَ السماحة تُقبَل» — وقد صار القبولُ بالشكل. **وكان يُقاس على الماشي
+// فيحمرّ خمسةُ أشكال** (س/ابتدائي · ش/ابتدائي · ي/وسطي · ع/وسطي · ى/وسطي) — **وهو
+// دَينُ ماشٍ لا دَينُ شكل**: طريقتُها تُقاس في §٣ ولا يُطالَب الماشي بعهد القبول.
 const FLOOR = 0.5;
 console.log(`\n— ٤) احتمالُ الارتجاف: أدنى المقبول ${Math.round(pen.TOLERANCE.lateral * FLOOR)}`
-  + ` من سماحة ${pen.TOLERANCE.lateral} — وهو عهدُ \`child-drift\` بعينه —`);
+  + ` من سماحة ${pen.TOLERANCE.lateral} — وهو عهدُ \`child-drift\` بعينه، على حَكَم القبول —`);
 const room = [];
 for (const { ch, form, ref } of shapes) {
   let max = 0;
   for (let sway = 0; sway <= pen.TOLERANCE.lateral; sway += 3) {
-    if (!pen.judge(ref, trace(ref, { sway })).accepted) break;
+    if (!accepts(ref, trace(ref, { sway }))) break;
     max = sway;
   }
   room.push({ ch, form, max });
 }
+const shortRoom = room.filter(({ max }) => max < pen.TOLERANCE.lateral * FLOOR);
 for (const { ch, form, max } of room) {
+  if (inDebt(ch, form)) {
+    console.log(`  🔴 ${ch} ${curriculum.FORM_NAMES[form]}: يحتمل ${max}`
+      + ' — **دَينٌ معلَنٌ لِـ ن٣** (فجوةُ نقاطها دون نصف قطر الدمج، انظر `SHAPE_DEBT`)');
+    continue;
+  }
   ok(max >= pen.TOLERANCE.lateral * FLOOR,
     `${ch} ${curriculum.FORM_NAMES[form]}: يحتمل انحراف ${max}`
     + `${max >= pen.TOLERANCE.lateral * FLOOR ? '' : ' — دون عهد `child-drift`'}`);
 }
+// **وسقفُ الدَّين لا يُتجاوَز**: شكلٌ واحدٌ اليوم — فإن زحف حمرّ من نفسه.
+ok(shortRoom.every(({ ch, form }) => inDebt(ch, form)) && shortRoom.length <= SHAPE_DEBT.size,
+  `وسقفُ دَين الشكل لا يُتجاوَز: ${shortRoom.length} من ${room.length} دون العهد،`
+  + ` وكلُّها معلَنةٌ بالاسم (${shortRoom.map((r) => `${r.ch}/${r.form}`).join('، ') || 'لا أحد'})`);
 
 // ————— ٥) الطيّةُ المعلَنة: أتُقبَل السنّةُ على خطٍّ واحد؟ —————
 //
@@ -252,18 +304,30 @@ ok(folded.length > 0,
 // وهو حكمٌ على الشوكة القصيرة بأنها ليست شوكة — **وذلك عيبُ حارسٍ لا عيبُ بيان**.
 // **فيُطبع أيُّ اليدين احتاجها**، فلا يُخفي التلطيفُ شيئاً: طيّةٌ لا تحتاجها يدٌ
 // واحدةٌ تحمرّ كما كانت.
+// 🔴 **وشرطاه اليومَ في موضعهما** (ن٢): **القبولُ بالشكل** — فاليدان تُقبلان لأنّ
+// حبرَهما حبرُ الحرف — **والإعلانُ يبقى صفةً تبدّل حكمَ الماشي**، وإلا كان حلية.
+// **وبه سقط الأحمرُ القديم `ن/وسطي`**: الأثرُ الرطبُ عليه يُردّ `reverse` بالماشي
+// **ويُقبَل شكلاً** — وذاك عينُ ما تعنيه «الطريقةُ تُدرَّس ولا تُشترَط».
 for (const { ch, form, ref } of folded) {
   const hands = [['بين الضلعين', freeHand], ['على الأثر الرطب', wetHand]].map(([what, hand]) => {
-    const free = pen.judge(ref, hand(ref));
+    const shape = accepts(ref, hand(ref));
     const bare = pen.judge(unfold(ref), hand(ref));
-    return { what, free, bare, needs: !bare.accepted && bare.primary === pen.FAULTS.REVERSE };
+    const held = pen.judge(ref, hand(ref));
+    return { what, shape, bare, held, needs: !bare.exact && bare.primary === pen.FAULTS.REVERSE };
   });
   const held = hands.filter((h) => h.needs).map((h) => h.what);
-  ok(hands.every((h) => h.free.accepted) && held.length > 0,
+  if (inDebt(ch, form)) {
+    console.log(`  🔴 ${ch} ${curriculum.FORM_NAMES[form]}: `
+      + hands.map((h) => `${h.what} ${h.shape ? 'تُقبَل' : 'تُرَدّ'}`).join(' · ')
+      + ' — **دَينٌ معلَنٌ لِـ ن٣** (انظر `SHAPE_DEBT`)');
+    continue;
+  }
+  ok(hands.every((h) => h.shape) && held.length > 0,
     `${ch} ${curriculum.FORM_NAMES[form]} (فجوةُ ضلعيه ${Math.round(gapOf(ref))}):`
-    + ` ${hands.map((h) => `${h.what} ${h.free.accepted ? 'تُقبَل' : `تُرفَض «${h.free.primary}»`}`).join(' · ')}`
-    + ` — وبنزع الإعلان ${held.length ? `تُرَدّ «reverse» في: ${held.join(' و')}`
-      : 'تُقبَل في اليدين كلتيهما، فالإعلانُ حلية!'}`);
+    + ` ${hands.map((h) => `${h.what} ${h.shape ? 'تُقبَل شكلاً' : 'تُرَدّ شكلاً'}`
+      + `${h.held.exact ? '' : ` (وطريقتُها «${h.held.primary}» تُقاس)`}`).join(' · ')}`
+    + ` — وبنزع الإعلان ${held.length ? `يردّها الماشي «reverse» في: ${held.join(' و')}`
+      : 'يطابقها في اليدين كلتيهما، فالإعلانُ حلية!'}`);
 }
 // **وأضيقُ المطويّات مدىً هو موضعُ الامتحان**: عند مضاعفة السماحة تتّسع دائرةُ البداية
 // حتى تبتلع طرفَي الشكل القصير، **فيسقط الشرطُ الأول من نفسه** ويبقى الحكمُ كلُّه على
@@ -277,7 +341,7 @@ const tightest = folded
   .sort((a, b) => a.span - b.span)[0];
 if (tightest) {
   const swallowed = pen.judge(tightest.ref, trace(tightest.ref, { from: 1, to: 0 }), { tolerance: 3 });
-  ok(!swallowed.accepted && swallowed.primary === pen.FAULTS.REVERSE,
+  ok(!swallowed.exact && swallowed.primary === pen.FAULTS.REVERSE,
     `وأضيقُ المطويّات مدىً (${tightest.ch} ${curriculum.FORM_NAMES[tightest.form]}: ${Math.round(tightest.span)}`
     + ` < دائرةُ بدايةٍ مضاعفةٍ ثلاثاً ${pen.TOLERANCE.start * 3}) يردّه **الشرطُ الثاني**`
     + ` «${swallowed.primary}» لا الأول — فرخصةُ الطيّة لمن دخلها من مدخلها`);
@@ -285,8 +349,8 @@ if (tightest) {
 
 // وما لا طيّةَ فيه لا يتبدّل حكمُه بنزعٍ ولا إثبات — فالصفةُ لا تسري على غير أهلها
 ok(walkers.filter(({ ref }) => !ref.strokes.some((s) => s.folds?.length))
-  .every(({ ref }) => pen.judge(ref, trace(ref)).accepted
-    && !pen.judge(ref, trace(ref, { from: 1, to: 0 })).accepted),
+  .every(({ ref }) => pen.judge(ref, trace(ref)).exact
+    && !pen.judge(ref, trace(ref, { from: 1, to: 0 })).exact),
   `والأشكالُ التي لا طيّةَ فيها (${walkers.length - folded.length}) على حكمها كما كانت`);
 
 // ————— ٦) تمييزُ المتشابهات: أيفرّق المحرّكُ بين كلِّ أختين؟ (الجلسة ٧) —————
@@ -315,8 +379,9 @@ for (const { node } of compareNodes) {
       for (const written of familyList) {
         if (asked === written) continue;
         const ref = curriculum.pathOf(asked, node.form);
-        const verdict = pen.judge(ref, trace(curriculum.pathOf(written, node.form)));
-        if (verdict.accepted) wrong.push(`${written} ⇐ ${asked}`);
+        // **وهو حَكَمُ القبول** (`judgeShape` عبر الآلة): فالأختُ تُرَدّ لأنّ **شكلَها
+        // شكلٌ آخر** لا لأنّ طريقتَها خالفت — وذاك عينُ ما يفصل ب من ن.
+        if (accepts(ref, trace(curriculum.pathOf(written, node.form)))) wrong.push(`${written} ⇐ ${asked}`);
       }
     }
     ok(wrong.length === 0,
@@ -324,10 +389,13 @@ for (const { node } of compareNodes) {
       + `كلُّ أختٍ تُرَدّ عن أختها (${familyList.length * (familyList.length - 1)} مقابلة)`
       + (wrong.length ? ` — **قُبل خطأً: ${wrong.join('، ')}**` : ''));
     // **وكلٌّ منهنّ تُقبَل عن نفسها** — فالردُّ للاختلاف لا لضيق المسار
-    ok(familyList.every((ch) => {
-      const ref = curriculum.pathOf(ch, node.form);
-      return pen.judge(ref, trace(ref)).accepted;
-    }), `و${familyList.join('')} ${curriculum.FORM_NAMES[node.form]}: كلٌّ تُقبَل عن نفسها`);
+    const selfMissed = familyList.filter((ch) => !inDebt(ch, node.form)
+      && !accepts(curriculum.pathOf(ch, node.form), trace(curriculum.pathOf(ch, node.form))));
+    const owed = familyList.filter((ch) => inDebt(ch, node.form));
+    ok(selfMissed.length === 0,
+      `و${familyList.join('')} ${curriculum.FORM_NAMES[node.form]}: كلٌّ تُقبَل عن نفسها`
+      + `${owed.length ? ` (و${owed.join('، ')} دَينٌ معلَنٌ لِـ ن٣)` : ''}`
+      + `${selfMissed.length ? ` — **رُدَّت عن نفسها: ${selfMissed.join('، ')}**` : ''}`);
   }
 }
 

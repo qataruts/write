@@ -120,12 +120,14 @@ console.log('\n— ٢) التسميةُ العمياء: يحكم الإنسان�
 
   // **ونداءُ الحَكَم واحدٌ في الملفّ كلِّه، وموضعُه في `reveal`**
   const src = read('app/arena/arena.js');
-  const calls = [...src.matchAll(/judgeFree\s*\(/g)].length;
-  const inReveal = /export function reveal[\s\S]*?judgeFree\s*\(/.test(src);
+  // 🔴 **وحَكَمُها منذ ن٢ `judgeShape` الكلّيّ** لا الماشي: الساحةُ تقيس ما يقع
+  // للطفل، فلو كشفت حكمَ ماشٍ لَعايَرت محرّكاً غيرَ المحرّك (`ENGINE_RESCUE §٣`).
+  const calls = [...src.matchAll(/judgeShape\s*\(/g)].length;
+  const inReveal = /export function reveal[\s\S]*?judgeShape\s*\(/.test(src);
   ok(calls === 1 && inReveal,
-    `ونداءُ \`judgeFree\` واحدٌ في الملفّ كلِّه (${calls}) وموضعُه في \`reveal\` بعد حكم الإنسان`);
-  const plantedSrc = 'const peek = judgeFree(ref, ink);\nexport function reveal() { judgeFree(a, b); }';
-  ok([...plantedSrc.matchAll(/judgeFree\s*\(/g)].length === 2,
+    `ونداءُ \`judgeShape\` واحدٌ في الملفّ كلِّه (${calls}) وموضعُه في \`reveal\` بعد حكم الإنسان`);
+  const plantedSrc = 'const peek = judgeShape(ref, ink);\nexport function reveal() { judgeShape(a, b); }';
+  ok([...plantedSrc.matchAll(/judgeShape\s*\(/g)].length === 2,
     '**والعدّادُ مجرَّبٌ سالباً**: نصٌّ فيه نداءٌ ثانٍ للحَكَم يسقط عليه');
 }
 
@@ -177,8 +179,13 @@ console.log('\n— ٤) ما يُسجَّل: حكمُ الإنسان وحكمُ �
   ok(Math.abs(base - item.lateral) < 0.05 && Math.abs(work / base - pen.FREE.ease) < 1e-9,
     `**ومجرَّبٌ سالباً**: لو سُجّل الأساسُ وحدَه لَقرأ القارئُ ${Math.round(base)} حيث حُكم بـ${Math.round(work)}`
     + ' — وهو عطبُ السجلّ الذي كشفه `FIELD_TRIAL §٦`');
-  ok(item.metrics && typeof item.metrics.maxLateral === 'number' && typeof item.metrics.coverage === 'number',
-    `و\`metrics\` بأعيانها (انحراف ${item.metrics.maxLateral} · تغطية ${item.metrics.coverage}٪)`);
+  // **ومقاييسُ الحَكَم الكلّيّ بأسمائه هو** — ولا يُكتب «انحرافٌ» وقد حُكم بغيره.
+  ok(item.metrics && ['coverage', 'recall', 'part', 'precision']
+    .every((k) => typeof item.metrics[k] === 'number'),
+    `و\`metrics\` بأعيانها (تغطية ${item.metrics.coverage}٪ · جزء ${item.metrics.part}٪`
+    + ` · دقّة ${item.metrics.precision}٪)`);
+  ok(item.maxLateral === null,
+    'ولا يُكتب «أقصى انحراف» وقد حُكم بغير الانحراف — المسجَّلُ هو ما حُكم به');
   ok(item.who === 'child' && item.age === '٦–٧' && item.tool === 'finger' && item.hand === 'left',
     'والفئةُ ونطاقُ العمر والأداةُ **واليد** (يسرى) — فعهدُ «الأعسر يُختبر لا يُفترض» يصير رقماً');
   ok(item.device.w === 820 && !('ua' in item.device) && !('platform' in item.device),
@@ -295,8 +302,8 @@ console.log('\n— ٧) الملفُّ يدخل عدّةَ المعايرة، و�
   ok(taps === 3, `ونقراتُ «ش» الثلاث تعبر العدّةَ نقراتٍ (${taps}) — لا يُبتَر منها الأثر`);
 
   // **ويُعاد الأثرُ على المحرّك فيطابق ما سُجّل** — فما يُجمَّد شاهدٌ صادق
-  const back = cases.map((c, i) => pen.judgeFree(
-    PATHS[c.ref.split('/')[0]][c.ref.split('/')[1]], c.strokes).accepted === book.items[i].accepted);
+  const back = cases.map((c, i) => pen.judgeShape(
+    PATHS[c.ref.split('/')[0]][c.ref.split('/')[1]], c.strokes).ok === book.items[i].accepted);
   ok(back.every(Boolean), 'وحكمُ الإعادة عينُ الحكم المسجَّل — فلا يُجمَّد شاهدٌ كاذب');
 
   // **والملفُّ يمرّ في الأداة فعلاً لا محاكاةً**
@@ -344,15 +351,15 @@ console.log('\n— ٩) صفرُ تعديلِ سماحةٍ من الصفحة: ت�
   const bad = [
     [/TOLERANCE\s*\.\s*\w+\s*=/, 'إسنادٌ إلى سماحة المحرّك'],
     [/FREE\s*\.\s*\w+\s*=/, 'إسنادٌ إلى كرم السماحة'],
-    [/judgeFree\s*\([^)]*\{/, 'خياراتٌ تُمرَّر إلى الحَكَم'],
+    [/judgeShape\s*\([^)]*\{/, 'خياراتٌ تُمرَّر إلى الحَكَم'],
     [/tolerance\s*:/, 'سماحةٌ تُكتب في الصفحة'],
   ].filter(([re]) => re.test(src));
   ok(bad.length === 0,
     `لا تكتب الصفحةُ سماحةً ولا تمرّرها${bad.length ? ` — وُجد: ${bad.map((b) => b[1]).join('، ')}` : ''}`);
-  ok(/judgeFree\(ref, attempt\.strokes\)/.test(src),
+  ok(/judgeShape\(ref, attempt\.strokes\)/.test(src),
     'والحَكَمُ يُنادى بمسارِه وأثرِه وحدَهما — فسماحتُه سماحةُ مادّته كما في شاشة الطفل');
-  const planted = 'judgeFree(ref, ink, { tolerance: 2 });';
-  ok(/judgeFree\s*\([^)]*\{/.test(planted),
+  const planted = 'judgeShape(ref, ink, { tolerance: 2 });';
+  ok(/judgeShape\s*\([^)]*\{/.test(planted),
     '**والكاشفُ مجرَّبٌ سالباً**: نداءٌ يمرّر سماحةً يسقط عليه');
 }
 

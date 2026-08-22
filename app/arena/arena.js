@@ -10,11 +10,16 @@
 // **لا في الشاشة ولا في ذاكرة الصفحة**. ولذلك **لا تُبنى هنا لوحةُ `penSurface`**
 // وإن كانت جاهزة: لوحُ الطفل يحكم عند كلّ رفعِ قلم (`settleFree`) فيُبقي الحبرَ أو
 // يُذهبه ويومض بالإرشاد — **وهو كشفٌ للحكم بالصورة قبل أن يُسأل الإنسان**. فالساحةُ
-// تلتقط الأثر وحدَه، **و`judgeFree` لا تُنادى إلا في `reveal` وبعد أن يُملأ حكمُ
+// تلتقط الأثر وحدَه، **و`judgeShape` لا تُنادى إلا في `reveal` وبعد أن يُملأ حكمُ
 // الإنسان** (نداءٌ واحدٌ في هذا الملفّ كلِّه، يعدّه `tools/test_arena.mjs`).
 //
+// 🔴 **وحَكَمُها منذ ن٢ هو `judgeShape` الكلّيّ** (`ENGINE_RESCUE §٣`): كان
+// `judgeFree` — وهو **ماشي المسار** الذي جاءت خطّةُ الإنقاذ لتُخرِجه من القبول.
+// **وساحةُ الحصاد تقيس ما يقع للطفل**، فلو بقيت تكشف حكمَ الماشي لَقاست غيرَ ما
+// يحكم به اللوح، **ولَعايَرت محرّكاً غيرَ المحرّك**.
+//
 // **والنموذجُ من مساره بعينه** (`refGlyph` من `pen.js`) — لا صورةَ ثانية للحرف،
-// فما يراه المتطوّعُ في «شاهِدْ» هو ما يحكم به `judgeFree` بعد قليل.
+// فما يراه المتطوّعُ في «شاهِدْ» هو ما يحكم به `judgeShape` بعد قليل.
 //
 // 🔒 **وهذا الملفُّ من حَملة مسار اليد**: لا يعرف الشبكةَ بنيوياً — ولا عنوانَ فيه
 // أصلاً. **وبابُ الإرسال في `send.js` وحدَه** (سنّةُ `feedback.js`: العناوينُ لا
@@ -22,7 +27,7 @@
 
 import { PATHS } from '../js/paths.js';
 import {
-  partsOf, boxOf, refGlyph, judgeFree, resolveTolerance, easeTolerance, FREE, MIN_STEP,
+  partsOf, boxOf, refGlyph, judgeShape, resolveTolerance, easeTolerance, FREE, MIN_STEP,
 } from '../js/pen.js';
 import { sendRow } from './send.js';
 
@@ -201,20 +206,34 @@ export function answer(attempt, human) {
  * في ذاكرة الصفحة أصلاً قبل أوانه، لا أنه يوجد ويُخفى. **ومجرَّبٌ سالباً**: يُنادى
  * الكشفُ قبل الحكم فيُردّ فارغاً ويبقى الحقلُ فارغاً (`test_arena §٢`).
  *
- * **وهذا النداءُ الوحيد لـ`judgeFree` في هذا الملفّ** — يعدّه الحارسُ نصّاً.
+ * **وهذا النداءُ الوحيد لـ`judgeShape` في هذا الملفّ** — يعدّه الحارسُ نصّاً.
+ *
+ * **وحقولُ السطر بأسمائها كما كانت** (`accepted` · `primary` · `codes` · `metrics`)
+ * فيبقى الملفُّ المصدَّر مقروءاً لـ`tools/import_traces.mjs` بلا تبديل — يولّفها
+ * السطرُ من حصيلة الحَكَم الكلّيّ: سببُه الأوّلُ `primary`، وإرشاداتُه (رجفةٌ وحجم)
+ * `codes`.
+ *
+ * ⚠ **ومقاييسُه مقاييسُه هو ولا تُلبَس أسماءَ غيره**: الحَكَمُ الكلّيّ لا يعرف
+ * «أقصى انحرافٍ عرضيّ» ولا «ارتداداً» — تلك مقاييسُ ماشٍ. فيُكتب ما يقيسه هو
+ * بأسمائه (`recall` · `part` · `precision`)، **وتبقى `coverage` وحدَها** لأنّها
+ * هي هي: كم من النموذج تحت حبر الطفل. **ورقمٌ باسم غيره أسوأُ من رقمٍ غائب.**
  */
 export function reveal(attempt, ref = refOf(attempt?.ch, attempt?.form)) {
   if (!attempt || !attempt.human || !ref) return null;
   if (attempt.engine) return attempt.engine;
-  const verdict = judgeFree(ref, attempt.strokes);
+  const verdict = judgeShape(ref, attempt.strokes);
   const m = verdict.metrics || {};
   attempt.engine = {
-    accepted: Boolean(verdict.accepted),
-    primary: verdict.primary || verdict.size || null,
-    codes: verdict.codes || [],
+    accepted: Boolean(verdict.ok),
+    primary: verdict.why || null,
+    codes: verdict.guides || [],
+    pending: Boolean(verdict.pending),
+    shaky: Boolean(verdict.shaky),
     metrics: {
-      maxLateral: round1(m.maxLateral), maxBack: round1(m.maxBack),
-      coverage: round1((m.coverage || 0) * 100), startDist: round1(m.startDist),
+      coverage: round1((m.recall || 0) * 100),
+      recall: round1((m.recall || 0) * 100),
+      part: round1((m.part || 0) * 100),
+      precision: round1((m.precision || 0) * 100),
     },
   };
   return attempt.engine;
@@ -264,8 +283,14 @@ export function itemOf(attempt, who = {}, device = deviceOf()) {
     code: engine.primary || null,
     codes: engine.codes || [],
     metrics: engine.metrics || null,
-    maxLateral: engine.metrics ? engine.metrics.maxLateral : null,
+    // **ولا يُكتب «أقصى انحراف» وقد حُكم بغير الانحراف** — الحَكَمُ الكلّيّ لا يقيسه
+    // (وهو عهدُ `test_regression §٣`: المعروضُ هو المسجَّل، والمسجَّلُ هو ما حُكم به).
+    maxLateral: null,
     coverage: engine.metrics ? Math.round(engine.metrics.coverage) : null,
+    part: engine.metrics ? Math.round(engine.metrics.part) : null,
+    precision: engine.metrics ? Math.round(engine.metrics.precision) : null,
+    pending: Boolean(engine.pending),
+    shaky: Boolean(engine.shaky),
     lateral: round1(base.lateral),
     limit: round1(work.lateral),
     ease: FREE.ease,

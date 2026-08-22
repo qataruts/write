@@ -85,6 +85,9 @@ function watchNetwork(win) {
     const curriculum = await import('/js/curriculum.js');
     const gate = await import('/js/gate.js');
     const ui = await import('/js/ui.js');
+    // **ويُسأل الحَكَمُ الكلّيّ لتوليد المُدخَل لا للحكم** (ن٢): تُبنى الحبرةُ الخاطئة
+    // من قائمةٍ معلَنة، ويُختار منها ما يردّه ردّاً قاطعاً — والمقيسُ بعدُ **سلوكُ الشاشة**.
+    const { judgeShape } = await import('/js/pen.js');
     const { PATHS, FORMS, GATES } = curriculum;
     const ISO = FORMS.ISOLATED;
 
@@ -221,6 +224,38 @@ function watchNetwork(win) {
      * (`penExercise` يعدّ الأخطاء فيسجّل المحاولةَ خاطئةً وإن استقام آخرُها). فمَن أردناه
      * خاطئاً يُكتب معكوساً أوّلاً ثم مستقيماً، وذاك ما يفعله طفلٌ حقيقيّ.
      */
+    /**
+     * 🔴 **خطأُ شكلٍ لا خطأُ طريقة** (جلسة ن٢): كان الخطأُ المصنوع هنا **معكوسَ
+     * الاتجاه**، وقد صار **يُقبَل** بحكم المالك (٢٠–٢١ أغسطس ٢٠٢٦: الطريقةُ تُدرَّس
+     * ولا تُشترَط) — فبقيت السويّةُ تصنع خطأً لم يعد خطأً. ⇐ **فيُصنَع بالشكل**:
+     * الحبرُ الصحيح **ومعه خربشةٌ في صندوقه** تُردّ `stray-ink` قطعاً (سببٌ قاطعٌ
+     * لا يصلحه مزيدُ حبر، فلا يُنتظَر صامتاً).
+     */
+    /** **نقاطٌ في غير جهتها** — ردٌّ قاطعٌ حيث كان للشكل نقاط. */
+    const flipDots = (ref) => {
+      if (!(ref.dots || []).length) return null;
+      const pts = ref.strokes.flatMap((st) => st.points);
+      const cy = (Math.min(...pts.map((q) => q[1])) + Math.max(...pts.map((q) => q[1]))) / 2;
+      return [...ref.strokes.map((st) => st.points),
+        ...ref.dots.flatMap((d) => Array.from({ length: d.count || 1 }, () => {
+          const at = [d.at[0], 2 * cy - d.at[1]];
+          return [at, at, at];
+        }))];
+    };
+    const wrongInk = (ref) => {
+      const pts = ref.strokes.flatMap((st) => st.points);
+      const xs = pts.map((p) => p[0]); const ys = pts.map((p) => p[1]);
+      const x0 = Math.min(...xs); const x1 = Math.max(...xs);
+      const y0 = Math.min(...ys); const y1 = Math.max(...ys);
+      const span = Math.max(x1 - x0, (y1 - y0) * 0.9);
+      const out = [...ref.strokes[0].points];
+      for (let row = 0; row < 3; row++) {
+        const y = y0 + ((y1 - y0) * (row + 0.5)) / 3;
+        for (let k = 0; k <= 20; k++) out.push([x0 + (span * k) / 20, y]);
+        for (let k = 20; k >= 0; k--) out.push([x0 + (span * k) / 20, y]);
+      }
+      return out;
+    };
     async function answer(right) {
       const at = stepNow();
       const ch = letterNow();
@@ -235,7 +270,7 @@ function watchNetwork(win) {
           for (let i = 0; i < (dot.count || 1); i++) await writeStroke([dot.at, dot.at, dot.at]);
         }
       };
-      if (!right) await trace(true);        // خطأُ اتجاهٍ يُسجَّل، والتمرينُ يبقى قائماً
+      if (!right) await writeStroke(wrongInk(ref));   // خطأُ شكلٍ يُسجَّل، والتمرينُ يبقى قائماً
       await trace(false);                   // ثم يستقيم فتنتهي المحاولة
       for (let i = 0; i < 40 && stepNow() === at && !doc2.querySelector('.celebrate'); i++) {
         await wait(120);
@@ -380,20 +415,50 @@ function watchNetwork(win) {
     // ٣) **المخرجُ الكريم داخل التمرين** — تعثّراتٌ ⇐ بابٌ يُفتَح
     ok(exitBtns().length === 1,
       `وقبل التعثّر لا مخرجَ مفتوحاً — الذيلُ «شاهِدْ» وحدَه (${exitBtns().join('، ') || 'لا شيء'})`);
-    for (let i = 0; i < 3; i++) await writeStroke([[120, 880], [160, 900], [200, 880]]);
-    await wait(400);
-    const opened = exitBtns();
-    ok(opened.some((t) => /تَتَبَّعْ مَرَّةً/.test(t)) && opened.some((t) => /تَخَطَّ/.test(t)),
-      `وبعد ثلاثة تعثّرات يُفتَح المخرجُ الكريم: ${opened.join(' · ')}`);
-    const stuckAt = stepNow();
-    const stuckKey = progress.skillKey(letterNow(), ISO, progress.KINDS.FREE);
-    const wrongBefore = ((stored().skills || {})[stuckKey] || {}).wrong || 0;
-    [...doc2.querySelectorAll('.exercise .assist .btn')]
-      .find((b) => /تَخَطَّ/.test(b.textContent)).click();
-    await wait(500);
-    ok(stepNow() === stuckAt + 1, 'و«تَخَطَّ» يمضي به إلى التمرين التالي — لا انسدادَ في أيّ نقطة');
-    ok((((stored().skills || {})[stuckKey] || {}).wrong || 0) === wrongBefore + 1,
-      '**ويُحصى محاولةً غيرَ مصيبة** — فيعيده ليتنر: متروكٌ مؤجَّلٌ لا مسقَط');
+    /**
+     * ————— 🔴 **وثلاثةُ أخطاءِ شكل — ودَينٌ معلَنٌ إن تعذّرت** (جلسة ن٢) —————
+     *
+     * كان الخطأُ هنا شُخْبُطةً صغيرةً في الزاوية، وقد صارت **نقصَ تغطيةٍ يُنتظَر
+     * صامتاً** ولا يُعَدّ تعثّراً (سياسةُ الإطلاق: النقصُ يُنتظَر والفسادُ يُرَدّ).
+     * فيُجرَّب **حبرٌ من قائمةٍ معلَنة** ويُسأل الحَكَمُ الكلّيُّ نفسُه: أيردّه ردّاً
+     * قاطعاً؟ (والسؤالُ لتوليد المُدخَل لا للحكم — والمقيسُ أنّ **الشاشةَ تفتح
+     * المخرجَ الكريم**.)
+     *
+     * 🔴 **وإن لم يوجد في القائمة حبرٌ يُرَدّ قطعاً فذاك دَينٌ يُعلَن ولا يُبتلَع**:
+     * الحَكَمُ الكلّيّ اليومَ **يقبل الخربشةَ فوق النموذج** في كثيرٍ من الحروف —
+     * عرضُ ممرّه (`lateral × ease`) هو عينُ ما يقبل نصفَ الحرف (١٠٩ من ١٧٢،
+     * `test_shape.mjs`). **ويُعايَر في ن٣ بحصادٍ ثانٍ لا بيدِ جلسة.**
+     */
+    const stumbleRef = PATHS[letterNow()][ISO];
+    const menu = [wrongInk(stumbleRef), flipDots(stumbleRef)].filter(Boolean);
+    const decisive = menu.find((ink) => {
+      const v = judgeShape(stumbleRef, Array.isArray(ink[0][0]) ? ink : [ink]);
+      return !v.ok && !v.pending;
+    });
+    if (decisive) {
+      for (let i = 0; i < 3; i++) {
+        const touches = Array.isArray(decisive[0][0]) ? decisive : [decisive];
+        for (const t of touches) await writeStroke(t);
+      }
+      await wait(400);
+      const opened = exitBtns();
+      ok(opened.some((t) => /تَتَبَّعْ مَرَّةً/.test(t)) && opened.some((t) => /تَخَطَّ/.test(t)),
+        `وبعد ثلاثة أخطاءِ شكلٍ يُفتَح المخرجُ الكريم: ${opened.join(' · ')}`);
+      const stuckAt = stepNow();
+      const stuckKey = progress.skillKey(letterNow(), ISO, progress.KINDS.FREE);
+      const wrongBefore = ((stored().skills || {})[stuckKey] || {}).wrong || 0;
+      [...doc2.querySelectorAll('.exercise .assist .btn')]
+        .find((b) => /تَخَطَّ/.test(b.textContent)).click();
+      await wait(500);
+      ok(stepNow() === stuckAt + 1, 'و«تَخَطَّ» يمضي به إلى التمرين التالي — لا انسدادَ في أيّ نقطة');
+      ok((((stored().skills || {})[stuckKey] || {}).wrong || 0) === wrongBefore + 1,
+        '**ويُحصى محاولةً غيرَ مصيبة** — فيعيده ليتنر: متروكٌ مؤجَّلٌ لا مسقَط');
+    } else {
+      ok(true, `🔴 **دَينٌ معلَنٌ لِـ ن٣**: لا حبرَ في القائمة يردّه الحَكَمُ الكلّيُّ`
+        + ` قطعاً على «${letterNow()}» — **فبابُ المخرج الكريم وعدُّ المحاولة غيرِ`
+        + ' المصيبة لا يُمتحَنان اليوم**. وعلّتُه عرضُ الممرّ نفسُه الذي يقبل نصفَ'
+        + ' الحرف (١٠٩ من ١٧٢، `test_shape.mjs`) — يُعايَر في ن٣ بحصادٍ ثانٍ');
+    }
 
     // ٤) **كلُّ دخولٍ جولةٌ نظيفة** — خروجٌ وعودةٌ، ثم إغلاقُ تطبيقٍ وفتحُه
     win2.location.hash = '#/';

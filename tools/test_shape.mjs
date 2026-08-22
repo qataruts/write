@@ -313,8 +313,8 @@ await negative('جهةُ النقطة (المقلوبةُ تُقبَل)',
   "if (false) dotFail = 'dots-side';",
   (alt) => alt.judgeShape(FLIP_REF, FLIP_INK).ok);
 await negative('عددُ التجمّعات (ت بثلاثِ نقاطٍ تُقبَل)',
-  "} else dotFail = 'dots-count';  // **وزيادةُ",
-  '} else dotFail = null;  // **وزيادةُ',
+  "      dotFail = 'dots-count';  // **وزيادةُ",
+  '      dotFail = null;  // **وزيادةُ',
   (alt) => alt.judgeShape(OVER_REF, OVER_INK).ok);
 await negative('نقرةٌ على حرفٍ بلا نقاط (تُقبَل)',
   "if (child.some((s) => isTap(s) && !hesitates(s))) dotFail = 'dots-count';",

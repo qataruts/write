@@ -1,6 +1,6 @@
 {
  "what": "عدّةُ معايرة محرّك القلم — مساراتٌ مسجّلة تُدخَل على المحرّك آلياً (METHOD.md §٣.٩)",
- "refs_note": "ثلاثةُ أشكالٍ هندسيةٍ محسوبة للعدّة وحدها لا حروف: `sample` مركّبٌ يجمع أصنافَ الشروط الأربعة، و`ring` شكلٌ مغلق تُحرَس به ثغرةُ ذيل الحلقة، و`tooth` سنّةٌ **بطيّةٍ معلنة** تُحرَس بها طيّةُ الجلسة ٢ب. ومعها **مطويّاتُ المنهج الثلاث** (lam-medial وba-medial وba-final) منقولةً من app/js/paths.js — فالمعيارُ يُثبَت على مادّته، ويحمرّ الفحصُ الذاتيّ إن تبدّل مسارُ أحدها. **وقد تبدّلت الثلاثةُ بأحكام المالك في مرجعية الكرّاسة** (١٢ أغسطس ٢٠٢٦، docs/REVIEW_HANDWRITING.md): ل/وسطي بحكم العمود (§١) فسقطت طيّتُه، وب/وسطي وب/نهائي بحكم المدخل (§٤) فصار مبدؤهما مقعدَهما على السطر — فأُعيدت العدّةُ عليها وأحكامُ حالاتها كما كانت. **ومعها نونُ بلاغ الميدان ٢** (noon، الجلسة م٣): عليها تُحرَس «الشكلُ لا الأثر» في الخطوة الحرّة — كأسٌ أضيقُ وأوسعُ وحرفٌ أصغرُ ومُزاح تُقبَل بالحكم الثاني (judgeFree) وتُرَدّ بالأول، والمعكوسةُ والمرآةُ والنقطةُ قبل الجسم تُرَدّ بالحكمين. **و«noon-initial» طريقُ التمييز** (مراجعةُ المدير للجلسة م٣): حالتان تُمشيان في آلة المحاولة الحرّة لمسةً لمسة (createFreeRun) لا تُحكَمان دفعةً — جوابُ الأخت ثم الصحيح يبلغ آخرَ الطريق، وجوابُ الأخت وحدَه لا يبلغه. وحكمُ المحرّك على مسارات الحروف كلِّها في tools/test_paths.mjs.",
+ "refs_note": "ثلاثةُ أشكالٍ هندسيةٍ محسوبة للعدّة وحدها لا حروف: `sample` مركّبٌ يجمع أصنافَ الشروط الأربعة، و`ring` شكلٌ مغلق تُحرَس به ثغرةُ ذيل الحلقة، و`tooth` سنّةٌ **بطيّةٍ معلنة** تُحرَس بها طيّةُ الجلسة ٢ب. ومعها **مطويّاتُ المنهج الثلاث** (lam-medial وba-medial وba-final) منقولةً من app/js/paths.js — فالمعيارُ يُثبَت على مادّته، ويحمرّ الفحصُ الذاتيّ إن تبدّل مسارُ أحدها. **وقد تبدّلت الثلاثةُ بأحكام المالك في مرجعية الكرّاسة** (١٢ أغسطس ٢٠٢٦، docs/REVIEW_HANDWRITING.md): ل/وسطي بحكم العمود (§١) فسقطت طيّتُه، وب/وسطي وب/نهائي بحكم المدخل (§٤) فصار مبدؤهما مقعدَهما على السطر — فأُعيدت العدّةُ عليها وأحكامُ حالاتها كما كانت. **ومعها نونُ بلاغ الميدان ٢** (noon، الجلسة م٣): عليها تُحرَس «الشكلُ لا الأثر» في الخطوة الحرّة — كأسٌ أضيقُ وأوسعُ وحرفٌ أصغرُ ومُزاح تُقبَل بالحكم الثاني (judgeFree) وتُرَدّ بالأول، والمعكوسةُ والمرآةُ والنقطةُ قبل الجسم تُرَدّ بالحكمين. **و«noon-initial» طريقُ التمييز** (مراجعةُ المدير للجلسة م٣): حالتان تُمشيان في آلة المحاولة الحرّة لمسةً لمسة (createFreeRun) لا تُحكَمان دفعةً — جوابُ الأخت ثم الصحيح يبلغ آخرَ الطريق، وجوابُ الأخت وحدَه لا يبلغه. وحكمُ المحرّك على مسارات الحروف كلِّها في tools/test_paths.mjs. **وكلُّ حالةٍ موسومةٌ بحكمَين منذ ن٢**: `expect.shape` حكمُ القبول (judgeShape) و`expect.exact` مطابقةُ الطريقة (الماشي) — فتشويهُ الطريقة يُقبَل شكلاً ويُقاس طريقةً، وتشويهُ الشكل يُرَدّ.",
  "generator": "tools/make_pen_traces.mjs",
  "warning": "فيها مساراتُ ميدانٍ حقيقية (origin: field) مع المصنوعة — المصنوعةُ تُثبت حكمَ المحرّك، والميدانيةُ تعاير سماحتَه",
  "refs": {
@@ -3230,7 +3230,8 @@
   {
    "id": "clean",
    "expect": {
-    "accept": true
+    "shape": true,
+    "exact": true
    },
    "note": "كتابةٌ سليمة: بدايةٌ صحيحة واتجاهٌ صحيح وترتيبٌ صحيح",
    "origin": "synthetic",
@@ -3615,7 +3616,8 @@
   {
    "id": "child-drift",
    "expect": {
-    "accept": true
+    "shape": true,
+    "exact": true
    },
    "note": "يدُ طفلٍ تنحرف انحرافاً واسعاً داخل السماحة (± 45)",
    "origin": "synthetic",
@@ -4000,7 +4002,8 @@
   {
    "id": "tremor-mild",
    "expect": {
-    "accept": true
+    "shape": true,
+    "exact": true
    },
    "note": "رجفةٌ خفيفة — **تُقبَل**: سماحةٌ ضيّقةٌ تُحبِط طفلَ الخامسة (`METHOD.md §٣.٥`)",
    "origin": "synthetic",
@@ -4385,7 +4388,8 @@
   {
    "id": "tremor-wild",
    "expect": {
-    "accept": false,
+    "shape": true,
+    "exact": false,
     "fault": "wander"
    },
    "note": "رجفةٌ عارمة تتجاوز السماحة (± 198) — الشرط ٣",
@@ -4771,7 +4775,8 @@
   {
    "id": "reversed",
    "expect": {
-    "accept": false,
+    "shape": true,
+    "exact": false,
     "fault": "start-end"
    },
    "note": "**المسارُ معكوساً** — يبدأ من الطرف الآخر ويمشي رجوعاً (الشرطان ١ و٢)",
@@ -5157,7 +5162,8 @@
   {
    "id": "start-mid",
    "expect": {
-    "accept": false,
+    "shape": true,
+    "exact": false,
     "fault": "start-far"
    },
    "note": "بدايةٌ خاطئة: ينزل في منتصف المسار ثم يتمّه (الشرط ١)",
@@ -5439,7 +5445,8 @@
   {
    "id": "dots-first",
    "expect": {
-    "accept": false,
+    "shape": true,
+    "exact": false,
     "fault": "dots-first"
    },
    "note": "**النقطةُ قبل الجسم** — العادةُ الخاطئة التي يفرض الخطُّ المدرسيّ عكسَها (الشرط ٤)",
@@ -5825,7 +5832,8 @@
   {
    "id": "order-swapped",
    "expect": {
-    "accept": false,
+    "shape": true,
+    "exact": false,
     "fault": "order"
    },
    "note": "ترتيبٌ مقلوب: يكتب الجزء الثاني قبل الأول (الشرط ٤)",
@@ -6211,8 +6219,10 @@
   {
    "id": "stopped-short",
    "expect": {
-    "accept": false,
-    "fault": "short"
+    "shape": true,
+    "exact": false,
+    "fault": "short",
+    "half": true
    },
    "note": "يرفع القلم عند ٦٠٪ من الجزء الأول",
    "origin": "synthetic",
@@ -6505,7 +6515,8 @@
   {
    "id": "backtrack",
    "expect": {
-    "accept": false,
+    "shape": true,
+    "exact": false,
     "fault": "reverse"
    },
    "note": "يتقدّم إلى ٧٠٪ ثم يرتدّ إلى ٣٠٪ ثم يُتمّ — ارتدادٌ على المسار (الشرط ٢)",
@@ -7087,7 +7098,8 @@
   {
    "id": "no-dot",
    "expect": {
-    "accept": false,
+    "shape": false,
+    "exact": false,
     "fault": "incomplete"
    },
    "note": "جسمان بلا نقطة — جزءٌ مقرَّرٌ لم يُكتب (الشرط ٤)",
@@ -7459,7 +7471,8 @@
   {
    "id": "ring-clean",
    "expect": {
-    "accept": true
+    "shape": true,
+    "exact": true
    },
    "note": "دائرةٌ تامّةٌ صحيحة — شاهدُ أنّ إصلاحَ ثغرة الذيل لم يمنع كتابةَ الشكل المغلق",
    "origin": "synthetic",
@@ -8016,7 +8029,8 @@
   {
    "id": "closed-tail",
    "expect": {
-    "accept": false,
+    "shape": false,
+    "exact": false,
     "fault": "reverse"
    },
    "note": "**ثغرةُ ذيل الشكل المغلق** (كشفتها مراجعةُ المدير): نزولٌ داخل دائرة البداية لكن على ذيل الدائرة، ثم حركةٌ ذرّية — كانت تُقبَل دائرةً كاملة",
@@ -8054,7 +8068,8 @@
   {
    "id": "ring-reversed",
    "expect": {
-    "accept": false,
+    "shape": true,
+    "exact": false,
     "fault": "reverse"
    },
    "note": "**دائرةٌ تُدار معكوسةً** من قمّتها — على الشكل المغلق يقع الرجوعُ في الطول قفزةً إلى الأمام فلا يمسّه شرطُ الرتابة، وكان يُسمَّى `wander` والحقُّ `reverse`",
@@ -8612,7 +8627,8 @@
   {
    "id": "ring-wander",
    "expect": {
-    "accept": false,
+    "shape": true,
+    "exact": false,
     "fault": "wander"
    },
    "note": "دائرةٌ في اتجاهها الصحيح ويدٌ ترتجف فوق السماحة — **تبقى** «يخرج عن المسار»",
@@ -9170,7 +9186,8 @@
   {
    "id": "fold-traced",
    "expect": {
-    "accept": true
+    "shape": true,
+    "exact": true
    },
    "note": "**سنّةٌ مطويّة تُتتبَّع** على ضلعَي النموذج برجفةٍ داخل السماحة (± 45) — الشرط ٢ عبر الطيّة",
    "origin": "synthetic",
@@ -9583,7 +9600,8 @@
   {
    "id": "fold-single-line",
    "expect": {
-    "accept": true,
+    "shape": true,
+    "exact": true,
     "needsFold": true
    },
    "note": "**سنّةٌ على خطٍّ واحد** — كما تُكتب حقّاً في «اكتبه وحدك»: يصعد ثم يعود على أثره بين ضلعَي النموذج. كانت تُرفَض `reverse` قبل إعلان الطيّة",
@@ -10013,7 +10031,8 @@
   {
    "id": "fold-reversed",
    "expect": {
-    "accept": false,
+    "shape": true,
+    "exact": false,
     "fault": "start-end"
    },
    "note": "**سنّةٌ معكوسة** — يبدأ من الذراع الخارجة ويمشي رجوعاً: الطيّةُ لا تُبيح عكسَ الحركة",
@@ -10427,7 +10446,8 @@
   {
    "id": "fold-skipped",
    "expect": {
-    "accept": false,
+    "shape": false,
+    "exact": false,
     "fault": "wander"
    },
    "note": "**قفزٌ فوق السنّة**: من الذراع الداخلة إلى الخارجة مباشرةً بلا صعودٍ ولا نزول — الطيّةُ لا تُمنَح بلا مشي",
@@ -10605,7 +10625,8 @@
   {
    "id": "lam-medial-drift",
    "expect": {
-    "accept": true
+    "shape": true,
+    "exact": true
    },
    "note": "**ل/وسطي برجفة 45** — الشكلُ الذي نقض عهدَ `child-drift` في مراجعة المدير (سقط برجفة ٤٠) فعاد فوقه بإعلان الطيّة، **ثم سقطت طيّتُه بحكم المالك في مرجعية الكرّاسة (§١)** فصار عموداً نازلاً من قمّته — ويبقى شاهدَ الرجفة على أطول عمودٍ موصول",
    "origin": "synthetic",
@@ -11278,7 +11299,8 @@
   {
    "id": "ba-medial-retrace",
    "expect": {
-    "accept": true,
+    "shape": true,
+    "exact": true,
     "needsFold": true
    },
    "note": "**ب/وسطي: العودةُ على الأثر الرطب** — يصعد ضلعَ السنّة الصاعد وينزل عليه هو. كانت تُردّ `wander`: فجوةُ الضلعين ١٦٠ وسماحةُ الانحراف ٩٠",
@@ -11538,7 +11560,8 @@
   {
    "id": "ba-medial-reversed",
    "expect": {
-    "accept": false,
+    "shape": true,
+    "exact": false,
     "fault": "start-end"
    },
    "note": "ب/وسطي معكوسةً — والطيّةُ لا تُبيح عكسَ الحركة ولو كان حبرُها واحداً",
@@ -11786,7 +11809,8 @@
   {
    "id": "ba-final-retrace",
    "expect": {
-    "accept": true,
+    "shape": true,
+    "exact": true,
     "needsFold": true
    },
    "note": "**ب/نهائي: العودةُ على الأثر الرطب** على تُوَيْجها — أضيقُ قوسٍ في المنهج. كانت تُردّ `reverse` كاذباً وفجوةُ ضلعيها ٨٠ داخلَ السماحة",
@@ -12274,7 +12298,8 @@
   {
    "id": "ba-final-reversed",
    "expect": {
-    "accept": false,
+    "shape": true,
+    "exact": false,
     "fault": "start-end"
    },
    "note": "ب/نهائي معكوسةً — تُوَيْجُها المطويّ لا يُبيح البدءَ من الطرف الآخر",
@@ -12734,7 +12759,8 @@
   {
    "id": "noon-narrow",
    "expect": {
-    "accept": true,
+    "shape": true,
+    "exact": true,
     "free": true,
     "strict": false
    },
@@ -13103,7 +13129,8 @@
   {
    "id": "noon-wide",
    "expect": {
-    "accept": true,
+    "shape": true,
+    "exact": true,
     "free": true,
     "strict": false
    },
@@ -13472,7 +13499,8 @@
   {
    "id": "noon-small",
    "expect": {
-    "accept": true,
+    "shape": true,
+    "exact": true,
     "free": true,
     "strict": false
    },
@@ -13841,7 +13869,8 @@
   {
    "id": "noon-shifted",
    "expect": {
-    "accept": true,
+    "shape": true,
+    "exact": true,
     "free": true,
     "strict": false
    },
@@ -14210,11 +14239,12 @@
   {
    "id": "noon-reversed",
    "expect": {
-    "accept": false,
+    "shape": true,
+    "exact": false,
     "free": true,
     "fault": "start-end"
    },
-   "note": "**ونونٌ معكوسةُ الحركة** — تُرَدّ بالحكم الثاني كما تُرَدّ بالأول: الاتجاهُ مادّةٌ مدرَّسة لا يبدّلها توفيقُ النموذج",
+   "note": "**ونونٌ معكوسةُ الحركة** — شكلُها شكلُنا فيقبلها الحَكَمُ الكلّيّ، **ويردّ الماشي طريقَتها** `start-end`: الاتجاهُ مادّةٌ تُدرَّس وتُقاس ولا يُردّ بها",
    "origin": "synthetic",
    "ref": "noon",
    "strokes": [
@@ -14579,10 +14609,12 @@
   {
    "id": "noon-mirrored",
    "expect": {
-    "accept": false,
-    "free": true
+    "shape": true,
+    "exact": false,
+    "free": true,
+    "fault": "dots-first"
    },
-   "note": "**ومرآةُ النون** — تملأ صندوقَها بحجمٍ معقول، **وليست نوناً**: التوفيقُ إزاحةٌ وتحجيمٌ منتظم لا انعكاس",
+   "note": "**ومرآةُ النون** — تملأ صندوقَها بحجمٍ معقول، **وكأسُها متناظرةٌ فمرآتُها هي هي**: يقبلها الحَكَمُ الكلّيّ بحقّ، ويردّ الماشي طريقَتها. والمرآةُ التي تبدّل الشكلَ حقّاً على الكاف (`kaf-mirrored`)",
    "origin": "synthetic",
    "ref": "noon",
    "strokes": [
@@ -14947,7 +14979,8 @@
   {
    "id": "noon-dots-first",
    "expect": {
-    "accept": false,
+    "shape": true,
+    "exact": false,
     "free": true,
     "fault": "dots-first"
    },
@@ -15316,9 +15349,10 @@
   {
    "id": "noon-tiny",
    "expect": {
-    "accept": false,
+    "shape": true,
+    "exact": false,
     "free": true,
-    "size": "size-small"
+    "guide": "size-small"
    },
    "note": "ونونٌ **ضئيلة** (١٥٪) تغرق في ممرّ سماحتها — تُقال لها «اكْتُبْهُ أَكْبَرْ»",
    "origin": "synthetic",
@@ -15685,9 +15719,10 @@
   {
    "id": "noon-huge",
    "expect": {
-    "accept": false,
+    "shape": true,
+    "exact": false,
     "free": true,
-    "size": "size-big"
+    "guide": "size-big"
    },
    "note": "ونونٌ **تفيض عن صندوقها** (٢٤٠٪) — تُقال لها «اكْتُبْهُ أَصْغَرْ»",
    "origin": "synthetic",
@@ -16054,7 +16089,8 @@
   {
    "id": "kaf-tail-short-eased",
    "expect": {
-    "accept": true,
+    "shape": true,
+    "exact": true,
     "free": true,
     "eased": true
    },
@@ -16583,11 +16619,13 @@
   {
    "id": "kaf-reversed",
    "expect": {
-    "accept": false,
+    "shape": true,
+    "exact": false,
     "free": true,
-    "direction": true
+    "direction": true,
+    "fault": "start-end"
    },
-   "note": "**كافٌ تُكتب من طرفها الآخر**: جسمُها وشولتُها كلٌّ في اتجاهٍ معكوس — تُرَدّ بالحكم الثاني، **ولا يفتحها تخفيفُ سماحة الشولة ولو ثُلِّث**: المرفوضُ فيها الاتجاهُ لا الدقّة",
+   "note": "**كافٌ تُكتب من طرفها الآخر**: جسمُها وشولتُها كلٌّ في اتجاهٍ معكوس — يقبل الحَكَمُ الكلّيّ شكلَها **ويردّ الماشي طريقَتها**، ولا يفتح التخفيفُ بابَ الاتجاه ولو ثُلِّث: المرفوضُ في الطريقة الاتجاهُ لا الدقّة",
    "origin": "synthetic",
    "ref": "ك/isolated",
    "strokes": [
@@ -17124,9 +17162,11 @@
   {
    "id": "kaf-tail-first",
    "expect": {
-    "accept": false,
+    "shape": true,
+    "exact": false,
     "free": true,
-    "direction": true
+    "direction": true,
+    "fault": "order"
    },
    "note": "و**شولةٌ قبل جسمها**: الجزءُ الملحقُ يُكتب قبل ما يُلحَق به — وهي النقطةُ قبل الجسم بعينها في حرفٍ جزؤه الثاني ضربةٌ لا نقطة، **فالترتيبُ مادّةٌ مدرَّسة** لا تفتحها سماحةُ الجزء",
    "origin": "synthetic",
@@ -17665,9 +17705,11 @@
   {
    "id": "kaf-tail-reversed",
    "expect": {
-    "accept": false,
+    "shape": true,
+    "exact": false,
     "free": true,
-    "direction": true
+    "direction": true,
+    "fault": "start-end"
    },
    "note": "وكافٌ **جسمُها مصيبٌ وشولتُها معكوسة**: تُرَدّ وحدَها — فالتخفيفُ يُغفَر به نقصانُ الشولة لا **عكسُ حركتها**، وهو أدقُّ ما يُحرَس هنا",
    "origin": "synthetic",
@@ -18206,7 +18248,8 @@
   {
    "id": "kaf-mirrored",
    "expect": {
-    "accept": false,
+    "shape": false,
+    "exact": false,
     "free": true,
     "direction": true
    },
@@ -18747,7 +18790,7 @@
   {
    "id": "compare-sister-then-right",
    "expect": {
-    "accept": true,
+    "shape": true,
     "free": true,
     "run": true
    },
@@ -19232,7 +19275,7 @@
   {
    "id": "compare-sister-only",
    "expect": {
-    "accept": false,
+    "shape": false,
     "free": true,
     "run": true
    },
@@ -19481,7 +19524,8 @@
   {
    "id": "word-1-clean",
    "expect": {
-    "accept": true,
+    "shape": true,
+    "exact": true,
     "tolerance": 1
    },
    "note": "«تمر» أمينةً — والانطباقُ في حبر وصلها مُعلَنٌ طيّةً (حكمُ المدير)",
@@ -20639,7 +20683,8 @@
   {
    "id": "word-1-drift",
    "expect": {
-    "accept": true,
+    "shape": true,
+    "exact": true,
     "tolerance": 1
    },
    "note": "«تمر» بيدٍ ترتجف بعهد أرضيتها (± 45 من سماحتها 90) — عهدُ `child-drift` على مادّة النسخ",
@@ -21797,10 +21842,11 @@
   {
    "id": "word-1-reversed",
    "expect": {
-    "accept": false,
+    "shape": true,
+    "exact": false,
     "tolerance": 1
    },
-   "note": "«تمر» معكوسةً — **خصومةُ المعكوس لا تلين**: العودُ غيرُ المعلَن ارتدادٌ كما كان",
+   "note": "«تمر» معكوسةً — شكلُها شكلُها فيقبله الحَكَمُ الكلّيّ، **وخصومةُ الماشي للمعكوس لا تلين**: العودُ غيرُ المعلَن ارتدادٌ كما كان",
    "origin": "synthetic",
    "ref": "word-1",
    "strokes": [
@@ -22955,7 +23001,8 @@
   {
    "id": "word-2-clean",
    "expect": {
-    "accept": true,
+    "shape": true,
+    "exact": true,
     "tolerance": 1
    },
    "note": "«شَمْسْ» أمينةً — والانطباقُ في حبر وصلها مُعلَنٌ طيّةً (حكمُ المدير)",
@@ -24495,7 +24542,8 @@
   {
    "id": "word-2-drift",
    "expect": {
-    "accept": true,
+    "shape": true,
+    "exact": true,
     "tolerance": 1
    },
    "note": "«شَمْسْ» بيدٍ ترتجف بعهد أرضيتها (± 45 من سماحتها 90) — عهدُ `child-drift` على مادّة النسخ",
@@ -26035,10 +26083,11 @@
   {
    "id": "word-2-reversed",
    "expect": {
-    "accept": false,
+    "shape": true,
+    "exact": false,
     "tolerance": 1
    },
-   "note": "«شَمْسْ» معكوسةً — **خصومةُ المعكوس لا تلين**: العودُ غيرُ المعلَن ارتدادٌ كما كان",
+   "note": "«شَمْسْ» معكوسةً — شكلُها شكلُها فيقبله الحَكَمُ الكلّيّ، **وخصومةُ الماشي للمعكوس لا تلين**: العودُ غيرُ المعلَن ارتدادٌ كما كان",
    "origin": "synthetic",
    "ref": "word-2",
    "strokes": [
@@ -27575,7 +27624,8 @@
   {
    "id": "word-3-clean",
    "expect": {
-    "accept": true,
+    "shape": true,
+    "exact": true,
     "tolerance": 1
    },
    "note": "«الشَّمْسْ» أمينةً — والانطباقُ في حبر وصلها مُعلَنٌ طيّةً (حكمُ المدير)",
@@ -29957,7 +30007,8 @@
   {
    "id": "word-3-drift",
    "expect": {
-    "accept": true,
+    "shape": true,
+    "exact": false,
     "tolerance": 1
    },
    "note": "«الشَّمْسْ» بيدٍ ترتجف بعهد أرضيتها (± 45 من سماحتها 90) — عهدُ `child-drift` على مادّة النسخ",
@@ -32339,10 +32390,11 @@
   {
    "id": "word-3-reversed",
    "expect": {
-    "accept": false,
+    "shape": true,
+    "exact": false,
     "tolerance": 1
    },
-   "note": "«الشَّمْسْ» معكوسةً — **خصومةُ المعكوس لا تلين**: العودُ غيرُ المعلَن ارتدادٌ كما كان",
+   "note": "«الشَّمْسْ» معكوسةً — شكلُها شكلُها فيقبله الحَكَمُ الكلّيّ، **وخصومةُ الماشي للمعكوس لا تلين**: العودُ غيرُ المعلَن ارتدادٌ كما كان",
    "origin": "synthetic",
    "ref": "word-3",
    "strokes": [

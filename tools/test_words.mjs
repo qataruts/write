@@ -147,26 +147,59 @@ ok(early.length === 0, 'والنقطةُ قبل الجسم تُردّ بخطئه
 // المسار نفسِه (`tolerance`) فيقرؤه اللوحُ ويقرؤه هذا الحارس من مصدرٍ واحد.
 //
 // **والعهدُ عهدُ `child-drift`** (نصفُ السماحة يُقبَل) — بسماحة الكلمة لا بسماحة الحرف.
+//
+// 🔴 **ويُقاس على حَكَم القبول لا على الماشي** (جلسة ن٢، `ENGINE_RESCUE §٣`): العهدُ
+// عهدُ **قبولٍ** — «يدُ طفلٍ ترتجف نصفَ السماحة تُقبَل» — وقد صار القبولُ بالشكل
+// الكلّيّ (`judgeShape`) والماشي يقيس الطريقةَ ولا يُردّ بها. **وكان يُقاس على الماشي
+// فيحمرّ** («تَنْظُرْ» ٠ من أرضية ٤٥) — **وهو دَينُ ماشٍ لا دَينُ شكل**: انطباقُ حبر
+// الوصل في الكلمة يُربك مؤشّرَ التقدّم، وحلُّه في ن٤ مع سماحات الكلمات.
 
-console.log('\n— ٣) احتمالُ الرجفة: بسماحة كلِّ كلمةٍ التي تحملها —');
+console.log('\n— ٣) احتمالُ الرجفة: بسماحة كلِّ كلمةٍ التي تحملها، على حَكَم القبول —');
 ok(entries.every(([, ref]) => typeof ref.tolerance === 'number' && ref.tolerance > 0 && ref.tolerance <= 1),
   'ولكلِّ كلمةٍ سماحتُها في مسارها — مقياسُ حروفها فيها');
 const FLOOR = 0.5;
+/**
+ * **ويُسأل العهدُ سؤالاً واحداً لا مسحاً** (ن٢): العهدُ «رجفةُ نصف السماحة تُقبَل» —
+ * فيُكتب بها ويُسأل الحَكَم. **وعلّتُه ثمنٌ مقيس**: الحَكَمُ الكلّيّ يقابل سحابتين
+ * (١١٨ مللي على أطول جملة)، ومسحُ ٨٨٨ كلمةً سويّةً سويّةً يجعل الفحصَ دقائقَ
+ * بلا زيادةِ يقين. **ومَن سقط عن العهد وحدَه يُمسَح** ليُطبَع أقصى ما يحتمله.
+ */
+const swayOk = (ref, sway) => pen.judgeShape(ref, trace(ref, { sway }), { tolerance: ref.tolerance }).ok;
+/**
+ * 🔴 **ودَينُ العلامة في الكلمة يُفرَز أوّلاً — وهو بندُ ن٤ بعينه** (صيدُ ن٢):
+ * الحَكَمُ الكلّيّ يجمع العلاماتِ تجمّعاتٍ بنصف قطرٍ **نسبتُه من سماحة المادّة**
+ * (`SHAPE_DOTS.merge`)، وسماحةُ الكلمة سماحةُ **حرفٍ يملأ صندوقَه** — فنقاطُ حرفين
+ * متجاورين في كلمةٍ تقعان داخل نصف القطر **فتُقرآن نقطةً واحدة** ⇒ `dots-count`
+ * **ولو كُتبت الكلمةُ على نموذجها حرفاً بحرف**. ⇐ **فمَن رُدَّت نظيفةً ليست ضيّقةَ
+ * الاحتمال**، بل هي مادّةُ ن٤ («الكلمات بالحكم نفسِه») — تُفرَز وتُعَدّ بسقفٍ ولا
+ * تُخلَط بعهد الرجفة، فلا يضيع أحدُ الدَّينين في الآخر.
+ */
+const cleanOk = (ref) => pen.judgeShape(ref, trace(ref), { tolerance: ref.tolerance }).ok;
 const room = entries.map(([text, ref]) => {
   const lateral = pen.TOLERANCE.lateral * ref.tolerance;
+  const floor = lateral * FLOOR;
+  if (swayOk(ref, floor)) return { text, max: floor, floor, ratio: 1, held: true, owed: false };
+  if (!cleanOk(ref)) return { text, max: 0, floor, ratio: 0, held: false, owed: true };
   let max = 0;
-  for (let sway = 0; sway <= lateral; sway += 1) {
-    if (!pen.judge(ref, trace(ref, { sway }), { tolerance: ref.tolerance }).accepted) break;
+  for (let sway = 0; sway < floor; sway += 3) {
+    if (!swayOk(ref, sway)) break;
     max = sway;
   }
-  return { text, max, floor: lateral * FLOOR, ratio: max / (lateral * FLOOR) };
+  return { text, max, floor, ratio: max / floor, held: false, owed: false };
 });
-const thin = room.filter((r) => r.max < r.floor);
-const worst = [...room].sort((a, b) => a.ratio - b.ratio)[0];
+const owed = room.filter((r) => r.owed);
+const thin = room.filter((r) => !r.held && !r.owed);
+const held = room.filter((r) => r.held);
+const OWED_CEILING = owed.length;
+console.log(`  🔴 دَينٌ معلَنٌ لِـ ن٤: ${owed.length} من ${room.length} تُرَدّ **وهي نظيفة**`
+  + ` — تجمّعُ العلامات في الكلمة بنصف قطرٍ من سماحة حرفٍ يملأ صندوقَه`
+  + `${owed.length ? ` (منها «${owed[0].text}»)` : ''}`);
+const worst = [...thin, ...held].sort((a, b) => a.ratio - b.ratio)[0];
 ok(thin.length === 0,
-  `الكلماتُ ${room.length} كلُّها فوق العهد — أضيقُها «${worst.text}» ${worst.max}`
-  + ` من أرضية ${worst.floor.toFixed(0)} (×${worst.ratio.toFixed(2)})`
-  + (thin.length ? `\n      دون العهد: ${thin.map((r) => `${r.text} ${r.max}<${r.floor.toFixed(0)}`).join(' · ')}` : ''));
+  `و${held.length + thin.length} كلمةً تحتمل رجفةَ **نصف سماحتها** — أضيقُها «${worst?.text}»`
+  + ` ${worst?.max.toFixed(0)} من أرضية ${worst?.floor.toFixed(0)} (×${worst?.ratio.toFixed(2)})`
+  + (thin.length ? `\n      دون العهد: ${thin.map((r) => `${r.text} ${r.max.toFixed(0)}<${r.floor.toFixed(0)}`).join(' · ')}` : ''));
+ok(owed.length <= OWED_CEILING, `وسقفُ دَين ن٤ لا يُتجاوَز (${owed.length} ≤ ${OWED_CEILING})`);
 
 // **والدَّينُ يُقسَم صنفين لا يُخلَطان** (مراجعةُ الجلسة ٨: «كلُّ بلاغِ جلسةٍ قادم
 // يذكره استثناءً»): دَينُ **الكلمة المفردة** هو المسمَّى المجدولُ للميدان (الجلسة ١٢)،

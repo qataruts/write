@@ -258,9 +258,17 @@ console.log('\n— ١ب) مقاييسُ الإرشاد تُشتقّ من مقي�
     + ` لا ${pen.GUIDE.dot}`);
 }
 
-// ————— ٢. عدّةُ المعايرة: الحكمُ يُثبَت حالةً حالة —————
+// ————— ٢. عدّةُ المعايرة: **الحكمان** يُثبَتان حالةً حالة —————
+//
+// 🔴 **ومنذ ن٢ حكمان لا حكم** (`ENGINE_RESCUE §٣`، حكمُ المالك ٢٠–٢١ أغسطس ٢٠٢٦):
+//   · **القبولُ** بـ`judgeShape` — الحَكَمُ الكلّيّ على الحبر الناتج، وهو المقصودُ
+//     بـ«يُقبَل/يُرَدّ» في هذا الباب وفي كل موضعٍ يُذكَر فيه القبول.
+//   · **والطريقةُ** (بدايةً واتجاهاً وترتيباً) يقيسها الماشي — `expect.exact` — **وتُقاس
+//     ولا يُردّ بها**، ومعها `expect.fault` أوّلُ شكواه بعينها.
+// **فلا يُطالَب الماشي بعهد القبول ولا الشكلُ بعهد الطريقة** — وهذا عينُ ما كان يجعل
+// كلَّ جلسةٍ تحارب حرّاساً يحرسون العهدَ القديم.
 
-console.log('\n— ٢) عدّةُ المعايرة: مساراتٌ مسجّلة تُدخَل على المحرّك —');
+console.log('\n— ٢) عدّةُ المعايرة: مساراتٌ مسجّلة تُدخَل على الحكمين —');
 ok(traces.cases.length >= 10, `العدّةُ فيها ${traces.cases.length} حالةً مسجّلة`);
 
 // **والعدّةُ تُفحَص قبل أن يُفحَص بها**: ملفٌّ انحرف عن مولّده شاهدٌ فاسد، فيُشغَّل
@@ -291,6 +299,12 @@ const refOf = (item) => (item.ref.includes('/')
   : traces.refs[item.ref]);
 
 const seen = new Map();
+const seenShape = new Map();
+/** آثارُ ميدانٍ وسمُها حكمُ الماشي القديم — تُقاس وتُطبع ولا يُحكَم بها على الشكل. */
+const oldGuard = [];
+/** حكمُ القبول المنتظَر: `shape` في المصنوع و`accept` في الميدانيّ (حكمُ العين). */
+const wantShape = (item) => (typeof item.expect.shape === 'boolean'
+  ? item.expect.shape : item.expect.accept);
 for (const item of traces.cases) {
   // **وحالاتُ الطريق تُمشى لا تُحكَم دفعةً** (§٢ج أدناه): لمساتُها محاولاتٌ متعاقبة
   // على آلة الخطوة الحرّة، لا ضرباتُ محاولةٍ واحدة.
@@ -300,12 +314,14 @@ for (const item of traces.cases) {
   const verdict = item.expect.free
     ? pen.judgeFree(refOf(item), item.strokes)
     : pen.judge(refOf(item), item.strokes);
+  const shape = pen.judgeShape(refOf(item), item.strokes);
   seen.set(item.id, verdict);
+  seenShape.set(item.id, shape);
   const m = verdict.metrics;
   const margin = `انحراف ${Math.round(m.maxLateral)}/${pen.TOLERANCE.lateral}`
     + ` · ارتداد ${Math.round(m.maxBack)}/${pen.TOLERANCE.back}`
     + ` · تغطية ${Math.round(m.coverage * 100)}٪`;
-  const wanted = item.expect.accept;
+  const wanted = wantShape(item);
   // **والموسومُ `stale-reference` يُقاس ولا يُحكَم به** (بند ص٧، وحكمُ الإدارة ٣ في
   // مراجعة ص٦): أثرٌ من الميدان كُتب فوق **الخيال القديم** ثم صار مرجعُ حرفه أثرَ يد
   // المالك — **فمنتظَرُه قِيس على غير ما يُقاس عليه اليوم**. فيبقى في العدّة بوسمه
@@ -313,37 +329,78 @@ for (const item of traces.cases) {
   // ويُستبدَل بأثرٍ جديد من ساحة الحصاد بعد النشر — وحينها يسقط الوسمُ من نفسه.
   if (item.stale) {
     console.log(`  ○ ${item.id}: موسومٌ \`stale-reference\` (${item.stale.since})`
-      + ` — ${verdict.accepted ? 'يُقبَل' : `يُرفَض بـ«${verdict.size || verdict.primary}»`}`
-      + ` والمنتظَرُ ${item.expect.accept ? 'قبولٌ' : 'ردٌّ'}: ${item.stale.why}`);
+      + ` — ${shape.ok ? 'يُقبَل' : `يُرفَض بـ«${shape.why}»`}`
+      + ` والمنتظَرُ ${wanted ? 'قبولٌ' : 'ردٌّ'}: ${item.stale.why}`);
     continue;
   }
-  // **والمطلوبُ أوّلُ خطأ لا وجودُه بين الأخطاء**: الشكوى تُسمّى بعينها، فلو رُفض
-  // المسارُ لعلّةٍ أخرى ثم جاء المنتظَرُ صدىً لها لَمَرّ الفحصُ على خطأٍ في الحكم.
-  const faultOk = wanted || !item.expect.fault || verdict.primary === item.expect.fault;
-  const sizeOk = !item.expect.size || verdict.size === item.expect.size;
-  ok(verdict.accepted === wanted && faultOk && sizeOk,
-    `${item.id}: ${wanted ? 'يُقبَل' : `يُرفَض بـ«${verdict.size || verdict.primary}»`} — ${item.note}`
-    + `\n      ${margin}`
-    + `${verdict.accepted === wanted ? '' : ' ← الحكمُ خالف المنتظَر'}`
-    + `${faultOk ? '' : ` ← أوّلُ خطئه «${verdict.primary}» والمنتظَر «${item.expect.fault}»`}`
-    + `${sizeOk ? '' : ` ← حجمُه «${verdict.size}» والمنتظَر «${item.expect.size}»`}`);
+  /**
+   * **والمطلوبُ أوّلُ خطأ لا وجودُه بين الأخطاء**: الشكوى تُسمّى بعينها، فلو رُفض
+   * المسارُ لعلّةٍ أخرى ثم جاء المنتظَرُ صدىً لها لَمَرّ الفحصُ على خطأٍ في الحكم.
+   * **وهي شكوى الماشي** — تُقاس ولا يُردّ بها.
+   */
+  /**
+   * 🔴 **وأثرُ ميدانٍ وسمُه حكمُ المحرّك القديم لا حكمُ عين** (ن٢): `import_traces`
+   * يكتب `expect.fault` **للردّ الذي ردّه الماشي وحدَه** — «العينُ تحكم ولا تسمّي
+   * علّةَ محرّك». **فردٌّ ميدانيٌّ يحمل شكوى ماشٍ عهدُه على الماشي لا على الشكل**،
+   * وإلّا حرس الحارسُ **العهدَ القديم** بعينه: يطالب الحَكَمَ الكلّيّ بأن يردّ ما
+   * ردّه الماشي — وذاك سقفُ الأربعين في المئة الذي جاءت خطّةُ الإنقاذ لتكسره.
+   * ⇐ **فيُقاس شكلُه ويُطبع ولا يُحكَم به**، ويُراجَع بعين المالك في ن٣.
+   */
+  const walkerOnly = item.origin === 'field' && wanted === false && Boolean(item.expect.fault);
+  if (walkerOnly) {
+    oldGuard.push({ item, shape, verdict });
+    console.log(`  ○ ${item.id}: وسمُه **حكمُ الماشي القديم** (${item.expect.fault})`
+      + ` — والماشي اليومَ ${verdict.exact ? 'يطابق' : `يخالف «${verdict.primary}»`}`
+      + `، والحَكَمُ الكلّيّ ${shape.ok ? 'يقبله' : `يردّه «${shape.why}»`}`
+      + ` (تغطية ${Math.round(shape.metrics.recall * 100)}٪ · دقّة ${
+        Math.round(shape.metrics.precision * 100)}٪) — يُراجَع بعين المالك في ن٣`);
+    // **وعهدُه أن يبقى مخالفاً للطريقة** — **واسمُ الشكوى لا يُحبَس** على أثرٍ تبدّل
+    // مرجعُ حرفه (ص٦): اسمٌ يتبدّل على مرجعٍ تبدّل ليس انحدارَ محرّك، فيُطبع بالاسم.
+    ok(!verdict.exact,
+      `  وعهدُه على الماشي قائم: يخالف الطريقةَ${verdict.primary === item.expect.fault
+        ? ` باسمها «${verdict.primary}»`
+        : ` — واسمُ شكواه انتقل «${item.expect.fault}» ⇐ «${verdict.primary || 'حجمٌ يُرشَد إليه'}»`
+          + ' على مرجعٍ تبدّل (ص٦)'}`);
+    continue;
+  }
+  const exactWanted = item.expect.exact;
+  const exactOk = typeof exactWanted !== 'boolean' || Boolean(verdict.exact) === exactWanted;
+  const faultOk = exactWanted !== false || !item.expect.fault || verdict.primary === item.expect.fault;
+  // **والحجمُ إرشادٌ يصحب الحكمَ ولا يردّ** — فيُطلَب في `guides` لا في الأسباب.
+  const guideOk = !item.expect.guide || shape.guides.includes(item.expect.guide);
+  ok(shape.ok === wanted && exactOk && faultOk && guideOk,
+    `${item.id}: ${wanted ? 'يُقبَل شكلاً' : `يُرَدّ بـ«${shape.why}»`}`
+    + ` · طريقتُه ${exactWanted === false ? 'تُقاس فتُخالف' : exactWanted ? 'تطابق' : '—'}`
+    + ` — ${item.note}`
+    + `\n      ${margin} · شكلٌ: تغطية ${Math.round(shape.metrics.recall * 100)}٪`
+    + ` جزء ${Math.round(shape.metrics.part * 100)}٪ دقّة ${Math.round(shape.metrics.precision * 100)}٪`
+    + `${shape.guides.length ? ` · إرشاد ${shape.guides.join('، ')}` : ''}`
+    + `${shape.ok === wanted ? '' : ' ← حكمُ الشكل خالف المنتظَر'}`
+    + `${exactOk ? '' : ` ← مطابقةُ الطريقة «${Boolean(verdict.exact)}» والمنتظَر «${exactWanted}»`}`
+    + `${faultOk ? '' : ` ← أوّلُ شكوى الماشي «${verdict.primary}» والمنتظَر «${item.expect.fault}»`}`
+    + `${guideOk ? '' : ` ← إرشادُه [${shape.guides}] ولا فيه «${item.expect.guide}»`}`);
 }
 
-// **المعكوسُ يُرفَض دائماً** (نصُّ `METHOD.md §٣.٩`) — والدليلُ أنه ليس رهنَ رقم:
-// تُضاعَف السماحةُ ثلاثاً فيبقى مرفوضاً، لأن المرفوضَ فيه **الاتجاه** لا الدقّة.
+// 🔴 **والمعكوسُ صار وجهين لا وجهاً** (حكمُ المالك ٢٠–٢١ أغسطس ٢٠٢٦): **شكلُه يُقبَل**
+// — فحبرُه حبرُنا والحرفُ يُقرأ — **وطريقتُه تُرَدّ ولا تُشترى برقم**: تُضاعَف
+// السماحةُ ثلاثاً فتبقى مخالفةً، لأن المخالَف فيها **الاتجاه** لا الدقّة.
 const reversed = traces.cases.find((c) => c.id === 'reversed');
 const loose = [1.5, 2, 3].map((factor) => pen.judge(refOf(reversed), reversed.strokes, { tolerance: factor }));
-ok(loose.every((v) => !v.accepted),
-  'والمعكوسُ يُرفَض ولو ضوعفت السماحةُ ثلاثاً — المرفوضُ فيه الاتجاهُ لا الدقّة');
+ok(seenShape.get('reversed').ok,
+  'والمعكوسُ **يُقبَل شكلاً** — الطريقةُ تُدرَّس ولا تُشترَط (حكمُ المالك)');
+ok(loose.every((v) => !v.exact),
+  'ولا تطابق طريقتُه المثلى ولو ضوعفت السماحةُ ثلاثاً — المخالَفُ فيه الاتجاهُ لا الدقّة');
 ok(loose.every((v) => v.primary === 'start-end' || v.primary === 'reverse'),
   `ويُسمّى خطؤه بعينه في الحالات الثلاث (${[...new Set(loose.map((v) => v.primary))].join('، ')})`);
 
 // وسماحةُ المحطة تعمل: ما قُبل بالسماحة الافتراضية يُردّ إن شُدِّدت إلى الثلث
 // (`METHOD.md §٣.٥`: «تتشدّد مع التقدّم») — فالسماحةُ مقبضٌ حقيقيّ لا حلية.
+// **وهو عهدُ الماشي**: يقيس مطابقةَ الطريقة، فتُقاس عليه السماحةُ — أمّا القبولُ
+// فبالشكل، ولا يُشَدّ بمقبضٍ في محطة.
 const drift = traces.cases.find((c) => c.id === 'child-drift');
-ok(pen.judge(refOf(drift), drift.strokes).accepted
-  && !pen.judge(refOf(drift), drift.strokes, { tolerance: 0.33 }).accepted,
-  'وسماحةُ المحطة مقبضٌ حقيقيّ: انحرافٌ يُقبل اليومَ يُردّ إذا شُدِّدت إلى الثلث');
+ok(pen.judge(refOf(drift), drift.strokes).exact
+  && !pen.judge(refOf(drift), drift.strokes, { tolerance: 0.33 }).exact,
+  'وسماحةُ المحطة مقبضٌ حقيقيّ في الماشي: انحرافٌ تطابق طريقتُه اليومَ تُخالف إذا شُدِّدت إلى الثلث');
 
 // ————— ثغرةُ ذيل الشكل المغلق: الحارسُ الصريح (مراجعةُ المدير للجلسة ١) —————
 //
@@ -413,9 +470,13 @@ ok(!skipVerdict.accepted && skipVerdict.metrics.coverage < 0.5,
 // **أن يبقى للطيّة شاهدُها على مادّتها**: العودةُ على الأثر الرطب على ب/وسطي وب/نهائي.
 const fold = traces.cases.filter((c) => refOf(c).strokes.some((s) => s.folds?.length));
 const wet = ['ba-medial-retrace', 'ba-final-retrace'].filter((id) => fold.some((c) => c.id === id));
-ok(fold.length > 0 && wet.length === 2 && fold.every((c) => seen.get(c.id).accepted === c.expect.accept),
-  `وحالاتُ الطيّة كلُّها على حكمها (${fold.length}): تتبّعاً وحُرّاً وقفزاً، **وعودةً على`
-  + ` الأثر الرطب على ب/وسطي وب/نهائي** (${wet.length}/2)، ومعكوساتُها تُرَدّ`);
+// **وحكمُها الذي يُقاس هنا حكمُ الماشي** (`exact`) — فالطيّةُ صفةٌ في المسار يقيس
+// بها الشرطُ الثاني، ولا أثرَ لها في الحَكَم الكلّيّ أصلاً.
+ok(fold.length > 0 && wet.length === 2
+  && fold.filter((c) => typeof c.expect.exact === 'boolean')
+    .every((c) => Boolean(seen.get(c.id).exact) === c.expect.exact),
+  `وحالاتُ الطيّة كلُّها على حكم طريقتها (${fold.length}): تتبّعاً وحُرّاً وقفزاً، **وعودةً على`
+  + ` الأثر الرطب على ب/وسطي وب/نهائي** (${wet.length}/2)، ومعكوساتُها تُخالف الطريقة`);
 // **والإعلانُ هو الفارق حيث ادُّعي**: كلُّ حالةٍ تُعلن `needsFold` (أيْ أنّ القلمَ
 // عاد فيها على أثره) تُرفَض `reverse` إن نُزعت الصفةُ من مسارها — ومَن تتبّع النموذجَ
 // بضلعيه لا يحتاجها فلا يُدَّعى له بها.
@@ -431,32 +492,51 @@ for (const item of fold.filter((c) => c.expect.needsFold)) {
 // **فتركت الطفلةُ الجهاز**. والحكمُ: في الخطوة الحرّة وحدَها يُوفَّق النموذجُ على
 // صندوق حبر الطفل (إزاحةً وتحجيماً منتظماً) ثم تُطبَّق الشروطُ الأربعة على الموفَّق.
 //
-// **والشهادةُ في شقّين لا في واحد**: أن تُقبَل بالحكم الثاني **وأن تُردّ بالأول** —
-// فلو سقط التوفيقُ يوماً لَقُرئ الإخفاقُ هنا ببلاغه، ولو صار الحكمُ الأول رحيماً
-// لَسقط الشقُّ الثاني ونبّه أنّ الخطوتين ٢ و٣ قد مُسّتا وهما لا تُمَسّان.
-console.log('\n— ٢ب) الخطوةُ الحرّة: النموذجُ يُوفَّق على صندوق حبر الطفل —');
+// 🔴 **وشهادتُها اليومَ شقّان آخران** (ن٢): **يقبلها الحَكَمُ الكلّيّ** — وهو حَكَمُ
+// القبول، وبه انحلّ بلاغُ الميدان من أصله لا بترقيع الماشي — **ويُري الماشي أنّ
+// توفيقَ الصندوق يعمل**: طريقتُها تُخالف بالحكم الأول (الذي لا يوفّق) وتطابق بالثاني
+// (الذي يوفّق) — ولا إحداثيَّ يتبدّل بينهما. فلو سقط التوفيقُ يوماً لَقُرئ هنا.
+console.log('\n— ٢ب) الخطوةُ الحرّة: القبولُ بالشكل، والتوفيقُ يُري أثرَه في الماشي —');
 {
   const field = traces.cases.filter((c) => c.expect.free);
   const shown = field.filter((c) => c.expect.strict === false);
-  ok(shown.length >= 4, `حالاتُ بلاغ الميدان في العدّة (${field.length} منها ${shown.length} تفترق فيها الحكمان)`);
+  ok(shown.length >= 4, `حالاتُ بلاغ الميدان في العدّة (${field.length} منها ${shown.length} يفترق فيها الماشيان)`);
+  const parted = [];
   for (const item of shown) {
     const strict = pen.judge(refOf(item), item.strokes);
     const loose = seen.get(item.id);
-    ok(loose.accepted && !strict.accepted,
-      `  «${item.id}»: يقبلها الحكمُ الثاني ويردّها الأول «${strict.primary}»`
+    const shape = seenShape.get(item.id);
+    if (!strict.exact) parted.push(item.id);
+    ok(shape.ok && loose.exact,
+      `  «${item.id}»: **يقبلها الحَكَمُ الكلّيّ** (تغطية ${Math.round(shape.metrics.recall * 100)}٪)`
+      + ` وتطابق طريقتُها بالتوفيق، وبلا توفيقٍ ${strict.exact ? '**تطابق أيضاً**' : `تُخالف «${strict.primary}»`}`
       + ` — مقياسُ التوفيق ${loose.scale.toFixed(2)}، وانحرافُها بعده ${
         Math.round(loose.metrics.maxLateral)}/${Math.round(pen.TOLERANCE.lateral * pen.FREE.ease)}`
-      + `${loose.accepted ? '' : ' ← رُدّت وهي مصيبة: بلاغُ الميدان ٢ يقع من جديد'}`
-      + `${strict.accepted ? ' ← قبِلها الحكمُ الأول: الخطوتان الموجَّهةُ والخافتة مُسّتا' : ''}`);
+      + `${shape.ok ? '' : ` ← رُدّت وهي مصيبة «${shape.why}»: بلاغُ الميدان ٢ يقع من جديد`}`
+      + `${loose.exact ? '' : ' ← التوفيقُ لم يُنقذ طريقتَها'}`);
   }
-  // **ولا تنقلب الرحمةُ تسييباً**: المرفوضُ فيه **الاتجاه** لا الدقّة، فلا يفتحه كرم.
+  /**
+   * 🔴 **وشاهدُ التوفيق يُعَدّ ولا يُدَّعى**: هذه الحالاتُ جُمِّدت على **نونٍ سابقة**،
+   * ثم صار مرجعُ الحروف أثرَ يد المالك (بند ص٦) فتبدّل حبرُها — **فما عاد كلُّ تشويهٍ
+   * منها يفترق فيه الماشيان**. فيُطبَع مَن يفترق فيه بالاسم، **ويُشترط شاهدٌ حيّ
+   * واحدٌ على الأقل** فلا يخضرّ البابُ على أربعةٍ لا يفرّقن شيئاً.
+   */
+  ok(parted.length > 0,
+    `وشاهدُ التوفيق حيٌّ في ${parted.length} من ${shown.length}: ${parted.join('، ') || 'لا أحد'}`
+    + ' — والباقي جُمِّد على نونٍ تبدّل مرجعُها (ص٦) فلم يعد تشويهُه يبلغ سماحةَ الماشي');
+  // **ولا تنقلب الرحمةُ تسييباً في الطريقة**: المخالَفُ فيها **الاتجاه** لا الدقّة،
+  // فلا يفتحه كرمُ سماحة. (وأمّا الشكلُ فيُقبَل بحكم المالك — وذاك بابٌ آخر.)
   const noonBack = traces.cases.find((c) => c.id === 'noon-reversed');
   const wide = [1.5, 2, 3].map((f) => pen.judgeFree(refOf(noonBack), noonBack.strokes, { tolerance: f }));
-  ok(wide.every((v) => !v.accepted),
-    'ونونٌ معكوسةٌ تُرَدّ بالحكم الثاني ولو ضوعفت سماحتُه ثلاثاً — الاتجاهُ مادّةٌ مدرَّسة');
-  const mirror = traces.cases.find((c) => c.id === 'noon-mirrored');
-  ok(!pen.judgeFree(refOf(mirror), mirror.strokes).accepted,
-    'ومرآةُ النون تُرَدّ وهي تملأ صندوقَها — التوفيقُ إزاحةٌ وتحجيمٌ منتظم **لا انعكاس**');
+  ok(wide.every((v) => !v.exact),
+    'ونونٌ معكوسةٌ تُخالف الطريقةَ ولو ضوعفت سماحةُ الماشي ثلاثاً — الاتجاهُ مادّةٌ مدرَّسة');
+  // **والمرآةُ التي تبدّل الشكلَ حقّاً تُرَدّ شكلاً**: كأسُ النون متناظرةٌ فمرآتُها
+  // هي هي (وهي حقٌّ لا تسييب)، **والكافُ ليست كذلك** — فعليها يقع عهدُ المرآة.
+  const mirror = traces.cases.find((c) => c.id === 'kaf-mirrored');
+  const mirrorShape = pen.judgeShape(refOf(mirror), mirror.strokes);
+  ok(!mirrorShape.ok,
+    `ومرآةُ الكاف تُرَدّ **شكلاً** «${mirrorShape.why}» وهي تملأ صندوقَها`
+    + ` (تغطية ${Math.round(mirrorShape.metrics.recall * 100)}٪) — التطبيعُ إزاحةٌ وتحجيمٌ **لا انعكاس**`);
 
   // **والتوفيقُ تحجيمٌ منتظم لا تشويهَ نِسَب**: يُقاس على نون الصورة نفسِها —
   // مقياسٌ واحدٌ للمحورين، فلا يُمطّ النموذجُ على أيّ شكلٍ فيقبله.
@@ -470,10 +550,14 @@ console.log('\n— ٢ب) الخطوةُ الحرّة: النموذجُ يُوف�
   // **وحدُّ الحجم محسوبٌ من الصندوق لا مكتوبٌ بيد**: يتحرّك بتحرّك السماحة والصندوق.
   const small = traces.cases.find((c) => c.id === 'noon-tiny');
   const big = traces.cases.find((c) => c.id === 'noon-huge');
-  ok(pen.judgeFree(refOf(small), small.strokes).size === pen.SIZE.SMALL
-    && pen.judgeFree(refOf(big), big.strokes).size === pen.SIZE.BIG,
-    'والحجمُ الشاذُّ **يُرشَد إليه بجملته**: '
-    + `«${pen.SIZE_TEXT[pen.SIZE.SMALL]}» و«${pen.SIZE_TEXT[pen.SIZE.BIG]}» — لا ردٌّ صامت`);
+  const smallShape = pen.judgeShape(refOf(small), small.strokes);
+  const bigShape = pen.judgeShape(refOf(big), big.strokes);
+  // 🔴 **والحجمُ صار إرشاداً يصحب القبولَ لا ردّاً** (ن٢): يُقال للطفل «اكتبه أكبر»
+  // **وحبرُه يثبت** — فالحرفُ مقروءٌ وإن شذّ حجمُه.
+  ok(smallShape.ok && smallShape.guides.includes(pen.SIZE.SMALL)
+    && bigShape.ok && bigShape.guides.includes(pen.SIZE.BIG),
+    'والحجمُ الشاذُّ **يُرشَد إليه بجملته ويُقبَل حبرُه**: '
+    + `«${pen.SIZE_TEXT[pen.SIZE.SMALL]}» و«${pen.SIZE_TEXT[pen.SIZE.BIG]}» — لا ردٌّ ولا صمت`);
   // وحدُّه من الصندوق: تُوسَّع سماحةُ المحطة فيتّسع معها ما يُعدّ ضئيلاً — رقمٌ محسوب.
   const shrunk = traces.cases.find((c) => c.id === 'noon-small');
   const wideTol = { ...pen.TOLERANCE, lateral: pen.TOLERANCE.lateral * 3 };
@@ -513,6 +597,8 @@ console.log('\n— ٢د) سماحةُ الجزء الملحق: فرقُ العد
     strokes: (ref.strokes || []).map(({ ease, ...rest }) => rest),   // eslint-disable-line no-unused-vars
   });
   const declared = traces.cases.filter((c) => refOf(c).strokes?.some((s) => s.ease > 1));
+  // **وهذا بابُ الماشي وحدَه**: `ease` صفةُ ضربةٍ يقرؤها الشرطُ الثالث في التغطية،
+  // **ولا يعرفها الحَكَمُ الكلّيّ أصلاً** — فالمقيسُ هنا مطابقةُ الطريقة لا القبول.
   const verdictOf = (item, ref) => (item.expect.free
     ? pen.judgeFree(ref, item.strokes) : pen.judge(ref, item.strokes));
 
@@ -522,15 +608,16 @@ console.log('\n— ٢د) سماحةُ الجزء الملحق: فرقُ العد
     if (item.expect.run) continue;
     const after = verdictOf(item, refOf(item));
     const before = verdictOf(item, bare(refOf(item)));
-    if (before.accepted !== after.accepted || (before.primary || null) !== (after.primary || null)) {
+    if (Boolean(before.exact) !== Boolean(after.exact)
+      || (before.primary || null) !== (after.primary || null)) {
       moved.push({ item, before, after });
     }
   }
   console.log(`  عدّةُ المعايرة ${traces.cases.length} حالة، وفيها ${declared.length} على مسارٍ`
     + ` **يُعلِن سماحةَ جزء** — وتبدّل بالتخفيف ${moved.length} حكماً:`);
   for (const { item, before, after } of moved) {
-    console.log(`    · ${item.id}: ${before.accepted ? 'قُبل' : before.primary}`
-      + ` ⇒ ${after.accepted ? 'قُبل' : after.primary}`);
+    console.log(`    · ${item.id}: ${before.exact ? 'طابقت' : before.primary}`
+      + ` ⇒ ${after.exact ? 'طابقت' : after.primary}`);
   }
   /**
    * **ولا قبولَ كاذبٌ جديد** — وهو نصُّ البند ٣: كلُّ حالةٍ **حكمُها المنتظَر ردٌّ**
@@ -539,9 +626,9 @@ console.log('\n— ٢د) سماحةُ الجزء الملحق: فرقُ العد
    * أدناه أنّ قبولَها معلَّقٌ بالبيان (تُرَدّ `short` إن نُزع).
    */
   const opened = moved.filter(({ item, before, after }) =>
-    !before.accepted && after.accepted && item.expect.accept === false);
+    !before.exact && after.exact && item.expect.exact === false);
   ok(opened.length === 0,
-    `و**صفرُ قبولٍ كاذبٍ جديد** على العدّة المجمَّدة (${moved.length} حكماً تبدّل، كلُّه`
+    `و**صفرُ مطابقةٍ كاذبةٍ جديدة** على العدّة المجمَّدة (${moved.length} حكماً تبدّل، كلُّه`
     + ` بإعلانٍ منتظَر)${
       opened.length ? ` — فُتح: ${opened.map((m) => m.item.id).join('، ')} ⇐ التخفيفُ باطل` : ''}`);
 
@@ -551,9 +638,9 @@ console.log('\n— ٢د) سماحةُ الجزء الملحق: فرقُ العد
   for (const item of easedCases) {
     const on = verdictOf(item, refOf(item));
     const off = verdictOf(item, bare(refOf(item)));
-    ok(on.accepted && !off.accepted && off.primary === pen.FAULTS.SHORT,
-      `  «${item.id}»: تُقبَل بالإعلان${on.accepted ? '' : ' ← رُدّت! فالتخفيفُ حبرٌ لا يمسّ يداً'}`
-      + ` وتُرَدّ بنزعه «${off.primary}» — فالسماحةُ صفةٌ في البيان لا رقمٌ عامّ`);
+    ok(on.exact && !off.exact && off.primary === pen.FAULTS.SHORT,
+      `  «${item.id}»: تطابق طريقتُها بالإعلان${on.exact ? '' : ' ← خالفت! فالتخفيفُ حبرٌ لا يمسّ يداً'}`
+      + ` وتُخالف بنزعه «${off.primary}» — فالسماحةُ صفةٌ في البيان لا رقمٌ عامّ`);
   }
   // **وما لا يُعلِن لا يتبدّل**: التخفيفُ صفةُ بيانٍ لا تسييبٌ عامّ.
   ok(moved.every(({ item }) => declared.includes(item)),
@@ -593,6 +680,7 @@ console.log('\n— ٢د) سماحةُ الجزء الملحق: فرقُ العد
   // فرُدَّت بالاتجاه وتغطيتُها تامّة، فقياسُ الأرضيّة عليها قياسٌ على غير جنسها.
   const rejected = traces.cases.filter((c) => c.origin === 'field' && c.ref === 'ك/isolated'
     && c.expect.accept === false && c.expect.fault === 'short');
+  // (وهي حالاتُ ميدانٍ يحمل وسمُها حكمَ المحرّك ساعةَ الالتقاط — `expect.accept`.)
   // **ولا حراسةَ على فراغ** (بلاغُ جلسة ص١، ١٨ أغسطس ٢٠٢٦): كان هذا السطرُ
   // `Math.max(...[])` = `-Infinity` **فيمرّ الشرطُ دائماً** بعد أن نسخ حكمُ المالك
   // (١٧ أغسطس، جلسة ك٢) حكمَي `field-015/016` إلى قبول — فذهبت المادّةُ وبقي الأخضر.
@@ -638,8 +726,8 @@ console.log('\n— ٢د) سماحةُ الجزء الملحق: فرقُ العد
     const loud = { ...KAF, strokes: KAF.strokes.map((s) => (s.ease ? { ...s, ease: s.ease * 3 } : s)) };
     const now = verdictOf(item, refOf(item));
     const wild = pen.judgeFree(loud, item.strokes);
-    ok(!now.accepted && !wild.accepted,
-      `  «${item.id}»: تُرَدّ «${now.primary}»${wild.accepted ? ' ← قُبلت بتثليث السماحة!' : ''}`
+    ok(!now.exact && !wild.exact,
+      `  «${item.id}»: تُخالف الطريقةَ «${now.primary}»${wild.exact ? ' ← طابقت بتثليث السماحة!' : ''}`
       + ` — ولو ثُلِّثت سماحةُ الجزء («${wild.primary}»)`);
   }
 }
@@ -658,10 +746,12 @@ for (const item of traces.cases.filter((c) => c.expect.run)) {
   const run = pen.createFreeRun(refOf(item), {});
   const steps = item.strokes.map((points) => run.push(points));
   const restarts = steps.filter((r) => r?.restarted).length;
-  ok(run.done === item.expect.accept,
+  const waited = steps.filter((r) => r === null).length;
+  ok(run.done === item.expect.shape,
     `${item.id}: ${run.done ? 'يبلغ آخرَ الطريق' : 'لا يبلغه'} — ${item.note}`
-    + `\n      ${item.strokes.length} لمسةً · استُؤنف ${restarts} · تعثّرات ${run.stumbles}`
-    + `${run.done === item.expect.accept ? '' : ' ← الطريقُ خالف المنتظَر'}`);
+    + `\n      ${item.strokes.length} لمسةً · انتُظر صامتاً ${waited} · استُؤنف ${restarts}`
+    + ` · تعثّرات ${run.stumbles}`
+    + `${run.done === item.expect.shape ? '' : ' ← الطريقُ خالف المنتظَر'}`);
 }
 // **ومجرَّبٌ سالباً في الآلة نفسِها**: نصفُ الشكل لا يبلغ آخرَه — فلو صار البابُ
 // يخضرّ لكلّ لمسةٍ لَما ميّز جواباً من نصف جواب.
@@ -672,6 +762,169 @@ for (const item of traces.cases.filter((c) => c.expect.run)) {
   ok(!run.done && run.settled === 1,
     `وجسمٌ بلا نقطته لا يبلغ آخرَ الطريق (استُوفي ${run.settled} من ${run.parts.length}`
     + ' جزءاً) — فالبابُ يفرّق بين الجواب ونصفِه');
+}
+
+// ————— ٢ه. سياسةُ الإطلاق: **قبولٌ · انتظارٌ صامت · ردٌّ قاطع** (جلسة ن٢) —————
+//
+// 🔴 **والعلّةُ أنّ الحكمَ يقع عند كلّ رفعِ قلم**: مَن كتب جسمَ الحرف ولمّا يتمّه
+// **ليس مخطئاً** — فالردُّ عليه عقوبةٌ على أثناء العمل. **فثلاثةُ أحوالٍ لا رابع**:
+//   · **قبولٌ** — يثبت الحبرُ ويُختَم الشكل، **ولو خالفت الطريقةُ طريقتَنا**.
+//   · **انتظارٌ صامت** — نقصٌ يصلحه مزيدُ حبر (`pending`): يُحفَظ الحبرُ ولا يُقال شيء
+//     **ولا يُعَدّ تعثّراً**.
+//   · **ردٌّ قاطع** — ما لا يصلحه مزيدُ حبر (خربشةٌ · جهةٌ مقلوبة · علامةٌ زائدة):
+//     يخفت حبرُ اللمسة ويومض الإرشادُ **ويُعَدّ تعثّراً**.
+//
+// **وتُقاس في الآلة نفسِها** (`createFreeRun` — عينُ ما يقوده اللوح) لا في وصفٍ مكتوب.
+console.log('\n— ٢ه) سياسةُ الإطلاق في آلة الخطوة الحرّة: قبولٌ · انتظارٌ · ردّ —');
+{
+  const HHA = PATHS['ح'].isolated;      // بلا نقاط — فنصفُه يسقط بالتغطية وحدَها
+  const NOON = PATHS['ن'].isolated;     // جسمٌ ونقطةٌ فوق
+  const bodyOf = (ref) => pen.partsOf(ref).filter((q) => q.kind === 'stroke')
+    .map((q) => q.poly.pts.map((r) => [r[0], r[1]]));
+  const dotsOf2 = (ref) => pen.partsOf(ref).filter((q) => q.kind === 'dot')
+    .flatMap((q) => Array.from({ length: q.count || 1 }, () => [q.at[0], q.at[1]]))
+    .map((at) => [at, at, at]);
+  /** نصفُ الجسم: يُرفَع القلمُ عند نصف **طوله** لا نصف عدد نقاطه. */
+  const halfBody = (ref) => pen.partsOf(ref).filter((q) => q.kind === 'stroke').map((q) => {
+    const out = [];
+    for (let at = 0; at <= q.poly.len * 0.5; at += 8) out.push(pen.pointAt(q.poly, at).at);
+    return out;
+  });
+  /** خربشةٌ في **فراغ** الحرف — لا فوق حبره: هي التي تقيسها الدقّة. */
+  const scribble = (ref) => {
+    const box = pen.inkBox([pen.refPoints(ref)]);
+    const tol = pen.easeTolerance(pen.resolveTolerance(ref.tolerance)).lateral;
+    const ink = pen.refPoints(ref);
+    const far = (p) => !ink.some((q) => Math.hypot(p[0] - q[0], p[1] - q[1]) <= tol);
+    const teeth = [];
+    for (let row = 0; row <= 34; row++) {
+      const y = box.y0 + (box.h * row) / 34;
+      for (let c = 0; c <= 34; c++) {
+        const x = box.x0 + (box.w * (row % 2 ? 34 - c : c)) / 34;
+        if (far([x, y])) teeth.push([x, y]);
+      }
+    }
+    return teeth;
+  };
+
+  // ١) **معكوسٌ صحيحُ الشكل يُقبَل** — والطريقةُ تُقاس في حصيلته ولا يُردّ بها.
+  {
+    const run = pen.createFreeRun(NOON, {});
+    const steps = [...bodyOf(NOON).map((b) => [...b].reverse()), ...dotsOf2(NOON)]
+      .map((t) => run.push(t));
+    const last = steps[steps.length - 1];
+    ok(run.done && last?.ok && last.verdict.accepted,
+      'معكوسُ الاتجاه صحيحُ الشكل **يُقبَل** — حكمُ المالك: الطريقةُ تُدرَّس ولا تُشترَط');
+    ok(last && last.verdict.exact === false && last.verdict.codes.length > 0,
+      `**وطريقتُه تُسجَّل قياساً**: مطابقةٌ ${last?.verdict.exact} وشكاوى الماشي`
+      + ` [${last?.verdict.codes.join('، ')}] — تُقرأ ولا يُردّ بها`);
+    ok(!last?.fault, 'ولا تُرفَع شكوى طريقةٍ خطأً إلى الشاشة — فلا تُحسَب على الطفل');
+  }
+
+  // ٢) **نصفُ حرفٍ يُنتظَر بصمت** — لا يُقبَل ولا يُنهَر، ولا يُعَدّ تعثّراً.
+  {
+    const run = pen.createFreeRun(HHA, {});
+    const half = run.push(halfBody(HHA)[0]);
+    const shape = pen.judgeShape(HHA, halfBody(HHA));
+    ok(half === null && !run.done && run.stumbles === 0,
+      `نصفُ «ح» **يُنتظَر بصمتاً**: لا حكمَ يُرفَع (\`${half}\`) ولا تعثّرَ يُعَدّ`
+      + ` (${run.stumbles}) — وسببُه «${shape.why}» و\`pending\` ${shape.pending}`);
+    // ثم يُتمّه فيُقبَل — فالانتظارُ انتظارٌ لا رفضٌ صامت
+    const rest = run.push(bodyOf(HHA)[0]);
+    ok(rest?.ok && run.done, 'ثم يُتمّه فيُقبَل — فالانتظارُ انتظارٌ، والحبرُ محفوظ');
+  }
+
+  // ٣) **خربشةٌ تُرَدّ فوراً** — لا يصلحها مزيدُ حبر، فلا يُترَك الطفلُ يزيد فوق ما فسد.
+  {
+    const run = pen.createFreeRun(HHA, {});
+    run.push(bodyOf(HHA)[0]);
+    const bad = run.push(scribble(HHA));
+    ok(bad && !bad.ok && !bad.pending && bad.fault?.code === pen.FAULTS.STRAY_INK,
+      `خربشةٌ في فراغ الحرف **تُرَدّ فوراً** بـ«${bad?.fault?.code}» — ولا تُنتظَر`);
+    ok(run.stumbles === 1 && pen.FAULT_TEXT[bad.fault.code],
+      `وتُعَدّ تعثّراً (${run.stumbles}) ولها نصٌّ تقرؤه اللوحة: «${pen.FAULT_TEXT[bad.fault.code]}»`);
+    // **وحبرُ الخربشة يُطرَح فيعود ما قبله كما كان** — فلا يُحمَّل الطفلُ ما مُحي
+    const back = run.push(scribble(HHA));
+    ok(back && !back.ok && run.stumbles === 2,
+      'وما طُرح لا يبقى في الحساب — فالردُّ يطوي لمستَه ويُبقي ما صحّ قبلها');
+    /**
+     * 🔴 **ودَينٌ مقيسٌ يُعلَن لـ ن٣ — خربشةٌ وحدَها في صندوقٍ فارغ**: الحَكَمُ
+     * الكلّيّ **يقبلها** إذ تغطّي النموذجَ تغطيةً تامّة ويقع من حبرها في ممرّ
+     * السماحة العريض (×`FREE.ease`) ما يجاوز عتبةَ الدقّة. **وهو أخو دَين «نصف
+     * الحرف»** (`test_shape.mjs`) وعلّتُهما واحدة: عرضُ الممرّ — **ويُعايَران معاً
+     * بحصادٍ ثانٍ لا بيدِ جلسة**. **والحبرُ الزائد فوق حرفٍ صحيحٍ مردودٌ اليوم**
+     * (السطرُ فوقه)، وهو حالُ اللوح: الطفلُ يكتب في صندوقٍ ثم يزيد.
+     */
+    const alone = pen.judgeShape(HHA, [scribble(HHA)]);
+    console.log(`  🔴 دَينٌ معلَن لـ ن٣: خربشةٌ **وحدَها** ${alone.ok ? 'تُقبَل' : `تُرَدّ «${alone.why}»`}`
+      + ` (تغطية ${Math.round(alone.metrics.recall * 100)}٪ · دقّة ${
+        Math.round(alone.metrics.precision * 100)}٪ من عتبة ${
+        Math.round(pen.SHAPE_LIMITS.precision * 100)}٪) — عرضُ الممرّ نفسُه`
+      + ' الذي يقبل نصفَ الحرف، ويُعايَر معه');
+    // **والآلةُ لا تطوي ما صحّ لأجل خربشة**: الاستئنافُ ممنوعٌ على `stray-ink` بعينه
+    ok(bad.fault.code === pen.FAULTS.STRAY_INK && !bad.restarted,
+      'ولا يُستأنَف الشكلُ على حبرٍ زائد — فالخربشةُ لا تُبطل ما صحّ قبلها');
+  }
+
+  // ٤) **واستئنافُ الشكل يطوي ما قبله**: مَن كتب شكلاً فانتُظر، ثم كتب الصحيحَ.
+  {
+    const run = pen.createFreeRun(NOON, {});
+    run.push(halfBody(NOON)[0]);                 // نصفٌ — يُنتظَر صامتاً
+    run.push(bodyOf(NOON)[0]);                   // ثم الجسمُ كاملاً
+    const end = run.push(dotsOf2(NOON)[0]);      // ثم نقطتُه
+    ok(run.done && end?.ok,
+      `ومَن كتب نصفاً ثم أعاد الشكلَ كاملاً يبلغ آخرَ الطريق (استُؤنف ${end?.restarted})`
+      + ` — ولا يُحاسَب بما طواه`);
+    /**
+     * 🔴 **ولا صمتَ لا يُخرَج منه** (صيدُ `test_measure` في ن٢): حبرٌ شاردٌ **بعيدٌ
+     * عن الصندوق** يُفسِد التطبيعَ فتنهار التغطيةُ ⇒ `pending` أبداً — **فيبقى
+     * الطفلُ في صمتٍ** ولو أعاد الشكلَ صحيحاً، **ولا يبلغ المخرجَ الكريم** لأنّ
+     * الانتظارَ ليس تعثّراً. فيُسأل الذيلُ قبل الانتظار.
+     */
+    const stuck = pen.createFreeRun(NOON, {});
+    stuck.push(bodyOf(NOON)[0]);
+    stuck.push([[0, 0], [0, 0]]);                // حبرٌ شاردٌ في زاوية اللوح
+    bodyOf(NOON).forEach((b) => stuck.push(b));
+    const out = stuck.push(dotsOf2(NOON)[0]);
+    ok(stuck.done && out?.ok && out.restarted,
+      'وحبرٌ شاردٌ بعيدٌ لا يحبس الطفلَ في صمت: يُعيد الشكلَ فيُطوى ما قبله ويُقبَل');
+  }
+
+  // ٥) 🔴 **ومادّةٌ لا جسمَ لها: نقرةُ الصفر** — استثناءٌ بنيويٌّ مُعلَن في المحرّك.
+  //    **وعلّتُه مقيسة**: `judgeShape` يوفّق مركزَ حبر الطفل على مركز النموذج،
+  //    **فموضعُ النقرة الوحيدة يُمحى قبل أن يُقاس**، وتُقاس دقّتُها إلى جسمٍ لا وجودَ
+  //    له فتخرج صفراً ⇒ `stray-ink` **في أشكاله الأربعة**، فلا تُعبَر محطتُه أبداً.
+  {
+    const ZERO = PATHS['٠'].isolated;
+    const at = ZERO.dots[0].at;
+    const far = [at[0] + pen.TOLERANCE.dot * 2, at[1]];
+    const bare = pen.judgeShape(ZERO, [[at, at, at]]);
+    const hit = pen.createFreeRun(ZERO, {});
+    const near = hit.push([at, at, at]);
+    const away = pen.createFreeRun(ZERO, {});
+    const off = away.push([far, far, far]);
+    ok(!bare.ok, `والحَكَمُ الكلّيّ لا يصلح لها بنيةً: نقرةٌ في موضعها يردّها «${bare.why}»`
+      + ` (دقّةٌ ${Math.round(bare.metrics.precision * 100)}٪ إلى جسمٍ لا وجودَ له)`);
+    ok(near?.ok && hit.done,
+      'فتُحكَم بموضعها في الآلة (`bodyless`) — والنقرةُ في موضعها **تُقبَل** فتُعبَر محطةُ الصفر');
+    ok(off && !off.ok && !away.done,
+      `وبعيداً عن موضعها **تُرَدّ** «${off?.fault?.code}» — فالاستثناءُ لا يفتح باباً`);
+    // **والاستثناءُ يُقرأ من المادّة لا من اسمٍ مكتوب** — فلا يشيخ بمادّةٍ تُضاف
+    ok(/const bodyless = !parts\.some\(\(part\) => part\.kind === 'stroke'\)/.test(penCode),
+      'وهو مقروءٌ من بنية المادّة لا من قائمة أسماء — فمادّةٌ جديدةٌ بلا جسمٍ تدخله من نفسها');
+  }
+
+  // ٦) **ولا حكمَ يُرفَع بلا اسمٍ معلَن**: كلُّ سببٍ من `judgeShape` له نصٌّ في اللوحة.
+  {
+    const reasons = ['body-coverage', 'part-missing', 'stray-ink', 'no-marks',
+      'dots-count', 'dots-side', 'dots-span'];
+    const nameless = reasons.filter((code) => !pen.FAULT_TEXT[code]);
+    ok(nameless.length === 0,
+      `ولأسباب الحَكَم الكلّيّ السبعة نصوصُها في \`FAULT_TEXT\` — فلا يسقط سببٌ من`
+      + ` لوحة وليّ الأمر صامتاً${nameless.length ? ` (بلا نصّ: ${nameless.join('، ')})` : ''}`);
+    ok(reasons.every((code) => Object.values(pen.FAULTS).includes(code)),
+      'وكلُّها معلَنةٌ في `FAULTS` — «رمزٌ لا يعرفه `FAULT_TEXT` لا يُخترع له نصّ» (`parent.js`)');
+  }
 }
 
 // ————— ٣. الشروطُ الأربعة أربعة: لكلٍّ وجهاه —————
@@ -688,9 +941,10 @@ for (const [name, codes] of CONDITIONS) {
   const hit = codes.filter((code) => allCodes.has(code));
   ok(hit.length > 0, `الشرط ${name}: تُسقِطه العدّةُ فعلاً (${hit.join('، ') || 'لا حالة'})`);
 }
-const accepted = traces.cases.filter((c) => c.expect.accept && !c.expect.run);
-ok(accepted.length >= 3 && accepted.every((c) => seen.get(c.id).accepted),
-  `وثلاثُ كتاباتٍ سليمةٍ على الأقل تُقبَل — ومنها الرجفةُ الخفيفة (${accepted.length} حالة)`);
+const accepted = traces.cases.filter((c) => wantShape(c) && !c.expect.run);
+ok(accepted.length >= 3 && accepted.every((c) => seenShape.get(c.id).ok),
+  `وثلاثُ كتاباتٍ سليمةٍ على الأقل يقبلها **الحَكَمُ الكلّيّ** — ومنها الرجفةُ الخفيفة`
+  + ` (${accepted.length} حالة)`);
 ok([...allCodes].every((code) => Object.values(pen.FAULTS).includes(code)),
   'ولا خطأَ يخرج من المحرّك بلا اسمٍ معلَنٍ في `FAULTS` (تقرؤه لوحةُ الجلسة ١٠)');
 ok(Object.keys(pen.FAULT_TEXT).length === Object.keys(pen.FAULTS).length,

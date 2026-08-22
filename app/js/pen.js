@@ -51,6 +51,19 @@ export const FAULTS = {
   DOTS_FIRST: 'dots-first',     // النقاطُ قبل الجسم (الشرط ٤)
   INCOMPLETE: 'incomplete',     // ترك جزءاً بلا كتابة
   EXTRA: 'extra',               // زاد جزءاً ليس من الحرف
+  /**
+   * **وأسبابُ الحَكَم الكلّيّ** (`judgeShape`، جلسة ن٢): هي **أسبابُ الردّ** منذ صار
+   * القبولُ بالشكل — فتُعلَن هنا بأسمائها لتقرأها لوحةُ وليّ الأمر (`parent.js`:
+   * «رمزٌ لا يعرفه `FAULT_TEXT` لا يُخترع له نصّ»). **وأمّا التسعةُ فوقها فصارت
+   * مادّةَ تدريسٍ تُقاس ولا يُردّ بها** (`METHOD.md §٣.٣`، حكمُ المالك ٢٠–٢١ أغسطس).
+   */
+  BODY_SHORT: 'body-coverage',  // لم يبلغ حبرُه نموذجَه
+  PART_SHORT: 'part-missing',   // جزءٌ من الحرف بلا حبر
+  STRAY_INK: 'stray-ink',       // حبرٌ في فراغ الحرف (خربشة)
+  NO_MARKS: 'no-marks',         // حرفٌ بنقاطٍ كُتب بلا نقطة
+  DOTS_COUNT: 'dots-count',     // عددُ العلامات غيرُ عددها
+  DOTS_SIDE: 'dots-side',       // العلامةُ في غير جهتها
+  DOTS_SPAN: 'dots-span',       // مدُّ الشَّرْطة أو رأسُ الثلاث
 };
 
 /**
@@ -85,6 +98,13 @@ export const FAULT_TEXT = {
   [FAULTS.DOTS_FIRST]: 'يضع النقاط قبل الجسم',
   [FAULTS.INCOMPLETE]: 'يترك جزءاً بلا كتابة',
   [FAULTS.EXTRA]: 'يزيد جزءاً ليس من الحرف',
+  [FAULTS.BODY_SHORT]: 'لم يكتب الحرفَ كلَّه',
+  [FAULTS.PART_SHORT]: 'يترك جزءاً من الحرف',
+  [FAULTS.STRAY_INK]: 'يزيد حبراً ليس من الحرف',
+  [FAULTS.NO_MARKS]: 'يترك نقاطَ الحرف',
+  [FAULTS.DOTS_COUNT]: 'عددُ النقاط غيرُ عددها',
+  [FAULTS.DOTS_SIDE]: 'يضع النقاط في غير جهتها',
+  [FAULTS.DOTS_SPAN]: 'يمدّ النقاط في غير مدّها',
 };
 
 /**
@@ -1310,8 +1330,9 @@ function shapeNormal(strokes, model, tol) {
  * @param {object} ref المسارُ المرجعيّ — وهو نفسُه المعروض (**النموذجُ هو المقياس**)
  * @param {Array<Array<[number, number]>>} strokes حبرُ الطفل، **بلا ترتيبٍ مضمون**
  * @param {{tolerance?: number|object}} [options] وسماحةُ المحطة إن نصّت غلبت
- * @returns {{ok: boolean, why: string|null, guides: string[],
+ * @returns {{ok: boolean, why: string|null, pending: boolean, guides: string[],
  *   metrics: {recall: number, part: number, precision: number}, shaky: boolean}}
+ *   و`pending` نقصٌ يصلحه مزيدُ حبرٍ فيُنتظَر بصمت — انظر شرحَه عند حسابه.
  */
 export function judgeShape(ref, strokes, options = {}) {
   /**
@@ -1332,8 +1353,9 @@ export function judgeShape(ref, strokes, options = {}) {
   const model = [...modelBody, ...modelDots];
   const ink = (strokes || []).filter((s) => s && s.length).map((s) => s.map((p) => [p[0], p[1]]));
   if (!ink.length || !model.length) {
+    // **ولوحٌ بلا حبرٍ نقصٌ يُنتظَر** لا شكلٌ فاسد — فالطفلُ لم يبدأ بعد.
     return {
-      ok: false, why: 'body-coverage', guides, shaky: false,
+      ok: false, why: FAULTS.BODY_SHORT, pending: true, guides, shaky: false,
       metrics: { recall: 0, part: 0, precision: 0 },
     };
   }
@@ -1390,11 +1412,23 @@ export function judgeShape(ref, strokes, options = {}) {
    * **وما بين النقاط لا يُحاسَب** — ولذلك قيسَت العلامةُ مجموعةً لا نقطةً نقطة.
    */
   let dotFail = null;
+  /** **ونقصُ العلامة يُفرَّق من فسادها**: النقصُ يصلحه مزيدُ حبرٍ، والفسادُ لا يصلحه. */
+  let dotShort = false;
+  /**
+   * 🔴 **وعلامةٌ لم تُكتب بعدُ تُفسِد قياسَ الدقّة نفسَه** (صيدُ ن٢ على `ة/ابتدائي`):
+   * التطبيعُ يوفّق صندوقَ حبر الطفل على صندوق **النموذج كلِّه — بنقاطه**، فمن كتب
+   * الجسمَ وحدَه كُبّر جسمُه ليملأ صندوقاً فيه نقاطٌ فوقه، **فخرج حبرُه الصحيح عن
+   * الممرّ فقُرئ زائداً** (`stray-ink`، ودقّتُه ٥٠٪). ⇐ **فما دامت العلاماتُ ناقصةً
+   * فالنقصُ نقصٌ يُنتظَر**، ولا يُنهَر طفلٌ على جسمٍ كتبه صحيحاً قبل أن ينقط.
+   */
+  let marksShort = false;
   if (dots === 0) {
     // **وحرفٌ بلا نقاطٍ لا يقبل نقرة** — إلا نقرةَ تردّدٍ على حبرٍ مكتوب.
     if (child.some((s) => isTap(s) && !hesitates(s))) dotFail = 'dots-count';
   } else if (!marks.length) {
     dotFail = 'no-marks';
+    dotShort = true;
+    marksShort = true;
   } else {
     const seats = marks.map((s) => shapeSeat(s));
     const taken = new Array(marks.length).fill(false);
@@ -1417,6 +1451,7 @@ export function judgeShape(ref, strokes, options = {}) {
       ? Math.sign(shapeMidY(modelDots) - shapeMidY(modelBody)) : 0;
     const sideChild = childBody.length
       ? Math.sign(shapeMidY(childMarks) - shapeMidY(childBody)) : sideModel;
+    marksShort = clusters < dots;
     if (sideModel !== 0 && sideChild !== sideModel) dotFail = 'dots-side';
     else if (clusters === dots) dotFail = null;
     else if (clusters < dots && runs.length) {
@@ -1424,7 +1459,10 @@ export function judgeShape(ref, strokes, options = {}) {
         && spanX <= SHAPE_DOTS.spanHigh * Math.max(dotSpan, tol);
       const apexOk = dots < 3 || spanY >= SHAPE_DOTS.apex * spanX;
       dotFail = spanOk && apexOk ? null : 'dots-span';
-    } else dotFail = 'dots-count';  // **وزيادةُ التجمّعات عن العدد ردٌّ** كنقصانها
+    } else {
+      dotFail = 'dots-count';  // **وزيادةُ التجمّعات عن العدد ردٌّ** كنقصانها
+      dotShort = clusters < dots;
+    }
   }
 
   /** **سببٌ واحدٌ أوّل** يُقال للطفل: الجسمُ قبل جزئه، وجزؤه قبل الزائد، ثم العلامة. */
@@ -1441,7 +1479,26 @@ export function judgeShape(ref, strokes, options = {}) {
     && recall <= SHAPE_LIMITS.recall + SHAPE_LIMITS.shakyBand;
   if (shaky) guides.push('shaky');
 
-  return { ok: !why, why: why || null, guides, metrics: { recall, part, precision }, shaky };
+  /**
+   * ————— **`pending`: نقصٌ يصلحه مزيدُ حبر — فيُنتظَر بصمت** (جلسة ن٢) —————
+   *
+   * **وعلّتُه أنّ الحكمَ يقع عند كلّ رفعِ قلم** وقد لا يكون الطفلُ فرغ بعد: مَن كتب
+   * جسمَ النون ولمّا يضع نقطتَها **ليس مخطئاً** — إنّما لم يتمّ. **فالردُّ عليه هنا
+   * عقوبةٌ على أثناء العمل**، والصوابُ أن يُحفَظ حبرُه ويُنتظَر.
+   *
+   * ⇐ **فالنقصُ يُنتظَر** (تغطيةُ جسمٍ أو جزءٍ ناقصة · لا علامات · تجمّعاتٌ أقلُّ من
+   * العدد) — **وما سواه قاطعٌ يُنبَّه له فوراً**: حبرٌ في فراغ الحرف (خربشة) أو
+   * علامةٌ في غير جهتها أو زائدةٌ عن العدد أو مدٌّ خاطئ. فهذه **لا يصلحها مزيدُ حبر**
+   * — والسكوتُ عليها تركُ الطفل يزيد فوق ما فسد.
+   */
+  const pending = Boolean(why) && (why === FAULTS.BODY_SHORT || why === FAULTS.PART_SHORT
+    || why === FAULTS.NO_MARKS || (why === FAULTS.DOTS_COUNT && dotShort)
+    // **وحبرٌ يُقرأ زائداً وعلامةُ الحرف لم تُكتب بعدُ** — انظر `marksShort` أعلاه.
+    || (why === FAULTS.STRAY_INK && marksShort));
+
+  return {
+    ok: !why, why: why || null, pending, guides, metrics: { recall, part, precision }, shaky,
+  };
 }
 
 /**
@@ -1455,9 +1512,29 @@ export function judgeShape(ref, strokes, options = {}) {
  * يبلغ آخرَه (`tools/test_pen.mjs §٢ج` و`tools/test_measure.mjs`)، **واللوحُ يقودها
  * هو نفسُه** فلا مصدران: ما يُفحَص في العدّة هو ما يمشي تحت إصبع الطفل.
  *
- * **ويُحكَم كلَّما تمّت لمساتُ جزء** لا عند آخر جزءٍ وحدَه: فمَن كتب جسمَ النون يُقبَل
- * جسمُه ويثبت حبرُه، ثم تُقاس نقطتُه **موفَّقةً مع جسمه** — فيبقى موضعُ النقطة من
- * الجسم مقيساً (وهو من الشكل)، ولا يُترك الطفلُ بلا جوابٍ حتى يتمّ.
+ * ————— 🔴 **وحَكَمُ القبول فيها صار `judgeShape` الكلّيّ** (جلسة ن٢) —————
+ *
+ * **وهذا هو الموضعُ الواحد**: الشاشاتُ كلُّها (درسٌ ونسخٌ وخفوتٌ وجملةٌ ولحاقٌ
+ * وبوّاباتٌ وإملاء) تمرّ بهذه الآلة — فلا يُوصَّل الحكمُ في ملفّ شاشةٍ واحد.
+ * **وعلّتُه مقيسة** (`ENGINE_RESCUE §١–٢`): الماشي يفترض الترتيبَ والاتجاهَ **ليقيس**،
+ * فمَن كتب بغير ترتيبنا انحرف المشيُ عنده فقاس البقيّةَ على غير أجزائها — موافقةُ
+ * عين الأب **٢٤/٦٠**، والحَكَمُ الكلّيّ **٥٧/٦٠** على البيانات نفسِها.
+ *
+ * **وسياسةُ الإطلاق ثلاثةُ أحوالٍ لا رابعَ لها** عند كلّ رفعِ قلم:
+ *   · **قبولٌ** (`ok`) — يثبت الحبرُ ويُختَم الشكل.
+ *   · **انتظارٌ صامت** (`pending`) — نقصٌ يصلحه مزيدُ حبر: **يُحفَظ الحبرُ ولا يُقال
+ *     شيء**، فمن كتب جسمَ النون ولمّا ينقط ليس مخطئاً.
+ *   · **ردٌّ قاطع** — ما لا يصلحه مزيدُ حبر (خربشةٌ · جهةٌ مقلوبة · علامةٌ زائدة ·
+ *     مدٌّ خاطئ): يخفت حبرُ اللمسة ويومض الإرشادُ ويُعَدّ تعثّراً.
+ *
+ * **والماشي يبقى معلّماً لا حَكَماً**: يُمَرّ عليه الأثرُ **صامتاً** في الحالين
+ * (`judgeFree` كما هي، بلا عرض) فتُستخرج إرشاداتُ الطريقة — البدايةُ والاتجاهُ
+ * والترتيب — **وتُحمَل في `verdict` قياساً يُسجَّل ولا يُردّ به** (`verdict.exact`
+ * مطابقةُ الطريقة، و`verdict.codes` شكاواها). فالطريقةُ **تُدرَّس وتُرشَد وتُقاس**،
+ * والشكلُ وحدَه يُشترَط (حكمُ المالك ٢٠–٢١ أغسطس ٢٠٢٦).
+ *
+ * **وأسماءُ حقول النتيجة كما كانت** فلا تُمَسّ شاشة: `ok` · `restarted` · `size` ·
+ * `text` · `verdict` (بـ`accepted` و`codes` و`primary` و`metrics`) · `done`.
  *
  * @param {object} ref المسارُ المرجعيّ
  * @param {{tolerance?: number|object}} [options]
@@ -1467,68 +1544,209 @@ export function createFreeRun(ref, options = {}) {
   /** كم لمسةً ينتظرها كلُّ جزء: الجسمُ واحدة، والنقطةُ بعددها. */
   const touchesOf = (part) => (part.kind === 'dot' ? part.count : 1);
   const reached = parts.reduce((run, part) => [...run, (run[run.length - 1] || 0) + touchesOf(part)], []);
-  const whole = reached[reached.length - 1] || 0;
-  /** النموذجُ إلى أوّل `k` جزءاً — فيُوفَّق ما كُتب على ما يقابله وحدَه لا على ما بعده. */
-  const subsetRef = (k) => (k >= parts.length ? ref : {
-    ...ref,
-    strokes: (ref.strokes || []).slice(0, k),
-    dots: (ref.dots || []).slice(0, Math.max(0, k - (ref.strokes || []).length)),
-  });
+
+  /**
+   * 🔴 **ومادّةٌ لا جسمَ لها يحكمها الماشي — استثناءٌ واحدٌ مقيسٌ مُعلَن** (ن٢):
+   * الصفرُ `٠` مادّتُه **نقرةٌ** لا ضربة (حكمُ المالك، `test_paths` يحرسه). والحَكَمُ
+   * الكلّيّ **لا يصلح لها بنيةً**: التطبيعُ يزيح مركزَ حبر الطفل إلى مركز النموذج،
+   * **فموضعُ النقرة الوحيدة يُمحى قبل أن يُقاس** — فتُقبَل نقرةٌ في أيّ زاوية.
+   * وفوق ذلك تُقاس دقّتُها إلى جسمٍ لا وجودَ له فتخرج صفراً، **فلا تُقبَل نقرةٌ أبداً**
+   * (قِيس: `٠` بأشكاله الأربعة `stray-ink` والدقّةُ ٠٪ — ومحطتُه لا تُعبَر).
+   * ⇐ **فما لا جسمَ له يحكمه الحَكَمُ الذي يقيس موضعَ النقرة** (الشرطُ الرابع في
+   * `judgeFree`)، **وما له جسمٌ — وهو الهجاءُ كلُّه — يحكمه الشكل**. والاستثناءُ
+   * **بنيويّ لا بالاسم**: يُقرأ من المادّة نفسِها فلا يشيخ بمادّةٍ تُضاف.
+   */
+  const bodyless = !parts.some((part) => part.kind === 'stroke');
 
   let touches = [];        // لمساتُ المحاولة الجارية — تُقرأ ولا تُخزَّن
-  let settled = 0;         // كم جزءاً قبله الحكمُ الثاني
+  let done = false;        // أقُبل الشكلُ كلُّه؟ — وهو حكمُ `judgeShape` وحدَه
   let stumbles = 0;        // تعثّراتٌ متتالية — وبها يُفتَح المخرجُ الكريم
+  let waits = 0;           // وانتظاراتٌ صامتةٌ متتالية — **ولها حدٌّ** (انظر أدناه)
 
-  const judgeAt = (count, ink) => judgeFree(count ? subsetRef(count) : ref, ink, options);
+  /**
+   * **مؤشّرُ الإرشاد — تعليمٌ لا حكم**: أيُّ جزءٍ تومض نقطةُ بدايته. يُقرأ من **عدد
+   * اللمسات** لا من قبولٍ جزئيّ — فالقبولُ صار كلّياً ولا يُجزَّأ. ومَن كتب جسمَ
+   * النون رأى إرشادَ نقطتها، ومن رُدَّ عليه رجع المؤشّرُ معه.
+   */
+  const guideAt = (n) => reached.filter((r) => r <= n).length;
+
+  /**
+   * 🔴 **وللصمت حدّ — «لا انسدادَ أبداً» عهدٌ فوق سياسة الإطلاق** (`METHOD.md §٥ب`،
+   * حكمُ المدير من بلاغ الميدان ٢): الانتظارُ الصامتُ رحمةٌ بمن **لم يتمّ**، فإن صار
+   * الطفلُ يكتب ما لا يُقرأ حرفَه — وهو أطبعُ حال المتعثّر — **بقي في صمتٍ لا مخرجَ
+   * منه**: لا حبرُه يخفت، ولا إرشادٌ يومض، **ولا يُفتَح له البابُ الكريم** لأنّ
+   * الانتظارَ ليس تعثّراً. ⇐ **فيُعَدّ الانتظارُ أيضاً**، وحدُّه **لمساتُ الشكل
+   * كلُّها ثم `FREE.stumbles` فوقها** — فمن جاوز ما يحتاجه شكلُه ثلاثَ لمساتٍ صامتة
+   * فقد تعثّر وإن لم يُرَدّ عليه. **ولا يُردّ حبرُه ولا يُنهَر**: يُفتَح البابُ وحدَه.
+   */
+  const waitCap = () => (reached[reached.length - 1] || 1) + FREE.stumbles;
+
+  /** حجمٌ يُرشَد إليه إن شذّ — من إرشادات الحَكَم الكلّيّ نفسِها، لا حَكَمٍ ثانٍ. */
+  const sizeOf_ = (shape) => shape.guides.find((g) => g === SIZE.SMALL || g === SIZE.BIG) || null;
+
+  /**
+   * **الماشي الصامت**: أثرُ الطفل يُعاد على `judgeFree` **بلا عرض** فتُقرأ منه
+   * الطريقةُ (بدايةً واتجاهاً وترتيباً) — ثم يُركَّب الحكمُ: **القبولُ من الشكل**
+   * والباقي قياسُ طريقةٍ يُسجَّل.
+   */
+  const verdictOf = (shape, ink) => {
+    /**
+     * **والماشي يُسأل عن المقبول وحدَه** (نصُّ خطّة الإنقاذ: «الأثرُ المقبول يُمرَّر
+     * للماشي الصامت»). **وثمنُه مقيس**: الحَكَمُ الكلّيّ يقابل سحابتين فيكلّف على
+     * أطول جملةٍ في الشجرة **١١٨ مللي** (٩٣٢ نقطة)، والماشي ١١ — ويقع الحكمُ **عند
+     * كلّ رفعِ قلم**. فلا يُمشى المسارُ في المردود: لا قياسَ يُكتب منه أصلاً.
+     */
+    if (!shape.ok) {
+      return {
+        done: false,
+        accepted: false,
+        exact: false,
+        size: shape.guides.find((g) => g === SIZE.SMALL || g === SIZE.BIG) || null,
+        guides: [...shape.guides],
+        attempts: ink.length,
+        parts: parts.length,
+        faults: [],
+        codes: [],
+        primary: shape.why,
+        // **ومقاييسُه مقاييسُه هو**: تغطيةٌ من الحَكَم الكلّيّ، ولا يُكتب «انحرافٌ»
+        // ولا «ارتدادٌ» وقد حُكم بغيرهما (عهدُ «المعروضُ هو المسجَّل»).
+        metrics: { maxLateral: 0, maxBack: 0, coverage: shape.metrics.recall, startDist: 0 },
+        shape,
+      };
+    }
+    const method = judgeFree(ref, ink, options);
+    return {
+      ...method,
+      accepted: true,
+      done: true,
+      /** إرشاداتُ الطريقة وإرشاداتُ الشكل معاً — وصفاً يصحب الحكمَ ولا يردّ به. */
+      guides: [...new Set([...(method.guides || []), ...shape.guides])],
+      shape,
+    };
+  };
+
+  const settle = (shape, ink, restarted) => {
+    done = true;
+    stumbles = 0;
+    waits = 0;
+    return {
+      ok: true,
+      restarted,
+      /** كم لمسةً من آخر ما رُسم بقيت في الشكل المقبول — بها يخفت اللوحُ ما طُوي. */
+      kept: ink.length,
+      pending: false,
+      size: sizeOf_(shape),
+      text: SIZE_TEXT[sizeOf_(shape)] || null,
+      fault: null,
+      shape,
+      verdict: verdictOf(shape, ink),
+      done: true,
+    };
+  };
 
   return {
     parts,
-    get settled() { return settled; },
+    /** مؤشّرُ الإرشاد (لا عدَدُ ما قُبل) — يقرؤه اللوحُ ليومض ببداية ما بقي. */
+    get settled() { return done ? parts.length : guideAt(touches.length); },
     get stumbles() { return stumbles; },
-    get done() { return settled >= parts.length; },
-    reset() { touches = []; settled = 0; },
+    /** انتظاراتٌ صامتةٌ بلغت حدَّها — تُقرأ كتعثّرٍ في فتح الباب الكريم وحدَه. */
+    get waits() { return waits; },
+    get stalled() { return waits >= waitCap(); },
+    get done() { return done; },
+    reset() { touches = []; done = false; waits = 0; },
     /**
-     * لمسةٌ رُفعت. تُعيد حكمَها، أو `null` إن كانت **في وسط جزءٍ بعددِ لمساته**
-     * (نقطتان لتاءٍ مثلاً) فلا حكمَ بعدُ.
+     * لمسةٌ رُفعت. تُعيد حكمَها، أو **`null` إن كان النقصُ ممّا يصلحه مزيدُ حبر** —
+     * فيُحتفَظ بالحبر ويُنتظَر بصمت (`pending` في `judgeShape`).
      */
     push(points) {
       touches.push(points);
-      const covered = reached.indexOf(touches.length) + 1;
-      if (!covered && touches.length < whole) return null;
-      const verdict = judgeAt(covered, touches);
-      if (verdict.accepted) {
-        settled = covered;
-        stumbles = 0;
-        return { ok: true, restarted: false, size: null, text: null, verdict, done: this.done };
-      }
       /**
-       * **واستئنافُ الشكل من أوّله محاولةٌ جديدة لا خطأٌ في بقيّته** (🔴 مراجعةُ
-       * المدير للجلسة م٣): مَن ثبت له جزءٌ ثم أعاد الشكلَ **كلَّه** — وهو أطبعُ ما
-       * يفعله طفلٌ رُدَّ عليه — كانت ضربتُه الأولى تُقاس على **الجزء الباقي** فتُردّ
-       * أبداً، فلا يبلغ آخرَه ولا تُكتب مهارتُه. (قِيست في محطة التمييز: يُكتب جسمُ
-       * الأخت فيُقبَل — والجسمُ واحدٌ في ب ت ث ن ي — ثم لا يُقبَل بعده شيء.)
-       *
-       * **والفيصلُ أن تُسأل اللمسةُ وحدَها**: أتصلح **أوّلَ جزءٍ** من الشكل؟ فإن صلحت
-       * فهي بدايةٌ جديدة، ويُطوى ما قبلها. ولا تُمنَح بلا استحقاق: تُحكَم بالشروط
-       * الأربعة نفسِها كأيّ بداية.
+       * **ومادّةُ النقرة تُحكَم بالماشي** (انظر `bodyless` أعلاه): يُصاغ منه حكمُ
+       * شكلٍ صوريّ بحقوله نفسِها، فلا يفترق عقدُ النتيجة بمادّةٍ عن مادّة.
        */
-      if (settled > 0 && reached[0] === 1) {
-        const fresh = judgeAt(1, [points]);
-        if (fresh.accepted) {
-          touches = [points];
-          settled = 1;
-          stumbles = 0;
-          return { ok: true, restarted: true, size: null, text: null, verdict: fresh, done: this.done };
+      const whole = reached[reached.length - 1] || 0;
+      const shape = bodyless
+        ? (() => {
+          /**
+           * **وحَكَمُها `judge` لا `judgeFree`**: الثاني يوفّق النموذجَ على **صندوق
+           * حبر الطفل** — ونقرةٌ واحدة لا صندوقَ لها، فيردّها حدُّ الحجم قبل أن
+           * يُنظَر في موضعها. والأوّلُ يقيس موضعَ النقرة على الشبكة كما هي، وهو
+           * المطلوبُ بعينه (وهو حَكَمُ `test_paths` على مادّة النقرة منذ يومها).
+           */
+          const walk = judge(ref, touches, options);
+          return {
+            ok: walk.accepted,
+            why: walk.accepted ? null : FAULTS.DOTS_COUNT,
+            pending: !walk.accepted && touches.length < reached[reached.length - 1],
+            guides: [],
+            metrics: { recall: walk.metrics.coverage, part: walk.metrics.coverage, precision: 1 },
+            shaky: false,
+          };
+        })()
+        : judgeShape(ref, touches, options);
+      if (shape.ok) return settle(shape, touches, false);
+      /**
+       * **واستئنافُ الشكل محاولةٌ جديدة لا خطأٌ في بقيّته** (🔴 مراجعةُ المدير
+       * للجلسة م٣، ومقيسٌ من جديد في ن٢): مَن كتب شكلاً فانتُظر صامتاً ثم **أعاد
+       * الشكلَ الصحيح** — وهو أطبعُ ما يفعله طفلٌ لم يُجَبْ — كان أوّلُ ما يكتبه
+       * يبقى في الحساب فتُقرأ نقطتاه نقطتين ويُردّ وهو مصيب. (قِيس على «طريق
+       * التمييز»: جوابُ الأخت ثم الجوابُ الصحيح — رُدَّ `dots-count`.)
+       *
+       * **والفيصلُ أن يُسأل ذيلُ اللمسات بالحَكَم نفسِه**: أيقوم آخرُها بالشكل
+       * كلِّه؟ فيُطوى ما قبله — **بأطول ذيلٍ يصلح** فلا يُطرح من حبر الطفل ما لا
+       * يلزم طرحُه. ولا يُمنَح بلا استحقاق: يُحكَم بـ`judgeShape` كأيّ محاولة.
+       */
+      /**
+       * 🔴 **ولا يُطوى ما قبلُ لأجل حبرٍ زائد** (`stray-ink`): سببُ هذا الردّ أنّ
+       * **آخرَ ما رُسم ليس من الحرف** — فطرحُ ما قبله يقلب المعنى ويجعل الخربشةَ
+       * تُبطل ما صحّ. **وأمّا اشتباهُ العلامات** (`dots-*`) فهو عينُ أثر الاستئناف:
+       * نقطتان لشكلٍ نقطتُه واحدة. فالاستئنافُ لهذا لا لذاك — **وهو مقيسٌ لا مبدأ**:
+       * بدونه تُقبَل خربشةٌ فوق حرفٍ صحيح، لأنّ الخربشةَ وحدَها تغطّي النموذجَ.
+       */
+      if (shape.why !== FAULTS.STRAY_INK && touches.length > whole) {
+        for (let k = 1; k < touches.length; k++) {
+          const tail = touches.slice(k);
+          const fresh = judgeShape(ref, tail, options);
+          if (fresh.ok) {
+            touches = tail;
+            return settle(fresh, touches, true);
+          }
         }
       }
+      /**
+       * 🔴 **والانتظارُ بعد النظر في الاستئناف لا قبله** (صيدُ `test_measure` في ن٢):
+       * حبرٌ شاردٌ بعيدٌ عن الصندوق **يُفسِد التطبيعَ** فتنهار التغطيةُ ⇒ `pending`
+       * أبداً — **فيبقى الطفلُ في صمتٍ لا يخرج منه** ولو أعاد الشكلَ صحيحاً عشراً
+       * (ولا يبلغ `onStuck` لأنّ الانتظارَ ليس تعثّراً). ⇐ **فيُسأل الذيلُ أوّلاً**،
+       * ويُقيَّد السؤالُ بـ«لمساتٌ أكثرُ ممّا يحتاجه الشكل» فلا يُدفَع ثمنُه في
+       * الكتابة السويّة.
+       */
+      if (shape.pending) { waits++; return null; }
+      waits = 0;
       stumbles++;
+      const ink = [...touches];
       touches.pop();
+      /**
+       * **ولا يُردّ صامتاً** (`SHAPE_JUDGE §٦`): سببُ الشكل يُرفَع باسمه المعلَن في
+       * `FAULTS` فتقرأه لوحةُ وليّ الأمر، **ولا يُخترَع له نصّ** (`parent.js`).
+       */
+      const fault = {
+        code: shape.why,
+        part: Math.min(guideAt(touches.length), parts.length - 1),
+        at: parts[Math.min(guideAt(touches.length), parts.length - 1)]?.start || [0, 0],
+        off: [0, 0],
+        metrics: shape.metrics,
+      };
       return {
         ok: false,
         restarted: false,
-        size: verdict.size,
-        text: SIZE_TEXT[verdict.size] || null,
-        verdict,
+        kept: touches.length,
+        pending: false,
+        size: sizeOf_(shape),
+        text: SIZE_TEXT[sizeOf_(shape)] || null,
+        fault,
+        shape,
+        verdict: verdictOf(shape, ink),
         done: false,
       };
     },
@@ -1821,14 +2039,29 @@ export function penSurface(config) {
    */
   function settleFree(drawn) {
     const result = run.push(inkPoints);
-    if (!result) return;                       // في وسط جزءٍ بعددِ لمساته
+    /**
+     * **الانتظارُ الصامت** (`judgeShape().pending`، جلسة ن٢): نقصٌ يصلحه مزيدُ حبر —
+     * **فيبقى حبرُ الطفل على اللوح ولا يُقال شيء**. ومَن كتب جسمَ النون ولمّا ينقط
+     * ليس مخطئاً، فلا يخفت حبرُه ولا يومض إليه إرشاد.
+     */
+    if (!result) {
+      // **وللصمت حدّ**: مَن جاوز لمساتِ شكله بثلاثٍ صامتة يُفتَح له البابُ الكريم —
+      // **بلا ردٍّ ولا وميضٍ ولا خفوتِ حبر** (`createFreeRun.stalled`).
+      if (run.stalled) onStuck?.(run.waits);
+      return;
+    }
     if (result.ok) {
       // **واستئنافُ الشكل يطوي ما قبله**: حبرُ المحاولة الماضية يخفت ويذهب، فلا
       // يبقى على اللوح شكلان.
       if (result.restarted) {
-        for (const path of [...inkLayer.querySelectorAll('path')]) if (path !== drawn) fadeInk(path);
+        // **ويُطوى ما طُوي وحدَه**: آخرُ `kept` مسارٍ هو الشكلُ المقبول، وما قبله
+        // محاولةٌ سابقة تخفت وتذهب — فلا يبقى على اللوح شكلان.
+        const paths = [...inkLayer.querySelectorAll('path')];
+        for (const path of paths.slice(0, Math.max(0, paths.length - (result.kept || 1)))) fadeInk(path);
       }
-      drawn?.classList.add('pen-line--kept');
+      // **والمقبولُ يثبت حبرُه كلُّه** — لا لمستُه الأخيرة وحدَها: القبولُ صار
+      // كلّياً على الشكل، فما انتُظر صامتاً يثبت مع ما خُتم به.
+      for (const path of [...inkLayer.querySelectorAll('path')]) path.classList.add('pen-line--kept');
       onTry?.(result);
       onPart?.({ ok: true, progress: 1 });
       paintGuide();
@@ -1837,9 +2070,10 @@ export function penSurface(config) {
     }
     fadeInk(drawn);
     hint();
-    // **الخطأُ الأوّل هو الخطأ** (`verdict()` أعلاه): يُرفَع وحدَه إلى القياس، فلا
-    // تُحصى على محاولةٍ واحدة شكاوى يتلو بعضُها بعضاً.
-    if (result.verdict.faults[0]) onFault?.(result.verdict.faults[0]);
+    // **وسببُ الردّ سببُ الشكل** (`judgeShape().why`): واحدٌ أوّلُ يُقال بعينه —
+    // فلا تُحصى على محاولةٍ واحدة شكاوى يتلو بعضُها بعضاً. **وشكاوى الطريقة تُقاس
+    // في `result.verdict` ولا تُرفَع خطأً** — تُدرَّس ولا يُردّ بها.
+    if (result.fault) onFault?.(result.fault);
     onTry?.(result);
     paintGuide();
     if (run.stumbles >= FREE.stumbles) onStuck?.(run.stumbles);
