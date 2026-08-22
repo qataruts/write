@@ -18,3 +18,13 @@ docs/naskh/
 # كرّاستا الخطّاط: مرجعان يُقرآن محلياً ولا يُنشران (أمر المالك، ١٩ أغسطس ٢٠٢٦)
 docs/Alkhattat_Naskh_Booklet.pdf
 docs/Alkhattat_Ruqaa_Booklet.pdf
+
+# مختبرُ م٩ (تجربةُ النموذج الصغير): البياناتُ والأوزانُ والبيئةُ لا تُلتزَم —
+# السكربتاتُ وREPORT.md وحدَها. (`ENGINE_PLAN §م٩`، جلسة م٩ ٢٢ أغسطس ٢٠٢٦)
+lab/m9/data/
+lab/m9/.venv/
+lab/m9/runs/
+lab/m9/out/
+*.pt
+*.pth
+*.onnx
