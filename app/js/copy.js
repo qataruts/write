@@ -319,7 +319,10 @@ export function renderNode(node) {
     live = surface;
     board.replaceChildren(surface.el);
     board.classList.toggle('lesson-board--watch', step.id === 'watch');
-    surface.play();
+    // **العرضُ التلقائيّ لا يفتح لوحَ كتابة** (توحيدُ بلاغ المالك، ٢٣ أغسطس
+    // ٢٠٢٦ — القاعدةُ الواحدة في كل الشاشات): القلمُ بيد الطفل من أول لمسة،
+    // والإعادةُ بزرّ الطلب.
+    if (step.id === 'watch') surface.play();
     if (step.id === 'watch') {
       surface.el.addEventListener('pointerdown', () => { audio.stop(); nextStep(); });
       say(unit.say, step.say);

@@ -224,7 +224,9 @@ export function renderNode(node) {
     });
     live = surface;
     board.replaceChildren(surface.el);
-    surface.play();
+    // **العرضُ التلقائيّ لا يفتح لوحَ كتابة** (توحيدُ بلاغ المالك، ٢٣ أغسطس
+    // ٢٠٢٦ — القاعدةُ الواحدة في كل الشاشات): القلمُ بيد الطفل من أول لمسة،
+    // والإعادةُ بزرّ الطلب.
     surface.el.addEventListener('pointerdown', () => surface.stop(), { capture: true });
     // التعليمةُ ثم **صوتُ الكلمة من بنك اقرأ** — وهو كلُّ ما يسمعه في درجة الإملاء
     say(sayOf(levelOf(unit.text)), unit.say);

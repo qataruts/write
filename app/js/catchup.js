@@ -321,7 +321,9 @@ function wordExam(item, api) {
     surface.el,
     kit.el,
   );
-  surface.play();
+  // **العرضُ التلقائيّ لا يفتح لوحَ كتابة** (توحيدُ بلاغ المالك، ٢٣ أغسطس
+  // ٢٠٢٦ — القاعدةُ الواحدة في كل الشاشات): القلمُ بيد الطفل من أول لمسة،
+  // والإعادةُ بزرّ الطلب.
   surface.el.addEventListener('pointerdown', () => surface.stop(), { capture: true });
   api.say(ask, item.say);
   return box;

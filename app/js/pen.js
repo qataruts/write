@@ -973,8 +973,16 @@ function sv(tag, attrs = {}) {
   return el;
 }
 
-const pathD = (points) => points
-  .map((p, i) => `${i ? 'L' : 'M'}${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(' ');
+/**
+ * **والنقرةُ تُرى ساعةَ وضعها** (بلاغُ المالك، ٢٣ أغسطس ٢٠٢٦: «الطفل ينقر على
+ * النقطة فلا يرى شيئاً وهذا يشتّته»): مسارُ نقطةٍ واحدةٍ طولُه صفرٌ فلا يرسم
+ * SVG منه شيئاً — فتُمَدّ شريطةً متناهيةَ الصغر يرسمها رأسُ القلم المدوّر
+ * (`stroke-linecap: round`) قرصاً بعرض الحبر، من أول لمسة لا بعد الرفع.
+ */
+const pathD = (points) => (points.length === 1
+  ? `M${points[0][0].toFixed(1)} ${points[0][1].toFixed(1)} l0.01 0`
+  : points
+    .map((p, i) => `${i ? 'L' : 'M'}${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(' '));
 
 /** أنماطُ العرض — خطواتُ حلقة الدرس (`METHOD.md §٥`). */
 export const MODES = { GUIDED: 'guided', FAINT: 'faint', FREE: 'free' };
@@ -2397,6 +2405,16 @@ export function penSurface(config) {
   let inkPath = null;
   let inkPoints = [];
   const written = [];   // ما ثبت على اللوح في الخطوات الموجَّهة — لحكم الشكل الكلّيّ
+  /**
+   * 🔴 **ودرجُ المحاولة يجمع كلَّ الحبر — لا ما رضيه الماشي وحدَه** (بلاغُ
+   * المالك، ٢٣ أغسطس ٢٠٢٦: «مقاطعُ مثل با تتوقف ولا تتعدّى الصفحة»):
+   * `written` لا يضمّ إلا ما استوفى جزءَه، والحبرُ المرفوض «يخفت ويذهب» —
+   * فمن كتب «با» ضربتين (وموصولُها جزءٌ واحدٌ بعهد الوصل) حوكمت كلُّ ضربةٍ
+   * يتيمةً وذهبت، **ولا يجتمع له شكلٌ أبداً**. فالدرجُ يحفظ كلَّ ضربةٍ رُسمت
+   * في هذه الخطوة، وحَكَمُ الشكل يُسأل عن **أطول ذيلٍ يصلح** منه (كما في
+   * المجرى الحرّ سواء) — فتُقبل الإعادةُ الصحيحة ولا تُبطلها خربشةٌ سبقت.
+   */
+  const attemptInk = [];
 
   /** إحداثيُّ الإصبع على شبكة المادّة — **بصندوقها هي** لا بمربّعٍ مفترَض. */
   function toGrid(event) {
@@ -2497,9 +2515,16 @@ export function penSurface(config) {
      * عن مجموع المكتوب**: إن قال صحيحاً قُبلت الخطوةُ كاملةً وثبت الحبرُ — **والماشي
      * يبقى مرشداً حيّاً** (وميضُ البداية وتلوّنُ المسار وعدُّ الأجزاء) لا بوّاباً.
      */
-    const attempt = [...written, inkPoints.map((q) => [q[0], q[1]])];
-    const shape = judgeShape(ref, attempt, { tolerance });
-    if (!result?.ok && shape.ok) {
+    attemptInk.push(inkPoints.map((q) => [q[0], q[1]]));
+    let attempt = null;
+    let shape = null;
+    for (let k = 0; k < attemptInk.length; k++) {
+      const tailTry = attemptInk.slice(k);
+      const tailShape = judgeShape(ref, tailTry, { tolerance });
+      if (tailShape.ok) { attempt = tailTry; shape = tailShape; break; }
+      if (k === 0) shape = tailShape;
+    }
+    if (!result?.ok && attempt) {
       inkPath?.classList.add('pen-line--kept');
       inkPath = null;
       for (let i = 0; i < parts.length; i++) paintProgress(i, 1);
@@ -2589,6 +2614,7 @@ export function penSurface(config) {
   function reset() {
     stop();
     trial.reset();
+    attemptInk.length = 0;  // ودرجُ المحاولة يُفرَغ معها — صفحةٌ جديدةٌ بلا إرث
     // **والتعثّراتُ لا تُصفَّر بزرّ «أعِدْ»**: هي عدَدُ ما لقيه الطفلُ لا عددُ ما
     // ضغطه — فمن أعاد مرّتين وتعثّر يجد المخرجَ الكريم مفتوحاً كما يجده مَن لم يُعِد.
     run?.reset();

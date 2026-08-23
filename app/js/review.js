@@ -210,7 +210,9 @@ function penExercise(item, api, mode) {
     surface.el,
     kit?.el,
   );
-  surface.play();
+  // **العرضُ التلقائيّ لا يفتح لوحَ كتابة** (توحيدُ بلاغ المالك، ٢٣ أغسطس
+  // ٢٠٢٦ — القاعدةُ الواحدة في كل الشاشات): القلمُ بيد الطفل من أول لمسة،
+  // والإعادةُ بزرّ الطلب.
   surface.el.addEventListener('pointerdown', () => surface.stop(), { capture: true });
   api.say(letterName(item.unit));
   return box;
@@ -322,7 +324,9 @@ function wordExercise(item, api, mode) {
   box.append(h('p', { class: 'ask' }, sentence
     ? (dictation ? 'اِسْتَمِعْ ثُمَّ اكْتُبِ الجملة' : 'اِنْسَخِ الجملة')
     : sayOf(level)), surface.el, kit?.el);
-  surface.play();
+  // **العرضُ التلقائيّ لا يفتح لوحَ كتابة** (توحيدُ بلاغ المالك، ٢٣ أغسطس
+  // ٢٠٢٦ — القاعدةُ الواحدة في كل الشاشات): القلمُ بيد الطفل من أول لمسة،
+  // والإعادةُ بزرّ الطلب.
   surface.el.addEventListener('pointerdown', () => surface.stop(), { capture: true });
   // **وفي الإملاء الصوتُ هو السؤال كلُّه** — ولا نموذجَ يُرى (`MODES.FREE`).
   // وتعليمةُ الدرجة تسبق الكلمةَ **في القناة الواحدة** (٤ج) فتُسمَعان بترتيبهما.
