@@ -180,11 +180,18 @@ def expand(units: list) -> list:
     for unit in units:
         if unit.get("kind") == "liga" and unit["text"] == "لا":
             lam = "medial" if unit["form"] == "final" else "initial"
+            # 🔴 **لام-ألف رسمٌ واحد لا حرفان بذراع** (أمر المالك، ٢٣ أغسطس ٢٠٢٦:
+            # «ليس بالعربي لامٌ موصولة بألف إلا على شكل لا — ولا تُكتب لـا») —
+            # ومرجعُه لوحُ «لَأَزِيدَنَّكُمْ» (كتيّب الخطاط ص٢٦): ساقان تلتقيان
+            # عند قدمٍ قصيرة. فوسمُ الزوج يُفعّل في التركيب: قصَّ ذراعِ وصل
+            # اللام المقيسَ، وجلوسَ الألف عند القدم، ورفعَ قلمٍ بنيوياً بينهما
+            # (كعمود الطاء — رفعٌ داخل الحرف المركّب يوجبه بناؤه).
             out.append({**unit, "kind": "letter", "text": "ل", "form": lam,
                         "wordEnd": False, "marks": unit.get("marks") or [],
-                        "extras": [], "split": True})
+                        "extras": [], "split": True, "liga": "lam"})
             out.append({**unit, "kind": "letter", "text": "ا", "form": "final",
-                        "marks": [], "extras": [], "split": True, "box": None})
+                        "marks": [], "extras": [], "split": True, "box": None,
+                        "liga": "alef", "cut": True})
         else:
             out.append(dict(unit))
     return out
@@ -250,6 +257,23 @@ def compose(text: str, meas: dict, paths: dict, canon: dict, marks_lib: dict,
 
     for unit in units:
         unit["src"] = source_of(unit, paths, canon)
+        # **قصُّ ذراع الوصل للامِ لام-ألف — بالقياس لا بالثابت**: الذراعُ هي
+        # المدى المنبسطُ الأخير من ضربتها (يسيرُ يساراً وميلُه ≤ ٠٫١٢ — قِيس
+        # من ذيلها: مقاطعُ الذراع ميلُها ~٠٫٠٢–٠٫٠٤ وأولُ منحنى الكأس ٠٫١٧)،
+        # فتبقى قدمٌ قصيرة تلقاها الألف — كلوح المرجع.
+        if unit.get("liga") == "lam" and unit["src"]["frame"] == "line":
+            ref = unit["src"]["ref"]
+            strokes = [dict(st) for st in ref["strokes"]]
+            pts = [list(q) for q in strokes[0]["points"]]
+            while len(pts) > 3:
+                (x1, y1), (x2, y2) = pts[-2], pts[-1]
+                dx, dy = x2 - x1, y2 - y1
+                if dx < 0 and abs(dy) <= 0.12 * abs(dx):
+                    pts.pop()
+                else:
+                    break
+            strokes[0] = {**strokes[0], "points": pts}
+            unit["src"] = {**unit["src"], "ref": {**ref, "strokes": strokes}}
 
     # ١) **مقياسُ الخيال إلى السطر — يُقرأ من الوصل نفسِه لا من حجم الحبر**.
     #
@@ -389,7 +413,9 @@ def compose(text: str, meas: dict, paths: dict, canon: dict, marks_lib: dict,
         if unit["form"] in ("isolated", "final"):
             hi = lo
         run = list(range(min(lo, hi), max(lo, hi) + 1))
-        tied = unit["form"] in ("medial", "final") and k > 0
+        # **وألفُ لام-ألف تُقطع قطعةً ثانية** (`cut` — الرفعُ البنيويّ داخل
+        # المركّب): تجلس بمقعدها ولا تُدمج جرياناً.
+        tied = unit["form"] in ("medial", "final") and k > 0 and not unit.get("cut")
         for j, idx in enumerate(run):
             if j == 0 and tied and open_run is not None:
                 open_run += placed[idx]
@@ -528,6 +554,10 @@ def expected(text: str, paths: dict, joins: dict, anchors: dict) -> dict:
                 body, extra = unit_strokes(unit_ch, form, paths, anchors)
                 inner += body - 1
                 marks += extra
+            if pair:
+                # **رسمُ لام-ألف يوجب رفعةً داخله** (أمر المالك ٢٣ أغسطس):
+                # الألفُ قطعةٌ ثانية في الحرف المركّب — كعمود الطاء.
+                inner += 1
             k += 2 if pair else 1
     return {"flows": flows, "inner": inner, "marks": marks,
             "total": flows + inner + marks}
@@ -681,10 +711,14 @@ def self_test() -> int:
     ok(joins.get("د") is False and joins.get("ر") is False,
        "والقواطعُ تُقرأ من المنهج (د · ر …) ولا تُكتب هنا")
     # قاعدةُ الوصل على أمثلةٍ يعرفها المالك بعينها
-    for text, want in [("با", 1), ("ما", 1), ("نا", 1), ("لا", 1), ("سلا", 1)]:
+    for text, want in [("با", 1), ("ما", 1), ("نا", 1)]:
         got = expected(text, paths, joins, anchors)
         ok(got["flows"] == 1 and got["inner"] == 0,
            f"«{text}»: جريانٌ واحدٌ بلا رفعٍ داخل الحرف (قطعُ الجسم {got['flows'] + got['inner']})")
+    for text in ("لا", "سلا"):
+        got = expected(text, paths, joins, anchors)
+        ok(got["flows"] == 1 and got["inner"] == 1,
+           f"«{text}»: لام-ألف رسمٌ برفعةٍ بنيويةٍ داخله — جريانٌ واحدٌ ورفعةُ الألف (قطع {got['flows']}+{got['inner']})")
     got = expected("مطر", paths, joins, anchors)
     ok(got["inner"] >= 1, "و«مطر»: عمودُ الطاء رفعٌ داخل الحرف يُعَدّ")
     ok(expected("مِحْفَظَةْ", paths, joins, anchors)["marks"] == 0,

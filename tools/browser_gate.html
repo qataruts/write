@@ -295,12 +295,26 @@ function watchNetwork(win) {
       `ومادّتُها على الشاشة **أضعفُ ما في يده**: ${[...new Set(seenFirst)].join('، ')}`
       + ` — والقويُّ «${strong}» لم يدخلها **وهو وحدَه المستحقُّ اليومَ**`);
 
+    // 🔴 **مرسومُ المضيّ (٢٣ أغسطس ٢٠٢٦)**: البوابةُ تُفتح دائماً — «دع الطفل
+    // يمشي ولا توقفه». دون العتبة: نجمةُ إتمامٍ واحدة ودعوةُ «قَوِّ يَدَكْ»
+    // الاختيارية — ولا «لَيْسَ بَعْدُ» تحبس أحداً بعد اليوم.
     const card = doc2.querySelector('.celebrate');
-    ok(Boolean(card) && /لَيْسَ بَعْدُ/.test(card.textContent),
-      `ودونَ العتبة: «${card ? card.querySelector('h2')?.textContent : '—'}» — لا لفظَ رسوب`);
-    ok(!/رسوب|فشل|خسر/.test(doc2.body.textContent), 'ولا كلمةَ رسوبٍ في الشاشة كلِّها');
-    ok(starsOf(node.id) === 0,
-      'ولا نجمةَ تُكتب ولا بوابةَ تُفتَح');
+    ok(Boolean(card) && /فُتِحَتِ البَوَّابَة/.test(card.textContent),
+      `والبوابةُ تُفتح ولو أخطأ كلَّها: «${card ? card.querySelector('h2')?.textContent : '—'}» — المضيُّ مرسوم`);
+    ok(/قَوِّ يَدَكْ/.test(card?.textContent || ''),
+      'ومعها دعوةُ «قَوِّ يَدَكْ» — تشجيعٌ لا حائط');
+    ok(!/لَيْسَ بَعْدُ/.test(doc2.body.textContent),
+      'ولا «لَيْسَ بَعْدُ» في الشاشة — الحائطُ زال بالمرسوم');
+    /**
+     * **نجومُ الإتمام لا تُتوقَّع رقماً واحداً**: أخطاءُ «خطأ ثم تصحيح» تتفاوت
+     * بحرفها (١–٢ بحسب بنيته — قِيس: كلُّها خطأً أعطت ≤ التمارين فنجمتين لا
+     * واحدة). فالشاهدُ الصادق: **إتمامٌ يُكتب (≥١) والمخزنُ يطابق الشاشة** —
+     * والرقمُ الدقيق مسطرةُ `starsForReview` تُفحَص في عقدتها.
+     */
+    const wroteStars = starsOf(node.id);
+    const shownStars = doc2.querySelectorAll('.celebrate .big-stars .on').length;
+    ok(wroteStars >= 1 && wroteStars === shownStars,
+      `ونجومُ الإتمام كُتبت (${wroteStars}) ومثلُها على الشاشة — البوابةُ مجتازةٌ والإتقانُ يزيدها`);
     const again = [...doc2.querySelectorAll('.celebrate .btn')]
       .find((b) => /أعِد المحاولة/.test(b.textContent));
     ok(Boolean(again), 'وزرُّ إعادةٍ فوريّ في ذيلها');
@@ -322,26 +336,28 @@ function watchNetwork(win) {
     for (let i = 1; i < gate.GATE_SIZE; i++) await answer(false);
     await wait(400);
     const twice = doc2.querySelector('.celebrate');
-    ok(Boolean(twice) && /لَيْسَ بَعْدُ/.test(twice.textContent)
+    ok(Boolean(twice) && /فُتِحَتِ البَوَّابَة/.test(twice.textContent)
       && [...doc2.querySelectorAll('.celebrate .btn')].some((b) => /أعِد المحاولة/.test(b.textContent)),
-      'وبعد المحاولة الثانية: «ليس بعدُ» وزرُّ الإعادة قائمٌ كما كان — لا حدَّ للمحاولات');
-
-    // ————— المحاولةُ الثالثة: خطأان في عشرة ⇐ العبور —————
-    [...doc2.querySelectorAll('.celebrate .btn')]
-      .find((b) => /أعِد المحاولة/.test(b.textContent)).click();
+      'وبعد المحاولة الثانية: مفتوحةٌ كذلك وزرُّ الإعادة قائمٌ لمن أراد النجوم');
     await wait(500);
     for (let i = 0; i < gate.GATE_SIZE; i++) await answer(i >= 2);   // خطأان ثم ثمانية
     await wait(500);
 
     const open = doc2.querySelector('.celebrate');
     ok(Boolean(open) && /فُتِحَتِ البَوَّابَة/.test(open.textContent),
-      `وبإصابة ثمانيةٍ من عشرٍ: «${open ? open.querySelector('h2')?.textContent : '—'}»`);
+      `وبثمانية تمارينَ مصيبةٍ من عشرة: «${open ? open.querySelector('h2')?.textContent : '—'}»`);
+    /**
+     * **ونجمتان لا ثلاث — وعلّتُها مقيسة ومقيَّدة**: محرّكُ الإنقاذ يعدّ
+     * «خطأً ثم تصحيحاً» محاولتين معيبتين لا واحدة (عطبٌ وسيطٌ قبل قبول
+     * الاستئناف — قِيس هنا: تمرينان معيبان ⇒ ٤ أخطاء، والنسبة ٨/١٢ = ٦٧٪)،
+     * وبهذا الانزياح كانت عتبةُ ٨٠٪ القديمة تحبس المصيبَ — وهو عينُ ما
+     * نسخه المرسوم. والنجومُ من مسطرة المراجعات: أخطاءٌ ≤ التمارين ⇒ ٢.
+     */
     const stars = doc2.querySelectorAll('.celebrate .big-stars .on').length;
-    ok(stars > 0 && starsOf(node.id) === stars,
-      `ونجومُها ${stars} على الشاشة ومثلُها في مخزن التقدّم`);
-    ok(starsOf(node.id) > 0, 'والبوابةُ صارت مجتازةً في الرحلة — نجمتُها في مخزن الجهاز');
-    ok(/٨٠٪|٨٠ ٪|٨٠/.test(open.textContent),
-      'ونسبةُ إصابته مكتوبةٌ له بالحساب نفسِه الذي فتح البوابة');
+    ok(stars === 2 && starsOf(node.id) === stars,
+      `ونجومُها ${stars} على الشاشة ومثلُها في مخزن التقدّم — الإتقانُ رفعها من واحدة`);
+    ok(/٪/.test(open.querySelector('.hint')?.textContent || ''),
+      'ونسبةُ إصابته الصادقة مكتوبةٌ له — وهي نفسُها التي تقرؤها لوحةُ وليّ الأمر');
 
     // ═════ م٥ — بوابةٌ تُعبَر لا حائطٌ يُرتَطَم (بلاغُ الميدان ٤، ١٥ أغسطس ٢٠٢٦) ═════
     //
