@@ -213,6 +213,10 @@ function watchRobot(win) {
     const drawn = doc.querySelectorAll('.pen-stroke--trail').length;
     ok(drawn === ref.strokes.length,
       `واللوحُ يرسم النموذجَ من المسار المرجعيّ نفسِه (${drawn} جزءاً)`);
+    // **و«شاهِدْ» تعرض من تلقاء نفسها** — هي صفحةُ الإظهار الوحيدة (بلاغُ
+    // المالك، ٢٣ أغسطس ٢٠٢٦): العرضُ التلقائيّ حقُّها وحدَها.
+    ok(Boolean(doc.querySelector('.pen-box--playing')),
+      'و«شاهِدْ» تعرض الكتابةَ من تلقاء نفسها — صفحةُ الإظهار الوحيدة');
 
     const acts = [...doc.querySelectorAll('main.lesson-letter .foot .btn')];
     const small = acts.filter((b) => b.getBoundingClientRect().height < 64);
@@ -225,6 +229,11 @@ function watchRobot(win) {
     ok(!doc.querySelector('.lesson-board')?.classList.contains('lesson-board--watch')
       && doc.querySelector('.pen-box--guided'),
       'والانتقالُ إلى «تتبّعْ موجَّهاً»: لوحٌ يُكتب عليه والمسارُ ظاهر');
+    // **وخطوةُ الكتابة تُفتح حيّةً — لا عرضَ مكرَّراً يحبس القلم** (بلاغُ المالك:
+    // «كلَّ مرةٍ تتوقّع أن المكان متاحٌ للكتابة تكتشف أنه يعيد يُظهر لك كيف
+    // تكتب فتضطرّ للانتظار») — فالإعادةُ بزرّ «شَاهِدْ» عند الطلب لا فرضاً.
+    ok(!doc.querySelector('.pen-box--playing'),
+      'وخطوةُ الكتابة فُتحت حيّةً: لا عرضَ يجري فوق اللوح والقلمُ بيد الطفل');
 
     // **الانحرافُ إرشادٌ لا رفض**: معكوسٌ أوّلاً — لا يُقبَل ولا يُخرج الطفلَ
     await writeShape(true);
