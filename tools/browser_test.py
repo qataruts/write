@@ -303,7 +303,12 @@ def run_chrome(url: str, profile: Path, extra: list, show: bool):
     if not show:
         cmd += ["--headless=new", "--disable-gpu"]
     cmd += extra + [url]
-    return subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    # **وخطأُ كروم لا يُبتلع عند التشخيص**: `UKTUB_CHROME_LOG=ملف` يفتح بابَه
+    # (عثرةُ «لم تصل أي نتيجة» المتكررة، ٢٤ أغسطس ٢٠٢٦ — أداةٌ صامتةٌ عيبُ
+    # أداةٍ يُصلَح). والافتراضُ الصامت بحاله.
+    log = os.environ.get("UKTUB_CHROME_LOG")
+    err = open(log, "ab") if log else subprocess.DEVNULL
+    return subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=err)
 
 
 # ————— مهلةُ السَّوقة: تُشتقّ من طول عملها لا رقمٌ واحدٌ للجميع —————

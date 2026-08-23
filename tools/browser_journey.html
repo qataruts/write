@@ -70,9 +70,21 @@ const errors = [];
 window.addEventListener('error', (e) => errors.push(String(e.message)));
 window.addEventListener('unhandledrejection', (e) => errors.push(String(e.reason)));
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
-const send = () => fetch('/result', {
-  method: 'POST', body: JSON.stringify({ from: 'write', rows: results }),
-});
+/**
+ * **والرحلةُ تنبض** (عهدُ «الأداة تنبض وتستأنف» — وعثرةُ «لم تصل أي نتيجة»
+ * المتكررة ٢٤ أغسطس ٢٠٢٦): كانت تُرسل دفعةً واحدةً في الختام، فحلقةٌ لا
+ * تنتهي = صمتٌ ١٥٠٠ ثانية بلا تشخيص. فالإرسالُ تزايديٌّ كلَّ ثمانٍ —
+ * والمهلةُ المنتهية تطبع الجزءَ الأخضرَ وموضعَ التجمّد بعينه.
+ */
+let sentUpTo = 0;
+const send = () => {
+  const rows = results.slice(sentUpTo);
+  sentUpTo = results.length;
+  return rows.length ? fetch('/result', {
+    method: 'POST', body: JSON.stringify({ from: 'write', rows }),
+  }) : Promise.resolve();
+};
+setInterval(send, 8000);
 
 /**
  * 🔇 **تعجيلُ الصوت**: وسيطُ نطقٍ ينتهي فوراً وعنصرُ صوتٍ ينتهي فوراً — فالقناةُ
