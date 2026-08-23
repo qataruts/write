@@ -328,6 +328,21 @@ export function renderNode(node) {
         },
       }, icon('eye'), ' أرِنِي'),
       h('button', { class: 'btn next', onclick: () => live?.reset() }, '↻ أعِدْ'),
+      // **مرسومُ المضيّ (٢٣ أغسطس ٢٠٢٦)**: «دع الطفل يمشي ولا توقفه» — زرُّ
+      // المضيّ حاضرٌ دائماً لا بعد التعثّر: يسجّل بصدقٍ (ليتنر يعيد التكرار،
+      // ولوحةُ وليّ الأمر تقرأ «مضى قبل تمام القبول») ثم يمضي.
+      h('button', {
+        class: 'btn next',
+        onclick: () => {
+          audio.stop();
+          const lvl = levelOf(unit.text);
+          progress.recordQuality(unit.text, progress.WORD_FORM,
+            lvl >= VEIL_STEPS ? progress.KINDS.DICTATE : progress.KINDS.COPY, ['passed-on']);
+          score(unit, lvl, false);
+          state.revealed = false;
+          nextUnit();
+        },
+      }, 'تَابِعْ →'),
     );
   }
 

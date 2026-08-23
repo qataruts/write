@@ -265,7 +265,12 @@ export function faultMap(list = progress.faults()) {
 export const SHAKY = 'shaky';
 
 /** الوصفان اللذان لا رمزَ خطأٍ لهما — بلسان وليّ الأمر (ثلاثيّةُ iTrace معرَّبة). */
+/** رمزُ المضيّ قبل القبول — تدفعه شاشاتُ الكتابة عند زرّ «تَابِعْ» (مرسومُ
+ *  ٢٣ أغسطس: التقييمُ لوليّ الأمر لا بوّابةَ على الطفل). */
+export const PASSED_ON = 'passed-on';
+
 const QUALITY_TEXT = {
+  [PASSED_ON]: 'مَضى قبل تمام القبول',
   [SHAKY]: 'صحيحٌ ويدُه ترتجف',
   [SIZE.BIG]: 'يكتبه كبيراً',
   [SIZE.SMALL]: 'يكتبه صغيراً',

@@ -476,13 +476,37 @@ export function renderNode(node) {
           onclick: () => { audio.stop(); speech = audio.play(unit.say); },
         }, icon('ear'), ' اسْمَعْ'),
         h('button', { class: 'btn next', onclick: () => live?.reset() }, '↻ أعِدْ'),
+      // **مرسومُ المضيّ (٢٣ أغسطس ٢٠٢٦)**: «دع الطفل يمشي ولا توقفه» — زرُّ
+      // المضيّ حاضرٌ دائماً لا بعد التعثّر: يسجّل بصدقٍ (ليتنر يعيد التكرار،
+      // ولوحةُ وليّ الأمر تقرأ «مضى قبل تمام القبول») ثم يمضي.
+      h('button', {
+        class: 'btn next',
+        onclick: () => {
+          audio.stop();
+          if (step.kind) progress.recordQuality(unit.text, progress.WORD_FORM, step.kind, ['passed-on']);
+          score(step, unit, false);
+          nextStep();
+        },
+      }, 'تَابِعْ →'),
       );
       return;
     }
     fill(foot,
       h('button', {
         class: 'btn btn--primary next',
-        onclick: () => { live?.reset(); live?.play(); },
+        onclick: () => { live?.reset(      // **مرسومُ المضيّ (٢٣ أغسطس ٢٠٢٦)**: «دع الطفل يمشي ولا توقفه» — زرُّ
+      // المضيّ حاضرٌ دائماً لا بعد التعثّر: يسجّل بصدقٍ (ليتنر يعيد التكرار،
+      // ولوحةُ وليّ الأمر تقرأ «مضى قبل تمام القبول») ثم يمضي.
+      h('button', {
+        class: 'btn next',
+        onclick: () => {
+          audio.stop();
+          if (step.kind) progress.recordQuality(unit.text, progress.WORD_FORM, step.kind, ['passed-on']);
+          score(step, unit, false);
+          nextStep();
+        },
+      }, 'تَابِعْ →'),
+    ); live?.play(); },
       }, icon('pen'), ' شَاهِدْ'),
       h('button', { class: 'btn next', onclick: () => live?.reset() }, '↻ أعِدْ'),
     );
