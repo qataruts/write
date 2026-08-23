@@ -235,10 +235,16 @@ console.log('\n— ٢ب) المُعلَنُ يُنادى فعلاً: يُمشى 
   // **والطريقُ موصولٌ بالقياس نصّاً**: بلوغُ آخرِه ينادي `onDone`، وهي تنادي `score`،
   // وهي تنادي `recordAttempt` — فلا يبقى بين المقيس والمكتوب فجوةٌ لا يراها أحد.
   const lesson = read('lesson.js');
-  ok(/onDone:\s*\(\)\s*=>\s*finishStep\(/.test(lesson)
+  ok(/onDone:\s*\(\w*\)\s*=>\s*\{[^}]*finishStep\(/s.test(lesson)
     && /function finishStep[^}]*score\(/s.test(lesson)
     && /function score[^}]*recordAttempt\(/s.test(lesson),
     'وبلوغُ آخرِ الطريق موصولٌ بالقياس: `onDone ← finishStep ← score ← recordAttempt`');
+  // **وقناةُ الجودة موصولةٌ بحمولتها** (م١٠): كانت `onDone` تُهمِل ما يسلّمه المحرّك،
+  // فيُحكَم بالوصف ولا يبلغ أحداً. **والمحروسُ الحمولةُ بعينها** — لا مجرّدُ نداء:
+  // ما تستقبله `onDone` هو ما يُمرَّر إلى التسجيل، فلا اشتقاقَ في الشاشة.
+  ok(/onDone:\s*\((\w+)\)\s*=>\s*\{[^}]*noteQuality\(step, unit, \1\)/s.test(lesson)
+    && /function noteQuality[^}]*progress\.recordQuality\(/s.test(lesson),
+    'ووصفُ القبول موصولٌ بسجلّه: `onDone(الحمولة) ← noteQuality ← recordQuality`');
 }
 
 // ولا نوعَ في `KINDS` بلا محطةٍ تكتبه (وإلا فهو قياسٌ لا يقيس شيئاً)
@@ -318,6 +324,60 @@ ok(units.every((u) => u.kinds.length && u.kinds.every((k) => p.isWordSkill(k))),
   'وقسمُ الكلمات يُبنى من سجلّ ليتنر نفسِه — لا من عدٍّ ثانٍ يفترق عنه');
 ok(!board.some((s) => s.letter === WORD),
   'ولا يظهر «حرفٌ» اسمُه كلمة في لوحة الحروف — القسمةُ قسمةُ `isWordSkill`');
+
+// ————— ٥) قناةُ الجودة: يُوصَف القبولُ ولا يُهدَم مخزون (م١٠) —————
+//
+// **الحكمُ الثالث** (`ENGINE_PLAN §٣ب-٢`): بين «مقبول» و«مردود» حالٌ ثالثة —
+// «صحيحٌ ويدُه ترتجف». والمحرّكُ يحسبها ويسلّمها، فالمحروسُ هنا شقّان:
+//   · **أنّها تتراكم بمفتاح مهارتها** (وحدة × شكل موقع × نوع) — لا بمفتاحٍ ثانٍ.
+//   · **وأنّها حقلٌ إضافيّ لا هجرةَ معه**: مخزونُ طفلٍ كُتب قبل البند يُقرأ سليماً
+//     وغيابُ الحقل صفرٌ مضمون — فلا يفقد طفلٌ نجمةً لأنّنا أضفنا عمودًا.
+
+console.log('\n— قناةُ الجودة: وصفُ القبول يُسجَّل ولا يهدم مخزوناً —');
+
+const QKEY = p.skillKey(LETTER, 'معزول', p.KINDS.FREE);
+p.recordQuality(LETTER, 'معزول', p.KINDS.FREE, ['shaky', 'size-big']);
+p.recordQuality(LETTER, 'معزول', p.KINDS.FREE, ['shaky']);
+const qbag = p.qualityOf(QKEY);
+ok(qbag?.shaky?.n === 2 && qbag['size-big']?.n === 1
+  && qbag.shaky.seen === p.dayNumber(),
+  `الوصفُ يتراكم بمفتاح مهارته «${QKEY}»: رجفةٌ ${qbag?.shaky?.n} وحجمٌ `
+  + `${qbag?.['size-big']?.n} — وآخرُ حالٍ بيومه`);
+ok(p.qualityOf(p.skillKey(LETTER, 'معزول', p.KINDS.TRACE)) === null
+  && p.recordQuality(LETTER, 'معزول', p.KINDS.FREE, []) === null,
+  'ومهارةٌ لم تُوصَف سجلُّها **معدوم** لا صفرٌ مصنوع — وقبولٌ بلا وصفٍ لا يكتب شيئاً');
+
+// **متانةُ الغياب**: مخزونٌ من قبل البند — بنجومه وصناديقه وبلا حقل الجودة أصلاً —
+// يُقرأ سليماً، ولا يُعاد تشكيلُ بنيةٍ قائمة.
+const OLD_KEY = 'uktub.progress.v1';
+const keep = store.get(OLD_KEY);
+const legacy = JSON.parse(keep);
+delete legacy.quality;
+store.set(OLD_KEY, JSON.stringify(legacy));
+const reloaded = await import(`${new URL('progress.js', APP)}?legacy=1`);
+const oldSkill = reloaded.getSkill(QKEY);
+ok(!('quality' in legacy) && oldSkill && oldSkill.box === legacy.skills[QKEY].box
+  && Object.keys(reloaded.journey()).length > 0,
+  'ومخزونٌ قديمٌ بلا حقل الجودة يُقرأ سليماً — نجومُه وصناديقُه كما كانت');
+ok(reloaded.qualityOf(QKEY) === null && reloaded.quality().length === 0,
+  'وغيابُ الحقل **صفرٌ مضمون** لا انهيار — لا سجلَّ جودةٍ ولا استثناء');
+const written = reloaded.recordQuality(LETTER, 'معزول', p.KINDS.FREE, ['shaky']);
+ok(written?.shaky?.n === 1,
+  'ويكتب فوقه من أوّل قبولٍ موصوف — فالحقلُ يُنشأ عند الحاجة لا بهجرةٍ تمسّ الكلّ');
+store.set(OLD_KEY, keep);
+
+// **والسالبُ مجرَّب**: يُعطَّل التسجيلُ في نسخةِ ذاكرةٍ من الوحدة (لا يُمَسّ الأصل)
+// فيجب أن يحمرّ شاهدُه — وإلّا فالشاهدُ يخضرّ من فراغ.
+const SRC = readFileSync(new URL('progress.js', APP), 'utf8');
+// (ومساراتُ الاستيراد تُحوَّل مطلقةً: نسخةُ `data:` لا أصلَ لها تُنسَب إليه.)
+const off = SRC
+  .replace(/from '\.\/([\w.]+)'/g, (_, f) => `from '${new URL('.', APP)}${f}'`)
+  .replace('  bag[key] = entry;', '  bag[key] = bag[key] || {};');
+const alt = await import(`data:text/javascript;base64,${Buffer.from(off, 'utf8').toString('base64')}`);
+alt.recordQuality(LETTER, 'معزول', p.KINDS.TRACE, ['shaky', 'size-big']);
+ok(!alt.qualityOf(p.skillKey(LETTER, 'معزول', p.KINDS.TRACE))?.shaky,
+  'ومجرَّبٌ سالباً: تُعطَّل كتابةُ السجلّ في نسخةِ ذاكرةٍ فيحمرّ شاهدُ التراكم');
+store.set(OLD_KEY, keep);
 
 console.log(fails ? `\n${fails} فشل` : '\nكل اختبارات «لا تدريسَ بلا قياس» ناجحة');
 process.exit(fails ? 1 : 0);

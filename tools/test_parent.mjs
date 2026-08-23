@@ -208,5 +208,62 @@ console.log('\n— ٥) اللوحةُ تُقرأ ولا تُسمَع —');
 ok(!/from '\.\/audio\.js'|new Audio|speechSynthesis/.test(parentCode),
   'لا صوتَ في لوحة وليّ الأمر — شاشةُ بالغٍ تُقرأ، ولا نصَّ منطوقاً جديداً منها');
 
+// ————— ٦) سطرُ الجودة: **الحكمُ الثالث** يبلغ وليَّ الأمر (م١٠) —————
+//
+// **المحروسُ ثلاثة**:
+//   · ما له نصٌّ معتمدٌ في المحرّك يُقرأ منه **بحرفه** — ولا يُخترع له نصٌّ ثانٍ.
+//   · والوصفان اللذان لا رمزَ خطأٍ لهما (الرجفةُ والحجم) **بأسمائها التي يدفعها
+//     المحرّكُ فعلاً** — لا باسمٍ يُكتب هنا ويشيخ يومَ يتبدّل.
+//   · **ووحدةٌ بلا سجلِّ جودةٍ لا سطرَ لها** — لا أصفارٌ تملأ اللوحة.
+
+console.log('\n— ٦) سطرُ الجودة: وصفُ القبول بلسانٍ يقرؤه الوالد —');
+
+// **الرمزُ يُقابَل بما يدفعه المحرّكُ نفسُه**: لو بُدِّل اسمُه في `pen.js` لَبقي
+// السطرُ صامتاً بلا حمرة — فيُقرأ نصُّ المحرّك ويُطالَب بدفع الرمز الذي تعرضه اللوحة.
+const penCode = codeOf(read('js/pen.js'));
+ok(new RegExp(`guides\\.push\\('${parent.SHAKY}'\\)`).test(penCode),
+  `ورمزُ الرجفة «${parent.SHAKY}» هو الذي يدفعه المحرّكُ في \`guides\` — لا اسمٌ يُكتب في اللوحة`);
+ok([pen.SIZE.BIG, pen.SIZE.SMALL].every((code) =>
+  parent.qualityLine({ unit: letter, code }).includes(parent.unitTitle(letter))
+  && parent.qualityLine({ unit: letter, code }) !== `${parent.unitTitle(letter)} — `),
+  'ولوصفَي الحجم جملتُهما — «يكتبه كبيراً» و«يكتبه صغيراً» بلسان وليّ الأمر');
+
+// **وإرشادُ الطريقة بنصّه المعتمد بحرفه** — لا نصَّ ثانٍ له في اللوحة.
+const guideCodes = [pen.FAULTS.START_FAR, pen.FAULTS.ORDER, pen.FAULTS.DOTS_FIRST,
+  pen.FAULTS.INCOMPLETE];
+ok(guideCodes.every((code) =>
+  parent.qualityLine({ unit: letter, code }).endsWith(pen.FAULT_TEXT[code])),
+  `وإرشاداتُ الطريقة بنصوصها المعتمدة في \`FAULT_TEXT\` بحرفها (${guideCodes.length} أوصاف)`);
+ok(parent.qualityLine({ unit: letter, code: 'no-such-guide' }) === ''
+  && parent.qualityMap([{ unit: letter, code: 'no-such-guide', n: 3, seen: 0 }]).length === 0,
+  'ووصفٌ مجهولٌ لا يُخترع له نصّ — يسقط كما يسقط رمزُ الخطأ المجهول');
+
+// **والخريطةُ تُجمع بالوحدة لا بمفتاح المهارة**: يقرأ الوالدُ حالَ يده في الحرف،
+// لا جدولاً يفرّق تتبّعَه من حرّه.
+const day = p.dayNumber();
+p.recordQuality(letter, 'معزول', p.KINDS.FREE, [parent.SHAKY, pen.SIZE.BIG]);
+p.recordQuality(letter, 'معزول', p.KINDS.TRACE, [parent.SHAKY]);
+const qmap = parent.qualityMap();
+const mine = qmap.find((u) => u.unit === letter);
+ok(mine && mine.lines[0].code === parent.SHAKY && mine.lines[0].n === 2,
+  `ورجفةُ التتبّع والحرّ سطرٌ واحدٌ بوحدته (${mine?.lines[0].n}) — لا سطرٌ لكلّ تمرين`);
+ok(mine.lines[0].text === `${parent.unitTitle(letter)} — صحيحٌ ويدُه ترتجف`,
+  `وتقرأ اللوحةُ: «${mine.lines[0].text}»`);
+ok(parent.seenText(day) === 'آخرُها اليوم' && parent.seenText(day - 1) === 'آخرُها أمس'
+  && /٣/.test(parent.seenText(day - 3)),
+  `وآخرُ الحال بطابعه: «${parent.seenText(day)}» · «${parent.seenText(day - 3)}»`);
+
+// **ولا سطرَ لمن لا سجلَّ له**: حرفٌ آخرُ في الرحلة لم يُوصَف قطّ لا يظهر أصلاً.
+const other = nodes.filter((n) => n.type === 'letter').map((n) => n.letter)
+  .find((l) => l !== letter);
+ok(!qmap.some((u) => u.unit === other) && parent.qualityMap([]).length === 0,
+  `وحرفٌ بلا سجلِّ جودةٍ لا سطرَ له («${parent.unitTitle(other)}») — ولا أصفارَ تملأ اللوحة`);
+
+// **وهو وصفٌ لا عقاب** (عهدُ لا-رسوب): التسجيلُ لا يمسّ صندوقَ ليتنر ولا نجمة.
+const boxBefore = p.skillBox(letter, 'معزول', p.KINDS.FREE);
+p.recordQuality(letter, 'معزول', p.KINDS.FREE, [parent.SHAKY]);
+ok(p.skillBox(letter, 'معزول', p.KINDS.FREE) === boxBefore,
+  `والوصفُ لا يمسّ ليتنر — الصندوقُ ${boxBefore} قبلَه وبعدَه (وصفٌ لا عقاب)`);
+
 console.log(fails ? `\n${fails} فشل` : '\nلوحةُ وليّ الأمر: الجملةُ مبنيّةٌ والمواضعُ كاملةٌ');
 process.exit(fails ? 1 : 0);

@@ -338,6 +338,59 @@ ok(!NEGATIVE.some(([, ref, strokes]) => {
   return v.why === pen.SIZE.BIG || v.why === pen.SIZE.SMALL;
 }), 'ولا يُردّ حرفٌ بحجمٍ قطّ — الحجمُ لا يظهر في الأسباب');
 
+/* ═════ ٥ب) **القبولُ لا يلتفت إلى `wander` بنيوياً** (م١٠) ═════ */
+//
+// **بندُ الخطة الأصليّ** (`ENGINE_PLAN §م١٠`): `wander` كانت تردّ ١٧ من ٣٥ ردّاً
+// كاذباً — **وأكثرُها يدٌ ترتجف على شكلٍ صحيح**. وقد **تحقّقت غايتُه بالإنقاذ نفسِه**
+// لا ببندٍ مستقلّ: صار القبولُ للحَكَم الكلّيّ، و`wander` بقيت في **الماشي** تعليماً.
+// **فيُغلَق البندُ بشاهدٍ لا بقول** — على سنّة حرّاس الغياب في ثقافة اقرأ: شقٌّ نصّيّ
+// يثبت أنّ مسارَ القبول **لا يذكرها أصلاً**، وشقٌّ سلوكيّ بأثرٍ متعرّجٍ حقيقيّ.
+console.log('\n٥ب) القبولُ لا يلتفت إلى `wander` — بنيةً وسلوكاً:');
+
+/** نصُّ دالّةٍ مصدَّرةٍ بعينها، مجرّداً من التعليقات — فلا تُحاسَب على شرحٍ يذكرها. */
+const bodyOf = (name) => {
+  const at = SRC.indexOf(`export function ${name}(`);
+  const rest = SRC.slice(at + 1);
+  const next = rest.search(/\nexport (function|const) /);
+  return (next < 0 ? rest : rest.slice(0, next))
+    .replace(/\/\*[\s\S]*?\*\//g, ' ')
+    .replace(/(^|\s)\/\/[^\n]*/g, ' ');
+};
+const dirty = ['judgeShape', 'createFreeRun'].filter((fn) => /wander/i.test(bodyOf(fn)));
+ok(dirty.length === 0,
+  'لا يذكر `judgeShape` ولا `createFreeRun` كلمةَ `wander` في شيفرتهما — طريقُ القبول'
+  + ' لا يمرّ بها' + (dirty.length ? ` — **تذكرها: ${dirty.join('، ')}**` : ''));
+
+// **والسلوكُ يشهد بما تشهد به البنية**: يدٌ مرتجفةٌ **داخل شكل النون** — تعرّجُها
+// **يجاوز سماحةَ الانحراف بأعيانها** فيردّها الماشي `wander`، والشكلُ يقبلها.
+const WOB_TOL = pen.easeTolerance(pen.resolveTolerance(NOON.tolerance));
+const wobbly = (() => {
+  const amp = WOB_TOL.lateral * 1.2;
+  const bodies = bodyStrokes(NOON).length;
+  return traceOf(NOON).map((st, i) => (i < bodies
+    ? st.map((q, k) => [q[0] + amp * Math.sin(k * 1.1), q[1] + amp * Math.cos(k * 1.1)])
+    : st));
+})();
+const walked = pen.judgeFree(NOON, wobbly);
+ok(walked.codes.includes(pen.FAULTS.WANDER)
+  && walked.metrics.maxLateral > WOB_TOL.lateral,
+  `والأثرُ متعرّجٌ حقّاً بمسطرة الماشي: انحرافُه ${Math.round(walked.metrics.maxLateral)}`
+  + ` وسماحتُه ${Math.round(WOB_TOL.lateral)} — فالشاهدُ ليس أثراً سويّاً`);
+const wobShape = pen.judgeShape(NOON, wobbly);
+ok(wobShape.ok, `ومع ذلك يقبله الحَكَمُ الكلّيّ — ${say(wobShape)}`);
+
+// **والقناةُ كلُّها**: يُدفَع الأثرُ في مجرى الكتابة الحرّة (`createFreeRun`) لمسةً
+// لمسة، فيُقبَل تامّاً — و`wander` تبقى **قياساً في `codes`** لا سبباً في الردّ،
+// **ولا تدخل `guides`** فلا تبلغ وليَّ الأمر وصفاً (قناةُ الجودة أوصافُها).
+const wobRun = pen.createFreeRun(NOON);
+let wobLast = null;
+for (const st of wobbly) wobLast = wobRun.push(st);
+ok(wobRun.done && wobLast?.ok && wobLast.verdict.accepted
+  && wobLast.verdict.codes.includes(pen.FAULTS.WANDER)
+  && !wobLast.verdict.guides.includes(pen.FAULTS.WANDER),
+  'ويمرّ في مجرى الكتابة الحرّة كاملاً: **يُقبَل ويُقاس ولا يُرَدّ** —'
+  + ` codes=[${wobLast?.verdict.codes}] guides=[${wobLast?.verdict.guides}]`);
+
 /* ═════ ٦) كلُّ قاعدةٍ مجرَّبةٌ سالباً ═════ */
 console.log('\n٦) التجريبُ السالب — تُعطَّل القاعدةُ في نسخة ذاكرةٍ فيحمرّ فحصُها:');
 const nth = (i) => NEGATIVE[i];

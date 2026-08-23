@@ -365,7 +365,14 @@ export function renderNode(node) {
        * الجهاز): بعد تعثّرٍ متكرر يُفتَح المخرجُ الكريم.
        */
       onStuck: () => wayOut(step, unit),
-      onDone: () => finishStep(step, unit),
+      /**
+       * **الحكمُ الثالث يبلغ سجلَّه** (م١٠، `ENGINE_PLAN §٣ب-٢`): حمولةُ المحرّك
+       * تحمل **أوصافَ القبول** (`shaky` · الحجمُ · إرشاداتُ الطريقة) — وكانت
+       * تُهمَل، فينقطع الطريقُ بين ما يحكم به المحرّكُ وما يقرؤه وليُّ الأمر.
+       * **وتُؤخذ كما سمّاها المحرّك** لا تُشتقّ ولا تُفسَّر — هو وحدَه يحكم بها.
+       * ولا أثرَ لها في سير الخطوة: القبولُ قبولٌ تامّ، وليتنر لا يُمَسّ.
+       */
+      onDone: (verdict) => { noteQuality(step, unit, verdict); finishStep(step, unit); },
     });
     live = surface;
     board.replaceChildren(surface.el);
@@ -409,6 +416,16 @@ export function renderNode(node) {
       progress.recordAttempt(unit.letter, unit.form, progress.KINDS.TRACE, clean,
         progress.dayNumber(), state.aided);
     }
+  }
+
+  /**
+   * **وصفُ القبول يُقيَّد بمفتاح مهارته** (م١٠) — عدّاً تراكمياً ويومَ آخرِ حال.
+   * **ومن القبول وحدَه**: الردودُ لها عدّادُ `recordFault` القائم، ولا تختلط
+   * القناتان. وخطوةٌ بلا نوعِ قياسٍ («شاهِدْ») لا تكتب شيئاً.
+   */
+  function noteQuality(step, unit, verdict) {
+    if (!step.kind) return;
+    progress.recordQuality(unit.letter, unit.form, step.kind, verdict?.guides);
   }
 
   /**

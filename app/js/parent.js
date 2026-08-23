@@ -16,7 +16,7 @@
 // (pill · vchip · note · chip) وتُلوَّن بمتغيّر --accent، فلا تحتاج تنسيقاً جديداً.
 
 import * as progress from './progress.js';
-import { FAULTS, FAULT_TEXT } from './pen.js';
+import { FAULTS, FAULT_TEXT, SIZE } from './pen.js';
 import { nameGap } from './lesson.js';
 import {
   h, fill, go, toast, arNum, arCount, topbar, letterTitle, nodeTitle, nodeWhere, stageTitle,
@@ -242,6 +242,104 @@ export function faultMap(list = progress.faults()) {
     .sort((a, b) => b.total - a.total || a.title.localeCompare(b.title, 'ar'));
 }
 
+// ————— سطرُ الجودة: **الحكمُ الثالث** «صحيحٌ ويدُه ترتجف» (م١٠) —————
+//
+// **العلّة** (`ENGINE_PLAN §٣ب-٢`، قراءةُ iTrace): عندنا «مقبول» و«مردود»، وبينهما
+// حالٌ ثالثة هي أطبعُ ما يكتبه طفلُ الخامسة — **حرفٌ صحيحٌ ويدٌ ترتجف**. والمحرّكُ
+// يحسبها مع كلِّ قبولٍ ويسلّمها في حمولته، فتُقيَّد بمفتاح مهارتها (`recordQuality`)
+// وتُقرأ هنا.
+//
+// **ومصدرُ النصّ واحدٌ كما في الأخطاء**: ما له نصٌّ معتمدٌ في المحرّك يُقرأ منه بحرفه
+// (`FAULT_TEXT` — إرشاداتُ الطريقة كلُّها)، **ولا يُخترَع له نصّ**. والباقي وصفان
+// لا رمزَ خطأٍ لهما أصلاً — الرجفةُ والحجم — فجملتُهما هنا، وهي **جملةُ وليّ أمرٍ
+// تصف حالاً** لا تعليمةَ طفلٍ تُقال له (تلك في `SIZE_TEXT` وموضعُها لوحُ الكتابة).
+//
+// 🔴 **وهو وصفٌ لا عقاب** (عهدُ لا-رسوب): هذه السطورُ كلُّها **محاولاتٌ قُبلت**
+// ومهارتُها كُتبت في ليتنر تامّةً — ولا تنقص نجمةً ولا تعيد صندوقاً.
+
+/**
+ * **رمزُ الرجفة كما يسمّيه المحرّك** — يدفعه `judgeShape` في `guides` ولا يُصدّره
+ * ثابتاً، فيُكتب هنا مرّةً **ويحرسه `test_parent`** (مقابلةُ الرمز بما يدفعه المحرّك
+ * فعلاً): يومَ يتبدّل اسمُه يحمرّ الفحصُ ولا يصمت السطر.
+ */
+export const SHAKY = 'shaky';
+
+/** الوصفان اللذان لا رمزَ خطأٍ لهما — بلسان وليّ الأمر (ثلاثيّةُ iTrace معرَّبة). */
+const QUALITY_TEXT = {
+  [SHAKY]: 'صحيحٌ ويدُه ترتجف',
+  [SIZE.BIG]: 'يكتبه كبيراً',
+  [SIZE.SMALL]: 'يكتبه صغيراً',
+};
+
+/** ترتيبُ أوصاف الجودة عند تساوي العدد: الرجفةُ فالحجمُ ثم ترتيبُ المحرّك للطريقة. */
+const QUALITY_ORDER = [...Object.keys(QUALITY_TEXT), ...FAULT_ORDER];
+
+/**
+ * **جملةُ الوصف مبنيّةً**: عنوانُ الوحدة ثم الوصف — من `QUALITY_TEXT` لما لا رمزَ
+ * خطأٍ له، ومن `FAULT_TEXT` لما له نصٌّ معتمد. ورمزٌ لا يعرفه واحدٌ منهما **لا
+ * يُخترع له نصّ**: يسقط من العرض كما يسقط رمزُ الخطأ المجهول.
+ */
+export function qualityLine(entry) {
+  const clause = QUALITY_TEXT[entry?.code] || FAULT_TEXT[entry?.code];
+  return clause ? `${unitTitle(entry.unit)} — ${clause}` : '';
+}
+
+/** «آخرُ حالٍ» بطابعه: يومُ التسجيل مقروءاً بلسان اليوم لا برقمٍ مبهم. */
+export const seenText = (day, today = progress.dayNumber()) => {
+  const ago = today - day;
+  if (!Number.isFinite(ago) || ago <= 0) return 'آخرُها اليوم';
+  if (ago === 1) return 'آخرُها أمس';
+  return `آخرُها قبل ${arCount(ago, ['يومٍ واحد', 'يومين', 'أيام', 'يوماً'])}`;
+};
+
+/**
+ * خريطةُ الجودة مجموعةً بوحدتها — الوحدةُ الأكثرُ وصفاً أولاً، وداخلَها الأكثرُ
+ * تكراراً. **ووحدةٌ بلا سجلٍّ لا تدخلها أصلاً** فلا أصفارَ تملأ اللوحة.
+ */
+export function qualityMap(list = progress.quality()) {
+  const byUnit = new Map();
+  for (const item of list) {
+    const text = qualityLine(item);
+    if (!text) continue;
+    const entry = byUnit.get(item.unit)
+      || { unit: item.unit, title: unitTitle(item.unit), total: 0, lines: [] };
+    const line = entry.lines.find((l) => l.code === item.code);
+    // **والمفتاحُ مفتاحُ مهارة** (حرف × شكل موقع × نوع)، والسطرُ سطرُ وحدة: تُجمع
+    // أوصافُ الحرف من تتبّعه وحرّه معاً — فيقرأ الوالدُ حالَ يده لا جدولَ تمارين.
+    if (line) { line.n += item.n; line.seen = Math.max(line.seen, item.seen); }
+    else entry.lines.push({ code: item.code, n: item.n, seen: item.seen, text });
+    entry.total += item.n;
+    byUnit.set(item.unit, entry);
+  }
+  for (const entry of byUnit.values()) {
+    entry.lines.sort((a, b) => b.n - a.n
+      || QUALITY_ORDER.indexOf(a.code) - QUALITY_ORDER.indexOf(b.code));
+  }
+  return [...byUnit.values()]
+    .sort((a, b) => b.total - a.total || a.title.localeCompare(b.title, 'ar'));
+}
+
+/** كتلةُ الجودة في اللوحة — **ولا شيءَ ألبتّة لمن لا سجلَّ له**. */
+function qualityBlock() {
+  const map = qualityMap();
+  if (!map.length) return null;
+  const shown = map.slice(0, FAULT_UNITS);
+  const hidden = map.length - shown.length;
+  return h('div', {},
+    h('p', { class: 'hint' },
+      'وهذه محاولاتٌ **قُبلت** ووُصف حالُها — الحكمُ الثالث بين «صحيح» و«خطأ»:'
+        .replace(/\*\*/g, '')),
+    h('ul', { class: 'faults' }, shown.flatMap((unit) => unit.lines.map((line) =>
+      h('li', { class: 'fault fault--quality' }, line.text, ' · ',
+        h('b', {}, timesText(line.n)), ' · ', seenText(line.seen))))),
+    hidden > 0 && h('p', { class: 'hint' },
+      `وأخفينا ${arCount(hidden, ['وحدةً واحدة', 'وحدتين', 'وحدات', 'وحدة'])} أقلَّ وصفاً.`),
+    h('p', { class: 'note' },
+      'ولا ينقص شيءٌ من نجومه بها: الحرفُ قُبل وسُجِّلت مهارتُه كاملة، وإنّما تقول لك'
+      + ' **كيف** كتبه لتكتبه معه بإصبعك على الطاولة.'.replace(/\*\*/g, '')),
+  );
+}
+
 function faultsSection() {
   const map = faultMap();
   const shown = map.slice(0, FAULT_UNITS);
@@ -253,6 +351,9 @@ function faultsSection() {
       h('p', { class: 'hint' },
         'لم تُسجَّل حركةٌ خاطئة بعدُ — لا لأنه معصوم، بل لأنّ يده لم تمشِ بعدُ ما يكفي.'
         + ' وحين تمشي سترى هنا **كيف** يخطئ لا كم أخطأ.'.replace(/\*\*/g, '')),
+      // **وقد يُقبَل ولا يُخطئ ومع ذلك يُوصَف** (م١٠): كتلةُ الجودة تقف بنفسها،
+      // فلا تُحبَس خلف وجود خطأ.
+      qualityBlock(),
     );
   }
 
@@ -275,6 +376,7 @@ function faultsSection() {
       'والمعدودُ هنا **اسمُ الخطأ ومرّاتُه** لا أثرُ يده: مسارُ قلمه لا يُخزَّن أصلاً'
       .replace(/\*\*/g, '')
       + ' ولا يغادر جهازه.'),
+    qualityBlock(),
   );
 }
 
@@ -938,7 +1040,7 @@ function dashboard(rerender = () => {}) {
         + '— ولكلٍّ صندوقُ مراجعته.')),
 
     // **قلبُ اللوحة** (`METHOD.md §٦`): كيف يخطئ لا كم أخطأ.
-    ...section('أخطاء الاتجاه — أين تتعثّر يده بالضبط', faultsSection()),
+    ...section('أخطاء الاتجاه وجودةُ اليد — أين تتعثّر يده بالضبط', faultsSection()),
 
     ...section('لكلِّ نوع تمرينٍ موضعُه', kindsSection()),
 

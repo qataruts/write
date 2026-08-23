@@ -122,6 +122,13 @@ const fromAr = (text) => Number(String(text).replace(/[٠-٩]/g,
     progress.recordFault(letter, pen.FAULTS.DOTS_FIRST);
     progress.recordFault(warm.part, pen.FAULTS.REVERSE);
     progress.recordFault(word, pen.FAULTS.SHORT);
+    // **وقناةُ الجودة** (م١٠): قبولٌ موصوفٌ بمفتاح مهارته — «صحيحٌ ويدُه ترتجف»
+    // و«يكتبه كبيراً». والحرفُ الثاني **لا سجلَّ جودةٍ له** فلا يظهر له سطرٌ أصلاً.
+    const other = NODES.filter((n) => n.type === 'letter').map((n) => n.letter)
+      .find((l) => l !== letter);
+    progress.recordQuality(letter, 'معزول', progress.KINDS.FREE, [parent.SHAKY, pen.SIZE.BIG]);
+    progress.recordQuality(letter, 'معزول', progress.KINDS.TRACE, [parent.SHAKY]);
+    progress.recordFault(other, pen.FAULTS.START_FAR);
 
     const wanted = `${parent.unitTitle(letter)} — ${pen.FAULT_TEXT[pen.FAULTS.START_END]}`;
 
@@ -189,7 +196,7 @@ const fromAr = (text) => Number(String(text).replace(/[٠-٩]/g,
 
     const panel = () => doc.querySelector('.audit');
     const text = () => panel().textContent.replace(/\s+/g, ' ');
-    const faultLines = () => [...doc.querySelectorAll('.faults .fault')]
+    const faultLines = () => [...doc.querySelectorAll('.faults .fault:not(.fault--quality)')]
       .map((el) => el.textContent.replace(/\s+/g, ' ').trim());
 
     ok(faultLines().length >= 4,
@@ -198,6 +205,32 @@ const fromAr = (text) => Number(String(text).replace(/[٠-٩]/g,
       `وأوّلُها أكثرُها تكراراً بحرفه: «${faultLines()[0]}»`);
     ok(faultLines()[0].includes('٤ مرات'),
       'ومعه عددُ مرّاته بالعربية لا برقمٍ لاتينيّ');
+
+    // ————— ٢ب) سطرُ الجودة: **الحكمُ الثالث** يُقرأ في اللوحة (م١٠) —————
+    const qualityLines = () => [...doc.querySelectorAll('.faults .fault--quality')]
+      .map((el) => el.textContent.replace(/\s+/g, ' ').trim());
+    const qWanted = `${parent.unitTitle(letter)} — صحيحٌ ويدُه ترتجف`;
+    ok(qualityLines().some((t) => t.startsWith(qWanted)),
+      `وسطرُ الجودة يُقرأ بلسانه: «${qualityLines()[0] || 'لا سطر'}»`);
+    ok(qualityLines().some((t) => t.startsWith(`${parent.unitTitle(letter)} — يكتبه كبيراً`)),
+      'ومعه وصفُ الحجم — «يكتبه كبيراً» بلسان وليّ الأمر لا بتعليمة الطفل');
+    ok(qualityLines().some((t) => /مرتان/.test(t)) && qualityLines().every((t) => /آخرُها/.test(t)),
+      `والعدُّ وآخرُ الحال في كلّ سطر (${qualityLines().length} سطراً)`);
+    // **ولا سطرَ لمن لا سجلَّ له**: الحرفُ الثاني له خطأٌ ولا وصفَ — فيُقرأ في
+    // خريطة الأخطاء ولا يظهر في الجودة أصلاً (لا أصفارٌ تملأ اللوحة).
+    ok(faultLines().some((t) => t.startsWith(parent.unitTitle(other)))
+      && !qualityLines().some((t) => t.startsWith(parent.unitTitle(other))),
+      `وحرفٌ بلا سجلِّ جودةٍ لا سطرَ له («${parent.unitTitle(other)}») وإن كان له خطأ`);
+    // **وأهدافُ اللمس لم يدخلها هدفٌ جديد**: سطورُ الجودة **قائمةٌ تُقرأ لا أزرارٌ
+    // تُلمَس** (كسطور الأخطاء قبلها — «هذه شاشةُ بالغٍ ونصُّها هو المنتَج»)، فلا
+    // يُدخِل البندُ هدفَ لمسٍ دون ٦٤ بكسل. واللوحةُ بجهتها العربية كما كانت.
+    const touchable = [...doc.querySelectorAll('.faults .fault--quality')]
+      .filter((el) => el.querySelector('button, a, input, select'));
+    ok(touchable.length === 0 && doc.documentElement.dir === 'rtl',
+      `وسطورُ الجودة تُقرأ ولا تُلمَس (${qualityLines().length} سطراً بلا هدفِ لمسٍ جديد)`
+      + ` واللوحةُ RTL (${doc.documentElement.dir})`);
+    ok(doc.documentElement.scrollWidth <= win.innerWidth + 1,
+      `ولا فائضَ أفقيّ في اللوحة (${doc.documentElement.scrollWidth} ≤ ${win.innerWidth})`);
     ok(faultLines().some((l) => l.startsWith(warm.title))
       && faultLines().some((l) => l.startsWith(word)),
       'وتدخلها التهيئةُ بعنوانها والكلمةُ بنصّها — لا رمزَ برمجيّ في شاشة الوالد');
@@ -255,7 +288,8 @@ const fromAr = (text) => Number(String(text).replace(/[٠-٩]/g,
     const readBack = progress.readBackup(fileText);
     ok(!readBack.error, `والملفُّ يُقرأ (${readBack.error || 'سليم'})`);
     const sum = progress.backupSummary(readBack.bundle);
-    ok(sum.faults === 4 && sum.skills === 5 && sum.nodes === 20,
+    // (خمسُ حركاتٍ منذ م١٠: الحرفُ الثاني له خطأٌ بلا وصفٍ — شاهدُ «لا سطرَ لمن لا سجلَّ له».)
+    ok(sum.faults === 5 && sum.skills === 5 && sum.nodes === 20,
       `وفيه خريطةُ الاتجاه كاملةً (${sum.faults} حركات · ${sum.skills} مهارات · ${sum.nodes} عقدة)`);
     ok(!/"points"|"strokes"|"clientX"|"off"/.test(fileText),
       '🔒 ولا إحداثيَّ لمسةٍ فيه — مسارُ قلم الطفل لا يغادر جهازه');

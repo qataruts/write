@@ -174,8 +174,15 @@ function watchRobot(win) {
       }
       await writeStroke(out);
     }
-    /** تصغيرٌ حول مركز الصندوق مع إزاحة — يدُ طفلٍ تكتب حرفَها أصغرَ وفي غير موضعه. */
-    const smallerAside = (p) => [500 + (p[0] - 500) * 0.7 + 90, 500 + (p[1] - 500) * 0.7 + 60];
+    /**
+     * تصغيرٌ حول مركز الصندوق مع إزاحة — يدُ طفلٍ تكتب حرفَها **أصغرَ وفي غير موضعه**.
+     *
+     * **وتصغيرُه دون مدى الحجم عمداً** (م١٠): فيجتمع الشاهدان في كتابةٍ واحدة —
+     * **يُقبَل** (الحجمُ إرشادٌ لا ردّ، وهو عينُ ما أخرج الطفلةَ من الجهاز يومَ كان
+     * يُردّ)، **ويُوصَف** `size-small` فيبلغ وصفُه سجلَّ الجودة. ومقيسٌ لا مظنون:
+     * قطرُ حبره ١٧٣ وممرُّ سماحته ١٨٠ — دونه بشعرة، والشكلُ تغطيتُه تامّة.
+     */
+    const smallerAside = (p) => [500 + (p[0] - 500) * 0.22 + 90, 500 + (p[1] - 500) * 0.22 + 60];
 
     const stored = () => {
       try { return JSON.parse(win.localStorage.getItem('uktub.progress.v1') || '{}'); }
@@ -309,6 +316,26 @@ function watchRobot(win) {
     const traceKey = skills.find((k) => k.endsWith('|trace'));
     const tries = (state.skills[traceKey]?.right || 0) + (state.skills[traceKey]?.wrong || 0);
     ok(tries >= 2, `والتتبّعُ خطوتان فمحاولتان في صندوقه (${tries})`);
+
+    // ————— قناةُ الجودة: **الحكمُ الثالث يبلغ سجلَّه** (م١٠) —————
+    //
+    // **الحمولةُ كانت تُهمَل**: المحرّكُ يحسب أوصافَ القبول ويسلّمها في `onDone`،
+    // فتُطرَح — فلا يعرف السجلُّ ولا تعرض اللوحة. وهذا يقيس القناةَ من طرفها إلى
+    // طرفها في متصفّحٍ حقيقيّ: **حرفٌ صحيحٌ كُتب دون مدى الحجم فقُبل ووُصف**.
+    const qbag = state.quality || {};
+    const freeQ = qbag[`${letter}|${FORMS.ISOLATED}|free`];
+    ok(freeQ?.['size-small']?.n >= 1 && freeQ['size-small'].seen === (await import('/js/progress.js')).dayNumber(),
+      `ووصفُ القبول بلغ السجلَّ بمفتاح مهارته: ${JSON.stringify(freeQ) || 'لا شيء'}`);
+    ok(Object.keys(qbag).every((k) => k.split('|')[0] === letter),
+      `ولا وصفَ لغير الحرف المكتوب — مفاتيحُ الجودة: ${Object.keys(qbag).join('، ') || 'لا شيء'}`);
+    // **وليتنر لم يُمَسّ** (عهدُ لا-رسوب): محاولةُ القبول الموصوف كُتبت في صندوقها
+    // كما كانت تُكتب — **والوصفُ لا يزيد فيها ولا ينقص**. (وأنّ التسجيلَ لا يمسّ
+    // الصندوقَ أصلاً مقيسٌ في `test_parent.mjs`: صندوقٌ قبلَه وبعدَه سواء.)
+    const freeKey = skills.find((k) => k.endsWith('|free'));
+    const freeTries = (state.skills[freeKey]?.right || 0) + (state.skills[freeKey]?.wrong || 0);
+    ok(freeTries >= 1,
+      `ومحاولةُ القبول الموصوف في صندوق ليتنر كما كانت (${freeTries} محاولة)`
+      + ' — وصفٌ يُقرأ لا عقابٌ يُنقِص');
 
     const stars = doc.querySelectorAll('main.lesson-letter .big-stars .on').length;
     const saved = (state.stars || {})[nodeOf() || ''] || 0;

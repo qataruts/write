@@ -130,6 +130,11 @@ function blank() {
     stars: {},        // معرّف عقدة ← نجوم
     skills: {},       // «وحدة|شكل موقع|تمرين» ← {right, wrong, box, due, seen}
     faults: {},       // «وحدة|رمزُ الخطأ الحركيّ» ← {n, seen} — انظر `recordFault`
+    // **قناةُ الجودة** (م١٠): «مفتاحُ المهارة» ← {رمزُ الوصف ← {n, seen}} — تُكتب من
+    // **القبول** وحدَه وتُقرأ في لوحة وليّ الأمر. وغيابُها صفرٌ مضمون: `migrate`
+    // يفرش `blank()` تحت كلِّ مخزونٍ قائم، فسجلُّ طفلٍ من قبل البند يُقرأ سليماً بلا
+    // هجرةِ بيانات — انظر `recordQuality`.
+    quality: {},
     // **وسمُ بنية الرحلة** (الجلسة ١٠): بصمةُ عقدها ساعةَ رآها هذا الجهاز آخرَ مرّة —
     // بها وحدَها يُعرَف أنّ البنية تحرّكت فيلزم الترحيلُ الرحيم (`migrateJourney`).
     journey: '',
@@ -772,6 +777,60 @@ export function faults() {
 
 /** أخطاءُ وحدةٍ بعينها (حرفٌ أو محطةُ تهيئة). */
 export const faultsOf = (unit) => faults().filter((f) => f.unit === unit);
+
+// ————— قناةُ الجودة: «صحيحٌ ويدُه ترتجف» (م١٠، `ENGINE_PLAN §٣ب-٢`) —————
+//
+// **الحكمُ الثالث لا الثاني**: عندنا اليوم «مقبول» و«مردود» — ونقصنا ما بينهما.
+// فالمحرّكُ يحسب مع كلِّ **قبولٍ** إرشاداتِه (`shaky` · `size-big`/`size-small` ·
+// وشكاوى الطريقة التي تُرشِد ولا تردّ) ويسلّمها في حمولة `onDone`، **وكانت تُهمَل**.
+// وهذه القناةُ تحفظها ليقرأها وليُّ الأمر: **«صحيحٌ ويدُه ترتجف»** لا «أخطأ».
+//
+// **ولا تمسّ ليتنر ولا تعاقب** (عهدُ لا-رسوب): القبولُ قبولٌ تامّ ومهارتُه تُكتب
+// كما كانت (`recordAttempt`) — والجودةُ **وصفٌ يُقرأ** لا درجةٌ تُنقِص.
+//
+// **وقناتان لا تختلطان**: `recordFault` عدّادُ ما **رُدّ** (وحدة × رمز)، وهذه سجلُّ
+// ما **قُبل موصوفاً** (مفتاحُ المهارة الثلاثيّ × رمز). ومَن خلطهما قرأ الوصفَ خطأً.
+//
+// 🔒 **والمخزونُ عددٌ لا أثرُ يد** كسابقه: رمزٌ ومرّاتُه ويومُ آخرِ حالٍ — ولا
+// إحداثيَّ لمسةٍ ولا انزياح (`METHOD.md §٣.٧`).
+
+/**
+ * تسجيلُ أوصاف الجودة لقبولٍ واحد — **بمفتاح المهارة نفسِه** (وحدة × شكل موقع × نوع).
+ *
+ * **وتُخزَّن كما جاءت من المحرّك**: لا قائمةَ رموزٍ ثانيةٌ هنا تشيخ، ولا اشتقاقَ ولا
+ * تفسير — مَن يحكم بالوصف هو مَن يسمّيه (`pen.js`)، وتقرؤه اللوحةُ بنصٍّ معتمد.
+ *
+ * @param {string[]} guides أوصافُ الحمولة (`verdict.guides`)
+ * @returns {object|null} حالةُ سجلّ الجودة لهذه المهارة بعد التسجيل
+ */
+export function recordQuality(unit, form, kind, guides, today = dayNumber()) {
+  if (!unit || !kind) return null;
+  const codes = [...new Set((guides || []).filter((g) => typeof g === 'string' && g))];
+  if (!codes.length) return null;
+  const key = skillKey(unit, form, kind);
+  const bag = state.quality || (state.quality = {});
+  const entry = bag[key] || {};
+  for (const code of codes) {
+    const cell = entry[code] || { n: 0, seen: today };
+    cell.n++;
+    cell.seen = today;
+    entry[code] = cell;
+  }
+  bag[key] = entry;
+  save();
+  return entry;
+}
+
+/** أوصافُ مهارةٍ بعينها: {رمز ← {n, seen}} — و`null` لمن لا سجلَّ له (لا أصفارٌ تُصنَع). */
+export const qualityOf = (key) => (state.quality || {})[key] || null;
+
+/** كلُّ ما سُجِّل من أوصاف الجودة: [{key, unit, form, kind, code, n, seen}] — الأكثرُ أولاً. */
+export function quality() {
+  return Object.entries(state.quality || {})
+    .flatMap(([key, entry]) => Object.entries(entry || {})
+      .map(([code, cell]) => ({ key, ...parseSkillKey(key), code, ...cell })))
+    .sort((a, b) => b.n - a.n || a.key.localeCompare(b.key));
+}
 
 /** ترتيب الضعف: أدنى صندوق، ثم أكثر أخطاءً، ثم أقدم استحقاقاً (وأخيراً المفتاح لثبات الترتيب). */
 const byWeakness = (a, b) =>
