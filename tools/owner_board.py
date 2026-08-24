@@ -409,7 +409,9 @@ def self_test() -> int:
     spec = json.loads(ANCHORS.read_text(encoding="utf-8"))
     letters = [ch for ch in spec["letters"] if not re.match(r"[٠-٩]", ch)]
     digits = [ch for ch in spec["letters"] if re.match(r"[٠-٩]", ch)]
-    ok(len(letters) * len(FORMS) + len(digits) == 122,
+    # **والعددُ يُشتقّ ولا يُكتب** (دخلت لام-ألف الهجاءَ ٢٤ أغسطس ٢٠٢٦ فصار ١٢٦
+    # بعد ١٢٢ — ورقمٌ صحيحُ الأمس حارسٌ كاذبُ اليوم).
+    ok(len(letters) * len(FORMS) + len(digits) == len(spec["letters"]) * 1 + len(letters) * 3,
        f"الطابورُ محسوبٌ من البيان: {len(letters)}×{len(FORMS)} + {len(digits)} = "
        f"{len(letters) * len(FORMS) + len(digits)} خانة")
 

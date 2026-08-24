@@ -18,7 +18,7 @@
 import { PATHS } from '../app/js/paths.js';
 import { TOLERANCE } from '../app/js/pen.js';
 import { TABLE } from './direction_table.mjs';
-import { LETTERS, VARIANTS, DIGITS as TAUGHT_DIGITS, Q3_RULING }
+import { LETTERS, VARIANTS, DIGITS as TAUGHT_DIGITS, Q3_RULING, STAGES }
   from '../app/js/curriculum.js';
 
 const FORMS = ['isolated', 'initial', 'medial', 'final'];
@@ -94,7 +94,7 @@ const rows = shapes.filter(({ ch, form }) => !isDigit(ch) || form === 'isolated'
 
 if (!RUN) { /* مستورَدٌ للقياس وحده */ } else {
 
-console.log('— حارسُ جهةِ البداية: ١٢٢ شكلاً بسندٍ مسمّى —');
+console.log(`— حارسُ جهةِ البداية: ${rows.length} شكلاً بسندٍ مسمّى —`);
 console.log(`  المسطرة: يمينٌ ≥ ${RIGHT} · يسارٌ ≤ ${LEFT} · وما بينهما وسط · وعرضٌ ≤ ${THIN} عمود`
   + '  (وهي مسطرةُ جرد الإدارة، ١٨ أغسطس ٢٠٢٦)');
 
@@ -106,9 +106,15 @@ console.log('\n— ١) الجدولُ يغطّي المادّةَ كلَّها،
 // **والمنهجُ يسجّل ساقطَه بنفسه**: متغيّرٌ بلا حاملٍ في سطوح اقرأ كلِّها (`surface: null`
 // في `Q3_RULING`) لا يبلغ الطفلَ فلا يُطالَب بمسار — «ؤ» و«ئ» اليوم. **فلا قائمةَ
 // تُكتب هنا**: يُقرأ حكمُ المولّد، فيومَ يجد لهما حاملاً يُطالِب بهما من نفسه.
+// **والوصلةُ التي صارت حرفاً تَعُدُّ نفسَها كذلك** (لام-ألف، ٢٤ أغسطس ٢٠٢٦): المنهجُ
+// يعلّم وصلاتٍ (`joins`) أكثرُها تركيبٌ من حرفين — فما بقي منها تركيباً لا رسمَ له في
+// `PATHS`، **وما حكم فيه المالكُ رسماً واحداً دخل الهجاءَ** فله أشكالُه الأربعة.
+// فيُقرأ الفرقُ من المصدرين الحيَّين ولا يُكتب رقمٌ ولا قائمة.
 const dropped = new Set(Q3_RULING.filter((r) => !r.surface).map((r) => r.mark));
 const variants = Object.keys(VARIANTS).filter((ch) => !dropped.has(ch));
-const taught = (Object.keys(LETTERS).length + variants.length) * FORMS.length
+const ligs = [...new Set(STAGES.flatMap((s) => s.nodes ?? []).flatMap((n) => n.joins ?? []))]
+  .filter((text) => PATHS[text]);
+const taught = (Object.keys(LETTERS).length + variants.length + ligs.length) * FORMS.length
   + Object.keys(TAUGHT_DIGITS).length;
 ok(rows.length === taught,
   `المادّةُ ${rows.length} شكلاً معلَناً — ويعلّم المنهجُ ${taught}`

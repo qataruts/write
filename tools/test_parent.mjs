@@ -79,7 +79,9 @@ console.log('\n— ٢) الوحدةُ من الرحلة: حرفاً وتهيئة
 
 const nodes = p.allNodes();
 const letter = nodes.find((n) => n.type === 'letter').letter;
-const warm = nodes.find((n) => n.type === 'warmup');
+// 🔴 **ولا محطةَ تهيئةٍ بعد اليوم** (أمرُ المالك ٢٤ أغسطس ٢٠٢٦): أُلغيت من الرحلة،
+// **فمكانُها في هذا الحارس الجملةُ** — وهي النوعُ الرابع الذي تسمّيه اللوحة.
+const line0 = nodes.find((n) => n.type === 'sentence');
 const word = nodes.find((n) => n.type === 'fade').words[0];
 const line = nodes.find((n) => n.type === 'sentence').sentences[0];
 
@@ -88,8 +90,8 @@ const line = nodes.find((n) => n.type === 'sentence').sentences[0];
 const { LETTERS } = await import(new URL('js/curriculum.js', APP));
 ok(parent.unitTitle(letter) !== letter && parent.unitTitle(letter).includes(LETTERS[letter].name),
   `الحرفُ يُسمّى باسمه من المنهج: «${parent.unitTitle(letter)}» (لا «${letter}» مفرداً)`);
-ok(parent.unitTitle(warm.part) === warm.title,
-  `ومحطةُ التهيئة بعنوانها المشكول: «${parent.unitTitle(warm.part)}» (لا «${warm.part}»)`);
+ok(nodes.every((n) => n.type !== 'warmup'),
+  'ولا محطةَ تهيئةٍ في الرحلة أصلاً — أُلغيت بأمر المالك، فلا تُسمّى في اللوحة');
 ok(parent.unitTitle(word) === word && parent.unitTitle(line) === line,
   `والكلمةُ والجملةُ نصُّهما عنوانُهما: «${word}» · «${line}»`);
 ok(parent.unitTitle('شيءٌ ليس في الرحلة') === 'شيءٌ ليس في الرحلة',
@@ -101,7 +103,7 @@ p.recordFault(letter, pen.FAULTS.START_END);
 p.recordFault(letter, pen.FAULTS.START_END);
 p.recordFault(letter, pen.FAULTS.START_END);
 p.recordFault(letter, pen.FAULTS.DOTS_FIRST);
-p.recordFault(warm.part, pen.FAULTS.REVERSE);
+p.recordFault(line, pen.FAULTS.REVERSE);
 p.recordFault(word, pen.FAULTS.SHORT);
 
 const map = parent.faultMap();
@@ -111,8 +113,8 @@ ok(first.unit === letter && first.total === 4 && first.lines[0].n === 3,
   + ` وأكثرُ أخطائها أولاً (${first.lines[0].n})`);
 ok(first.lines[0].text === `${parent.unitTitle(letter)} — ${pen.FAULT_TEXT[pen.FAULTS.START_END]}`,
   `وتقرأ اللوحةُ: «${first.lines[0].text}» — لا «أخطأ في ${parent.unitTitle(letter)}»`);
-ok(map.length === 3 && map.some((u) => u.unit === warm.part) && map.some((u) => u.unit === word),
-  `والخريطةُ تجمع الأنواع كلَّها: حرفٌ وتهيئةٌ وكلمة (${map.length} وحدات)`);
+ok(map.length === 3 && map.some((u) => u.unit === line) && map.some((u) => u.unit === word),
+  `والخريطةُ تجمع الأنواع كلَّها: حرفٌ وكلمةٌ وجملة (${map.length} وحدات)`);
 
 // **والترتيبُ عند التساوي ترتيبُ المحرّك لا الأبجدية**: رمزان بعددٍ واحد يخرجان كما
 // أعلنهما `FAULTS` — فترتيبُ الشكوى ترتيبُ شدّتها عند الحَكَم لا صدفةَ حروفها.

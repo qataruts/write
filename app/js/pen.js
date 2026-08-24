@@ -2170,7 +2170,22 @@ export function penSurface(config) {
   // عرضُ الحبر ٢٢ كُتب يومَ كانت الشبكةُ ١٠٠٠، **فلمّا صارت خليّةُ السطر ٢١٦٣٫٥**
   // (بند ص٢/ب) بقي الرقمُ وانكسرت نسبتُه إلى **١/٢٫١٦** — وعينُ المالك قالت
   // «ضعفين» فأصابت المقدار. ⇐ فيُشتقّ من الخليّة فلا يشيخ برقمٍ مكتوب.
+  /**
+   * 🔴 **سماكةُ الحبر واحدةٌ بالقياس الفعليّ لا بأكبر البُعدين** (بلاغ المالك
+   * ٢٤ أغسطس: «السماكة غير موحدة»): كان المعاملُ `max(bw,bh)/GRID` فيتبدّل
+   * سُمكُ الخط بين مادّةٍ عريضة وأخرى مربعة حين يحدّ الارتفاعُ العرضَ —
+   * فصار من **وحدة العرض الحقيقية** (بكسل لكل وحدة شبكة، بقاعدة `meet`)
+   * ليثبت السُّمكُ المرئيّ على قيمته في خلية الحرف مهما اتسع الصندوق.
+   */
+  const setInk = () => {
+    const r = box.getBoundingClientRect();
+    if (!r.width || !r.height) return;
+    const unit = Math.min(r.width / bw, r.height / bh);
+    const letterUnit = Math.min(r.width, r.height) / GRID;
+    box.style.setProperty('--ink-scale', String(letterUnit / Math.max(unit, 1e-6)));
+  };
   box.style.setProperty('--ink-scale', String(Math.max(bw, bh) / GRID));
+  if (typeof ResizeObserver !== 'undefined') new ResizeObserver(setInk).observe(box);
   const svg = sv('svg', {
     class: 'pen-surface', viewBox: `0 0 ${bw} ${bh}`, role: 'img', 'aria-label': label,
   });

@@ -2633,10 +2633,93 @@ async function markLibrary(spec, texts) {
 }
 
 /**
+ * **قطعُ الوحدة ونقاطُها من قناعها** — قاعدةٌ واحدة تخدم العيّنةَ والبناء (بند ك٢)،
+ * فلا تُكتب مرّتين ولا تفترقان يومَ تُصحَّح إحداهما.
+ *
+ * `em` **جسمُ الحرف بوحدات اللوح الجاري** (مقاسُ الخطّ الذي رُسم به) — **والنقطةُ
+ * تُعرَف بامتدادها نسبةً إليه لا بعتبةٍ مطلقة** (عيبُ ليلة العيّنة الثاني، وشاهدٌ
+ * لقاعدة «الحدُّ العامل لا الثابتُ المكتوب»): أقصرُ ضربةٍ حقيقية تجاوز ثلثَ الجسم
+ * والنقطةُ دونه — والقاعدةُ لا تُمَسّ.
+ *
+ * **والترتيبُ كتابيٌّ أوّليّ** (بند ك٢/٢ — وإيماءاتُ الكيفية بندٌ لاحق لا يدخل هنا):
+ * الأجسامُ من أيمنِها (فالعربيةُ تُكتب يمنةً)، وكلُّ قطعةٍ تبدأ من أيمنِ طرفيها
+ * فإن استويا فمن أعلاهما، وقطعُ الجسم الواحد على مبادئها كذلك. **ورفعُ القلم**
+ * يُعلَن في `lift` على قاعدة المالك المحصورة: مبدأُ جسمٍ جديد رفعٌ (وهو ما يقع بعد
+ * غير الموصول: ا د ذ ر ز و)، وما اتّصل حبرُه فالقلمُ فيه ماضٍ.
+ */
+function skelOf(mask, em, wantInk = false, tall = 0.3, wide = 0.6) {
+  const parts = bodies(mask);
+  const keep = parts.filter((b) => b.area >= DUST);
+  const emCells = em / PX;
+  const bbox = (b) => {
+    let x0 = MASK_W;
+    let x1 = 0;
+    let y0 = MASK_H;
+    let y1 = 0;
+    for (const c of b.cells) {
+      const cx = c % MASK_W;
+      const cy = (c - cx) / MASK_W;
+      if (cx < x0) x0 = cx;
+      if (cx > x1) x1 = cx;
+      if (cy < y0) y0 = cy;
+      if (cy > y1) y1 = cy;
+    }
+    return { x0, x1, y0, y1, w: x1 - x0 + 1, h: y1 - y0 + 1 };
+  };
+  const isDot = (b) => {
+    const { w, h } = bbox(b);
+    return h < emCells * tall && w < emCells * wide;
+  };
+  // والنقطةُ تُعاد قطعَ ناظرٍ صادقة: مركزٌ ونصفا قطرٍ من صندوقها — فالمزدوجة
+  // الملتحمة تظهر بيضيّةً كما هي في الحبر، لا دائرةً منتفخةً تكذب.
+  const dots = keep.filter(isDot).map((b) => {
+    const { w, h } = bbox(b);
+    return [b.at[0] * PX, b.at[1] * PX, (w / 2) * PX, (h / 2) * PX];
+  });
+  const big = keep.filter((b) => !isDot(b));
+  big.sort((a, b) => bbox(b).x1 - bbox(a).x1);
+  const pieces = [];
+  // **وصندوقُ كلِّ جسمٍ يُعلَن**: به تُقاس فرجةُ النقطة في فضاء الحكم نفسِه (حبراً
+  // لا هيكلاً)، فلا يُقارَن مقيسان في فضاءين — وبه يعرف من بعدَنا أين يجلس الجسم.
+  const boxes = big.map((b) => {
+    const k = bbox(b);
+    return [k.x0 * PX, k.y0 * PX, (k.x1 + 1) * PX, (k.y1 + 1) * PX];
+  });
+  big.forEach((b, bi) => {
+    const g = skeletonGraph(thin(maskOf(b.cells)));
+    const edges = g.edges.map((e) => e.chain.map((q) => {
+      const [qx, qy] = pxAt(q);
+      return [qx * PX, qy * PX];
+    }));
+    for (const e of edges) {
+      const head = e[0];
+      const tail = e[e.length - 1];
+      if (tail[0] > head[0] + PX || (Math.abs(tail[0] - head[0]) <= PX && tail[1] < head[1])) {
+        e.reverse();
+      }
+    }
+    edges.sort((p, q) => (q[0][0] - p[0][0]) || (p[0][1] - q[0][1]));
+    edges.forEach((pts, i) => pieces.push({ pts, body: bi, lift: i === 0 }));
+  });
+  let ink;
+  if (wantInk) {
+    ink = [];
+    for (const b of keep) {
+      for (let i = 0; i < b.cells.length; i += 4) {
+        const c = b.cells[i];
+        const cx = c % MASK_W;
+        ink.push([cx * PX, ((c - cx) / MASK_W) * PX]);
+      }
+    }
+  }
+  return { pieces, dots, bodies: big.length, boxes, ink };
+}
+
+/**
  * 🔬 **عيّنةُ «كلُّ شيءٍ من الفونت»** (قرار المالك الناسخ، ٢٤ أغسطس ٢٠٢٦:
  * «كل ما هو مكتوب كله بلا استثناء من الفونت»): تُصاغ المادّةُ — حرفاً بموضعه
  * أو كلمةً كاملة — بالمُشكِّل وتُنحَّف هيكلاً، وتُعاد قطعُها ونقاطُها خاماً
- * للمعاينة بعين المالك قبل بند التعميم (ومعه إعادةُ معايرة الحَكَم).
+ * للمعاينة بعين المالك. **وهي عيّانُ اليد** — والبناءُ التامّ في `runFontSkel`.
  */
 async function runSkelSet() {
   const items = JSON.parse(qs.get('items') || '[]');
@@ -2670,60 +2753,107 @@ async function runSkelSet() {
           }
         }
       }
-      const parts = bodies(mask);
-      // النقطةُ تُعرَف بامتدادها نسبةً لحجم الحرف لا بعتبةٍ مطلقة — فمساحتُها
-      // تتبدّل مع مقاس الخط (حرفٌ مفرد ٠٫٦ شبكة وجملةٌ تنكمش)، والفاصلُ الصادق
-      // هو الارتفاع: أقصرُ ضربةٍ حقيقية (رأس ر) تجاوز ثلثَ الجسم والنقطةُ دونه.
-      const emCells = (it.f ? MASK * 0.6 * PX : sizeUsed) / PX;
-      const bbox = (b) => {
-        let x0 = MASK_W, x1 = 0, y0 = MASK_H, y1 = 0;
-        for (const c of b.cells) {
-          const cx = c % MASK_W;
-          const cy = (c - cx) / MASK_W;
-          if (cx < x0) x0 = cx;
-          if (cx > x1) x1 = cx;
-          if (cy < y0) y0 = cy;
-          if (cy > y1) y1 = cy;
-        }
-        return { w: x1 - x0 + 1, h: y1 - y0 + 1 };
-      };
-      const keep = parts.filter((b) => b.area >= DUST);
-      const isDot = (b) => {
-        const { w, h } = bbox(b);
-        return h < emCells * 0.3 && w < emCells * 0.6;
-      };
-      const big = keep.filter((b) => !isDot(b));
-      // والنقطةُ تُعاد قطعَ ناظرٍ صادقة: مركزٌ ونصفا قطرٍ من صندوقها — فالمزدوجة
-      // الملتحمة تظهر بيضيّةً كما هي في الحبر، لا دائرةً منتفخةً تكذب.
-      const dots = keep.filter(isDot).map((b) => {
-        const { w, h } = bbox(b);
-        return [b.at[0] * PX, b.at[1] * PX, (w / 2) * PX, (h / 2) * PX];
-      });
-      const pieces = [];
-      for (const b of big) {
-        const g = skeletonGraph(thin(maskOf(b.cells)));
-        for (const e of g.edges) pieces.push(e.chain.map((q) => {
-          const [qx, qy] = pxAt(q);
-          return [qx * PX, qy * PX];
-        }));
-      }
-      // ولوحةُ التراكب تطلب الحبرَ الأصلي شاهداً تحت الهيكل — خلايا الأجسام
-      // المحفوظة منقّصةً (كلُّ رابعة) لتخفّ ولا تكذب.
-      let ink;
-      if (qs.get('ink')) {
-        ink = [];
-        for (const b of keep) {
-          for (let i = 0; i < b.cells.length; i += 4) {
-            const c = b.cells[i];
-            const cx = c % MASK_W;
-            ink.push([cx * PX, ((c - cx) / MASK_W) * PX]);
-          }
-        }
-      }
-      results.push({ ok: true, msg: `skel ${it.f ? it.t + '/' + it.f : it.t}: قطع ${pieces.length} نقاط ${dots.length}`,
-        skel: { name: it.f ? it.t + '/' + it.f : it.t, pieces, dots, ...(ink ? { ink } : {}) } });
+      const got = skelOf(mask, it.f ? MASK * 0.6 * PX : sizeUsed, !!qs.get('ink'));
+      const name = it.f ? it.t + '/' + it.f : it.t;
+      results.push({ ok: true, msg: `skel ${name}: قطع ${got.pieces.length} نقاط ${got.dots.length}`,
+        skel: { name, pieces: got.pieces.map((p) => p.pts), dots: got.dots,
+          ...(got.ink ? { ink: got.ink } : {}) } });
     } catch (err) {
       results.push({ ok: false, msg: `skel ${it.t}: ${err.message}` });
+    }
+  }
+  await send();
+}
+
+/**
+ * 🏗 **مولّدُ الهياكل من الفونت للمادّة كلِّها** (بند ك٢ — تعميمُ مرسوم ٢٤ أغسطس).
+ *
+ * كلُّ وحدةٍ — حرفاً بموضعه بالوصلة، أو كلمةً، أو جملةً — **تُشكَّل نصاً كاملاً
+ * دفعةً واحدة** بمحرّك الخطّ ثم يُستخرج هيكلُها: **لا تركيبَ حرفٍ إلى حرفٍ**.
+ *
+ * **والمقياسُ واحدٌ للمادّة كلِّها** (أمرُ المالك المنتهي في النسبة): يُرسَم كلُّ
+ * وحدةٍ بأكبرِ مقاسٍ يسعه لوحُها — **دقّةُ تتبّعٍ لا حكمُ نِسَب**، وهي عينُ حجّة
+ * `line_layer.py` — ثم تُردُّ إحداثياتُها إلى **فضاءٍ واحد**: جسمُ الحرف فيه
+ * `EM_OUT`، وخطُّ الأساس صفرٌ، ومبدأُ السينِ حافّةُ الحبر اليمنى (فالوحداتُ
+ * تجلس على سطرٍ واحد ويُقاس بعضُها ببعض). **فلا وحدةٌ تُكبَّر لتملأ خليّتَها.**
+ *
+ * وقائمةُ الدفعة تُخدَم ملفّاً (`/__font_items.json`) لا في العنوان — كما تُخدَم
+ * قانونيّاتُ دفعة الكلمات، فلا يُحمَّل عنوانٌ بمادّةِ جملةٍ كاملة.
+ */
+const EM_OUT = GRID;
+
+/**
+ * **وحدُّ النقطة يُطلَب من المادّة لا من ثابتٍ مكتوب** (قاعدةُ «الحدّ العامل»):
+ * القاعدةُ بحالها — **النقطةُ تُعرَف بامتدادها نسبةً لجسم الحرف** — وإنّما تبدّل
+ * **مرجعُها**: في عيّان اليد الجسمُ خيالٌ يملأ خليّتَه، وهنا الجسمُ **جسمُ الخطّ
+ * نفسِه** (`em`) لأنّ المادّةَ كلَّها على مقياسٍ واحد.
+ *
+ * **والرقمُ قِيس على المادّة كلِّها مرّتين**: أوّلاً بمسبار `?raw=1` (بلا تمييزٍ
+ * أصلاً) فوُضع على ٠٫٢، **ثمّ أمسك الحارسُ نفسُه أنّ الفرجة عندها ٠٫٠٠١ لا أكثر**:
+ * **شولةُ الكاف** ٠٫٢٠١ وأعلى «نقطةٍ» ٠٫١٩٩ — **وهما شيءٌ واحد**: الشولةُ عينُها
+ * خرجت جسماً في `ك/معزول` ونقطةً في «الظلام الحالك في كهف الجبل»، **فحُكم على
+ * الشيء الواحد بحكمين**. ⇐ **والنقاطُ الصادقةُ كلُّها دون ٠٫١٤٢**، فالفرجةُ
+ * الحقيقية ٠٫١٤٢ ← ٠٫٢٠١ **والحدُّ منتصفُها** — وبه تبقى شولةُ الكاف ضربةً في
+ * كل موضع (وهي إحدى رفعتَي القلم المسمّاتين في `CLAUDE.md`).
+ * **والعرضُ يبقى واسعاً** فلا تُطرَد المزدوجةُ الملتحمة.
+ */
+const DOT_TALL = 0.17;
+const DOT_WIDE = 0.6;
+
+async function runFontSkel() {
+  await inlineFont(FONT_SRC);
+  const items = await (await fetch('/__font_items.json')).json();
+  for (const it of items) {
+    const name = it.form ? `${it.text}/${it.form}` : it.text;
+    try {
+      const text = it.form ? SHAPE[it.form](it.text) : it.text;
+      // **حارسُ العلامات**: المادّةُ تُحصَد نصاً مجرَّداً — «لا تشكيل في كل تطبيق
+      // اكتب»، وقد تسرّبت الحركاتُ إلى العيّنة الأولى فظهرت السكونُ حلقةً.
+      if (HARAKA.test(text)) throw new Error('نصٌّ مشكولٌ — والحصادُ مجرَّد');
+      if (text.includes('ـ')) throw new Error('نصٌّ فيه تطويل — ولا يُدَسّ في الحصاد');
+      setSheet(GRID);
+      const probe = maskBox(imageMask(await svgPaint(text, 100, GRID / 2, GRID / 2)));
+      if (!probe) throw new Error('لا حبرَ في المسبار');
+      const scale = Math.min((SHEET_MAX - 2 * MARGIN) / probe.w, (GRID - 2 * MARGIN) / probe.h);
+      const size = 100 * scale;
+      setSheet(probe.w * scale + 2 * MARGIN);
+      const baseline = MARGIN + (GRID / 2 - probe.y0) * scale;
+      const anchor = SHEET_W / 2 - (probe.cx - GRID / 2) * scale;
+      const mask = imageMask(await svgPaint(text, size, anchor, baseline));
+      const box = maskBox(mask);
+      if (!box) throw new Error('لا حبرَ في الرسم');
+      // `?raw=1` مسبارُ معايرة: بلا تمييز نقطةٍ — تخرج الأجرامُ كلُّها أجساماً
+      const got = skelOf(mask, qs.has('raw') ? 0 : size, false, DOT_TALL, DOT_WIDE);
+      if (!got.bodies) throw new Error('لا جسمَ — كلُّ حبرها نقاط');
+      // إلى الفضاء الواحد: `EM_OUT` جسماً، وصفرٌ أساساً، وحافّةُ الحبر اليمنى مبدأً
+      const k = EM_OUT / size;
+      const at = (p) => [round1((p[0] - box.x1) * k), round1((p[1] - baseline) * k)];
+      const pieces = got.pieces.map((piece) => ({
+        p: resample(piece.pts.map(at), 1), body: piece.body, lift: piece.lift,
+      }));
+      const dots = got.dots.map((d) => [...at([d[0], d[1]]), round1(d[2] * k), round1(d[3] * k)]);
+      // **ولام-ألفٍ تُسأل عن نفسها بالقياس**: أضيقُ من «لـا» ⇐ المُشكِّلُ صهرها
+      // رسماً واحداً كما يجب، وأوسعُ أو مثلُها ⇐ خرجت «لـا» وهو ممنوعٌ قطعاً.
+      let lig = null;
+      if (text.includes('لا')) {
+        shaper(100);
+        lig = sctx.measureText(text).width
+          < sctx.measureText(text.replace(/لا/g, 'لـا')).width - 0.5;
+      }
+      results.push({
+        ok: true,
+        msg: `${name}: أجسام ${got.bodies} · قطع ${pieces.length} · نقاط ${dots.length}`,
+        unit: {
+          name, text: it.text, form: it.form || null, kind: it.kind,
+          em: EM_OUT, size: round1(size), bodies: got.bodies, lig,
+          box: [round1((box.x0 - box.x1) * k), round1((box.y0 - baseline) * k),
+            0, round1((box.y1 - baseline) * k)],
+          bboxes: got.boxes.map((b) => [...at([b[0], b[1]]), ...at([b[2], b[3]])]),
+          pieces, dots,
+        },
+      });
+    } catch (err) {
+      results.push({ ok: false, msg: `${name}: ${err.message}`, fell: { name, why: err.message } });
     }
   }
   await send();
@@ -3651,6 +3781,7 @@ let FONT_SRC = null;
     FONT_SRC = await loadFont();
     if (qs.get('part') === 'measure') await runWordMeasure();
     if (qs.get('part') === 'skelset') await runSkelSet();
+    else if (qs.get('part') === 'fontskel') await runFontSkel();
     else if (qs.get('part') === 'words') await runWordChunk();
     else if (qs.has('build')) await runBuild();
     else if (qs.has('nodes')) await runNodes();
