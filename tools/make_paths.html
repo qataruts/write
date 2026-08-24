@@ -2632,6 +2632,103 @@ async function markLibrary(spec, texts) {
   return out;
 }
 
+/**
+ * 🔬 **عيّنةُ «كلُّ شيءٍ من الفونت»** (قرار المالك الناسخ، ٢٤ أغسطس ٢٠٢٦:
+ * «كل ما هو مكتوب كله بلا استثناء من الفونت»): تُصاغ المادّةُ — حرفاً بموضعه
+ * أو كلمةً كاملة — بالمُشكِّل وتُنحَّف هيكلاً، وتُعاد قطعُها ونقاطُها خاماً
+ * للمعاينة بعين المالك قبل بند التعميم (ومعه إعادةُ معايرة الحَكَم).
+ */
+async function runSkelSet() {
+  const items = JSON.parse(qs.get('items') || '[]');
+  for (const it of items) {
+    try {
+      let mask;
+      let sizeUsed = 0;
+      if (it.f) {
+        mask = ghost(it.t, it.f).mask;
+      } else {
+        setSheet(GRID);
+        shaper(200);
+        const w = sctx.measureText(it.t).width || 1;
+        const size = Math.min(200 * (GRID * 0.86) / w, GRID * 0.6);
+        sizeUsed = size;
+        sctx.clearRect(0, 0, GRID, GRID);
+        shaper(size);
+        const tw = sctx.measureText(it.t).width;
+        sctx.fillText(it.t, (GRID - tw) / 2, GRID * 0.62);
+        const data = sctx.getImageData(0, 0, GRID, GRID).data;
+        mask = new Uint8Array(MASK * MASK);
+        for (let y = 0; y < MASK; y++) {
+          for (let x2 = 0; x2 < MASK; x2++) {
+            let on = 0;
+            for (let dy = 0; dy < PX; dy++) {
+              for (let dx = 0; dx < PX; dx++) {
+                if (data[(((y * PX + dy) * GRID) + (x2 * PX + dx)) * 4 + 3] > 128) on++;
+              }
+            }
+            mask[y * MASK + x2] = on * 2 >= PX * PX ? 1 : 0;
+          }
+        }
+      }
+      const parts = bodies(mask);
+      // النقطةُ تُعرَف بامتدادها نسبةً لحجم الحرف لا بعتبةٍ مطلقة — فمساحتُها
+      // تتبدّل مع مقاس الخط (حرفٌ مفرد ٠٫٦ شبكة وجملةٌ تنكمش)، والفاصلُ الصادق
+      // هو الارتفاع: أقصرُ ضربةٍ حقيقية (رأس ر) تجاوز ثلثَ الجسم والنقطةُ دونه.
+      const emCells = (it.f ? MASK * 0.6 * PX : sizeUsed) / PX;
+      const bbox = (b) => {
+        let x0 = MASK_W, x1 = 0, y0 = MASK_H, y1 = 0;
+        for (const c of b.cells) {
+          const cx = c % MASK_W;
+          const cy = (c - cx) / MASK_W;
+          if (cx < x0) x0 = cx;
+          if (cx > x1) x1 = cx;
+          if (cy < y0) y0 = cy;
+          if (cy > y1) y1 = cy;
+        }
+        return { w: x1 - x0 + 1, h: y1 - y0 + 1 };
+      };
+      const keep = parts.filter((b) => b.area >= DUST);
+      const isDot = (b) => {
+        const { w, h } = bbox(b);
+        return h < emCells * 0.3 && w < emCells * 0.6;
+      };
+      const big = keep.filter((b) => !isDot(b));
+      // والنقطةُ تُعاد قطعَ ناظرٍ صادقة: مركزٌ ونصفا قطرٍ من صندوقها — فالمزدوجة
+      // الملتحمة تظهر بيضيّةً كما هي في الحبر، لا دائرةً منتفخةً تكذب.
+      const dots = keep.filter(isDot).map((b) => {
+        const { w, h } = bbox(b);
+        return [b.at[0] * PX, b.at[1] * PX, (w / 2) * PX, (h / 2) * PX];
+      });
+      const pieces = [];
+      for (const b of big) {
+        const g = skeletonGraph(thin(maskOf(b.cells)));
+        for (const e of g.edges) pieces.push(e.chain.map((q) => {
+          const [qx, qy] = pxAt(q);
+          return [qx * PX, qy * PX];
+        }));
+      }
+      // ولوحةُ التراكب تطلب الحبرَ الأصلي شاهداً تحت الهيكل — خلايا الأجسام
+      // المحفوظة منقّصةً (كلُّ رابعة) لتخفّ ولا تكذب.
+      let ink;
+      if (qs.get('ink')) {
+        ink = [];
+        for (const b of keep) {
+          for (let i = 0; i < b.cells.length; i += 4) {
+            const c = b.cells[i];
+            const cx = c % MASK_W;
+            ink.push([cx * PX, ((c - cx) / MASK_W) * PX]);
+          }
+        }
+      }
+      results.push({ ok: true, msg: `skel ${it.f ? it.t + '/' + it.f : it.t}: قطع ${pieces.length} نقاط ${dots.length}`,
+        skel: { name: it.f ? it.t + '/' + it.f : it.t, pieces, dots, ...(ink ? { ink } : {}) } });
+    } catch (err) {
+      results.push({ ok: false, msg: `skel ${it.t}: ${err.message}` });
+    }
+  }
+  await send();
+}
+
 async function runWordMeasure() {
   const spec = await anchors();
   const cur = await import('/js/curriculum.js');
@@ -3553,6 +3650,7 @@ let FONT_SRC = null;
   try {
     FONT_SRC = await loadFont();
     if (qs.get('part') === 'measure') await runWordMeasure();
+    if (qs.get('part') === 'skelset') await runSkelSet();
     else if (qs.get('part') === 'words') await runWordChunk();
     else if (qs.has('build')) await runBuild();
     else if (qs.has('nodes')) await runNodes();
