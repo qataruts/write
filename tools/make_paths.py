@@ -921,10 +921,20 @@ def seat_build() -> int:
     paths, prior = ghost["paths"], paths_module()[1]
     owner_layer.set_ghost(paths)
     hand, owner = owner_layer.layer()
-    for ch, family in hand.items():
-        paths.setdefault(ch, {}).update(family)
+    # 🔬 **أرضيةُ الهيكل الخالص** (توضيح المالك ٢٤ أغسطس: «خطُّ يدي كان فقط
+    # للاتجاهات والوقفات والتحرك وليس للفونت نفسه»): `UKTUB_NO_HAND=1` يُبقي
+    # الأجسامَ على هيكل الخيال ولا يُعلي طبقةَ اليد — فيدُ المالك تبقى مرجعَ
+    # الإيماءة (الترتيب والاتجاه والرفع) لا مرجعَ الشكل. اعتمادُه قرارُ مالكٍ
+    # ينسخ تفسيرَ ص٦ الشكليّ.
+    import os as _os
+    if _os.environ.get("UKTUB_NO_HAND") == "1":
+        print("🔬 أرضيةُ الهيكل الخالص: طبقةُ اليد للإيماءة لا للشكل — الأجسامُ من الخيال")
+    else:
+        for ch, family in hand.items():
+            paths.setdefault(ch, {}).update(family)
     away = max((row["away"] for row in owner["panel"]), default=0)
-    print(f"✍️  طبقةُ المالك: {owner['shapes']} شكلاً من يده تعلو الخيال")
+    print(f"✍️  طبقةُ المالك: {owner['shapes']} شكلاً من يده — "
+          + ("موقوفةٌ عن الشكل في هذا البناء" if _os.environ.get("UKTUB_NO_HAND") == "1" else "تعلو الخيال"))
     merged = merge_layer(paths)
     derived = derive_layer(paths)
     seating = seat_layer(paths)
