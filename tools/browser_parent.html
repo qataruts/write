@@ -103,7 +103,6 @@ const fromAr = (text) => Number(String(text).replace(/[٠-٩]/g,
     progress.reset();
     const NODES = progress.allNodes();
     const letter = NODES.find((n) => n.type === 'letter').letter;
-    const warm = NODES.find((n) => n.type === 'warmup');
     const word = NODES.find((n) => n.type === 'fade').words[0];
     const line = NODES.find((n) => n.type === 'sentence').sentences[0];
 
@@ -120,7 +119,9 @@ const fromAr = (text) => Number(String(text).replace(/[٠-٩]/g,
     progress.setChildName(CHILD);
     for (let i = 0; i < 4; i++) progress.recordFault(letter, pen.FAULTS.START_END);
     progress.recordFault(letter, pen.FAULTS.DOTS_FIRST);
-    progress.recordFault(warm.part, pen.FAULTS.REVERSE);
+    // (كان هنا خطأُ محطةِ تهيئة — طُويت المرحلةُ بمرسوم ٢٤ أغسطس؛
+    //  فيقوم مقامَه خطأُ كلمةٍ ثانٍ ليبقى تنوّعُ الأسماء مقيساً.)
+    progress.recordFault(word, pen.FAULTS.REVERSE);
     progress.recordFault(word, pen.FAULTS.SHORT);
     // **وقناةُ الجودة** (م١٠): قبولٌ موصوفٌ بمفتاح مهارته — «صحيحٌ ويدُه ترتجف»
     // و«يكتبه كبيراً». والحرفُ الثاني **لا سجلَّ جودةٍ له** فلا يظهر له سطرٌ أصلاً.
@@ -231,9 +232,8 @@ const fromAr = (text) => Number(String(text).replace(/[٠-٩]/g,
       + ` واللوحةُ RTL (${doc.documentElement.dir})`);
     ok(doc.documentElement.scrollWidth <= win.innerWidth + 1,
       `ولا فائضَ أفقيّ في اللوحة (${doc.documentElement.scrollWidth} ≤ ${win.innerWidth})`);
-    ok(faultLines().some((l) => l.startsWith(warm.title))
-      && faultLines().some((l) => l.startsWith(word)),
-      'وتدخلها التهيئةُ بعنوانها والكلمةُ بنصّها — لا رمزَ برمجيّ في شاشة الوالد');
+    ok(faultLines().some((l) => l.startsWith(word)),
+      'وتدخلها الكلمةُ بنصّها لا برمزها — (والتهيئةُ مطويّةٌ بمرسوم ٢٤ أغسطس فلا سطرَ لها)');
     ok(!/lines-h|start-end|dots-first|undefined|NaN/.test(text()),
       'ولا رمزَ محرّكٍ ولا «undefined» يظهر لوليّ الأمر');
     // **وكلُّ سطرٍ يقول «كيف» لا «كم»**: نصُّ محرّكٍ يصف الحركة، لا عدداً مبهماً

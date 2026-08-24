@@ -126,8 +126,8 @@ function hurryAudio(win) {
     const kinds = [...new Set(nodes.map((n) => n.type))];
     ok(nodes.length > 0 && kinds.includes('warmup') && kinds.includes('gate'),
       `الرحلةُ ${nodes.length} عقدةً في ${kinds.length} نوعاً: ${kinds.join('، ')}`);
-    ok(nodes[0].type === 'warmup',
-      `وأوّلُها محطةُ تهيئةٍ حركية («${nodes[0].part}») — قبل أيّ حرف`);
+    ok(nodes[0].type === 'letter' && nodes[0].letter === 'ا',
+      `وأوّلُها حرفُ الألف مباشرةً («${nodes[0].id}») — التهيئةُ مطويّةٌ بمرسوم ٢٤ أغسطس`);
     const last = nodes[nodes.length - 1];
     ok(last.type === 'gate' && last.part === 'end',
       `وآخرُها **بوابةُ الختام** («${last.part}») — بابُ «أَتْقِنْ»`);
@@ -294,15 +294,16 @@ function hurryAudio(win) {
         // **ومن أخطأ يُعيد من أوّلها** (`METHOD.md §٣.٤`: إعادةٌ بلا حدّ): لوحٌ بقي
         // بعد كتابةٍ تامّة يعني أنّ جزءاً لم يُستوفَ — والطفلُ حينئذٍ يضغط «أعِدْ»
         // ويبدأ من رأس المادّة، لا يُكمل على تقدّمٍ نصفِ مكتوب.
-        if (el === lastBoard) {
-          const redo = [...doc.querySelectorAll('main .foot .btn')]
-            .find((b) => b.textContent.includes('أَعِدْ') || b.textContent.includes('أعِدْ'));
-          if (redo) { redo.click(); seen.clicks++; await wait(60); }
-        }
+        // 🔴 **«نقيس ولا نرفض» (مرسوم ٢٤ أغسطس)**: اللوحُ لا يتقدّم من تلقائه —
+        // بعد الكتابة تُنقر «تَابِعْ» (القياسُ الصامتُ والبابُ الواحد). وبقاءُ
+        // اللوح نفسِه قبلها ليس عيباً بعد اليوم فلا إعادةَ ولا محو.
         lastBoard = el;
         await writeRef(el, item.ref);
         seen.writes++;
-        await wait(60);
+        const go = [...doc.querySelectorAll('main .foot .btn')]
+          .find((b) => /تَابِعْ/.test(b.textContent));
+        if (go) { go.click(); seen.clicks++; }
+        await wait(180);
       }
       const main = doc.querySelector('main');
       const where = `صنفُ الشاشة «${main?.className || 'لا شاشة'}»`

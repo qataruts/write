@@ -2145,6 +2145,15 @@ export function penSurface(config) {
   const {
     ref, mode = MODES.GUIDED, tolerance, bounds = false, baseline = null, veil = 0,
     onFault, onPart, onDone, onTry, onStuck, label = 'لوحُ الكتابة', pace = 1,
+    /**
+     * 🔴 **«نقيس ولا نرفض» — مرسومُ المالك الثاني (٢٤ أغسطس ٢٠٢٦)**: «تقبل
+     * عملَه وتقيسه ولا تجبره على نقطة البداية ولا ترفض كتابته — لا جزءَ
+     * كلمةٍ ولا حرفاً؛ والقبولُ والقياسُ على ضغط زرّ متابعة». فنمطُ
+     * `judge: 'defer'` يجعل اللوحَ **التقاطاً محضاً**: الحبرُ يثبت كما رُسم،
+     * لا ماشيَ ولا حكمَ ولا محوَ ولا وميضَ ولا صوتَ خطأ — والمحرّكُ كلُّه
+     * يُسأل مرةً واحدةً صامتاً عبر `measure()` حين يضغط الطفلُ «تَابِعْ».
+     */
+    judge = 'live',
   } = config;
 
   const [bw, bh] = boxOf(ref);
@@ -2497,6 +2506,13 @@ export function penSurface(config) {
       if (!free) trial.move(end[0], end[1]);
       if (inkPath) inkPath.setAttribute('d', pathD(inkPoints));
     }
+    // **النمطُ المؤجَّل يلتقط ويثبت ويصمت** — الضربةُ إلى الدرج والحبرُ باقٍ.
+    if (judge === 'defer') {
+      attemptInk.push(inkPoints.map((q) => [q[0], q[1]]));
+      inkPath?.classList.add('pen-line--kept');
+      inkPath = null;
+      return;
+    }
     // **الخطوةُ الحرّة تُحكَم هنا** بحكمها الثاني: الشكلُ تامّاً موفَّقاً على صندوق حبره.
     if (free) {
       const drawn = inkPath;
@@ -2635,6 +2651,23 @@ export function penSurface(config) {
     play,
     stop,
     reset,
+    /**
+     * **القياسُ الصامت عند «تَابِعْ»** (مرسوم ٢٤ أغسطس): يُسأل الحَكَمُ الكلّيّ
+     * وقياسُ الطريقة عن كلِّ الحبر مرةً واحدة — نسبةُ النجاح لوليّ الأمر،
+     * ولا شيءَ يُقال للطفل ولا يوقفه.
+     */
+    measure() {
+      const strokes = attemptInk.map((st) => st.map((q) => [q[0], q[1]]));
+      const shape = judgeShape(ref, strokes, { tolerance });
+      const method = judgeFree(ref, strokes, { tolerance });
+      return {
+        shape,
+        method,
+        strokes: strokes.length,
+        rate: Math.round(Math.max(0, Math.min(1, shape.metrics?.recall ?? shape.recall ?? 0)) * 100),
+        clean: Boolean(shape.ok),
+      };
+    },
     /**
      * **أثرُ الطفل كما رسمه** — عقدُ حبره المرسومة على هذا اللوح، تُقرأ ولا تُخزَّن.
      *

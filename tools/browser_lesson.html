@@ -134,6 +134,12 @@ function watchRobot(win) {
       await wait(60);
     }
     const tap = async (at) => writeStroke([at, at, at]);
+    // **بابُ الانتقال الواحد** (مرسوم ٢٤ أغسطس): «تَابِعْ» الأزرق يقيس صامتاً ويمضي.
+    const tabi = async () => {
+      [...doc.querySelectorAll('main .foot .btn')]
+        .find((b) => /تَابِعْ/.test(b.textContent))?.click();
+      await wait(700);
+    };
     /**
      * يدُ طفلٍ مصنوعة: تمشي على المسار المرجعيّ نفسِه (وتعكسه إن طُلب)، ثم تنقط.
      * **و`at` تشويهٌ موصوف** يُطبَّق على ما تكتبه — به تُمتحن الخطوةُ الحرّة: حرفٌ
@@ -190,18 +196,11 @@ function watchRobot(win) {
     };
     const nodeOf = () => Object.keys(stored().stars || {}).find((id) => id.endsWith(`:${letter}`));
 
-    // ————— أوّلاً: القفلُ يُفتَح بإتمام التهيئة (الرحلةُ حبلٌ واحد) —————
-    const { WARMUPS } = await import('/js/warmups.js');
-    for (const [part, station] of Object.entries(WARMUPS)) {
-      win.location.hash = `#/warmup/${encodeURIComponent(part)}`;
-      await wait(400);
-      for (const shape of station.shapes) {
-        for (const stroke of shape.ref.strokes) await writeStroke(stroke.points);
-        await wait(520);
-      }
-    }
-    ok(Object.keys(stored().stars || {}).length === Object.keys(WARMUPS).length,
-      `محطاتُ التهيئة أُتمّت فانفتح بابُ الحروف (${Object.keys(stored().stars || {}).length})`);
+    // ————— **الحروفُ بابُ البداية** (مرسوم ٢٤ أغسطس: «ابدأ من الحروف
+    // مباشرة دون هذه التهيئة») — لا مشيَ تهيئةٍ قبل الحرف الأول.
+    const { allNodes } = await import('/js/progress.js');
+    ok(allNodes()[0]?.type === 'letter',
+      `وأولُ الرحلة حرفٌ لا تهيئة («${allNodes()[0]?.id}») — التهيئةُ مطويةٌ بالمرسوم`);
 
     // ————— الدرس: أربعُ خطواتٍ بحلقة `METHOD.md §٥` —————
     const netMark = netCalls.length;
@@ -242,91 +241,66 @@ function watchRobot(win) {
     ok(!doc.querySelector('.pen-box--playing'),
       'وخطوةُ الكتابة فُتحت حيّةً: لا عرضَ يجري فوق اللوح والقلمُ بيد الطفل');
 
-    // **الانحرافُ إرشادٌ لا رفض**: معكوسٌ أوّلاً — لا يُقبَل ولا يُخرج الطفلَ
-    await writeShape(true);
-    await wait(200);
-    ok(Boolean(doc.querySelector('main.lesson-letter .pen-surface')),
-      'والمعكوسُ لا يُقبَل **ولا يُخرِج الطفلَ من الشاشة** — إرشادٌ لا رفض');
-    const faultsNow = Object.keys(stored().faults || {});
-    ok(faultsNow.some((k) => k.startsWith(`${letter}|`)),
-      `وخطؤه سُجِّل بموضعه الحركيّ (${faultsNow.join('، ') || 'لا شيء'}) — عدّادُ أخطاء الاتجاه`);
-
-    // ثم تُمشى الخطواتُ الكاتبةُ الثلاث.
-    // **والانتظارُ بينها انتظارُ كلامٍ لا زينة**: الشاشةُ تنتقل بعد تمام جملتها
-    // (عهدُ ٤ج)، فمَن استعجلها كتب الخطوةَ الثانية على لوح الأولى — وقد وقع ذلك
-    // فعلاً في أوّل تشغيلٍ لهذا الفحص (ثلاثُ محاولاتٍ في صندوق «تتبّع» ولا حرّ).
-    const STEP_WAIT = 5200;              // فوق أطولِ احتياطٍ محسوبٍ لنصٍّ لم يُصرَّف بعد
     /**
-     * 🔴 **والخافتُ يُكتب مقسومَ الضربات عمداً** (بلاغُ المالك، ٢٣ أغسطس ٢٠٢٦:
-     * «مقاطعُ مثل با تتوقف ولا تتعدّى الصفحة»): كلُّ ضربةِ نموذجٍ تُكتب نصفين
-     * برفعِ قلمٍ بينهما — فالماشي لا يرضى النصفَ، ودرجُ المحاولة في المحرّك
-     * يجمع الحبرَ كلَّه ويقبل الشكلَ التامّ. لو عاد العيبُ (حبرٌ مرفوضٌ يذهب
-     * ولا يتراكم) انسدّت هذه الخطوةُ واحمرّ ما بعدها.
+     * 🔴 **«نقيس ولا نرفض» — عقدُ مرسوم ٢٤ أغسطس ٢٠٢٦** (بلاغُ المالك: «بدأ
+     * يؤثر نفسياً على الأطفال… بسبب هذا المحرك المعيق»): لوحُ الكتابة التقاطٌ
+     * صامتٌ محض — لا حكمَ لحظياً ولا محوَ حبرٍ ولا إرشادَ خطأٍ ولا انسدادَ،
+     * و«تَابِعْ» الأزرقُ الأولُ هو القياسُ والبابُ الواحد ويمضي دائماً.
+     */
+    // معكوسُ الاتجاه: يبقى حبرُه على اللوح كما رسمه — لا يخفت ولا يُمحى ولا يُرَدّ
+    await writeShape(true);
+    await wait(400);
+    const inkAfterReverse = doc.querySelectorAll('.pen-line').length;
+    ok(inkAfterReverse > 0 && doc.querySelector('.pen-box--guided'),
+      `والمعكوسُ حبرُه باقٍ على اللوح (${inkAfterReverse} ضربة) والشاشةُ ساكنة — لا رفضَ ولا محوَ ولا نقلة`);
+    ok(!/أخطأت|حاول مرّة|رسوب|فشل/.test(doc.querySelector('main.lesson-letter').textContent),
+      'ولا كلمةَ لومٍ تظهر لحظةَ الكتابة — الصمتُ عهدُ اللوح');
+    // ثم يكتب الصحيح فوقه ويضغط «تَابِعْ» — القياسُ الصامتُ يقرأ الكلَّ ويمضي
+    await writeShape(false);
+    await tabi();
+    ok(Boolean(doc.querySelector('.pen-box--faint')),
+      'و«تَابِعْ» بعد التصحيح يمضي إلى الخافت — قياسٌ صامتٌ وبابٌ واحد');
+    const tabiBtn = [...doc.querySelectorAll('main .foot .btn')]
+      .find((b) => /تَابِعْ/.test(b.textContent));
+    ok(Boolean(tabiBtn) && tabiBtn.classList.contains('btn--primary'),
+      'وزرُّ «تَابِعْ» أولُ الأزرار بلونه الأزرق الواضح — أمرُ المالك بعينه');
+
+    /**
+     * **الخافتُ يُكتب مقسومَ الضربات عمداً** (شاهد «با تتوقف»): كلُّ ضربةِ
+     * نموذجٍ نصفين، والنصفُ الثاني من طرفه البعيد — والقياسُ عند «تَابِعْ»
+     * يقرأ الحبرَ كلَّه فيمضي.
      */
     async function writeShapeSplit() {
       for (const stroke of ref.strokes) {
         const half = Math.max(2, Math.ceil(stroke.points.length / 2));
         await writeStroke(stroke.points.slice(0, half));
-        // **والنصفُ الثاني من طرفه البعيد** — كطفلٍ يكتب ألفَ «با» من أعلى بعد
-        // بائها: لا يبدأ من نقطة الرفع فلا يقدر الماشي على وصله بجزئه، ويذهب
-        // حبرُه القديم مذهبَ المرفوض — ودرجُ المحاولة وحدَه يجمعه للحَكَم الكلّيّ.
         await writeStroke([...stroke.points.slice(half - 1)].reverse());
       }
       for (const dot of ref.dots) {
         for (let i = 0; i < (dot.count || 1); i++) await tap(dot.at);
       }
     }
-    await writeShape(false);             // ٢) تتبّعٌ موجَّه — صحيحاً
-    await wait(STEP_WAIT);
-    await writeShapeSplit();             // ٣) تتبّعٌ خافت — صحيحاً مقسومَ الضربات
-    await wait(STEP_WAIT);
+    await writeShapeSplit();             // ٣) الخافت — مقسومَ الضربات عمداً
+    await tabi();
     ok(Boolean(doc.querySelector('.pen-box--free')),
-      'والخافتُ قُبل مقسومَ الضربات: رفعُ القلم في وسط الجزء لا يحبس الصفحة — درجُ المحاولة يجمع');
-    // ————— ٤) «اكتُبْهُ وحدَك»: 🚪 **لا انسدادَ أبداً** ثم «الشكلُ لا الأثر» —————
-    //
-    // 🔴 **بلاغُ الميدان ٢ (١٣ أغسطس ٢٠٢٦)**: رُدّت نونٌ صحيحةُ الشكل لأنّ كأسها
-    // أضيقُ من كأس النموذج الخفيّ، **فتركت الطفلةُ الجهاز**. فهنا يُقاس الشقّان في
-    // متصفّحٍ حقيقيّ: أنّ التعثّرَ المتكرر **يفتح باباً** لا يسدّه، وأنّ الحرفَ
-    // الصحيحَ في حجمٍ وموضعٍ آخرين **يُقبَل**.
-    ok(Boolean(doc.querySelector('.pen-box--free')), 'والخطوةُ الرابعة صندوقٌ فارغ — «اكتُبْهُ وحدَك»');
-    // **وثلاثةُ أخطاءِ شكلٍ متتالية** (لا أخطاءَ طريقة — تلك تُقبَل اليوم بحكم المالك)
-    await writeWrong();                                  // خربشةٌ فوق الحبر — تعثّرٌ أوّل
-    await wait(200);
-    await writeWrong();                                  // وثانٍ
-    await wait(200);
-    await writeWrong();                                  // وثالث
-    await wait(400);
+      'والخافتُ قُبل مقسومَ الضربات: رفعُ القلم في وسط الجزء لا يحبس — القياسُ على كل الحبر');
 
-    const way = [...doc.querySelectorAll('main.lesson-letter .foot .btn')];
-    const wayText = way.map((b) => b.textContent.trim());
-    ok(way.length >= 2 && wayText.some((t) => t.includes('تَتَبَّعْ')) && wayText.some((t) => t.includes('تَابِعْ')),
-      `وبعد تعثّرٍ متكرر **يُفتَح مخرجٌ كريم**: ${wayText.join(' · ') || 'لا زرّ'}`);
-    ok(way.every((b) => b.getBoundingClientRect().height >= 64),
-      'وأزرارُه هدفُ لمسٍ ≥ ٦٤ بكسل — يبلغها إصبعُ طفلٍ متعثّر');
-    const stuckText = doc.querySelector('main.lesson-letter').textContent;
-    ok(!/رسوب|فشل|أخطأت|حاول مرّة أخرى/.test(stuckText),
-      'ولا لومَ ولا رسوبَ فيما يقرؤه — الطفلُ يخرج من الشاشة بيده لا بيأسه');
-    const starsKept = Object.keys(stored().stars || {}).length;
-
-    way.find((b) => b.textContent.includes('تَتَبَّعْ')).click();     // يخرج **بيده** إلى التتبّع
-    await wait(600);
-    ok(Boolean(doc.querySelector('.pen-box--guided'))
-      && Object.keys(stored().stars || {}).length === starsKept,
-      'فيعود إلى التتبّع الموجَّه — **بلا رسوبٍ ولا حرمانِ نجمة** (نجومُ ما قبله كما هي)');
-
-    await writeShape(false);             // تتبّعٌ موجَّه مرّةً أخرى
-    await wait(STEP_WAIT);
-    await writeShape(false);             // فخافت
-    await wait(STEP_WAIT);
-    // **ثم الحرّةُ: خطأُ شكلٍ أوّلاً** — فيبقى في صندوقه الأول ويستحقّ المراجعةَ
-    // اليومَ نفسَه (ليتنر: الخطأُ يعيد الصندوق إلى الصفر) — **ثم حرفٌ صحيحُ الشكل في
-    // حجمٍ وموضعٍ آخرين**: كان يُردّ `start-far` قبل الحكم الثاني، وهو عينُ ما أخرج
-    // الطفلةَ من الجهاز. (وكان الخطأُ هنا معكوسَ الاتجاه، **وقد صار يُقبَل** بحكم
-    // المالك — فبُدِّل بخطأ شكلٍ، جلسة ن٢.)
+    // ٤) «اكتُبْهُ وحدَك»: خربشةٌ ثم «تَابِعْ» — **يمضي ويُقيَّد ولا يُحبَس**
+    ok(Boolean(doc.querySelector('.pen-box--free')), 'والخطوةُ الرابعة صندوقٌ فارغ للكتابة الحرة');
     await writeWrong();
     await wait(300);
-    await writeShape(false, smallerAside);
-    await wait(STEP_WAIT);
+    const inkAfterWrong = doc.querySelectorAll('.pen-line').length;
+    ok(inkAfterWrong > 0,
+      `وخربشةُ الحرّة حبرُها باقٍ (${inkAfterWrong}) — لا حكمَ قبل «تَابِعْ»`);
+    const starsKept = Object.keys(stored().stars || {}).length;
+    await tabi();
+    ok(!doc.querySelector('.pen-box--free') || doc.querySelector('.celebrate, .mark-card'),
+      'و«تَابِعْ» بعد الخربشة يمضي كذلك — نقيسُ ولا نرفض، والتكرارُ يعوّض');
+    ok(Object.keys(stored().stars || {}).length >= starsKept,
+      'ولا نجمةَ تُحرَم بخربشة — الوصفُ لوليّ الأمر لا عقابَ للطفل');
+    const quality = stored().quality || {};
+    ok(Object.values(quality).some((q) => q && q['passed-on']),
+      'ولوحةُ وليّ الأمر تقرأ «مَضى قبل تمام القبول» — القياسُ وصل مستقرَّه');
 
     const state = stored();
     const skills = Object.keys(state.skills || {});
@@ -345,11 +319,15 @@ function watchRobot(win) {
     // فتُطرَح — فلا يعرف السجلُّ ولا تعرض اللوحة. وهذا يقيس القناةَ من طرفها إلى
     // طرفها في متصفّحٍ حقيقيّ: **حرفٌ صحيحٌ كُتب دون مدى الحجم فقُبل ووُصف**.
     const qbag = state.quality || {};
-    const freeQ = qbag[`${letter}|${FORMS.ISOLATED}|free`];
-    ok(freeQ?.['size-small']?.n >= 1 && freeQ['size-small'].seen === (await import('/js/progress.js')).dayNumber(),
-      `ووصفُ القبول بلغ السجلَّ بمفتاح مهارته: ${JSON.stringify(freeQ) || 'لا شيء'}`);
+    // **الوصفُ يصل عبر «تَابِعْ» وحدَه الآن** (مرسوم ٢٤ أغسطس): خربشةُ
+    // الحرّة قُيّدت «مَضى قبل تمام القبول» بيوم رؤيتها — والمفاتيحُ كلُّها
+    // للحرف المكتوب لا لغيره.
+    const day = (await import('/js/progress.js')).dayNumber();
+    ok(Object.values(qbag).some((q) => q?.['passed-on']?.seen === day),
+      `ووصفُ «تَابِعْ» بلغ السجلَّ بيومه: ${JSON.stringify(Object.values(qbag)[0] || {})}`);
     ok(Object.keys(qbag).every((k) => k.split('|')[0] === letter),
       `ولا وصفَ لغير الحرف المكتوب — مفاتيحُ الجودة: ${Object.keys(qbag).join('، ') || 'لا شيء'}`);
+
     // **وليتنر لم يُمَسّ** (عهدُ لا-رسوب): محاولةُ القبول الموصوف كُتبت في صندوقها
     // كما كانت تُكتب — **والوصفُ لا يزيد فيها ولا ينقص**. (وأنّ التسجيلَ لا يمسّ
     // الصندوقَ أصلاً مقيسٌ في `test_parent.mjs`: صندوقٌ قبلَه وبعدَه سواء.)

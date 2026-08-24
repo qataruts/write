@@ -297,6 +297,8 @@ export function renderNode(node) {
     const surface = penSurface({
       ref: unit.ref,
       mode: step.mode,
+      // **«شاهِدْ» عرضٌ حيّ وكلُّ لوحِ كتابةٍ التقاطٌ مؤجَّل** (مرسوم ٢٤ أغسطس)
+      judge: step.id === 'watch' ? 'live' : 'defer',
       // **سماحةُ الكلمة من مسارها** — مقياسُ حروفها فيها، لا سماحةُ حرفٍ يملأ صندوقه
       tolerance: aid.tolerance,
       pace: demoPace(),
@@ -324,7 +326,7 @@ export function renderNode(node) {
     // والإعادةُ بزرّ الطلب.
     if (step.id === 'watch') surface.play();
     if (step.id === 'watch') {
-      surface.el.addEventListener('pointerdown', () => { audio.stop(); nextStep(); });
+      surface.el.addEventListener('pointerdown', () => { audio.stop(); });
       say(unit.say, step.say);
     } else {
       surface.el.addEventListener('pointerdown', () => surface.stop(), { capture: true });
@@ -451,7 +453,7 @@ export function renderNode(node) {
         h('button', {
           class: 'btn btn--primary next',
           onclick: () => { audio.stop(); nextStep(); },
-        }, icon('pen'), ' اِنْسَخْ'),
+        }, 'تَابِعْ →'),
         // **وزرُّ الأذن يُسمِع الكلمةَ بصوت اقرأ** — يسقط في سطر المسافة (لا صوتَ له)
         unit.say && h('button', {
           class: 'btn next',
@@ -465,48 +467,38 @@ export function renderNode(node) {
       );
       return;
     }
-    // **وفي الدرجة الحرّة لا زرَّ «شاهِدْ» على اللوح**: نموذجُها فوقه ظاهرٌ لا يغيب،
-    // وعرضُ اللوح فيها لا يُري شيئاً (`app.css: .pen-box--free`) — فوعدٌ لا يُوفى.
-    // ويبقى زرُّ الأذن (الكلمةُ بصوت اقرأ) وزرُّ الإعادة، **وبابُ التتبّع يفتحه
-    // المخرجُ الكريم** عند التعثّر لا نقرةً تُبطِل الدرجة.
-    if (step.mode === MODES.FREE) {
-      fill(foot,
-        unit.say && h('button', {
-          class: 'btn btn--primary next',
-          onclick: () => { audio.stop(); speech = audio.play(unit.say); },
-        }, icon('ear'), ' اسْمَعْ'),
-        h('button', { class: 'btn next', onclick: () => live?.reset() }, '↻ أعِدْ'),
-      // **مرسومُ المضيّ (٢٣ أغسطس ٢٠٢٦)**: «دع الطفل يمشي ولا توقفه» — زرُّ
-      // المضيّ حاضرٌ دائماً لا بعد التعثّر: يسجّل بصدقٍ (ليتنر يعيد التكرار،
-      // ولوحةُ وليّ الأمر تقرأ «مضى قبل تمام القبول») ثم يمضي.
-      h('button', {
-        class: 'btn next',
-        onclick: () => {
-          audio.stop();
-          if (step.kind) progress.recordQuality(unit.text, progress.WORD_FORM, step.kind, ['passed-on']);
-          score(step, unit, false);
-          nextStep();
-        },
-      }, 'تَابِعْ →'),
-      );
-      return;
-    }
+    // 🔴 **«نقيس ولا نرفض»** (مرسوم ٢٤ أغسطس ٢٠٢٦): اللوحُ التقاطٌ صامت،
+    // و«تَابِعْ» الأزرقُ الأولُ هو القياسُ والبابُ الواحد — يُسأل الحَكَمُ
+    // عنده مرةً (نسبةُ النجاح والوصفُ لوليّ الأمر وليتنر) ويمضي دائماً.
+    // وفي الدرجة الحرّة لا زرَّ «شاهِدْ» — النموذجُ محجوبٌ بوعد الدرجة.
+    const measureOn = () => {
+      audio.stop();
+      const m = live?.measure?.();
+      if (m) {
+        if (!m.clean && m.shape?.why) progress.recordFault(unit.text, m.shape.why);
+        if (step.kind) progress.recordQuality(unit.text, progress.WORD_FORM, step.kind,
+          m.clean ? [...new Set([...(m.shape.guides || []), ...(m.method?.guides || [])])]
+            : ['passed-on']);
+        score(step, unit, m.clean);
+        // **وإنتاجٌ حرٌّ نظيفٌ غيرُ مكشوفٍ يُنضج الكلمة** (ب١ — كما كان في
+        // مسلك الإتمام القديم): طريقُها إلى الإملاء يمرّ من هنا.
+        if (step.mode === MODES.FREE && m.clean && !state.shown && !unit.space) {
+          progress.recordRead(unit.text);
+        }
+      } else {
+        score(step, unit, false);
+      }
+      nextStep();
+    };
     fill(foot,
-      h('button', {
-        class: 'btn btn--primary next',
-        onclick: () => { live?.reset(      // **مرسومُ المضيّ (٢٣ أغسطس ٢٠٢٦)**: «دع الطفل يمشي ولا توقفه» — زرُّ
-      // المضيّ حاضرٌ دائماً لا بعد التعثّر: يسجّل بصدقٍ (ليتنر يعيد التكرار،
-      // ولوحةُ وليّ الأمر تقرأ «مضى قبل تمام القبول») ثم يمضي.
-      h('button', {
+      h('button', { class: 'btn btn--primary next', onclick: measureOn }, 'تَابِعْ →'),
+      unit.say && h('button', {
         class: 'btn next',
-        onclick: () => {
-          audio.stop();
-          if (step.kind) progress.recordQuality(unit.text, progress.WORD_FORM, step.kind, ['passed-on']);
-          score(step, unit, false);
-          nextStep();
-        },
-      }, 'تَابِعْ →'),
-    ); live?.play(); },
+        onclick: () => { audio.stop(); speech = audio.play(unit.say); },
+      }, icon('ear'), ' اسْمَعْ'),
+      step.mode !== MODES.FREE && h('button', {
+        class: 'btn next',
+        onclick: () => { live?.reset(); live?.play(); },
       }, icon('pen'), ' شَاهِدْ'),
       h('button', { class: 'btn next', onclick: () => live?.reset() }, '↻ أعِدْ'),
     );

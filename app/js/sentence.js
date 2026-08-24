@@ -186,6 +186,7 @@ export function renderNode(node) {
     const surface = penSurface({
       ref: unit.ref,
       mode: step.mode,
+      judge: 'defer',   // **التقاطٌ صامتٌ والقياسُ عند «تَابِعْ»** (مرسوم ٢٤ أغسطس)
       // **سماحةُ الجملة من مسارها** — مقياسُ حروفها فيها (`METHOD.md §٣.٥`)
       tolerance: aid.tolerance,
       pace: demoPace(),
@@ -303,15 +304,22 @@ export function renderNode(node) {
         onclick: () => { live?.reset(); live?.play(); },
       }, icon('pen'), ' شَاهِدْ'),
       h('button', { class: 'btn next', onclick: () => live?.reset() }, '↻ أعِدْ'),
-      // **مرسومُ المضيّ (٢٣ أغسطس ٢٠٢٦)**: «دع الطفل يمشي ولا توقفه» — زرُّ
-      // المضيّ حاضرٌ دائماً لا بعد التعثّر: يسجّل بصدقٍ (ليتنر يعيد التكرار،
-      // ولوحةُ وليّ الأمر تقرأ «مضى قبل تمام القبول») ثم يمضي.
+      // 🔴 **«نقيس ولا نرفض»** (مرسوم ٢٤ أغسطس): «تَابِعْ» الأزرقُ يقيس مرةً
+      // صامتاً (النسبةُ والوصفُ لوليّ الأمر وليتنر) ويمضي دائماً.
       h('button', {
-        class: 'btn next',
+        class: 'btn btn--primary next',
         onclick: () => {
           audio.stop();
-          if (step.kind) progress.recordQuality(unit.text, progress.SENTENCE_FORM, step.kind, ['passed-on']);
-          score(step, unit, false);
+          const m = live?.measure?.();
+          if (m) {
+            if (!m.clean && m.shape?.why) progress.recordFault(unit.text, m.shape.why);
+            if (step.kind) progress.recordQuality(unit.text, progress.SENTENCE_FORM, step.kind,
+              m.clean ? [...new Set([...(m.shape.guides || []), ...(m.method?.guides || [])])]
+                : ['passed-on']);
+            score(step, unit, m.clean);
+          } else {
+            score(step, unit, false);
+          }
           nextStep();
         },
       }, 'تَابِعْ →'),

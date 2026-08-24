@@ -209,6 +209,7 @@ export function renderNode(node) {
     const surface = penSurface({
       ref: unit.ref,
       mode: modeOf(level),
+      judge: 'defer',   // **التقاطٌ صامتٌ والقياسُ عند «تَابِعْ»** (مرسوم ٢٤ أغسطس)
       veil: veilOf(unit.ref, level),
       // **سماحةُ الكلمة ومسطرتُها من مسارها** — كما في محطة النسخ سواءً
       tolerance: aid.tolerance,
@@ -331,14 +332,22 @@ export function renderNode(node) {
       // **مرسومُ المضيّ (٢٣ أغسطس ٢٠٢٦)**: «دع الطفل يمشي ولا توقفه» — زرُّ
       // المضيّ حاضرٌ دائماً لا بعد التعثّر: يسجّل بصدقٍ (ليتنر يعيد التكرار،
       // ولوحةُ وليّ الأمر تقرأ «مضى قبل تمام القبول») ثم يمضي.
+      // 🔴 **«نقيس ولا نرفض»** (مرسوم ٢٤ أغسطس): القياسُ الصامت عند «تَابِعْ»
+      // الأزرق وحدَه — نسبةُ النجاح لوليّ الأمر، والخفوتُ يتقدّم بإصابته.
       h('button', {
-        class: 'btn next',
+        class: 'btn btn--primary next',
         onclick: () => {
           audio.stop();
           const lvl = levelOf(unit.text);
-          progress.recordQuality(unit.text, progress.WORD_FORM,
-            lvl >= VEIL_STEPS ? progress.KINDS.DICTATE : progress.KINDS.COPY, ['passed-on']);
-          score(unit, lvl, false);
+          const kind = lvl >= VEIL_STEPS ? progress.KINDS.DICTATE : progress.KINDS.COPY;
+          const m = live?.measure?.();
+          const clean = Boolean(m?.clean);
+          if (m && !clean && m.shape?.why) progress.recordFault(unit.text, m.shape.why);
+          progress.recordQuality(unit.text, progress.WORD_FORM, kind,
+            clean ? [...new Set([...(m.shape.guides || []), ...(m.method?.guides || [])])]
+              : ['passed-on']);
+          score(unit, lvl, clean);
+          if (clean && !state.revealed) progress.recordRead(unit.text);
           state.revealed = false;
           nextUnit();
         },

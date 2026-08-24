@@ -156,6 +156,12 @@ function watchNetwork(win) {
       try { return JSON.parse(win.localStorage.getItem('uktub.progress.v1') || '{}'); }
       catch { return {}; }
     };
+    // **بابُ الانتقال الواحد** (مرسوم ٢٤ أغسطس): «تَابِعْ» يقيس صامتاً ويمضي.
+    const tabi = async () => {
+      [...doc.querySelectorAll('main .foot .btn')]
+        .find((b) => /تَابِعْ/.test(b.textContent))?.click();
+      await wait(900);
+    };
     const STEP_WAIT = 5200;          // فوق أطولِ احتياطٍ محسوبٍ لنصٍّ لم يُصرَّف بعد
 
     // ————— §١ عقدةُ الوصل: حرفان فثلاثة —————
@@ -206,7 +212,8 @@ function watchNetwork(win) {
             `ولا زرَّ «شاهِدْ» على لوحها (${labels.join(' · ') || 'لا زرّ'})`);
         }
         await writeWord(unit.ref);
-        await wait(STEP_WAIT);
+        await tabi();                    // القياسُ والمضيّ بالزرّ الواحد
+        await wait(1200);                // وانتظارُ كلامِ الخطوة التالية
       }
     }
     await wait(600);

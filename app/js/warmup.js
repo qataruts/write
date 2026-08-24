@@ -95,6 +95,7 @@ export function renderWarmup(part) {
     hint.textContent = shape.note;
     const surface = penSurface({
       ref: shape.ref,
+      judge: 'defer',   // **التقاطٌ صامتٌ والقياسُ عند «تَابِعْ»** (مرسوم ٢٤ أغسطس)
       tolerance: shape.tolerance,
       pace: demoPace(),
       bounds: Boolean(shape.bounds),
@@ -174,6 +175,14 @@ export function renderWarmup(part) {
     foot.replaceChildren(
       h('button', {
         class: 'btn btn--primary next',
+        onclick: () => {
+          const m = live?.measure?.();
+          if (m && !m.clean && m.shape?.why) progress.recordFault(part, m.shape.why);
+          step();
+        },
+      }, 'تَابِعْ →'),
+      h('button', {
+        class: 'btn next',
         onclick: () => { live?.reset(); live?.play(); },
       }, icon('pen'), ' شاهِدْ'),
       h('button', {
@@ -183,7 +192,6 @@ export function renderWarmup(part) {
       // **مرسومُ المضيّ (٢٣ أغسطس ٢٠٢٦)**: «دع الطفل يمشي ولا توقفه» — زرُّ
       // المضيّ حاضرٌ دائماً لا بعد التعثّر: يسجّل بصدقٍ (ليتنر يعيد التكرار،
       // ولوحةُ وليّ الأمر تقرأ «مضى قبل تمام القبول») ثم يمضي.
-      h('button', { class: 'btn next', onclick: () => step() }, 'تَابِعْ →'),
     );
   }
 

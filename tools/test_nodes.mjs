@@ -52,6 +52,9 @@ const curriculum = await import(new URL('curriculum.js', APP));
 
 const flatBefore = [];
 for (const stage of curriculum.STAGES) {
+  // **مرسوم ٢٤ أغسطس ٢٠٢٦**: مرحلةُ التهيئة مطويّةٌ من الرحلة («ابدأ من
+  // الحروف مباشرة») — فالمرجعُ المسطَّح يطويها كما تطويها `journey()`.
+  if (stage.kind === 'warmup') continue;
   const gate = curriculum.gateBefore(stage.id);
   if (gate) flatBefore.push(`gate:${gate.id}`);
   // **ومعرّفُ العقدة من أصل الشطر** (`of`، الجلسة ح): محطةٌ تُقحَم بين شطرَي مرحلةٍ

@@ -343,6 +343,8 @@ export function renderNode(node) {
     const surface = penSurface({
       ref: unit.ref,
       mode: step.mode,
+      // **«شاهِدْ» عرضٌ حيّ، وكلُّ لوحِ كتابةٍ التقاطٌ مؤجَّلُ القياس** (مرسوم ٢٤ أغسطس)
+      judge: step.id === 'watch' ? 'live' : 'defer',
       tolerance: aid.tolerance,
       pace: demoPace(),
       label: `لوحُ كتابة: ${letterName(unit.letter)}${unit.form === FORMS.ISOLATED ? '' : ` ${formTitle(unit.form)}`}`,
@@ -385,7 +387,8 @@ export function renderNode(node) {
     if (step.id === 'watch') {
       // لمسةُ الطفل على لوح العرض تنقله إلى التتبّع — والنقرةُ **تُسكت ثم تُشغّل**
       // (عقدُ ٤ج: كلامُ التطبيق يصفّ، ونقرةُ الطفل تعيش وحدَها).
-      surface.el.addEventListener('pointerdown', () => { audio.stop(); nextStep(); });
+      // ولمسُ لوح العرض لا ينقل — الانتقالُ بالزرّ وحدَه (مرسوم ٢٤ أغسطس)
+      surface.el.addEventListener('pointerdown', () => { audio.stop(); });
       say(letterName(unit.letter), step.say);
     } else {
       surface.el.addEventListener('pointerdown', () => surface.stop(), { capture: true });
@@ -531,10 +534,12 @@ export function renderNode(node) {
   function paintFoot(step, unit) {
     if (step.id === 'watch') {
       foot.replaceChildren(
+        // **زرُّ الانتقال الواحد باسمه الواحد** (مرسوم ٢٤ أغسطس: «لا انتقال
+        // إلا بزر تابع — بعضها أوتوماتيكي والأخرى بالزر يحيّر»)
         h('button', {
           class: 'btn btn--primary next',
           onclick: () => { audio.stop(); nextStep(); },
-        }, icon('pen'), ' تَتَبَّعْ'),
+        }, 'تَابِعْ →'),
         h('button', {
           class: 'btn next',
           // **نقرةُ الطفل تُسكت ثم تُشغّل** (عقدُ قناة ٤ج): فتسقط بقيّةُ ما صُفّ
@@ -561,23 +566,31 @@ export function renderNode(node) {
       return;
     }
     foot.replaceChildren(
+      // 🔴 **«نقيس ولا نرفض» — القياسُ كلُّه هنا** (مرسوم ٢٤ أغسطس ٢٠٢٦):
+      // اللوحُ التقاطٌ صامت، وعند «تَابِعْ» وحدَها يُسأل الحَكَمُ مرةً —
+      // نسبةُ النجاح والوصفُ لوليّ الأمر وليتنر، **والمضيُّ دائماً**.
       h('button', {
         class: 'btn btn--primary next',
-        onclick: () => { live?.reset(); live?.play(); },
-      }, icon('pen'), ' شَاهِدْ'),
-      h('button', { class: 'btn next', onclick: () => live?.reset() }, '↻ أعِدْ'),
-      // **مرسومُ المضيّ (٢٣ أغسطس ٢٠٢٦)**: «دع الطفل يمشي ولا توقفه» — زرُّ
-      // المضيّ حاضرٌ دائماً لا بعد التعثّر: يسجّل بصدقٍ (ليتنر يعيد التكرار،
-      // ولوحةُ وليّ الأمر تقرأ «مضى قبل تمام القبول») ثم يمضي.
-      h('button', {
-        class: 'btn next',
         onclick: () => {
           audio.stop();
-          if (step.kind) progress.recordQuality(unit.letter, unit.form, step.kind, ['passed-on']);
-          score(step, unit, false);
+          const m = live?.measure?.();
+          if (m) {
+            if (!m.clean && m.shape?.why) progress.recordFault(unit.letter, m.shape.why);
+            if (step.kind) progress.recordQuality(unit.letter, unit.form, step.kind,
+              m.clean ? [...new Set([...(m.shape.guides || []), ...(m.method?.guides || [])])]
+                : ['passed-on']);
+            score(step, unit, m.clean);
+          } else {
+            score(step, unit, false);
+          }
           nextStep();
         },
       }, 'تَابِعْ →'),
+      h('button', {
+        class: 'btn next',
+        onclick: () => { live?.reset(); live?.play(); },
+      }, icon('pen'), ' شَاهِدْ'),
+      h('button', { class: 'btn next', onclick: () => live?.reset() }, '↻ أعِدْ'),
     );
   }
 

@@ -124,94 +124,40 @@ function watchNetwork(win) {
       catch { return {}; }
     };
     const nodeOf = (part) => Object.keys(stored().stars || {}).find((id) => id.endsWith(`:${part}`));
+    // **بابُ الانتقال الواحد** (مرسوم ٢٤ أغسطس)
+    const tabi = async () => {
+      [...doc.querySelectorAll('main .foot .btn')]
+        .find((b) => /تَابِعْ/.test(b.textContent))?.click();
+      await wait(700);
+    };
 
-    // ————— المحطاتُ الستّ بالقفل التسلسليّ —————
+    // 🔴 ————— **التهيئةُ ملغاةٌ بمرسوم ٢٤ أغسطس ٢٠٢٦** —————
+    // أمرُ المالك بلفظه: «ألغِ التهيئة ما قبل حرف ا — ابدأ من الحروف مباشرة
+    // دون هذه التهيئة، الخطوطُ والمنحنياتُ غيرُ مفيدة». فهذا الفحصُ انقلب
+    // من مشي المحطات الست إلى **حراسة إلغائها**: يومَ تعود إلى الرحلة يحمرّ.
     const netMark = netCalls.length;
-    let crossed = 0;
-    let firstStation = true;
+    const { allNodes } = await import('/js/progress.js');
+    const nodes = allNodes();
+    ok(nodes.length > 0 && nodes.every((n) => n.type !== 'warmup'),
+      `لا محطةَ تهيئةٍ في الرحلة (${nodes.length} عقدة) — المرسومُ نافذ`);
+    ok(nodes[0].type === 'letter' && nodes[0].letter === 'ا',
+      `وأولُ الرحلة حرفُ الألف مباشرةً («${nodes[0].id}»)`);
 
-    for (const part of parts) {
-      win.location.hash = `#/warmup/${encodeURIComponent(part)}`;
-      await wait(500);
-      const board = surfaceEl();
-      if (!board) {
-        ok(false, `${part}: لا لوحَ على الشاشة — أمقفلةٌ المحطةُ وقد أُتمّ ما قبلها؟`);
-        continue;
-      }
-
-      // **النموذجُ من الشكل نفسِه**: عددُ خطوط النموذج عددُ أجزاء الشكل الأول
-      const shapes = WARMUPS[part].shapes;
-      const drawn = doc.querySelectorAll('.pen-stroke--trail').length;
-      ok(drawn === shapes[0].ref.strokes.length,
-        `${part}: اللوحُ يرسم نموذجَ شكله الأول (${drawn} جزءاً)`);
-
-      // **ممرُّ السماحة يُرسم حيث تملكه المحطة**: `bounds` في بيان الشكل
-      const fenced = doc.querySelectorAll('.pen-fence').length > 0;
-      ok(fenced === Boolean(shapes[0].bounds),
-        `${part}: ممرُّ الحدود ${shapes[0].bounds ? 'مرسومٌ كما تعلنه المحطة' : 'غيرُ مرسوم — ولا تعلنه'}`);
-
-      // **أهدافُ اللمس ≥ ٦٤ بكسل لفعل الشاشة** (`DESIGN §٤`)
-      const acts = [...doc.querySelectorAll('main.warmup .foot .btn')];
-      const small = acts.filter((b) => b.getBoundingClientRect().height < 64);
-      ok(acts.length >= 2 && small.length === 0,
-        `${part}: أفعالُ الشاشة (${acts.length}) هدفُ لمسٍ ≥ ٦٤ بكسل`
-        + (small.length ? ` — دونها: ${small.map((b) => Math.round(b.getBoundingClientRect().height)).join('، ')}` : ''));
-
-      // **الانحرافُ إرشادٌ لا رفض** (مرّةً واحدة، في أوّل محطة): يُكتب الشكلُ الأول
-      // معكوساً فلا يُقبَل ولا تُغلَق الشاشة، ثم يُكتب صحيحاً فيُقبَل.
-      if (firstStation) {
-        firstStation = false;
-        await writeShape(shapes[0].ref, true);
-        await wait(200);
-        const stillHere = Boolean(surfaceEl());
-        const noStars = !(stored().stars || {})[nodeOf(part) || ''];
-        ok(stillHere && noStars,
-          `${part}: المعكوسُ لا يُقبَل **ولا يُخرِج الطفلَ من الشاشة** — إرشادٌ لا رفض`);
-        const faults = Object.keys(stored().faults || {});
-        ok(faults.some((k) => k.startsWith(`${part}|`)),
-          `${part}: وخطؤه سُجِّل باسمه (${faults.join('، ') || 'لا شيء'}) — عدّادُ أخطاء الاتجاه`);
-      }
-
-      for (const shape of shapes) {
-        await writeShape(shape.ref, false);
-        await wait(560);            // لحظةُ الانتقال إلى الشكل التالي
-      }
-
-      const stars = doc.querySelectorAll('main.warmup .big-stars .on').length;
-      const saved = (stored().stars || {})[nodeOf(part) || ''] || 0;
-      ok(stars > 0 && saved === stars,
-        `${part}: أُتمّت — ${stars} نجومٍ على الشاشة و${saved} في مخزن التقدّم`);
-      if (saved > 0) crossed++;
-    }
-
-    ok(crossed === parts.length,
-      `**والمحطاتُ الستّ عُبرت كلُّها بالقفل التسلسليّ** (${crossed}/${parts.length})`);
-
-    // ————— القياس: نجومٌ وأخطاءُ اتجاه، ولا ليتنر —————
-    const state = stored();
-    const faults = Object.entries(state.faults || {});
-    ok(faults.length > 0,
-      `وأخطاءُ الاتجاه مكتوبةٌ بأسمائها: ${faults.map(([k, v]) => `${k}×${v.n}`).join('، ')}`);
-    ok(Object.keys(state.skills || {}).length === 0,
-      '**ولا مهارةَ واحدة في ليتنر** — التهيئةُ معفاةٌ بعلّتها المكتوبة (وحداتُها ليست حروفاً)'
-      + (Object.keys(state.skills || {}).length ? ` — كُتب: ${Object.keys(state.skills).join('، ')}` : ''));
-    ok(faults.every(([key]) => !/[0-9]/.test(key.split('|')[1] || '')),
-      'وما كُتب اسمُ الخطأ لا إحداثيُّ يد — مسارُ الطفل لا يُخزَّن');
-
-    // ————— الخريطة: النجومُ عليها والمحطةُ التالية مفتوحة —————
+    // الخريطةُ بلا محطة تهيئة، وأولُ الحروف مفتوحٌ من أول يوم
     win.location.hash = '#/';
     await wait(600);
-    const done = doc.querySelectorAll('main.map .station--warmup .node--done').length;
-    ok(done === parts.length,
-      `والخريطةُ تُظهر المحطات المنجَزة (${done}/${parts.length})`);
-    const next = doc.querySelector('main.map [data-next]');
-    ok(Boolean(next), 'و«تابع من هنا» انتقل إلى ما بعد التهيئة — القفلُ التسلسليّ يمشي');
+    ok(!doc.querySelector('main.map .station--warmup'),
+      'والخريطةُ بلا محطة تهيئة — لا بابَ ميتاً يحيّر طفلاً');
+    win.location.hash = `#/letter/${encodeURIComponent('ا')}`;
+    await wait(700);
+    ok(Boolean(doc.querySelector('main.lesson-letter')),
+      'ودرسُ الألف يُفتح من أول نقرة — لا قفلَ تهيئةٍ قبله');
+    ok(Boolean(surfaceEl()),
+      'ولوحُه حاضرٌ للكتابة — البدايةُ حرفٌ لا خطوطَ ومنحنيات');
 
-    // ————— الخصوصية والسلامة —————
-    const cycle = netCalls.slice(netMark);
-    ok(cycle.length === 0,
-      '🔒 **صفرُ طلباتٍ شبكية** في المحطات الستّ كلِّها — مسارُ الطفل لا يغادر جهازه'
-      + `${cycle.length ? ' — ' + cycle.slice(0, 5).join('، ') : ''}`);
+    const strokesNet = netCalls.filter((u) => /ink|stroke|trace/.test(u));
+    ok(strokesNet.length === 0 && netCalls.length === netMark,
+      '🔒 **صفرُ طلباتٍ شبكية** في الفتح والكتابة — مسارُ الطفل لا يغادر جهازه');
     const before = netCalls.length;
     try { await win.fetch('/manifest.webmanifest'); } catch { /* لا يهمّ ردُّه */ }
     ok(netCalls.length > before, 'والعدّادُ مجرَّبٌ سالباً: طلبٌ متعمَّد بعدها يُمسَك');

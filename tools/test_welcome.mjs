@@ -54,6 +54,10 @@ const progress = await import(new URL('progress.js', JS));
 const {
   STAGES, GATES, MARKS, WORDS, SENTENCES, LETTERS, DIGITS, PATHS, Q3_RULING,
 } = await import(new URL('curriculum.js', JS));
+
+// 🔴 **مرسوم ٢٤ أغسطس ٢٠٢٦**: مرحلةُ التهيئة مطويّةٌ من الرحلة («ابدأ من
+// الحروف مباشرة») — فصفحاتُ التعريف وحارسُها يطويانها كما تطويها `journey()`.
+const LIVE_STAGES = STAGES.filter((st) => st.kind !== 'warmup');
 const { FAULT_TEXT } = await import(new URL('pen.js', JS));
 const { PASS_PERCENT } = await import(new URL('catchup.js', JS));
 const support = await import(new URL('support.js', JS));
@@ -219,7 +223,7 @@ const STATS = {
   // **والشطرُ الذي يعلن أصلَه ليس قسماً ثانياً** (`of`، الجلسة ح): شُقّت «بساتينُ
   // النسخ» صندوقين لتقع محطةُ الاسم بعد أوّل بستان — والمرحلةُ في المنهج واحدة
   // باسمها وعقدِها، فتُعَدّ مرّةً كما يعدّها الجدول.
-  sections: new Set(STAGES.map((s) => s.of ?? s.id)).size + GATES.length,
+  sections: new Set(LIVE_STAGES.map((s) => s.of ?? s.id)).size + GATES.length,
   nodes: progress.allNodes().length,
   letters: Object.keys(LETTERS).length,
   pathForms,
@@ -230,7 +234,6 @@ const STATS = {
   gates: GATES.length,
   kinds: Object.keys(progress.KINDS).length,
   faults: Object.keys(FAULT_TEXT).length,
-  warmupNodes: nodesOfKind('warmup'),
   letterNodes: nodesOfKind('letter'),
   digitNodes: nodesOfKind('digit'),
   digits: Object.keys(DIGITS).length,
@@ -247,7 +250,7 @@ const STATS = {
   q3Station: q3.station,
   q3Hosted: q3.hosted,
   q3Dropped: q3.dropped,
-  groups: STAGES.filter((s) => /^g\d+$/.test(s.id)).length,
+  groups: LIVE_STAGES.filter((s) => /^g\d+$/.test(s.id)).length,
   firstWordNode: firstWordAt + 1,
   firstWordLetters: ALL_NODES.slice(0, firstWordAt).filter((n) => n.type === 'letter').length,
 };
@@ -296,7 +299,7 @@ for (const section of journey) {
   stageNodes[key] = (stageNodes[key] || 0) + section.nodes.length;
 }
 const TABLE_NODES = new Map([
-  ...STAGES.map((s) => [s.title, stageNodes[s.of ?? s.id] || 0]),
+  ...LIVE_STAGES.map((s) => [s.title, stageNodes[s.of ?? s.id] || 0]),
   ...GATES.map((g) => [g.title, stageNodes[`gate:${g.id}`] || 0]),
 ]);
 
@@ -367,7 +370,7 @@ console.log('\n٧. أسماءُ الأقسام مقروءةٌ من المنهج'
 
 // **وأسماءُ المراحل لا أسماءُ شُطورها** (الجلسة ش): الجدولُ يعدّ مراحلَ المنهج، وشقُّ
 // المرحلة الكبيرة محطاتٍ عرضٌ يقع في الخريطة — تحرسه مقايسةُ `test_nodes` لا هذه.
-const titles = [...STAGES.map((s) => s.title), ...GATES.map((g) => g.title)];
+const titles = [...LIVE_STAGES.map((s) => s.title), ...GATES.map((g) => g.title)];
 const absent = titles.filter((t) => !cur.includes(t));
 ok(absent.length === 0,
   `الأقسامُ ${ar(titles.length)} كلُّها في جدول الرحلة${absent.length ? ` — الغائب: ${absent.join('، ')}` : ''}`);
