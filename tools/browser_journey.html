@@ -128,7 +128,8 @@ function hurryAudio(win) {
 
     const nodes = progress.allNodes();
     const kinds = [...new Set(nodes.map((n) => n.type))];
-    ok(nodes.length > 0 && kinds.includes('warmup') && kinds.includes('gate'),
+    ok(nodes.length > 0 && kinds.includes('letter') && kinds.includes('gate')
+      && !kinds.includes('warmup'),
       `الرحلةُ ${nodes.length} عقدةً في ${kinds.length} نوعاً: ${kinds.join('، ')}`);
     ok(nodes[0].type === 'letter' && nodes[0].letter === 'ا',
       `وأوّلُها حرفُ الألف مباشرةً («${nodes[0].id}») — التهيئةُ مطويّةٌ بمرسوم ٢٤ أغسطس`);
@@ -368,8 +369,10 @@ function hurryAudio(win) {
     const forms = new Set(keys.map((k) => k.split('|')[1]));
     ok(forms.has('كلمة') && forms.has('جملة'),
       `ومحاورُ الوحدات فيها الكلمةُ والجملةُ معاً (${[...forms].join('، ')})`);
-    ok(keys.length > 0 && Object.values(skills).every((s) => s.box > 0),
-      `وكلُّ مهارةٍ قِيست ارتفع صندوقُها (${keys.length} مهارة) — فالمراجعةُ تجدولها`);
+    const skillRows = Object.entries(JSON.parse(win.localStorage.getItem('uktub.progress.v1') || '{}').skills || {});
+    ok(skillRows.length > 0 && skillRows.every(([, v]) => (v.right || 0) + (v.wrong || 0) > 0),
+      `وكلُّ مهارةٍ قِيست لها محاولاتٌ بسجلّها (${skillRows.length} مهارة) — والمصيبُ يرفع صندوقَه`
+      + ` والتكرارُ يجدول ما لم يُصِب (مرسوم «نقيس ولا نرفض»)`);
 
     // **وما لا مادّةَ له لا يُعَدّ ناقصاً**: محطةُ الاسم تُتخطّى بعهدها، فالتمامُ
     // **ما مُشِي وما تُخطّي** — ولو عُدَّت نقصاً لقال التقدّمُ كذباً إنّ الرحلة لم تتمّ
