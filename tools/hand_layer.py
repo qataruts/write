@@ -297,6 +297,28 @@ def strip_lead(pieces: list, pen: float) -> int:
             break
         pieces.remove(bar)
         cut += len(bar["p"])
+    # **وقد يكون الشريطُ صدرَ قطعةٍ لا قطعةً كاملة** (كما في الحرف المفرد): فيُقصّ
+    # بالنقاط — يُمشى من الطرف الأيمن ما دام الاتجاهُ أفقيّاً (±٢٠° على نافذةِ
+    # ثلاثِ نقاطٍ، فالنقطتان المتجاورتان مشوّشتان بتربيع البكسل).
+    if len(pieces) >= 1:
+        x1 = max(q[0] for pc in pieces for q in pc["p"])
+        for pc in pieces:
+            for end in (0, -1):
+                if abs(pc["p"][end][0] - x1) > pen * 0.25:
+                    continue
+                pts = pc["p"] if end == 0 else list(reversed(pc["p"]))
+                k = 0
+                while k + 3 < len(pts):
+                    dx = pts[k + 3][0] - pts[k][0]
+                    dy = pts[k + 3][1] - pts[k][1]
+                    if abs(math.degrees(math.atan2(dy, abs(dx) + 1e-6))) > 20:
+                        break
+                    k += 1
+                if k >= 3 and len(pts) - k >= 3:
+                    keep = pts[k:]
+                    pc["p"] = keep if end == 0 else list(reversed(keep))
+                    cut += k
+                return cut
     return cut
 
 
@@ -471,9 +493,10 @@ def assemble_unit(unit: dict, book: dict, tol: float = 25.0, letters_map: dict =
     floor = 0
     for bi in order:
         pieces = by_body[bi]
-        # **شرطةُ المدخل تُقتلَع قبل بناء الرسم** — والجسمُ الذي يفتح وصلةً وحدَه.
-        if unit["kind"] != "letter" or unit.get("form") in ("initial", "isolated"):
-            strip_lead(pieces, tol * 4)
+        # ⚠ **واقتلاعُ شرطة المدخل جُرّب فشوّه الرسم** (٢٥ أغسطس): الشريطُ الأفقيّ
+        # جزءٌ من هيكل الحرف في هذا الخطّ، فحذفُه يقطع رأسَ الخاء والجيم في الكلمات
+        # (رُئي بالعين على «أخي» و«أختي»). **فالشكلُ يبقى كما يرسمه الخطّ**، ولا
+        # يُمَسّ — وإزالتُها إن أُريدت فبتبديل الخطّ أو بتحرير الغليف، لا بقصٍّ أعمى.
         nodes, edges, spots = graph_of(pieces, tol)
         bridge(nodes, edges, spots)
         # **والحدُّ الأدنى ضربةٌ لكلِّ جسمٍ من الحبر** — لا أكثر: الرجوعُ على الأثر
@@ -494,19 +517,41 @@ def assemble_unit(unit: dict, book: dict, tol: float = 25.0, letters_map: dict =
         # صورةُ الحرف أفقيّاً حتى تنطبق حافّتُها اليمنى على حافّة الوصلة، **ثم
         # يُؤخَذ مبدؤه كما هو**. ⚠ والنسبةُ المئوية أخطأت هنا: مبدأُ «خ» عند ٠٫٨٥
         # من عرضها، فلمّا نُسب إلى شريحةٍ مقصوصةٍ وقع **في وسط ما بين الحروف**.
-        # **ونافذةُ الرأس قلمٌ ونصف**: رأسُ الحرف ليس نقطةً بل قوسٌ — فأقصى يمينه
-        # أخفضُ من قمّته بقليل، والمطلوبُ **القمّة** («من فوق» بنصّ المالك).
-        near = tol * 6
-        top_x = max(spots[n][0] for n in nodes)
-        edge = [n for n in nodes if spots[n][0] >= top_x - near]
-        start = min(edge, key=lambda n: spots[n][1])
-        # **وبعد اقتلاع الشرطة يصير أيمنُ الوصلة رأسَ حرفها الأوّل** — فمبدؤها
-        # أعلى ذلك الرأس: «تبدأ من بداية الخاء فوق وليس على اليمين» (المالك).
-        if hand:
-            h_pts = [q for st in hand for q in st]
-            mapped = to_frame([hand[0][0]], bbox(h_pts), bbox(pts_all))[0]
-            start = min(nodes, key=lambda n: (spots[n][0] - mapped[0]) ** 2
-                        + (spots[n][1] - mapped[1]) ** 2)
+        # 🔴 **المبدأُ رأسُ الحرف: أعلى نقطةٍ فيه، وأيمنُها إن تساوت** (حكمُ المالك
+        # المتكرّر: «تبدأ من بداية الخاء **فوق**» · «الجيمُ أوّلَ الكلمة لِمَ تبدأ من
+        # اليمين؟»). فالقلمُ يبدأ حيث يبدأ الرسمُ: قمّةُ الرأس في (ج ح خ)، وأعلى
+        # الطرف الأيمن في (د ر ب س ن ...) — **قاعدةٌ واحدةٌ تعطي الاثنين**.
+        #
+        # ⚠ **ولا يُقرأ اتجاهُ أثر اليد**: قِيس فإذا مبدأُ ج/ح/خ في `owner_shapes`
+        # مسجَّلٌ عند ٠٫٨٣–١٫٠٠ من يمين الشكل — **أي عند ذيله لا رأسه**: فترتيبُ
+        # نقاطها معكوس. الاعتمادُ عليه كان يضع القلمَ في وسط الكلمة، **وهو أصلُ ما
+        # رآه المالك مراراً**. يُؤخذ أثرُه شاهدَ شكلٍ، ويُحكَم في المبدأ بالقاعدة.
+        #
+        # **ونطاقُ الحرف الأوّل** في الوصلة: شريحتُها اليمنى بعرض ذلك الحرف مفرداً.
+        span = None
+        if runs and bi not in carrier:
+            kk = len([x for x in order[:order.index(bi)] if x not in carrier])
+            if kk < len(runs):
+                a_unit = letters_map.get(f"{runs[kk][0]}/{runs[kk][1]}")
+                if a_unit:
+                    ap = [q for st in a_unit["strokes"] for q in st["p"]]
+                    span = max(q[0] for q in ap) - min(q[0] for q in ap)
+        right = max(q[0] for pc in pieces for q in pc["p"])
+        # 🔴 **والموصولُ من قبله يبدأ من يمينه لا من أعلاه** (تنبيهُ المالك ٢٥ أغسطس):
+        # فالحرفُ الوسطيّ/النهائيّ يدخله القلمُ من وصلته اليمنى — **وقاعدةُ الرأس
+        # لفاتح الكلام وحدَه** (ابتدائيّ أو مستقلّ). وفي الكلمات كلُّ ضربةٍ تفتح
+        # وصلةً فهي بحكم فاتح الكلام.
+        opener = unit["kind"] != "letter" or unit.get("form") in ("initial", "isolated")
+        if opener:
+            zone = [q for pc in pieces for q in pc["p"]
+                    if span is None or q[0] >= right - span * 1.05]
+            crown = min(q[1] for q in zone)
+            head = max((q for q in zone if q[1] <= crown + tol), key=lambda q: q[0])
+        else:
+            zone = [q for pc in pieces for q in pc["p"] if q[0] >= right - tol * 2]
+            head = min(zone, key=lambda q: q[1])
+        start = min(nodes, key=lambda n: (spots[n][0] - head[0]) ** 2
+                    + (spots[n][1] - head[1]) ** 2)
         for path in walk(nodes, edges, spots, start):
             strokes.append({"p": [[round(x, 1), round(y, 1)] for x, y in path],
                             "body": bi, "lift": True})
@@ -687,45 +732,30 @@ def self_test() -> int:
     ok(not wrong, f"والوقفُ عند حروف الانقطاع وحدَها — أجسامُ {len(units)} وحدةٍ"
                   f" على قاعدة المالك" + (f" (خالفت: {wrong[:4]})" if wrong else ""))
 
-    # ٤) المبدأُ من أثر يده — يُقاس بُعدُه لا يُدَّعى
-    gaps = []
+    # ٤) **المبدأُ بحكم المالك لا بترتيب أثره**: فاتحُ الكلام من رأسه (أعلى نقطةٍ
+    #    في نطاق حرفه الأوّل)، والموصولُ من قبله من يمينه. **ولا يُقاس على ترتيب
+    #    نقاط `owner_shapes`**: قِيس فإذا ج/ح/خ مسجَّلةٌ معكوسةَ الاتجاه (مبدؤها
+    #    عند ٠٫٨٣–١٫٠٠ من اليمين، أي عند ذيلها) — فيُؤخَذ أثرُه شاهدَ شكلٍ لا مبدأ.
+    # ٥) **فاتحُ الكلام يبدأ من رأسه**: يُقاس بُعدُ مبدئه عن قمّة نطاقه رأسياً.
+    high = []
+    seen = 0
     for u in units:
-        if u["kind"] != "letter":
-            continue
-        hs = hand_strokes(book, u["text"], u["form"])
-        if not hs or not u["strokes"]:
-            continue
-        h_pts = [p for st in hs for p in st]
-        ours = bbox([p for st in u["strokes"] for p in st["p"]])
-        mapped = to_frame([hs[0][0]], bbox(h_pts), ours)[0]
-        head = u["strokes"][0]["p"][0]
-        span = max(ours[2] - ours[0], ours[3] - ours[1], 1e-6)
-        gaps.append(math.dist(head, mapped) / span)
-    gaps.sort()
-    med = gaps[len(gaps) // 2] if gaps else 1.0
-    near = sum(1 for g in gaps if g <= 0.25)
-    ok(gaps and med <= 0.25,
-       f"ومبدأُ الضربة من أثر يده: وُسطى البُعد {med:.0%} من قطر الشكل في"
-       f" {len(gaps)} شكلاً · وداخلَ الرُّبع {near}/{len(gaps)}")
-
-    # ٥) **مبدأُ الوصلة عند رأس حرفها الأوّل** (بعد اقتلاع شرطة المدخل): يُقاس
-    #    بُعدُ المبدأ عن أيمن الوصلة — فالرأسُ هناك، والمنتصفُ يحمرّ.
-    pen = 102.8
-    far, seen = [], 0
-    for u in units:
-        if u["kind"] == "letter":
+        if u["kind"] == "letter" and u.get("form") in ("medial", "final"):
             continue
         for st in u["strokes"]:
-            bp = [q for x in u["strokes"] if x["body"] == st["body"] for q in x["p"]]
-            x1 = max(q[0] for q in bp)
+            # **القمّةُ قمّةُ حرفه هو** لا قمّةُ الوصلة كلِّها: فطاءُ «أخطبوط» أعلى
+            # من فائها، والمقصودُ أن يبدأ الحرفُ من رأسه لا أن يعلوَ رأسَ جاره.
+            hx = st["p"][0][0]
+            bp = [q for x in u["strokes"] if x["body"] == st["body"] for q in x["p"]
+                  if abs(q[0] - hx) <= 300]
+            crown = min(q[1] for q in bp) if bp else st["p"][0][1]
             seen += 1
-            if x1 - st["p"][0][0] > pen * 1.8:
-                far.append(u["text"][:14])
+            if st["p"][0][1] - crown > 102.8 * 1.2:
+                high.append(u["text"][:12])
                 break
-    ok(seen and len(far) <= seen * 0.08,
-       f"ومبدأُ الوصلة عند رأس حرفها الأوّل لا في وسطها: {seen - len(far)}/{seen} ضربةً"
-       f" تبدأ في حدود قلمٍ ونصفٍ من أيمن وصلتها"
-       + (f" — بعُدت {far[:4]}" if far else ""))
+    ok(seen and len(high) <= seen * 0.12,
+       f"وفاتحُ الكلام يبدأ من رأسه: {seen - len(high)}/{seen} ضربةً مبدؤها في حدود"
+       f" قلمٍ من قمّة وصلتها" + (f" — نزلت {high[:4]}" if high else ""))
 
     # ٦) ومجرَّبٌ سالباً: جسمٌ بضربتين حيث تكفي واحدة يحمرّ
     hurt = json.loads(json.dumps(units[:1]))
