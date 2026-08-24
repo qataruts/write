@@ -106,8 +106,15 @@ const resources = (win) => win.performance.getEntriesByType('resource').map((e) 
     if (!surface) throw new Error('لا لوحَ على الشاشة');
 
     const box = surface.getBoundingClientRect();
-    ok(Math.abs(box.width - box.height) <= 2 && box.width >= 240,
-      `واللوحُ مربّعٌ بمقاسٍ يكفي يدَ طفل (${Math.round(box.width)}×${Math.round(box.height)})`);
+    // 🔴 **اللوحُ صفحةٌ لا مربّع** (أمر المالك ٢٤ أغسطس بلقطة «سلام درس»:
+    // «المساحة غير كافية والتابلت فارغ واللوح صغير»): كان العهدُ تربيعاً،
+    // فصار **ملءَ العرض المتاح** بارتفاعٍ يكفي اليد — والمادّةُ تتوسطه.
+    // **والمقياسُ ملءُ الوعاء لا نسبةٌ محفوظة**: اللوحُ يأخذ عرضَ ما يحويه
+    // كاملاً (معملُ المطوّر وعاؤه ضيّق، وشاشاتُ الطفل تُقاس ببطارية الأجهزة).
+    const host = surface.closest('.pen-box')?.parentElement;
+    const room = host ? host.getBoundingClientRect().width : box.width;
+    ok(box.height >= 240 && box.width >= Math.min(room - 8, 320),
+      `واللوحُ يملأ عرضَ صفحته ويكفي يدَ طفل (${Math.round(box.width)}×${Math.round(box.height)} في وعاءٍ ${Math.round(room)})`);
     // ————— القرصةُ حرة، واللوحُ محروسٌ من جهته (الجلسة م٢ — نقضُ الميدان) —————
     //
     // **قُلب هذا الحارسُ مع أخيه النصيّ**: كان يحرس قفلَ المقياس (الجلسة ٤ب) فصار

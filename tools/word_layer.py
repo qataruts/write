@@ -261,6 +261,22 @@ def compose(text: str, meas: dict, paths: dict, canon: dict, marks_lib: dict,
         # المدى المنبسطُ الأخير من ضربتها (يسيرُ يساراً وميلُه ≤ ٠٫١٢ — قِيس
         # من ذيلها: مقاطعُ الذراع ميلُها ~٠٫٠٢–٠٫٠٤ وأولُ منحنى الكأس ٠٫١٧)،
         # فتبقى قدمٌ قصيرة تلقاها الألف — كلوح المرجع.
+        # **وذراعُ ألف الوصل تُقصّ من مبدئها** (بلاغُ المالك: «لا تكتبها لـا»):
+        # ألفُ النهاية تبدأ بمدٍّ أفقيٍّ على السطر (٣١٤ وحدةً مقيسة) هو ذراعُ
+        # وصلها بما قبلها — وهو بعينه ما يُري «لـا». فتُقصّ بالقاعدة نفسِها.
+        if unit.get("liga") == "alef" and unit["src"]["frame"] == "line":
+            ref = unit["src"]["ref"]
+            strokes = [dict(st) for st in ref["strokes"]]
+            pts = [list(q) for q in strokes[0]["points"]]
+            while len(pts) > 3:
+                (x1, y1), (x2, y2) = pts[0], pts[1]
+                dx, dy = x2 - x1, y2 - y1
+                if dx < 0 and abs(dy) <= 0.12 * abs(dx):
+                    pts.pop(0)
+                else:
+                    break
+            strokes[0] = {**strokes[0], "points": pts}
+            unit["src"] = {**unit["src"], "ref": {**ref, "strokes": strokes}}
         if unit.get("liga") == "lam" and unit["src"]["frame"] == "line":
             ref = unit["src"]["ref"]
             strokes = [dict(st) for st in ref["strokes"]]
@@ -369,13 +385,24 @@ def compose(text: str, meas: dict, paths: dict, canon: dict, marks_lib: dict,
         unit["exit"] = exit_stroke(ref, base, src["bodyN"])
 
         # **والوصلُ يصحّح الوضع**: مقعدُ الموصول على مخرج ما قبله بحرفه.
-        tied = unit["form"] in ("medial", "final") and k > 0
-        if tied:
+        # 🔴 **والإزاحةُ لا تتسرّب** (بلاغُ المالك ٢٤ أغسطس بلقطة «سَلَامْ دَرَسْ»:
+        # «جد حلاً جذرياً لتداخل الكلمات»): كانت `shift` تبقى على قيمتها فيرثها
+        # كلُّ حرفٍ غيرِ موصولٍ بعدها — فتُدفَع بقيّةُ الكلمة والكلمةُ التالية
+        # عن مواضع القياس فتتراكبان. **والقاعدة**: الموصولُ يجلس على مخرج ما
+        # قبله، **وغيرُ الموصول يجلس حيث قاسه المُشكِّل بلا إرث** (صفرُ إزاحة).
+        # (وألفُ لام-ألف تجلس على قدم اللام وإن كانت قطعةً ثانيةً في الرسم.)
+        # **والإزاحةُ جاريةٌ داخل الكلمة، تُصفَّر عند حدّها**: تصحيحُ الوصل
+        # يسري على بقيّة حروف الكلمة (وإلا انفكّ ما بعده عمّا قبله — أمسكه
+        # حارسُ البنية على «أُخْتِي…»)، **ولا يعبر المسافة أبداً** (وعبورُه هو
+        # الذي راكب «سَلَامْ» و«دَرَسْ»). و`wordEnd` من بيان المُشكِّل نفسِه.
+        if k > 0 and units[k - 1].get("wordEnd"):
+            shift = 0.0
+        seated = (unit["form"] in ("medial", "final") or unit.get("liga") == "alef") and k > 0
+        if seated:
             prev = units[k - 1]
             want = prev["placed"][prev["exit"]][-1][0]
             got = strokes[unit["seat"]][0][0]
             shift = want - got
-        # وما لم يوصل يبقى على فرجة الخيال — تُنقَل بمقياسها ولا تُخترَع.
         if shift:
             unit["placed"] = [[[p[0] + shift, p[1]] for p in s] for s in strokes]
         unit["dx"] = shift
@@ -415,6 +442,7 @@ def compose(text: str, meas: dict, paths: dict, canon: dict, marks_lib: dict,
         run = list(range(min(lo, hi), max(lo, hi) + 1))
         # **وألفُ لام-ألف تُقطع قطعةً ثانية** (`cut` — الرفعُ البنيويّ داخل
         # المركّب): تجلس بمقعدها ولا تُدمج جرياناً.
+        # (الجريانُ يُقطع عند ألف لام-ألف وإن جلست على القدم — رفعُ قلمٍ بنيويّ)
         tied = unit["form"] in ("medial", "final") and k > 0 and not unit.get("cut")
         for j, idx in enumerate(run):
             if j == 0 and tied and open_run is not None:
@@ -723,6 +751,23 @@ def self_test() -> int:
     ok(got["inner"] >= 1, "و«مطر»: عمودُ الطاء رفعٌ داخل الحرف يُعَدّ")
     ok(expected("مِحْفَظَةْ", paths, joins, anchors)["marks"] == 0,
        "و«مِحْفَظَةْ» لا تطلب ضربةَ علامةٍ واحدة — الكتابةُ عاريةٌ والقراءةُ مشكولة")
+    # 🔴 **حارسُ القواطع** (بلاغُ المالك ٢٤ أغسطس: «الدالُ موصولةٌ بما بعدها —
+    # راقب كلَّ الحروف التي لا توصل: و ز ر د ذ وغيرها»): بعد كل قاطعٍ **يجب**
+    # أن تبدأ قطعةٌ جديدة — فأدنى عددِ قطعِ الوحدة = ١ + عددُ القواطع التي
+    # يليها حرف. وهو حارسُ الظاهر الذي تراه العينُ، فوق حارس الوصل المفصَّل.
+    CUTTERS = set("اآأإدذرزوةى")
+    words_now = load_words()
+    if words_now:
+        short = []
+        for text, ref in words_now.items():
+            chars = [c for c in "".join(ch for ch in text if ch not in "ًٌٍَُِّْـ") if c != " "]
+            need = 1 + sum(1 for i in range(1, len(chars)) if chars[i - 1] in CUTTERS)
+            if len(ref.get("strokes") or []) < need:
+                short.append(f"{text} ({len(ref['strokes'])}<{need})")
+        ok(not short,
+           f"وكلُّ قاطعٍ يقطع فعلاً في {len(words_now)} وحدةً مبنيّة"
+           + (f" — مخالفات: {'، '.join(short[:5])}" if short else ""))
+
     words = load_words()
     if words:
         bad = audit(words, paths)
