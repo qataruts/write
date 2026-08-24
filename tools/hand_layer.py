@@ -435,36 +435,39 @@ def assemble_unit(unit: dict, book: dict, tol: float = 25.0, letters_map: dict =
         ours = bbox(pts_all)
         # **مبدأُ الجسم**: أقربُ عقدةٍ إلى مبدأ يد المالك إن وُجد أثرُه، وإلا
         # **الأيمنُ فالأعلى** — وهي قاعدةُ العربية العامّة (`STROKE_ORDER §٢`).
-        start = None
+        # 🔴 **مبدأُ الوصلة = مبدأُ حرفها الأوّل بعينه** (حكمُ المالك الجامع، ٢٥
+        # أغسطس ٢٠٢٦: «الموضوعُ ليس للخاء وحدها بل **كلّ الحروف**؛ الحروفُ
+        # الابتدائية **دائماً مكانُ كتابتها مطابقٌ لما أعطيتك إيّاه**، والحرفُ يمكن
+        # أن يكون ابتدائياً أو مستقلاً/نهائياً إذا جاء قبله حرفٌ غيرُ موصول»).
+        #
+        # **والمطابقةُ بالإزاحة لا بالنسبة**: المادّةُ كلُّها بمقياسٍ واحدٍ وخطِّ
+        # أساسٍ واحد (`font_layer §space`) — فالحرفُ داخلَ الكلمة **بحجمه مفرداً**
+        # (قِيس على «أخي»: قمّةُ الخاء ٦٢٤ في الكلمة و٦٢٦ مفردةً). فيكفي أن تُزاح
+        # صورةُ الحرف أفقيّاً حتى تنطبق حافّتُها اليمنى على حافّة الوصلة، **ثم
+        # يُؤخَذ مبدؤه كما هو**. ⚠ والنسبةُ المئوية أخطأت هنا: مبدأُ «خ» عند ٠٫٨٥
+        # من عرضها، فلمّا نُسب إلى شريحةٍ مقصوصةٍ وقع **في وسط ما بين الحروف**.
+        near = tol * 4
+        top_x = max(spots[n][0] for n in nodes)
+        edge = [n for n in nodes if spots[n][0] >= top_x - near]
+        start = min(edge, key=lambda n: spots[n][1])
         if runs and bi not in carrier:
-            # الوصلةُ التالية بترتيب اليمين ⇐ حرفُها الأوّل وشكلُه
-            k = len([b for b in order[:order.index(bi)] if b not in carrier])
+            k = len([x for x in order[:order.index(bi)] if x not in carrier])
             if k < len(runs):
                 ch, form = runs[k]
                 anchor = letters_map.get(f"{ch}/{form}")
                 if anchor:
-                    a_pts = [p for st in anchor["strokes"] for p in st["p"]]
+                    a_pts = [q for st in anchor["strokes"] for q in st["p"]]
                     ax0, ay0, ax1, ay1 = bbox(a_pts)
                     head = anchor["strokes"][0]["p"][0]
-                    rel = ((ax1 - head[0]) / max(ax1 - ax0, 1e-6),
-                           (head[1] - ay0) / max(ay1 - ay0, 1e-6))
-                    # موضعُ الحرف داخل الوصلة: شريحتُها اليمنى بعرض الحرف نفسِه
-                    bx0, by0, bx1, by1 = box_of[bi]
-                    cut = max(bx0, bx1 - (ax1 - ax0))
-                    seg = [p for pc in pieces for p in pc["p"] if p[0] >= cut]
-                    if len(seg) > 1:
-                        sx0, sy0, sx1, sy1 = bbox(seg)
-                        want = [sx1 - rel[0] * (sx1 - sx0), sy0 + rel[1] * (sy1 - sy0)]
-                        start = min(nodes, key=lambda n: (spots[n][0] - want[0]) ** 2
-                                    + (spots[n][1] - want[1]) ** 2)
-        if start is None and hand:
-            h_pts = [p for st in hand for p in st]
-            mapped = to_frame([hand[0][0]], bbox(h_pts), ours)[0]
+                    bx0, by0, bx1, by1 = bbox(pts_all)
+                    want = [head[0] + (bx1 - ax1), head[1]]
+                    start = min(nodes, key=lambda n: (spots[n][0] - want[0]) ** 2
+                                + (spots[n][1] - want[1]) ** 2)
+        if hand:
+            h_pts = [q for st in hand for q in st]
+            mapped = to_frame([hand[0][0]], bbox(h_pts), bbox(pts_all))[0]
             start = min(nodes, key=lambda n: (spots[n][0] - mapped[0]) ** 2
                         + (spots[n][1] - mapped[1]) ** 2)
-        elif start is None:
-            # **الأيمنُ فالأعلى** — قاعدةُ العربية حين لا أثرَ ليدٍ (`STROKE_ORDER §٢`).
-            start = max(nodes, key=lambda n: (spots[n][0], -spots[n][1]))
         for path in walk(nodes, edges, spots, start):
             strokes.append({"p": [[round(x, 1), round(y, 1)] for x, y in path],
                             "body": bi, "lift": True})
