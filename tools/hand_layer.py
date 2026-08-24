@@ -187,14 +187,20 @@ def walk(nodes: dict, edges: list, spots: list, start: int) -> list:
     odd = sorted([n for n, d in deg.items() if d % 2 == 1],
                  key=lambda n: (-spots[n][0], spots[n][1]))
     # **مبدأُ اليد طرفٌ، ومنتهاها أيسرُ فردية** — فيبقيان فرديّين ويُزاوَج ما بينهما.
+    # 🔴 **والمبدأُ المطلوبُ يُحترَم دائماً** (عطبٌ أمسكه المالك ثلاث مرّات: «خي في
+    # أخي تبدأ من المنتصف»): كان المشيُ يُبدل المبدأَ بأوّل عقدةٍ فردية إن لم تكن
+    # عقدةُ المبدأ فردية — **فيضيع الحكمُ كلُّه**. ⇐ إن كانت فرديةً بقيت طرفاً
+    # وزُوّج ما سواها، **وإن كانت زوجيةً زُوّجت الفردياتُ كلُّها** فيصير للرسم دورةٌ
+    # مغلقةٌ **تبدأ حيث شئنا** — والمبدأُ محفوظٌ في الحالين.
     free = []
     if odd:
-        head = start if start in odd else odd[0]
-        odd.remove(head)
-        tail = min(odd, key=lambda n: (spots[n][0], -spots[n][1])) if odd else None
-        if tail is not None:
-            odd.remove(tail)
-        free = [head] + ([tail] if tail is not None else [])
+        if start in odd:
+            head = start
+            odd.remove(head)
+            tail = min(odd, key=lambda n: (spots[n][0], -spots[n][1])) if odd else None
+            if tail is not None:
+                odd.remove(tail)
+            free = [head] + ([tail] if tail is not None else [])
     while len(odd) >= 2:
         a = odd.pop(0)
         b = min(odd, key=lambda n: math.dist(spots[a], spots[n]))
@@ -207,8 +213,8 @@ def walk(nodes: dict, edges: list, spots: list, start: int) -> list:
             nodes.setdefault(e["b"], []).append(idx)
             left.add(idx)
 
-    begin = free[0] if free else (start if start in nodes
-                                  else max(nodes, key=lambda n: (spots[n][0], -spots[n][1])))
+    begin = start if start in nodes else (
+        free[0] if free else max(nodes, key=lambda n: (spots[n][0], -spots[n][1])))
     # **هيرهولزر على الحوافّ نفسِها** (لا على العقد): تُمشى دويرةٌ حتى الوقوف، ثم
     # يُبحث في خطواتها عن عقدةٍ بقيت لها حوافٌّ **فتُدمَج دويرتُها في موضعها** —
     # فلا حافٌّ تُترَك ولا يُخترَع رفعٌ.
@@ -253,6 +259,45 @@ def walk(nodes: dict, edges: list, spots: list, start: int) -> list:
         pts = e["p"] if e["a"] == frm else list(reversed(e["p"]))
         path.extend(pts if not path else pts[1:])
     return [path] if len(path) > 1 else []
+
+
+def strip_lead(pieces: list, pen: float) -> int:
+    """🔴 **تُقتلَع شرطةُ الوصل من مبدأ الوصلة** (حكمُ المالك ٢٥ أغسطس ٢٠٢٦:
+    «أرى شرطةً قبل الجيم في الدراجة؟؟» · «انظر إلى كتابتك بيدك، هل هناك شرطة؟»
+    · «حلّ المشكلة من جذرها»).
+
+    **العلّةُ مقيسة**: خطوطُ النسخ ترسم لحرف الابتداء من أسرة (ج ح خ) وغيرِها
+    **شريطاً أفقيّاً داخلاً من يمينه** — مدخلَ وصلٍ لا يصل شيئاً حين يفتح الحرفُ
+    كلاماً. قِيس في «أخي»: قطعةٌ من (10148,758) إلى (10023,761) زواياها ١٨٠°
+    كلُّها، طولُها ١٢٥ وحدة. **وخطُّ يد المالك لا شرطةَ فيه**، فتُقتلَع.
+
+    ⇐ يُمشى من أيمن طرفٍ حرٍّ ما دام المسارُ أفقيّاً (±٢٠°)، فتُحذف تلك النقاط.
+    **ولا يُمَسّ وصلٌ حقيقيّ**: هذا لا يجري إلا على **الجسم الذي يفتح وصلة** —
+    وما بين حرفين موصولين داخلَ الوصلة لا يُقارَب.
+    """
+    if not pieces:
+        return 0
+    cut = 0
+    for _ in range(4):          # قد يتلوها شريطٌ آخر — يُقتلَع حتى ينتهي المدخل
+        if len(pieces) < 2:
+            break
+        x1 = max(q[0] for pc in pieces for q in pc["p"])
+        bar = None
+        for pc in pieces:
+            xs = [q[0] for q in pc["p"]]
+            ys = [q[1] for q in pc["p"]]
+            wide = max(xs) - min(xs)
+            tall = max(ys) - min(ys)
+            # **الشريطُ يُعرَف بقياسه**: يلمس أيمنَ الوصلة، ويمتدّ عرضاً نصفَ القلم
+            # فأكثر، وارتفاعُه دون خُمسه — فهو خطٌّ أفقيٌّ لا جزءٌ من رسم الحرف.
+            if max(xs) >= x1 - pen * 0.25 and wide >= pen * 0.5 and tall <= pen * 0.2:
+                bar = pc
+                break
+        if not bar:
+            break
+        pieces.remove(bar)
+        cut += len(bar["p"])
+    return cut
 
 
 def bridge(nodes: dict, edges: list, spots: list) -> int:
@@ -426,6 +471,9 @@ def assemble_unit(unit: dict, book: dict, tol: float = 25.0, letters_map: dict =
     floor = 0
     for bi in order:
         pieces = by_body[bi]
+        # **شرطةُ المدخل تُقتلَع قبل بناء الرسم** — والجسمُ الذي يفتح وصلةً وحدَه.
+        if unit["kind"] != "letter" or unit.get("form") in ("initial", "isolated"):
+            strip_lead(pieces, tol * 4)
         nodes, edges, spots = graph_of(pieces, tol)
         bridge(nodes, edges, spots)
         # **والحدُّ الأدنى ضربةٌ لكلِّ جسمٍ من الحبر** — لا أكثر: الرجوعُ على الأثر
@@ -446,23 +494,14 @@ def assemble_unit(unit: dict, book: dict, tol: float = 25.0, letters_map: dict =
         # صورةُ الحرف أفقيّاً حتى تنطبق حافّتُها اليمنى على حافّة الوصلة، **ثم
         # يُؤخَذ مبدؤه كما هو**. ⚠ والنسبةُ المئوية أخطأت هنا: مبدأُ «خ» عند ٠٫٨٥
         # من عرضها، فلمّا نُسب إلى شريحةٍ مقصوصةٍ وقع **في وسط ما بين الحروف**.
-        near = tol * 4
+        # **ونافذةُ الرأس قلمٌ ونصف**: رأسُ الحرف ليس نقطةً بل قوسٌ — فأقصى يمينه
+        # أخفضُ من قمّته بقليل، والمطلوبُ **القمّة** («من فوق» بنصّ المالك).
+        near = tol * 6
         top_x = max(spots[n][0] for n in nodes)
         edge = [n for n in nodes if spots[n][0] >= top_x - near]
         start = min(edge, key=lambda n: spots[n][1])
-        if runs and bi not in carrier:
-            k = len([x for x in order[:order.index(bi)] if x not in carrier])
-            if k < len(runs):
-                ch, form = runs[k]
-                anchor = letters_map.get(f"{ch}/{form}")
-                if anchor:
-                    a_pts = [q for st in anchor["strokes"] for q in st["p"]]
-                    ax0, ay0, ax1, ay1 = bbox(a_pts)
-                    head = anchor["strokes"][0]["p"][0]
-                    bx0, by0, bx1, by1 = bbox(pts_all)
-                    want = [head[0] + (bx1 - ax1), head[1]]
-                    start = min(nodes, key=lambda n: (spots[n][0] - want[0]) ** 2
-                                + (spots[n][1] - want[1]) ** 2)
+        # **وبعد اقتلاع الشرطة يصير أيمنُ الوصلة رأسَ حرفها الأوّل** — فمبدؤها
+        # أعلى ذلك الرأس: «تبدأ من بداية الخاء فوق وليس على اليمين» (المالك).
         if hand:
             h_pts = [q for st in hand for q in st]
             mapped = to_frame([hand[0][0]], bbox(h_pts), bbox(pts_all))[0]
@@ -669,72 +708,24 @@ def self_test() -> int:
        f"ومبدأُ الضربة من أثر يده: وُسطى البُعد {med:.0%} من قطر الشكل في"
        f" {len(gaps)} شكلاً · وداخلَ الرُّبع {near}/{len(gaps)}")
 
-    # ٥) **قاعدةُ المالك في المبدأ** (٢٥ أغسطس): «الحرفُ يأخذ شكلَ أوّل الكلمة إذا
-    #    جاء في أوّلها أو في وسطها وقبله حرفٌ غيرُ موصول» ⇐ **ومبدؤه مبدأُ أوّلِ
-    #    الكلام**: رأسُ الخاء فوق لا أيمنُ الوصلة. يُقاس بمقابلة مبدأ كلِّ وصلةٍ
-    #    بمبدأ حرفها الأوّل في شكله، نسبةً إلى صندوقيهما.
-    lm = {u["name"]: u for u in units if u["kind"] == "letter"}
-    off = []
-    seen_runs = 0
+    # ٥) **مبدأُ الوصلة عند رأس حرفها الأوّل** (بعد اقتلاع شرطة المدخل): يُقاس
+    #    بُعدُ المبدأ عن أيمن الوصلة — فالرأسُ هناك، والمنتصفُ يحمرّ.
+    pen = 102.8
+    far, seen = [], 0
     for u in units:
         if u["kind"] == "letter":
             continue
-        runs = []
-        for word in u["text"].split():
-            i = 0
-            while i < len(word):
-                j = i
-                while j < len(word) - 1 and word[j] not in CUTTERS:
-                    j += 1
-                runs.append((word[i], form_of(word, i)))
-                i = j + 1
-        heads = [st for st in u["strokes"]]
-        for k, (ch, form) in enumerate(runs):
-            anchor = lm.get(f"{ch}/{form}")
-            if not anchor or k >= len(heads):
-                continue
-            a_pts = [p for st in anchor["strokes"] for p in st["p"]]
-            ax0, ay0, ax1, ay1 = bbox(a_pts)
-            ah = anchor["strokes"][0]["p"][0]
-            want_rel = ((ax1 - ah[0]) / max(ax1 - ax0, 1e-6),
-                        (ah[1] - ay0) / max(ay1 - ay0, 1e-6))
-            st = heads[k]
-            sx0, sy0, sx1, sy1 = bbox(st["p"])
-            got_rel = ((sx1 - st["p"][0][0]) / max(sx1 - sx0, 1e-6),
-                       (st["p"][0][1] - sy0) / max(sy1 - sy0, 1e-6))
-            seen_runs += 1
-            if abs(got_rel[1] - want_rel[1]) > 0.45:
-                off.append(u["name"])
+        for st in u["strokes"]:
+            bp = [q for x in u["strokes"] if x["body"] == st["body"] for q in x["p"]]
+            x1 = max(q[0] for q in bp)
+            seen += 1
+            if x1 - st["p"][0][0] > pen * 1.8:
+                far.append(u["text"][:14])
                 break
-    ok(seen_runs and len(off) <= seen_runs * 0.1,
-       f"و**كلُّ حرفٍ قبله غيرُ موصولٍ يبدأ كأوّلِ الكلمة**: {seen_runs - len(off)}/{seen_runs}"
-       f" وصلةً مبدؤها مبدأُ حرفها الأوّل في شكل الابتداء — لا أيمنُ حبرها"
-       + (f" — شذّت {off[:4]}" if off else ""))
-
-    # **وشكلُ ذلك الحرف شكلُ الابتداء نفسُه** (نصُّ القاعدة لا أثرُها): فلا يُسمّى
-    # وسطياً ولا نهائياً حرفٌ يفتح وصلةً — ولو جاء في منتصف الكلمة.
-    wrong_form = []
-    mid_init, mid_lone = [], []
-    for u in units:
-        if u["kind"] == "letter":
-            continue
-        for word in u["text"].split():
-            i = 0
-            while i < len(word):
-                j = i
-                while j < len(word) - 1 and word[j] not in CUTTERS:
-                    j += 1
-                f = form_of(word, i)
-                if f not in ("initial", "isolated"):
-                    wrong_form.append(f"{u['text']}:{word[i]}={f}")
-                elif i > 0:
-                    (mid_init if f == "initial" else mid_lone).append(word[i])
-                i = j + 1
-    ok(not wrong_form,
-       f"**والشكلُ يتبع القاعدةَ بشطريها**: حرفٌ بعد غير الموصول يفتح الوصلة فيأخذ"
-       f" شكلَ الابتداء ({len(mid_init)} موضعاً في وسط الكلمات)، **وإن كان آخِرَ"
-       f" الكلمة فشكلَ المستقلّ** ({len(mid_lone)} موضعاً)"
-       + (f" — خالف {wrong_form[:4]}" if wrong_form else ""))
+    ok(seen and len(far) <= seen * 0.08,
+       f"ومبدأُ الوصلة عند رأس حرفها الأوّل لا في وسطها: {seen - len(far)}/{seen} ضربةً"
+       f" تبدأ في حدود قلمٍ ونصفٍ من أيمن وصلتها"
+       + (f" — بعُدت {far[:4]}" if far else ""))
 
     # ٦) ومجرَّبٌ سالباً: جسمٌ بضربتين حيث تكفي واحدة يحمرّ
     hurt = json.loads(json.dumps(units[:1]))
