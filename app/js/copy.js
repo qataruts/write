@@ -115,7 +115,7 @@ export const SPOKEN = [...Object.values(SAY), ...SPOKEN_WORDS];
  * واحدةٌ (كلمةٌ × نسخ) وإنما ارتقت درجتُها، **ولا مفتاحَ ثالثٌ يشقّ صندوقَ الكلمة**.
  */
 export const STEPS = [
-  { id: 'watch', mode: MODES.GUIDED, title: 'شَاهِدْ', say: SAY.watch, kind: null },
+  // (صفحةُ «شاهِدْ» دُمجت في أول كتابة — مرسوم ٢٤ أغسطس: اللوحُ حيٌّ من أول ظهور)
   { id: 'guided', mode: MODES.GUIDED, title: 'اِنْسَخْ', say: SAY.guided, kind: progress.KINDS.COPY },
   { id: 'free', mode: MODES.FREE, title: 'وَحْدَكْ', say: SAY.free, kind: progress.KINDS.COPY },
 ];
@@ -225,6 +225,9 @@ export function renderNode(node) {
         onclick: () => go('#/'),
       }, '→ الخريطة'),
       h('span', { class: 'spacer' }),
+      // 🔴 **الرأسُ صفٌّ واحد** (أمر المالك ٢٤ أغسطس) — العنوانُ في سطر الرأس.
+      title,
+      h('span', { class: 'spacer' }),
       brandMark(),
     ),
   );
@@ -298,7 +301,7 @@ export function renderNode(node) {
       ref: unit.ref,
       mode: step.mode,
       // **«شاهِدْ» عرضٌ حيّ وكلُّ لوحِ كتابةٍ التقاطٌ مؤجَّل** (مرسوم ٢٤ أغسطس)
-      judge: step.id === 'watch' ? 'live' : 'defer',
+      judge: 'defer',
       // **سماحةُ الكلمة من مسارها** — مقياسُ حروفها فيها، لا سماحةُ حرفٍ يملأ صندوقه
       tolerance: aid.tolerance,
       pace: demoPace(),
@@ -330,7 +333,8 @@ export function renderNode(node) {
       say(unit.say, step.say);
     } else {
       surface.el.addEventListener('pointerdown', () => surface.stop(), { capture: true });
-      say(unit.space ? SAY.space : step.say);
+      if (state.index === 0 && unit.say) say(unit.say, unit.space ? SAY.space : step.say);
+      else say(unit.space ? SAY.space : step.say);
     }
     paintDots();
     paintStrip();
@@ -505,7 +509,7 @@ export function renderNode(node) {
   }
 
   const main = h('main', { class: 'screen lesson-letter lesson-copy' },
-    title, strip, dots, model, board, hint, foot);
+    strip, dots, model, board, hint, foot);
   screen.append(main);
   mount();
   return screen;

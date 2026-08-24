@@ -559,8 +559,22 @@ export const heroStep = (hero, rest) => h('div', { class: 'hero-step' },
  * **ولا تُخزَّن ولا تُرسَل**: عقدةٌ في الشاشة تموت بها (`METHOD §٣.٧`).
  */
 export function traceFace(paths, className = 'celebrate-face') {
+  // 🔴 **أثرُ الطفل يتوسّط وجهَ الختام** (بلاغ المالك ٢٤ أغسطس: «الحرف غير
+  // مسنتر ويأتي مائلاً وتلاحظه البنات»): كان الإطارُ شبكةً ثابتةً فيجلس
+  // الحبرُ حيث كُتب على اللوح — فيُحسَب الإطارُ من صندوق الحبر نفسِه
+  // مربَّعاً بمتنفَّسٍ، والأثرُ وسطَه أبداً.
+  const nums = paths.join(' ').match(/-?\d+(?:\.\d+)?/g)?.map(Number) || [];
+  let vb = '-190 -190 1380 1380';
+  if (nums.length >= 4) {
+    const xs = nums.filter((_, i) => i % 2 === 0);
+    const ys = nums.filter((_, i) => i % 2 === 1);
+    const x0 = Math.min(...xs); const x1 = Math.max(...xs);
+    const y0 = Math.min(...ys); const y1 = Math.max(...ys);
+    const half = Math.max(x1 - x0, y1 - y0) / 2 + 130;   // متنفَّسٌ وعرضُ الحبر
+    vb = `${(x0 + x1) / 2 - half} ${(y0 + y1) / 2 - half} ${half * 2} ${half * 2}`;
+  }
   const el = h('div', { class: className });
-  el.innerHTML = `<svg class="trace-ink" viewBox="-190 -190 1380 1380" fill="none"
+  el.innerHTML = `<svg class="trace-ink" viewBox="${vb}" fill="none"
     stroke="currentColor" stroke-width="64" stroke-linecap="round" stroke-linejoin="round"
     aria-hidden="true">${paths.map((d) => `<path d="${d}" />`).join('')}</svg>`;
   return el;

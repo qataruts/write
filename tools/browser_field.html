@@ -380,7 +380,7 @@ const toastShown = () => {
         .find((b) => /تَابِعْ/.test(b.textContent))?.click();
       await wait(900);
     };
-    await goTabi();                       // من «شاهِدْ» إلى أول كتابة
+    // (لا نقرةَ افتتاحٍ — أولُ ظهورٍ لوحٌ حيٌّ بعد دمج «شاهِدْ»)
     for (const shape of shapes) {
       for (const stroke of shape.ref.strokes) {
         const id = ++pointerId;

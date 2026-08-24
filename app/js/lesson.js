@@ -88,7 +88,10 @@ export const SPOKEN = [...Object.values(SAY), ...LETTER_NAMES, ...DIGIT_NAMES];
  * `mode` نمطُ اللوح في `pen.js`، فما يراه الطفلُ هو ما يحكم به المحرّك.
  */
 export const STEPS = [
-  { id: 'watch', mode: MODES.GUIDED, title: 'شَاهِدْ', say: SAY.watch, kind: null },
+  // 🔴 **لا صفحةَ عرضٍ ميتة** (أمر المالك ٢٤ أغسطس: «عند عرض الحرف وقول اسمه
+  // اجعل اللوحةَ فعّالة — يبدأ الطفلُ بالكتابة ثم النقر على التالي»):
+  // أولُ ظهورٍ = النموذجُ ظاهرٌ واسمُه يُقال **واللوحُ حيٌّ من اللحظة
+  // الأولى** — والعرضُ المتحرك بزرّ «شَاهِدْ» لمن أراده.
   { id: 'guided', mode: MODES.GUIDED, title: 'تَتَبَّعْ', say: SAY.guided, kind: progress.KINDS.TRACE },
   { id: 'faint', mode: MODES.FAINT, title: 'خَافِتٌ', say: SAY.faint, kind: progress.KINDS.TRACE },
   { id: 'free', mode: MODES.FREE, title: 'وَحْدَكْ', say: SAY.free, kind: progress.KINDS.FREE },
@@ -272,6 +275,10 @@ export function renderNode(node) {
         onclick: () => go('#/'),
       }, '→ الخريطة'),
       h('span', { class: 'spacer' }),
+      // 🔴 **الرأسُ صفٌّ واحد** (أمر المالك ٢٤ أغسطس: «صفّان في رأس الصفحة
+      // يُنزلان اللوح — اجعل الهيدر صفاً واحداً») — العنوانُ في سطر الرأس نفسِه.
+      title,
+      h('span', { class: 'spacer' }),
       brandMark(),
     ),
   );
@@ -344,7 +351,7 @@ export function renderNode(node) {
       ref: unit.ref,
       mode: step.mode,
       // **«شاهِدْ» عرضٌ حيّ، وكلُّ لوحِ كتابةٍ التقاطٌ مؤجَّلُ القياس** (مرسوم ٢٤ أغسطس)
-      judge: step.id === 'watch' ? 'live' : 'defer',
+      judge: 'defer',
       tolerance: aid.tolerance,
       pace: demoPace(),
       label: `لوحُ كتابة: ${letterName(unit.letter)}${unit.form === FORMS.ISOLATED ? '' : ` ${formTitle(unit.form)}`}`,
@@ -395,6 +402,8 @@ export function renderNode(node) {
       // **وفي التمييز يُقال المطلوبُ بعد التعليمة**: التعليمةُ تصف العمل والاسمُ
       // يعيّن المطلوب — وكلاهما يصفّ في القناة الواحدة فيُسمَعان بترتيبهما.
       if (step.id === 'compare') say(step.say, letterName(unit.letter));
+      // **وأولُ لقاءِ الوحدة يقول اسمَها** (كان قولَ صفحة «شاهِدْ» — دُمجت):
+      else if (state.index === 0) say(letterName(unit.letter), step.say);
       else say(step.say);
     }
     paintDots();
@@ -616,7 +625,7 @@ export function renderNode(node) {
   }
 
   const main = h('main', { class: 'screen lesson-letter' },
-    title, strip, dots, family, board, hint, foot);
+    strip, dots, family, board, hint, foot);
   screen.append(main);
   mount();
   return screen;

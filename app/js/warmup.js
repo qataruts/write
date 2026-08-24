@@ -195,7 +195,7 @@ export function renderWarmup(part) {
     );
   }
 
-  const main = h('main', { class: 'screen warmup' }, title, dots, board, hint, foot);
+  const main = h('main', { class: 'screen warmup' }, dots, board, hint, foot);
   screen.append(main);
   paintFoot();
   mount();

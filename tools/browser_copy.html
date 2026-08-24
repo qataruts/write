@@ -174,8 +174,8 @@ function watchNetwork(win) {
 
     ok(Boolean(doc.querySelector('main.lesson-copy')),
       `شاشةُ النسخ فُتحت بعنوانها (#/join/${pairNode.part})`);
-    ok(doc.querySelectorAll('main .dots .dot').length === 3,
-      'وحلقتُها ثلاثُ خطوات: شاهِدْ ← انسَخْ موجَّهاً ← اكتُبْها وحدَك');
+    ok(doc.querySelectorAll('main .dots .dot').length === 2,
+      'وحلقتُها خطوتان كاتبتان: انسَخْ موجَّهاً ← اكتُبْها وحدك — «شاهِدْ» دُمجت في أولاها (مرسوم ٢٤ أغسطس)');
     const units = unitsOf(pairNode);
     ok(doc.querySelectorAll('main .unit-strip .unit').length === units.length,
       `وشريطُ الوحدات يقول كم فيها (${units.length}: ${units.map((u) => u.text).join(' · ')})`);
@@ -187,11 +187,8 @@ function watchNetwork(win) {
 
     // تُمشى العقدةُ كلُّها: لكلِّ وحدةٍ ثلاثُ خطوات (الأولى نقرةٌ، والثنتان كتابة)
     for (const unit of units) {
-      const act = doc.querySelector('main .foot .btn');
-      act.click();                            // «اُنْسُخْ» — من العرض إلى الكتابة
-      // **والانتظارُ بقدر الكلام لا بقدر الرسم** (عقدُ قناة ٤ج): الانتقالُ بعد النقرة
-      // **ينتظر تمامَ ما يُقال**، فلو كُتب قبله لَوقع الحبرُ على لوح العرض وضاع —
-      // وهو ما وقع في أوّل تشغيل (بقيت الشاشةُ على أوّل وحدةٍ وقُيّد مفتاحٌ واحد).
+      // (كانت هنا نقرةُ «انسخ» من صفحة العرض — دُمجت الصفحةُ فاللوحُ حيٌّ
+      //  من أول ظهور، والانتظارُ لتمام كلام الوحدة وحدَه.)
       await wait(STEP_WAIT);
       for (let step = 0; step < 2; step++) {
         // 🖊 **ودرجةُ النسخ الحرّ تُقاس في أوّل وحدةٍ** (ب١): الخطوةُ الثانيةُ

@@ -141,6 +141,9 @@ export function renderNode(node) {
         onclick: () => go('#/'),
       }, '→ الخريطة'),
       h('span', { class: 'spacer' }),
+      // 🔴 **الرأسُ صفٌّ واحد** (أمر المالك ٢٤ أغسطس) — العنوانُ في سطر الرأس.
+      title,
+      h('span', { class: 'spacer' }),
       brandMark(),
     ),
   );
@@ -327,7 +330,7 @@ export function renderNode(node) {
   }
 
   const main = h('main', { class: 'screen lesson-letter lesson-sentence' },
-    title, strip, dots, board, hint, foot);
+    strip, dots, board, hint, foot);
   screen.append(main);
   mount();
   return screen;

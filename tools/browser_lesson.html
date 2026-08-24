@@ -102,7 +102,8 @@ function watchRobot(win) {
     const letter = Object.keys(PATHS)[0];              // أوّلُ حرفٍ في المنهج بمساره
     const ref = PATHS[letter][FORMS.ISOLATED];
     ok(Boolean(ref), `أوّلُ حرفٍ مؤلَّفٍ مسارُه: «${letter}»`);
-    ok(STEPS.length === 4, `وحلقةُ الدرس أربعُ خطوات (${STEPS.map((s) => s.id).join(' ← ')})`);
+    ok(STEPS.length === 3 && STEPS[0].id === 'guided',
+      `وحلقةُ الدرس ثلاثُ خطواتٍ كاتبة (${STEPS.map((s) => s.id).join(' ← ')}) — «شاهِدْ» دُمجت في أولاها`);
 
     // ————— إصبعٌ على اللوح —————
     let pointerId = 1;
@@ -209,37 +210,26 @@ function watchRobot(win) {
     await wait(600);
 
     ok(Boolean(doc.querySelector('main.lesson-letter')), 'شاشةُ الدرس فُتحت للحرف الأول');
-    ok(doc.querySelectorAll('main.lesson-letter .dots .dot').length === 4,
-      'ومؤشّرُ الخطوات أربعُ نقاط');
+    ok(doc.querySelectorAll('main.lesson-letter .dots .dot').length === 3,
+      'ومؤشّرُ الخطوات ثلاثُ نقاطٍ كاتبة — صفحةُ «شاهِدْ» دُمجت في أولاها (مرسوم ٢٤ أغسطس)');
 
     // **خطوةُ «شاهِدْ» عرضٌ لا كتابة**: لوحُها لا يقبل الحبر، وزرُّها ينقل إلى التتبّع
     const board = doc.querySelector('.lesson-board');
-    ok(board?.classList.contains('lesson-board--watch'),
-      'وأولى الخطوات «شاهِدْ» — لوحُ عرضٍ لا يُكتب عليه');
+    // 🔴 **أولُ ظهورٍ لوحٌ حيّ** (أمر المالك ٢٤ أغسطس: «اجعل اللوحة فعّالة —
+    // يبدأ الطفلُ بالكتابة ثم النقر على التالي» — لا صفحةَ عرضٍ قبلها):
+    ok(!board?.classList.contains('lesson-board--watch')
+      && Boolean(doc.querySelector('.pen-box--guided')),
+      'وأولُ ظهورٍ لوحُ تتبّعٍ حيٌّ يُكتب عليه — لا صفحةَ عرضٍ ميتة');
     const drawn = doc.querySelectorAll('.pen-stroke--trail').length;
     ok(drawn === ref.strokes.length,
-      `واللوحُ يرسم النموذجَ من المسار المرجعيّ نفسِه (${drawn} جزءاً)`);
-    // **و«شاهِدْ» تعرض من تلقاء نفسها** — هي صفحةُ الإظهار الوحيدة (بلاغُ
-    // المالك، ٢٣ أغسطس ٢٠٢٦): العرضُ التلقائيّ حقُّها وحدَها.
-    ok(Boolean(doc.querySelector('.pen-box--playing')),
-      'و«شاهِدْ» تعرض الكتابةَ من تلقاء نفسها — صفحةُ الإظهار الوحيدة');
-
+      `والنموذجُ ظاهرٌ عليه من المسار المرجعيّ نفسِه (${drawn} جزءاً)`);
+    ok(!doc.querySelector('.pen-box--playing'),
+      'ولا عرضَ يجري فوقه — العرضُ بزرّ «شَاهِدْ» لمن أراده');
     const acts = [...doc.querySelectorAll('main.lesson-letter .foot .btn')];
     const small = acts.filter((b) => b.getBoundingClientRect().height < 64);
     ok(acts.length >= 2 && small.length === 0,
       `وأفعالُ الشاشة (${acts.length}) هدفُ لمسٍ ≥ ٦٤ بكسل`
       + (small.length ? ` — دونها: ${small.map((b) => Math.round(b.getBoundingClientRect().height)).join('، ')}` : ''));
-
-    acts[0].click();                       // «تَتَبَّعْ» → الخطوةُ الثانية
-    await wait(500);
-    ok(!doc.querySelector('.lesson-board')?.classList.contains('lesson-board--watch')
-      && doc.querySelector('.pen-box--guided'),
-      'والانتقالُ إلى «تتبّعْ موجَّهاً»: لوحٌ يُكتب عليه والمسارُ ظاهر');
-    // **وخطوةُ الكتابة تُفتح حيّةً — لا عرضَ مكرَّراً يحبس القلم** (بلاغُ المالك:
-    // «كلَّ مرةٍ تتوقّع أن المكان متاحٌ للكتابة تكتشف أنه يعيد يُظهر لك كيف
-    // تكتب فتضطرّ للانتظار») — فالإعادةُ بزرّ «شَاهِدْ» عند الطلب لا فرضاً.
-    ok(!doc.querySelector('.pen-box--playing'),
-      'وخطوةُ الكتابة فُتحت حيّةً: لا عرضَ يجري فوق اللوح والقلمُ بيد الطفل');
 
     /**
      * 🔴 **«نقيس ولا نرفض» — عقدُ مرسوم ٢٤ أغسطس ٢٠٢٦** (بلاغُ المالك: «بدأ
@@ -350,7 +340,10 @@ function watchRobot(win) {
     ok(!robot.includes(name),
       `ولم يُطلَب نطقُه آلياً قطّ — الاحتياطُ لِما لا ملفَّ له وحدَه`
       + ` (نُطق آلياً: ${robot.length ? robot.join(' · ') : 'لا شيء'})`);
-    ok(hitsBefore > 0, `والبنكُ يُجلَب فعلاً من الخادم (${hitsBefore} ملفاً حتى فتح الدرس)`);
+    // (كان الشرطُ «جُلب قبل فتح الدرس» — وذاك أثرُ مشي التهيئة الملغاة قبله؛
+    //  الجلبُ الآن مع الدرس نفسِه: اسمُ الحرف يُقال في أول لوحٍ حيّ.)
+    ok((await audioHits()) > 0,
+      `والبنكُ يُجلَب فعلاً من الخادم (${await audioHits()} ملفاً بعد الدرس)`);
 
     // ————— الخصوصية والسلامة —————
     const cycle = netCalls.slice(netMark);

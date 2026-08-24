@@ -163,20 +163,19 @@ function watchNetwork(win) {
 
     ok(Boolean(doc.querySelector('main.lesson-letter')),
       `شاشةُ المحطة فُتحت بعنوانها المركّب (#/form/${plain.stageId}/${plain.part})`);
-    ok(doc.querySelectorAll('main .dots .dot').length === 4,
-      'وحلقتُها حلقةُ الدرس نفسُها — أربعُ خطوات');
+    ok((await import('/js/lesson.js')).STEPS.length === 3,
+      'وحلقتُها حلقةُ الدرس نفسُها — ثلاثُ خطواتٍ كاتبة («شاهِدْ» مدمجة)');
     ok(doc.querySelectorAll('main .unit-strip .unit').length === plain.letters.length,
       `وشريطُ الوحدات يقول كم حرفاً فيها (${plain.letters.length}: ${plain.letters.join(' ')})`);
     ok(doc.querySelectorAll('main .unit-strip .ref-glyph').length === plain.letters.length,
       'وشاراتُه مرسومةٌ من المسارات المرجعية نفسِها (`refGlyph`) لا بخطّ نصّ');
-    ok(doc.querySelector('.lesson-board')?.classList.contains('lesson-board--watch'),
-      'وأولى خطواتها «شاهِدْ» — لوحُ عرضٍ لا يُكتب عليه');
+    ok(Boolean(doc.querySelector('.pen-box--guided')),
+      'وأولى خطواتها لوحُ تتبّعٍ حيٌّ — لا صفحةَ عرض (مرسوم ٢٤ أغسطس)');
 
     // تُمشى المحطةُ كلُّها: لكلِّ حرفٍ أربعُ خطوات (الأولى نقرةٌ، والثلاثُ كتابة)
     for (const letter of plain.letters) {
       const ref = pathOf(letter, plain.form);
-      const act = doc.querySelector('main .foot .btn');
-      act.click();                            // «تَتَبَّعْ» — من العرض إلى الكتابة
+      // (كانت نقرةُ الانتقال من صفحة العرض — دُمجت فاللوحُ حيٌّ من أول ظهور)
       await wait(700);
       for (let step = 0; step < 3; step++) {
         await writeShape(ref);

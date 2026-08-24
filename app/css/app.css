@@ -1372,6 +1372,9 @@ button {
    يُحجز له علوُّه سلفاً فلا يتحرك اللوحُ من تبدّل كلمة؛ ويُطفأ رسوُّ التمرير
    التلقائيّ فلا يسحب المتصفحُ الشاشةَ خلف تغيّرات المحتوى. */
 main.lesson-letter .hint, main.warmup .hint { min-height: 2.8em; }
+/* والعنوانُ في صفّ الرأس: مضغوطٌ بسطرٍ واحدٍ لا يلفّ — قصُّه خيرٌ من نزول اللوح */
+.topbar h1 { font-size: 1.05rem; margin: 0; white-space: nowrap; overflow: hidden;
+  text-overflow: ellipsis; max-width: 46vw; }
 .screen main, main.screen { overflow-anchor: none; }
 
 .pen-box {
