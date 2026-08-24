@@ -393,23 +393,14 @@ def assemble_unit(unit: dict, book: dict, tol: float = 25.0, letters_map: dict =
     if unit["kind"] == "letter":
         hand = hand_strokes(book, unit["text"], unit["form"])
 
-    # 🔴 **ومبدأُ كلِّ جسمٍ مبدأُ حرفه الأوّل** (حكمُ المالك ٢٥ أغسطس ٢٠٢٦ على
-    # «أخي»: «الضربةُ تبدأ من بداية الخاء فوق وليس على اليمين — فالخاءُ هنا أوّلُ
-    # الكلام لأنّ الحرف الذي قبلها غير موصول. عمّم هذا»). ⇐ **الجسمُ وصلةٌ
-    # مستقلّة**، وأوّلُ حرفٍ فيها يُكتب كما يُكتب مبتدَأً: من مبدئه هو (رأسُ الخاء
-    # فوق) لا من أيمنِ حبر الوصلة. ومبدأُ ذلك الحرف مأخوذٌ من **أثر يد المالك**
-    # لذلك الشكل بعينه (`letter_start`)، ويُنزَّل في موضع الحرف داخل الوصلة.
-    runs = []
-    if unit["kind"] != "letter":
-        for word in unit["text"].split():
-            i = 0
-            while i < len(word):
-                j = i
-                while j < len(word) - 1 and word[j] not in CUTTERS:
-                    j += 1
-                runs.append((word[i], form_of(word, i)))
-                i = j + 1
-
+    # 🔴 **ولا يُعبَث بمكان بداية الحرف** (تصحيحُ المالك ٢٥ أغسطس ٢٠٢٦ على «أختي»:
+    # «أعِد الخاءَ التي يسبقها موصولٌ لشكلها الأوّليّ — البدايةُ من اليمين — وكذلك كلُّ
+    # الحروف المشابهة، **لا تعبث بمكان بداية الحرف**. المشكلةُ كانت أنّ الخاءَ التي
+    # قبلها حرفٌ غيرُ موصولٍ تُستبدَل بخاء أوّلِ الكلمة **وهذا هو الصحيح**»).
+    # ⇐ **فالقاعدةُ تحكم الشكلَ لا المبدأ**: استبدالُ الشكل يفعله محرّكُ الخطّ نفسُه
+    # عند التشكيل (وقد قِيس: الفونتُ يعطي «خـ» الابتدائية في «أخي» و«أختي» معاً).
+    # **ومبدأُ الوصلة يبقى حيث كان**: أيمنُ حبرها فأعلاه — وهو مبدأُ العربية.
+    # (وقد جُرّبت مزاوجةُ المبدأ بأثر اليد لكلّ وصلةٍ فردّها المالكُ بعينه.)
     strokes = []
     floor = 0
     for bi in order:
@@ -424,28 +415,7 @@ def assemble_unit(unit: dict, book: dict, tol: float = 25.0, letters_map: dict =
         # **مبدأُ الجسم**: أقربُ عقدةٍ إلى مبدأ يد المالك إن وُجد أثرُه، وإلا
         # **الأيمنُ فالأعلى** — وهي قاعدةُ العربية العامّة (`STROKE_ORDER §٢`).
         start = None
-        if runs and bi not in carrier:
-            # الوصلةُ التالية بترتيب اليمين ⇐ حرفُها الأوّل وشكلُه
-            k = len([b for b in order[:order.index(bi)] if b not in carrier])
-            if k < len(runs):
-                ch, form = runs[k]
-                anchor = letters_map.get(f"{ch}/{form}")
-                if anchor:
-                    a_pts = [p for st in anchor["strokes"] for p in st["p"]]
-                    ax0, ay0, ax1, ay1 = bbox(a_pts)
-                    head = anchor["strokes"][0]["p"][0]
-                    rel = ((ax1 - head[0]) / max(ax1 - ax0, 1e-6),
-                           (head[1] - ay0) / max(ay1 - ay0, 1e-6))
-                    # موضعُ الحرف داخل الوصلة: شريحتُها اليمنى بعرض الحرف نفسِه
-                    bx0, by0, bx1, by1 = box_of[bi]
-                    cut = max(bx0, bx1 - (ax1 - ax0))
-                    seg = [p for pc in pieces for p in pc["p"] if p[0] >= cut]
-                    if len(seg) > 1:
-                        sx0, sy0, sx1, sy1 = bbox(seg)
-                        want = [sx1 - rel[0] * (sx1 - sx0), sy0 + rel[1] * (sy1 - sy0)]
-                        start = min(nodes, key=lambda n: (spots[n][0] - want[0]) ** 2
-                                    + (spots[n][1] - want[1]) ** 2)
-        if start is None and hand:
+        if hand:
             h_pts = [p for st in hand for p in st]
             mapped = to_frame([hand[0][0]], bbox(h_pts), ours)[0]
             start = min(nodes, key=lambda n: (spots[n][0] - mapped[0]) ** 2
@@ -651,50 +621,9 @@ def self_test() -> int:
        f"ومبدأُ الضربة من أثر يده: وُسطى البُعد {med:.0%} من قطر الشكل في"
        f" {len(gaps)} شكلاً · وداخلَ الرُّبع {near}/{len(gaps)}")
 
-    # ٥) **قاعدةُ المالك في المبدأ** (٢٥ أغسطس): «الحرفُ يأخذ شكلَ أوّل الكلمة إذا
-    #    جاء في أوّلها أو في وسطها وقبله حرفٌ غيرُ موصول» ⇐ **ومبدؤه مبدأُ أوّلِ
-    #    الكلام**: رأسُ الخاء فوق لا أيمنُ الوصلة. يُقاس بمقابلة مبدأ كلِّ وصلةٍ
-    #    بمبدأ حرفها الأوّل في شكله، نسبةً إلى صندوقيهما.
-    lm = {u["name"]: u for u in units if u["kind"] == "letter"}
-    off = []
-    seen_runs = 0
-    for u in units:
-        if u["kind"] == "letter":
-            continue
-        runs = []
-        for word in u["text"].split():
-            i = 0
-            while i < len(word):
-                j = i
-                while j < len(word) - 1 and word[j] not in CUTTERS:
-                    j += 1
-                runs.append((word[i], form_of(word, i)))
-                i = j + 1
-        heads = [st for st in u["strokes"]]
-        for k, (ch, form) in enumerate(runs):
-            anchor = lm.get(f"{ch}/{form}")
-            if not anchor or k >= len(heads):
-                continue
-            a_pts = [p for st in anchor["strokes"] for p in st["p"]]
-            ax0, ay0, ax1, ay1 = bbox(a_pts)
-            ah = anchor["strokes"][0]["p"][0]
-            want_rel = ((ax1 - ah[0]) / max(ax1 - ax0, 1e-6),
-                        (ah[1] - ay0) / max(ay1 - ay0, 1e-6))
-            st = heads[k]
-            sx0, sy0, sx1, sy1 = bbox(st["p"])
-            got_rel = ((sx1 - st["p"][0][0]) / max(sx1 - sx0, 1e-6),
-                       (st["p"][0][1] - sy0) / max(sy1 - sy0, 1e-6))
-            seen_runs += 1
-            if abs(got_rel[1] - want_rel[1]) > 0.45:
-                off.append(u["name"])
-                break
-    ok(seen_runs and len(off) <= seen_runs * 0.1,
-       f"و**كلُّ حرفٍ قبله غيرُ موصولٍ يبدأ كأوّلِ الكلمة**: {seen_runs - len(off)}/{seen_runs}"
-       f" وصلةً مبدؤها مبدأُ حرفها الأوّل في شكل الابتداء — لا أيمنُ حبرها"
-       + (f" — شذّت {off[:4]}" if off else ""))
-
-    # **وشكلُ ذلك الحرف شكلُ الابتداء نفسُه** (نصُّ القاعدة لا أثرُها): فلا يُسمّى
-    # وسطياً ولا نهائياً حرفٌ يفتح وصلةً — ولو جاء في منتصف الكلمة.
+    # ٥) **الشكلُ يتبدّل، والمبدأُ لا يُمَسّ** (تصحيحُ المالك ٢٥ أغسطس): الحرفُ الذي
+    #    قبله غيرُ موصولٍ **يُستبدَل بشكل أوّل الكلمة** — يفعله محرّكُ الخطّ عند
+    #    التشكيل، فيُحرَس **أنّ اشتقاقنا يوافقه** ولا يُحرَك مبدأُ ضربةٍ لأجله.
     wrong_form = []
     mid_init, mid_lone = [], []
     for u in units:
