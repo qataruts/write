@@ -145,6 +145,12 @@ function watchNetwork(win) {
       try { return JSON.parse(win.localStorage.getItem('uktub.progress.v1') || '{}'); }
       catch { return {}; }
     };
+    // **بابُ الانتقال الواحد** (مرسوم ٢٤ أغسطس): «تَابِعْ» يقيس صامتاً ويمضي.
+    const tabi = async () => {
+      [...doc.querySelectorAll('main .foot .btn')]
+        .find((b) => /تَابِعْ/.test(b.textContent))?.click();
+      await wait(800);
+    };
     const STEP_WAIT = 5200;          // فوق أطولِ احتياطٍ محسوبٍ لنصٍّ لم يُصرَّف بعد
 
     // ————— §١ محطةُ شكل الموقع: حروفُ المجموعة بحلقتها —————
@@ -174,7 +180,8 @@ function watchNetwork(win) {
       await wait(700);
       for (let step = 0; step < 3; step++) {
         await writeShape(ref);
-        await wait(STEP_WAIT);
+        await tabi();
+        await wait(900);
       }
     }
 
@@ -238,20 +245,23 @@ function watchNetwork(win) {
     ok(Boolean(asked), `والمطلوبةُ معلومةٌ للوح (${asked || 'لا شيء'}) — فما يُحكَم به هو ما سُئل عنه`);
     const other = family.find((ch) => ch !== asked);
 
-    // (١) جوابُ الأخت: يُكتب شكلُ أختها فلا يُقبَل — ولا يُخرِجه من الشاشة
-    const before = Object.keys(stored().faults || {}).length;
+    // (١) جوابُ الأخت — **صمتٌ تامّ** (مرسوم «نقيس ولا نرفض»): حبرُه يبقى،
+    // لا حكمَ ولا لومَ ولا نقلة؛ والطفلُ يمسح بيده («أعِدْ») ويكتب الصواب.
     await writeShape(pathOf(other, compare.form));
     await wait(400);
-    ok(Boolean(doc.querySelector('main.lesson-letter .pen-surface')),
-      `جوابُ الأخت («${other}» عن «${asked}») لا يُقبَل **ولا يُخرِج الطفلَ** — إرشادٌ لا رفض`);
-    ok(Object.keys(stored().faults || {}).length >= before,
-      'وخطؤه يُسجَّل بموضعه الحركيّ كما في سائر الشاشات');
+    ok(Boolean(doc.querySelector('main.lesson-letter .pen-surface'))
+      && doc.querySelectorAll('.pen-line').length > 0,
+      `جوابُ الأخت («${other}» عن «${asked}») حبرُه باقٍ والشاشةُ ساكنة — لا رفضَ قبل «تَابِعْ»`);
     ok(!doc.querySelector('main .big-stars'),
-      'ولم تُختَم المحطةُ بجوابٍ خاطئ');
+      'ولم تُختَم المحطةُ من تلقائها — البابُ «تَابِعْ» وحدَه');
+    [...doc.querySelectorAll('main .foot .btn')]
+      .find((b) => /أعِدْ/.test(b.textContent))?.click();
+    await wait(300);
 
-    // (٢) ثم الجوابُ الصحيح: يُقبَل وتمضي المحطة
+    // (٢) ثم الجوابُ الصحيح و«تَابِعْ»: يُقاس نظيفاً وتمضي المحطة
     await writeShape(pathOf(asked, compare.form));
-    await wait(STEP_WAIT);
+    await tabi();
+    await wait(600);
     const askedKey = `${asked}|${compare.form}|free`;
     ok(Boolean(stored().skills?.[askedKey]),
       `والجوابُ الصحيح يُقاس بمفتاحه (${askedKey})`);

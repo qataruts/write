@@ -282,8 +282,10 @@ function watchNetwork(win) {
     const afterOne = doneNodes();
     ok(afterOne > beforeNodes,
       `ففُتحت له ${afterOne - beforeNodes} عقدة في المخزن (كانت ${beforeNodes})`);
-    ok((stored().stars || {})['warm:lines-h'] > 0,
-      'ومعها التهيئةُ الحركية — القدرةُ الأعلى تشهد للأدنى (استنتاجٌ معلَنٌ بعلّته)');
+    // (كانت التهيئةُ الحركية تُشهَد هنا بالاستنتاج — طُويت المرحلةُ بمرسوم
+    //  ٢٤ أغسطس «ابدأ من الحروف مباشرة» فلا شهادةَ لميت.)
+    ok(!(stored().stars || {})['warm:lines-h'],
+      'ولا تُزرَع نجمةُ تهيئةٍ مطويّة — المرسومُ نافذٌ في اللحاق أيضاً');
     ok(skillCount() >= head.sample.length,
       `والزرعُ في ليتنر: ${skillCount()} مهارةً بمفاتيحَ حقيقية`);
     ok(Object.keys(stored().skills || {}).every((k) => k.split('|').length === 3

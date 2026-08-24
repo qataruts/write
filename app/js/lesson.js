@@ -557,8 +557,29 @@ export function renderNode(node) {
     // (يعيد اسمَ المطلوب) وزرُّ الإعادة، ولا يُكشَف الجوابُ بنقرة.
     if (step.id === 'compare') {
       foot.replaceChildren(
+        // 🔴 **والتمييزُ خطوةُ كتابةٍ فبابُه «تَابِعْ» نفسُه** (مرسوم ٢٤ أغسطس
+        // — وقد انسدّ بلا بابٍ حين أُجّل قياسُه دون زرّه: أمسكه سائقُ الرحلة
+        // عند `g3-forms:compare-final`): يقيس صامتاً ويمضي دائماً، ولا يُكشَف
+        // الجوابُ بزرّ «شاهِدْ» — يبقى السؤالُ سؤالاً.
         h('button', {
           class: 'btn btn--primary next',
+          onclick: () => {
+            audio.stop();
+            const m = live?.measure?.();
+            if (m) {
+              if (!m.clean && m.shape?.why) progress.recordFault(unit.letter, m.shape.why);
+              if (step.kind) progress.recordQuality(unit.letter, unit.form, step.kind,
+                m.clean ? [...new Set([...(m.shape.guides || []), ...(m.method?.guides || [])])]
+                  : ['passed-on']);
+              score(step, unit, m.clean);
+            } else {
+              score(step, unit, false);
+            }
+            nextStep();
+          },
+        }, 'تَابِعْ →'),
+        h('button', {
+          class: 'btn next',
           onclick: () => { audio.stop(); speech = audio.play(letterName(unit.letter)); },
         }, icon('ear'), ' أَعِدِ السُّؤَال'),
         h('button', { class: 'btn next', onclick: () => live?.reset() }, '↻ أعِدْ'),

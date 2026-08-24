@@ -76,13 +76,17 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
  * تنتهي = صمتٌ ١٥٠٠ ثانية بلا تشخيص. فالإرسالُ تزايديٌّ كلَّ ثمانٍ —
  * والمهلةُ المنتهية تطبع الجزءَ الأخضرَ وموضعَ التجمّد بعينه.
  */
-let sentUpTo = 0;
+/** والدفعةُ **حصيلةٌ كاملة لا فرقٌ تزايديّ**: خادمُ الفحص يستبدل الدفعةَ
+ *  بالدفعة — ففرقٌ تزايديٌّ يجعل التقريرَ آخرَ دفعةٍ وحدَها ويُضيع متنَ
+ *  الرحلة (وقع ٢٤ أغسطس وأضاع سطرَ الانسداد). الكاملةُ كلَّ مرةٍ تجعل
+ *  الاستبدالَ أماناً: آخرُ دفعةٍ = كلُّ ما جرى حتى لحظتها. */
+let lastSent = 0;
 const send = () => {
-  const rows = results.slice(sentUpTo);
-  sentUpTo = results.length;
-  return rows.length ? fetch('/result', {
-    method: 'POST', body: JSON.stringify({ from: 'write', rows }),
-  }) : Promise.resolve();
+  if (results.length === lastSent) return Promise.resolve();
+  lastSent = results.length;
+  return fetch('/result', {
+    method: 'POST', body: JSON.stringify({ from: 'write', rows: results }),
+  });
 };
 setInterval(send, 8000);
 

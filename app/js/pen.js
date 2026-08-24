@@ -2540,7 +2540,9 @@ export function penSurface(config) {
       if (tailShape.ok) { attempt = tailTry; shape = tailShape; break; }
       if (k === 0) shape = tailShape;
     }
-    if (!result?.ok && attempt) {
+    /** و`judge:'strict'` معملُ الطريقة (لوحُ المطوّر): الماشي وحدَه يحكم،
+     *  ولا تحريرَ شكلٍ — فالمعملُ يقيس الطريقةَ لا يعلّم طفلاً. */
+    if (judge !== 'strict' && !result?.ok && attempt) {
       inkPath?.classList.add('pen-line--kept');
       inkPath = null;
       for (let i = 0; i < parts.length; i++) paintProgress(i, 1);

@@ -315,9 +315,9 @@ const send = () => fetch('/result', {
 
       // (أ) **وهو في محطةٍ يكتب**: الإشعارُ يُؤجَّل ولا يقطع
       const node = swDoc.querySelector('main.map .station a[href^="#/"], main.map .station button');
-      swWin.location.hash = '#/warmup/lines-h';
+      swWin.location.hash = '#/letter/%D8%A7';   // درسُ الألف — (كانت التهيئة، طُويت بمرسوم ٢٤ أغسطس)
       await wait(700);
-      ok(!swDoc.querySelector('main.map'), 'الطفلُ في محطةٍ لا في الخريطة (تهيئةُ اليد)');
+      ok(!swDoc.querySelector('main.map'), 'الطفلُ في محطةٍ لا في الخريطة (درسُ الألف)');
       fireChange();
       await wait(300);
       ok(!shown().includes('وصل تحديث'),

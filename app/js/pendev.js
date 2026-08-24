@@ -199,6 +199,7 @@ export function renderPenDev() {
     });
 
     const surface = penSurface({
+      judge: 'strict',   // معملُ الطريقة: الماشي وحدَه — لا تحريرَ شكلٍ هنا
       ref,
       mode: state.mode,
       label: `لوحُ كتابة ${state.letter} ${FORM_NAMES[state.form]}`,

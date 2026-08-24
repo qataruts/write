@@ -282,7 +282,7 @@ const toastShown = () => {
     for (const [label, w, h] of SIZES) {
       frame.style.width = `${w}px`;
       frame.style.height = `${h}px`;
-      win.location.hash = `#/warmup/${encodeURIComponent(parts[0])}`;
+      win.location.hash = `#/letter/${encodeURIComponent('ا')}`;   // (كانت التهيئة — طُويت بمرسوم ٢٤ أغسطس)
       await wait(450);
       win.scrollTo(0, 0);
       await wait(120);
@@ -325,7 +325,7 @@ const toastShown = () => {
         const during = topmostOver(back);
         ok(!during.covered,
           `${label} · وإصبعٌ عالقٌ على اللوح: فوق مركز الزرّ **${during.covered ? name(during.hit) : 'نفسُه'}**`);
-        win.location.hash = `#/warmup/${encodeURIComponent(parts[0])}`;   // تثبيتُ العنوان قبل القياس
+        win.location.hash = `#/letter/${encodeURIComponent('ا')}`;   // (كانت التهيئة — طُويت بمرسوم ٢٤ أغسطس)   // تثبيتُ العنوان قبل القياس
         await wait(120);
         tap(back);
         await wait(200);
@@ -334,13 +334,13 @@ const toastShown = () => {
       }
 
       // (ج) والرسالةُ العابرة ظاهرة: أتغطّي فعلَ الشاشة؟ (وهي مثبتةٌ في ذيل المنظور)
-      win.location.hash = `#/warmup/${encodeURIComponent(parts[0])}`;
+      win.location.hash = `#/letter/${encodeURIComponent('ا')}`;   // (كانت التهيئة — طُويت بمرسوم ٢٤ أغسطس)
       await wait(400);
       const bar = toastEl();
       bar.hidden = false;
       bar.textContent = 'رسالةٌ عابرةٌ للقياس';
       await wait(60);
-      const acts = [...doc.querySelectorAll('main.warmup .foot .btn'), backBtn()]
+      const acts = [...doc.querySelectorAll('main.lesson-letter .foot .btn'), backBtn()]
         .filter((el) => el && !topmostOver(el).offscreen);
       const hidden = acts.filter((el) => topmostOver(el).covered);
       ok(hidden.length === 0,
@@ -352,10 +352,11 @@ const toastShown = () => {
     // (د) ختامُ المحطة: زرُّ «→ الخريطة» في الذيل — يُقاس مقاسُه وغطاؤه ونقرتُه
     frame.style.width = '768px';
     frame.style.height = '1024px';
-    win.location.hash = `#/warmup/${encodeURIComponent(parts[0])}`;
+    win.location.hash = `#/letter/${encodeURIComponent('ا')}`;   // (كانت التهيئة — طُويت بمرسوم ٢٤ أغسطس)
     await wait(450);
-    const { WARMUPS } = await import('/js/warmups.js');
-    const shapes = WARMUPS[parts[0]].shapes;
+    // (المادةُ صارت درسَ الألف — التهيئةُ طُويت بمرسوم ٢٤ أغسطس)
+    const AREF = (await import('/js/paths.js')).PATHS['ا'].isolated;
+    const shapes = [{ ref: AREF }, { ref: AREF }, { ref: AREF }];
     let pointerId = 40;
     const toClient = ([x, y]) => {
       const el = surfaceEl();
@@ -373,6 +374,13 @@ const toastShown = () => {
       bubbles: true, cancelable: true, composed: true,
       pointerId: id, pointerType: 'touch', isPrimary: true, ...toClient(point),
     }));
+    // «شاهِدْ» أولاً ثم ثلاثُ خطواتِ كتابةٍ — والبابُ «تَابِعْ» (مرسوم ٢٤ أغسطس)
+    const goTabi = async () => {
+      [...doc.querySelectorAll('main .foot .btn')]
+        .find((b) => /تَابِعْ/.test(b.textContent))?.click();
+      await wait(900);
+    };
+    await goTabi();                       // من «شاهِدْ» إلى أول كتابة
     for (const shape of shapes) {
       for (const stroke of shape.ref.strokes) {
         const id = ++pointerId;
@@ -382,9 +390,11 @@ const toastShown = () => {
         fire('pointerup', stroke.points[stroke.points.length - 1], id);
         await wait(60);
       }
-      await wait(560);
+      await goTabi();
     }
-    const footBack = [...doc.querySelectorAll('main.warmup .foot .btn')]
+    const cardBtn = doc.querySelector('main .mark-card .btn');
+    if (cardBtn) { cardBtn.click(); await wait(400); }
+    const footBack = [...doc.querySelectorAll('main.lesson-letter .foot .btn')]
       .find((b) => b.textContent.includes('الخريطة'));
     ok(Boolean(footBack), 'وبعد ختام المحطة زرُّ «→ الخريطة» في ذيلها');
     if (footBack) {
