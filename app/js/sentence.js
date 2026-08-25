@@ -317,7 +317,10 @@ export function renderNode(node) {
           if (m) {
             if (!m.clean && m.shape?.why) progress.recordFault(unit.text, m.shape.why);
             if (step.kind) progress.recordQuality(unit.text, progress.SENTENCE_FORM, step.kind,
-              m.clean ? [...new Set([...(m.shape.guides || []), ...(m.method?.guides || [])])]
+              // **وقياسُ الطريقة مرفوعٌ عن الجمل كما رُفع عن الكلمات** (حكم المالك
+              // ٢٥ أغسطس ٢٠٢٦): مادّةُ النسخ تعود على أثرها، والماشي يقرأ الرجوعَ
+              // تحت الرجفة انحرافاً — فيبقى قياسُ الشكل وحدَه (وهو مصدرُ النجوم).
+              m.clean ? [...new Set(m.shape.guides || [])]
                 : ['passed-on']);
             score(step, unit, m.clean);
           } else {
