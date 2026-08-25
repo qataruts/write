@@ -101,8 +101,106 @@ def turn(prev: float, nxt: float) -> float:
     return d
 
 
-def walk(nodes: dict, edges: list, spots: list, start: int) -> list:
+def fold_marks(edges: list, seq: list, bounds: list) -> list:
+    """🔴 **إعلانُ الطيّات — مواضعُ الرجوع على الأثر، من المشي لا من الشكل.**
+
+    الطيّةُ صفةٌ في بيانات المسار تقول «**مكانٌ واحدٌ يحمل طولين ذهاباً وإياباً**»،
+    وبها يقرأ الحَكَمُ (`pen.js §foldsOf`) رجوعَ القلم **مشياً لا انعكاساً** — وما لم
+    تُعلَن فالعودُ ارتدادٌ يُردّ به خطُّ الطفل الصحيح.
+
+    **ومواضعُها معلومةٌ يقيناً هنا**: مزاوجةُ ساعي البريد تُضاعِف حافّةَ الرجوع
+    (`twin` وعليها بصمةُ أصلها `of`)، فالطيّةُ **كتلةٌ من الأرجل تُمشى ثم تُعاد
+    مرآةً** — تُلتقَط بالتناظر حول مفصلها كما تُلتقَط في `make_paths.html §foldSpan`:
+    `keys[i-k] == keys[i+1+k]` **وباتجاهين متقابلين** (فالمرورُ الثاني في الاتجاه
+    عينه ليس طيّةً بل انطباقٌ متوازٍ، حكمُه غيرُ حكمها).
+
+    **ولا تتداخل طيّتان**: ما دخل في طيّةٍ لا يُعاد عدُّه في التي بعدها — فلا يقع
+    مكانان في مكان (شرطُ `check_paths §check_folds`).
+    """
+    keys = [edges[i].get("of", i) for i, _ in seq]
+    marks = []
+    barrier = 0
+    i = 0
+    while i < len(seq) - 1:
+        k = 0
+        while (i - k >= barrier and i + 1 + k < len(seq)
+               and keys[i - k] == keys[i + 1 + k]
+               and seq[i - k][1] != seq[i + 1 + k][1]):
+            k += 1
+        if k:
+            marks.append({"from": bounds[i - k + 1][0],
+                          "apex": bounds[i][1],
+                          "to": bounds[i + k][1]})
+            barrier = i + k + 1
+            i += k
+        i += 1
+    return marks
+
+
+def unfold(path: list, marks: list, pen: float) -> None:
+    """🔴 **فكُّ الطيّة بنصف القلم** — وإلا انطبق ضلعاها فقُرئ خطُّ الطفل عكساً.
+
+    الإعلانُ وحدَه لا يكفي: ضلعا الطيّة يخرجان من مشي الهيكل **منطبقين نقطةً
+    بنقطة**، فطفلٌ يكتب السنّةَ خطّاً واحداً — كما تُكتب حقّاً — يقع إسقاطُه بين
+    ضلعين في مكانٍ واحد فيتقهقر تقدّمُه ويُقرأ ارتداداً. **فيُباعَد الضلعان**
+    (`make_paths.html §shifted`، والعيبُ مقيسٌ عندهم على «س/نهائي» بإصبعٍ حقيقيّ).
+
+    **والمقدارُ من مادّتنا لا منقولٌ**: القلمُ مقيسٌ (`pen_of` — عرضُ ساق الألف
+    حبراً)، فيُزاح كلُّ ضلعٍ **رُبعَه** إلى جهته فيفترقان **نصفَ القلم** بين المفرق
+    والقمّة، **وينعدم الإزاحُ عند طرفيهما**: عند القمّة لأنّها نقطةٌ واحدة، وعند
+    **المفرق لأنّه موصولٌ بذراعٍ لا تُزاح**.
+
+    ⚠ **وعلّةُ انعدامه عند المفرق مقيسة**: أُزيح المفرقُ أوّلاً إزاحةً تامّة (كما في
+    `make_paths §shifted`) **فانفتقت قطعةٌ بينه وبين ذراعه**: خطوةٌ من ٣٣ وحدةً صارت
+    ٧٦، وأقصى ما تحتمله نافذةُ رتابة المحرّك ٧٠ — **١١٥ مخالفةً كلُّها عند حدود
+    الطيّات**. وهناك تُقتطع الذراعُ بمقدار الإزاح فتلتقيه، **وعندنا الذراعُ والضلعُ
+    مسارٌ واحدٌ متّصل** فلا اقتطاع: فيُدخَل الإزاحُ على استقامةٍ في **نصف قلمٍ** من
+    المفرق ثم يبلغ تمامَه — فلا تنفتق قطعةٌ ويبقى الضلعان متمايزين حيث يُقاسان.
+
+    **وجهةُ الفتح يدلّ عليها ذراعا الطيّة**: الضلعُ الصاعد يميل إلى حيث جاء القلم
+    والنازلُ إلى حيث يمضي — فينفتح كما تنفتح اليدُ حقّاً. فإن لم يكن للطيّة
+    ذراعٌ (طيّةٌ تفتح الضربةَ وتختمها) بقي العمودُ على وتر المفرق–القمّة كما هو.
+    """
+    if pen <= 0:
+        return
+    grip = pen / 4.0
+    for m in marks:
+        f0, f1, f2 = m["from"], m["apex"], m["to"]
+        fork, apex = path[f0], path[f1]
+        vx, vy = apex[0] - fork[0], apex[1] - fork[1]
+        span = math.hypot(vx, vy)
+        if span < 1e-6:
+            continue
+        nx, ny = -vy / span, vx / span
+        vote = 0.0
+        if f0 > 0:
+            vote += (path[f0 - 1][0] - fork[0]) * nx + (path[f0 - 1][1] - fork[1]) * ny
+        if f2 + 1 < len(path):
+            vote -= (path[f2 + 1][0] - fork[0]) * nx + (path[f2 + 1][1] - fork[1]) * ny
+        if vote < 0:
+            nx, ny = -nx, -ny
+        for lo, hi, sign, rising in ((f0, f1, 1.0, True), (f1, f2, -1.0, False)):
+            run = [0.0]
+            for j in range(lo + 1, hi + 1):
+                run.append(run[-1] + math.dist(path[j - 1], path[j]))
+            total = run[-1] or 1.0
+            ramp = min(pen / 2.0, total / 2.0)
+            for q, j in enumerate(range(lo, hi + 1)):
+                # **البُعدُ عن المفرق** — به يُقاس الدخولُ والخروج معاً
+                off = run[q] if rising else total - run[q]
+                hold = min(off / ramp, 1.0 - off / total)
+                if hold <= 0:
+                    continue
+                path[j] = [path[j][0] + sign * grip * hold * nx,
+                           path[j][1] + sign * grip * hold * ny]
+
+
+def walk(nodes: dict, edges: list, spots: list, start: int, pen: float = 0.0) -> list:
     """يعيد أقلَّ ما يمكن من ضربات تغطّي أضلاعَ الجسم كلَّها.
+
+    **وكلُّ ضربةٍ تعلن طيّاتِها** (`{from, apex, to}` أرقامَ نقاطٍ في مسارها):
+    مواضعُ الرجوع على الأثر **معلومةٌ من المشي نفسِه** — هي الحوافُّ المضاعَفة
+    (`twin`) في مزاوجة ساعي البريد — فلا تُستنبَط من شكل المسار استنباطاً.
 
     **والحدُّ الأدنى ليس رجاءً بل نظرية**: رسمٌ بيانيٌّ متّصلٌ فيه `k` عقدةً فردية
     يُغطّى بـ`max(1, k/2)` مسارات. فتُزاوَج العقدُ الفردية **بحوافَّ افتراضية**
@@ -144,9 +242,12 @@ def walk(nodes: dict, edges: list, spots: list, start: int) -> list:
             ids = sorted({i for es in sub_nodes.values() for i in es})
             remap = {old_i: k for k, old_i in enumerate(ids)}
             sub_edges = [dict(edges[i]) for i in ids]
+            for kk, old_i in enumerate(ids):
+                if "of" in sub_edges[kk]:
+                    sub_edges[kk]["of"] = remap.get(sub_edges[kk]["of"], kk)
             sub_nodes = {n: [remap[i] for i in es] for n, es in sub_nodes.items()}
             head = start if start in comp else max(comp, key=lambda n: (spots[n][0], -spots[n][1]))
-            out.extend(walk(sub_nodes, sub_edges, spots, head))
+            out.extend(walk(sub_nodes, sub_edges, spots, head, pen))
         return out
     # 🔴 **واليدُ ترجع على أثرها ولا ترفع** (حكمُ المالك ٢٥ أغسطس: «القطعُ يذهب
     # للحدّ الأدنى ما كان ذلك ممكناً»، وأثرُه شاهد: «محفظة» بضربةٍ واحدة وفيها
@@ -208,7 +309,8 @@ def walk(nodes: dict, edges: list, spots: list, start: int) -> list:
         for i in shortest(a, b):
             e = edges[i]
             idx = len(edges)
-            edges.append({"a": e["a"], "b": e["b"], "p": e["p"], "twin": True})
+            edges.append({"a": e["a"], "b": e["b"], "p": e["p"], "twin": True,
+                          "of": e.get("of", i)})
             nodes.setdefault(e["a"], []).append(idx)
             nodes.setdefault(e["b"], []).append(idx)
             left.add(idx)
@@ -253,12 +355,22 @@ def walk(nodes: dict, edges: list, spots: list, start: int) -> list:
         else:
             k += 1
 
+    # **حدودُ كلِّ رِجلٍ في المسار** — بها تُترجَم أرقامُ الأرجل إلى أرقام نقاط.
+    # (والنقاطُ تُنسَخ: أضلاعُ الهيكل مشتركةٌ بين الحافّة ومضاعَفتها، ففكُّ الطيّة
+    # على النسخة الأصلية يزيح الضلعين معاً فيبطل الفكُّ نفسُه.)
     path = []
+    bounds = []
     for i, frm in seq:
         e = edges[i]
         pts = e["p"] if e["a"] == frm else list(reversed(e["p"]))
-        path.extend(pts if not path else pts[1:])
-    return [path] if len(path) > 1 else []
+        head = max(0, len(path) - 1)
+        path.extend([list(q) for q in (pts if not path else pts[1:])])
+        bounds.append((head, len(path) - 1))
+    if len(path) < 2:
+        return []
+    marks = fold_marks(edges, seq, bounds)
+    unfold(path, marks, pen)
+    return [{"p": path, "folds": marks}]
 
 
 def strip_lead(pieces: list, pen: float) -> int:
@@ -552,9 +664,13 @@ def assemble_unit(unit: dict, book: dict, tol: float = 25.0, letters_map: dict =
             head = min(zone, key=lambda q: q[1])
         start = min(nodes, key=lambda n: (spots[n][0] - head[0]) ** 2
                     + (spots[n][1] - head[1]) ** 2)
-        for path in walk(nodes, edges, spots, start):
-            strokes.append({"p": [[round(x, 1), round(y, 1)] for x, y in path],
-                            "body": bi, "lift": True})
+        for run in walk(nodes, edges, spots, start, tol * 4):
+            one = {"p": [[round(x, 1), round(y, 1)] for x, y in run["p"]],
+                   "body": bi, "lift": True}
+            # **والطيّةُ تُعلَن أو تُترك** — لا قائمةً فارغة (شرطُ `check_paths`).
+            if run["folds"]:
+                one["folds"] = run["folds"]
+            strokes.append(one)
     out = dict(unit)
     out["strokes"] = strokes
     out["floor"] = floor
@@ -632,12 +748,49 @@ def hand_whole(his: list, ours: dict) -> bool:
     return 0.5 <= his_r / max(our_r, 1e-6) <= 2.0
 
 
+def reseat(payload: dict) -> int:
+    """🔴 **السطرُ واحدٌ للمادّة كلِّها** — ووحداتٌ فاتتها الإزاحةُ العامّة تُردّ إليه.
+
+    حصادُ الفونت يخرج بخطّ أساسٍ **صفرٍ** في فضاء الغليف (فالإحداثياتُ سالبة)، ثم
+    تُزاح المادّةُ كلُّها **إزاحةً عامّةً واحدة** فتصير موجبةً على سطرٍ واحد
+    (`font_layer §assemble`). **و١٣٨ وحدةً من حصادٍ لاحق (أسطرُ الكلمتين: «بابا
+    ماما» وأخواتها) سُجِّلت إزاحتُها في `at` ولم تُطبَّق على إحداثياتها** — فبقيت
+    فوق السطر بخطّ الأساس كلِّه.
+
+    **والمقدارُ مقيسٌ لا مدَّعى**: صناديقُ الأجسام (`bboxes`) خامٌ في المادّة كلِّها،
+    فيُقابَل كلُّ زوجٍ بكلمته الأولى **جسماً بجسم** فينعدم فرقُ التنحيف — ووسيطُ
+    الفارق في ٦٤ مقابلةً **٩٢٢٫٩ وحدة**، وهو `space.baseline` بعينه.
+
+    ⇐ فما كان حبرُه بعدُ في فضاء الغليف (فوق نصف خطّ الأساس) يُزاح **إزاحتَه
+    المسجّلة في `at`** — ولا يُمَسّ سواه، فالشرطُ يمنع الإزاحةَ مرّتين.
+    """
+    base = payload["space"]["baseline"]
+    moved = 0
+    for unit in payload["units"]:
+        top = max((q[1] for pc in unit["pieces"] for q in pc["p"]), default=base)
+        if top >= base / 2:
+            continue
+        dx, dy = unit.get("at") or [0.0, base]
+        for pc in unit["pieces"]:
+            pc["p"] = [[round(q[0] + dx, 1), round(q[1] + dy, 1)] for q in pc["p"]]
+        unit["dots"] = [[round(d[0] + dx, 1), round(d[1] + dy, 1)] + list(d[2:])
+                        for d in unit["dots"]]
+        unit["box"] = [round(unit["box"][0] + dx, 1), round(unit["box"][1] + dy, 1),
+                       round(unit["box"][2] + dx, 1), round(unit["box"][3] + dy, 1)]
+        moved += 1
+    return moved
+
+
 def build() -> int:
     if not SRC.exists():
         print(f"لا {SRC.relative_to(ROOT)} — تُبنى طبقةُ الفونت أوّلاً (`font_layer.py --build`)")
         return 1
     payload = json.loads(SRC.read_text(encoding="utf-8"))
     book = hand_book()
+    late = reseat(payload)
+    if late:
+        print(f"وحداتٌ فاتتها الإزاحةُ العامّة فرُدّت إلى السطر الواحد: {late}"
+              f" (بخطّ أساسها {payload['space']['baseline']:.1f})")
     tol = pen_of(payload) / 4
     print(f"قلمُ الخطّ {pen_of(payload):.1f} وحدة — وتجاورُ العُقَد رُبعُه ({tol:.1f})")
     units = []
@@ -757,7 +910,44 @@ def self_test() -> int:
        f"وفاتحُ الكلام يبدأ من رأسه: {seen - len(high)}/{seen} ضربةً مبدؤها في حدود"
        f" قلمٍ من قمّة وصلتها" + (f" — نزلت {high[:4]}" if high else ""))
 
-    # ٦) ومجرَّبٌ سالباً: جسمٌ بضربتين حيث تكفي واحدة يحمرّ
+    # ٦) 🔴 **الطيّةُ رجوعٌ على الأثر حقّاً، وضلعاها متمايزان** — لا دعوى
+    #    الطيّةُ **رخصةٌ في الحكم**: داخلَها يقرأ المحرّكُ العودَ مشياً لا انعكاساً،
+    #    فدعواها حيث لا رجوعَ تفتح على الحرف باباً لا يُغلَق. **والمفحوصُ من جنسها**:
+    #    ضلعاها **على حبرٍ واحد** (كلُّ نقطةٍ من الصاعد لها نظيرةٌ من النازل دون
+    #    نصف قلم)، **وطرفاهما متمايزان** بما يقارب نصفَ القلم الذي فُكّا به.
+    pen = pen_of(payload)
+
+    def run_of(pts):
+        out = [0.0]
+        for i in range(1, len(pts)):
+            out.append(out[-1] + math.dist(pts[i - 1], pts[i]))
+        return out
+
+    same, folds, gaps = 0, 0, []
+    for u in units:
+        for st in u["strokes"]:
+            for f in st.get("folds") or []:
+                folds += 1
+                up = st["p"][f["from"]:f["apex"] + 1]
+                dn = st["p"][f["apex"]:f["to"] + 1]
+                if max(min(math.dist(a, b) for b in dn) for a in up) <= pen / 2:
+                    same += 1
+                # **أوسعُ فرجةٍ بين نظيرين**: النظيرُ ما بَعُد عن القمّة بُعدَه
+                cu, cd = run_of(up), run_of(dn)
+                tu, td = cu[-1] or 1.0, cd[-1] or 1.0
+                gaps.append(max(
+                    math.dist(a, min(zip(cd, dn),
+                                     key=lambda q: abs(q[0] - (1 - r / tu) * td))[1])
+                    for r, a in zip(cu, up)))
+    ok(folds and same == folds,
+       f"والطيّاتُ رجوعٌ على أثرٍ واحد: {same}/{folds} ضلعاها على حبرٍ واحد"
+       f" (كلُّ نقطةٍ من الصاعد دون نصف القلم {pen / 2:.1f} من النازل)")
+    gaps.sort()
+    ok(folds and gaps[0] >= pen / 8,
+       f"وضلعاها مفكوكان لا منطبقان: أضيقُ فرجةٍ {gaps[0]:.1f}"
+       f" ووسيطُها {gaps[len(gaps) // 2]:.1f} — والحدُّ ثُمنُ القلم ({pen / 8:.1f})")
+
+    # ٧) ومجرَّبٌ سالباً: جسمٌ بضربتين حيث تكفي واحدة يحمرّ
     hurt = json.loads(json.dumps(units[:1]))
     hurt[0]["strokes"].append(dict(hurt[0]["strokes"][0]))
     ok(len(hurt[0]["strokes"]) > hurt[0]["floor"],
