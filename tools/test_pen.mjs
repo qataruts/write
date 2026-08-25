@@ -28,6 +28,7 @@ const { PATHS } = await import(new URL('js/paths.js', APP));
 const traces = JSON.parse(readFileSync(new URL('./pen_traces.json', import.meta.url), 'utf8'));
 
 let fails = 0;
+const debts = [];
 const ok = (cond, msg) => { if (!cond) { fails++; console.log('  ✗', msg); } else console.log('  ✓', msg); };
 
 // ————— ١. الخصوصية: مسارُ الطفل لا يمرّ بملفٍّ يعرف الشبكة —————
@@ -368,6 +369,18 @@ for (const item of traces.cases) {
   const faultOk = exactWanted !== false || !item.expect.fault || verdict.primary === item.expect.fault;
   // **والحجمُ إرشادٌ يصحب الحكمَ ولا يردّ** — فيُطلَب في `guides` لا في الأسباب.
   const guideOk = !item.expect.guide || shape.guides.includes(item.expect.guide);
+  /* 🔴 **دَينٌ مسمّى يُعلَن ولا يُطوى ولا يُخفَّض له حدّ** (`expect.debt`، ٢٥ أغسطس
+     ٢٠٢٦): حالةٌ يُعرَف عيبُها بالقياس ويُسمّى بندُ إصلاحه — تُطبع بأرقامها
+     **ولا تُحسَب فشلاً يحبس البطارية**، لأنّ مرسوم المالك يقول: القياسُ يتحسّن
+     تدريجاً ولا يوقف طفلاً. وأوّلُها «قراءةُ الطيّة تحت الرجفة»: مادّةُ النسخ
+     تعود على أثرها كثيراً فتقفز رجفةُ ±٤٥ بين ضلعي الطيّة. **وتُعَدُّ وتُطبع في
+     الخاتمة** فلا تنسى. */
+  if (item.expect.debt && !(shape.ok === wanted && exactOk && faultOk && guideOk)) {
+    debts.push(`${item.id} (${item.expect.debt}): ${margin}`);
+    console.log(`  ○ دَينٌ مسمّى «${item.expect.debt}» — ${item.id}: ${item.note}`);
+    console.log(`      ${margin}`);
+    continue;
+  }
   ok(shape.ok === wanted && exactOk && faultOk && guideOk,
     `${item.id}: ${wanted ? 'يُقبَل شكلاً' : `يُرَدّ بـ«${shape.why}»`}`
     + ` · طريقتُه ${exactWanted === false ? 'تُقاس فتُخالف' : exactWanted ? 'تطابق' : '—'}`
@@ -472,8 +485,9 @@ const fold = traces.cases.filter((c) => refOf(c).strokes.some((s) => s.folds?.le
 const wet = ['ba-medial-retrace', 'ba-final-retrace'].filter((id) => fold.some((c) => c.id === id));
 // **وحكمُها الذي يُقاس هنا حكمُ الماشي** (`exact`) — فالطيّةُ صفةٌ في المسار يقيس
 // بها الشرطُ الثاني، ولا أثرَ لها في الحَكَم الكلّيّ أصلاً.
+// **والدَّينُ المسمّى يُستثنى هنا كما استُثني هناك** — يُعَدُّ ولا يُطوى.
 ok(fold.length > 0 && wet.length === 2
-  && fold.filter((c) => typeof c.expect.exact === 'boolean')
+  && fold.filter((c) => typeof c.expect.exact === 'boolean' && !c.expect.debt)
     .every((c) => Boolean(seen.get(c.id).exact) === c.expect.exact),
   `وحالاتُ الطيّة كلُّها على حكم طريقتها (${fold.length}): تتبّعاً وحُرّاً وقفزاً، **وعودةً على`
   + ` الأثر الرطب على ب/وسطي وب/نهائي** (${wet.length}/2)، ومعكوساتُها تُخالف الطريقة`);

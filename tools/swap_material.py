@@ -12,6 +12,7 @@ import json
 import math
 import re
 import subprocess
+import tempfile
 import sys
 from pathlib import Path
 
@@ -28,24 +29,42 @@ WLINE = 1344.7
 MARGIN = 81.0
 
 
+def base_copy() -> Path:
+    """ينسخ مادّةَ `HEAD` إلى مجلّدٍ مؤقّت **فتُقرأ الأصولُ ولو كانت الشجرةُ مكسورة**.
+
+    ⚠ **عطبٌ دائريّ وقع فأُغلق** (٢٥ أغسطس): العدّةُ كانت تستورد `app/js` من الشجرة
+    لتقرأ السماحاتِ والمقياس — فإذا كتبت ملفّاً مكسوراً لم تستطع قراءةَ شيءٍ بعده،
+    فيبقى المكسورُ مكسوراً. **والأصلُ يُطلَب من `git` فلا يُصاب بما نكتب.**
+    """
+    out = Path(tempfile.mkdtemp(prefix="uktub-base-"))
+    for name in ("paths.js", "word_paths.js"):
+        text = subprocess.run(["git", "show", f"HEAD:app/js/{name}"],
+                              capture_output=True, text=True, cwd=ROOT).stdout
+        (out / name).write_text(text, encoding="utf-8")
+    return out
+
+
 def old_material():
     """يقرأ المادّةَ القائمة من التطبيق نفسِه — للمقياس والسماحات وخطّ الأساس."""
     src = """
-    import { PATHS } from './app/js/paths.js';
+    import { PATHS } from 'BASE/paths.js';
     import { resolveTolerance, MIN_STEP } from './app/js/pen.js';
-    const out = { tol: {}, back: {}, alef: 0, wback: resolveTolerance(1).back,
-                  step: MIN_STEP };
+    const out = { tol: {}, back: {}, lat: {}, alef: 0, wback: resolveTolerance(1).back,
+                  wlat: resolveTolerance(1).lateral, step: MIN_STEP };
     for (const [ch, forms] of Object.entries(PATHS))
       for (const [f, ref] of Object.entries(forms)) {
         out.tol[ch + '/' + f] = ref.tolerance ?? null;
         // **الحدُّ العامل لا الثابتُ المكتوب**: سماحةُ الارتداد تُطلَب من الدالّة
         // التي يحكم بها المحرّك (`resolveTolerance`) لا من `TOLERANCE` ولا من وثيقة.
         out.back[ch + '/' + f] = resolveTolerance(ref.tolerance ?? undefined).back;
+        out.lat[ch + '/' + f] = resolveTolerance(ref.tolerance ?? undefined).lateral;
       }
     const p = PATHS['ا'].isolated.strokes.flatMap(s => s.points).map(q => q[1]);
     out.alef = Math.max(...p) - Math.min(...p);
     console.log(JSON.stringify(out));
     """
+    base = base_copy()
+    src = src.replace("BASE", base.as_posix())
     r = subprocess.run(["node", "--input-type=module", "-e", src],
                        capture_output=True, text=True, cwd=ROOT)
     if r.returncode:
@@ -69,6 +88,66 @@ def r1(v):
 
 def poly_len(pts):
     return sum(math.dist(pts[i], pts[i + 1]) for i in range(len(pts) - 1))
+
+
+def sound_folds(points, folds, back, lateral):
+    """يُسقِط الطيّاتِ التي لا يقيسها المحرّك — **بمعيار `check_paths` بعينه**.
+
+    طيّةٌ تُعلَن ولا يفرّق المحرّكُ ضلعيها كذبٌ عليه: فيلزم (أ) أن يبلغ كلُّ ضلعٍ
+    **سماحةَ الارتداد** طولاً، و(ب) أن يشترك الضلعان في حبرٍ واحد — أدنى مسافةٍ
+    بينهما دون **سماحة الانحراف**، مقيسةً بين نقطتين متباعدتين بضعفَي الارتداد
+    (فجوارُ القمّة اشتراكٌ بحكم البناء لا شهادةَ فيه).
+    """
+    if not folds:
+        return folds
+    def seg(a, b):
+        return sum(math.dist(points[i - 1], points[i]) for i in range(a + 1, b + 1))
+    keep = []
+    for f in folds:
+        a, mid, b = f["from"], f["apex"], f["to"]
+        if not (0 <= a < mid < b < len(points)):
+            continue
+        rise, fall = seg(a, mid), seg(mid, b)
+        if min(rise, fall) < back:
+            continue
+        up_at = [seg(a, k) for k in range(a, mid + 1)]
+        down_at = [seg(a, k) for k in range(mid, b + 1)]
+        span = back * 2
+        touch = min((math.dist(points[a + i], points[mid + j])
+                     for i, pl in enumerate(up_at)
+                     for j, ql in enumerate(down_at) if ql - pl >= span),
+                    default=float("inf"))
+        if touch >= lateral:
+            continue
+        keep.append(f)
+    return keep
+
+
+def thin(points, folds, cap):
+    """يُسقِط النقاطَ الزائدة ما دامت القطعةُ دون الحدّ — **وحفظُ الطيّة شرط**.
+
+    **العلّةُ مقيسة**: خطوةُ الهيكل ١٤٫٨ وخطوةُ المادّة القائمة ٤٥٫٨ — ثلاثةُ أضعاف
+    كثافةٍ لا يفرّقها المحرّك (`MIN_STEP` ٦) وتُثقل تنزيلَ الـPWA (١٠م.ب مقابل ٤٫٣).
+    **والحدُّ حدُّ نافذة الرتابة نفسُه** الذي يحرسه `check_paths`، فلا نُخالف حارساً
+    لنخفّف حملاً. **وأطرافُ الطيّة تُثبَّت** فلا تنزلق إعلاناتُها.
+    """
+    if len(points) < 3:
+        return points, folds
+    hold = {0, len(points) - 1}
+    for f in folds or []:
+        hold |= {f["from"], f["apex"], f["to"]}
+    keep = [0]
+    for i in range(1, len(points) - 1):
+        if i in hold:
+            keep.append(i)
+            continue
+        if math.dist(points[keep[-1]], points[i + 1]) > cap:
+            keep.append(i)
+    keep.append(len(points) - 1)
+    index = {old: new for new, old in enumerate(keep)}
+    marks = [{"from": index[f["from"]], "apex": index[f["apex"]], "to": index[f["to"]]}
+             for f in (folds or [])]
+    return [points[i] for i in keep], marks
 
 
 def carry_folds(stroke, points, back):
@@ -117,7 +196,7 @@ def densify(points, folds, cap):
 
 
 def convert(unit, scale, base_y, cell_line, left=None, centre_w=None, back=0.0,
-            head=0.1, floor=6.0):
+            head=0.1, floor=6.0, lateral=0.0):
     """ينقل وحدةً إلى فضاء التطبيق: مقياسٌ واحد، وخطُّ أساسٍ مطابَق."""
     pts = [q for st in unit["strokes"] for q in st["p"]] + [[d[0], d[1]] for d in unit["dots"]]
     x0, y0, x1, y1 = bbox(pts)
@@ -133,7 +212,9 @@ def convert(unit, scale, base_y, cell_line, left=None, centre_w=None, back=0.0,
         # **الحدُّ من المحرّك بعينه**: `min(back, len × HEAD_RATIO)` — ونُدَقِّق دونه
         # بعُشره فلا يقع الحدُّ على حدّ السكين.
         cap = max(floor, min(back, poly_len(pts) * head)) * 0.9
+        pts, folds = thin(pts, folds, max(cap, 1.0))
         pts, folds = densify(pts, folds, max(cap, 1.0))
+        folds = sound_folds(pts, folds, back, lateral)
         one = {"start": pts[0], "points": pts}
         if folds:
             one["folds"] = folds
@@ -183,13 +264,15 @@ def main():
         if u["kind"] == "letter":
             ch, form = u["name"].split("/")
             st, dots, _ = convert(u, scale, base_y, LINE, centre_w=CELL,
+                                  lateral=old["lat"].get(u["name"], old["wlat"]),
                                   back=old["back"].get(u["name"], old["wback"]),
                                   head=old["head"], floor=old["step"])
             letters.setdefault(ch, {})[form] = {
                 "box": [CELL, CELL], "line": LINE,
                 "tolerance": old["tol"].get(u["name"]), "strokes": st, "dots": dots}
         else:
-            st, dots, w = convert(u, scale, base_y, WLINE, left=MARGIN, back=old["wback"],
+            st, dots, w = convert(u, scale, base_y, WLINE, left=MARGIN,
+                                  lateral=old["wlat"], back=old["wback"],
                                   head=old["head"], floor=old["step"])
             words[u["text"]] = {"box": [w + 2 * MARGIN, WCELL], "line": WLINE,
                                 "tolerance": 1, "strokes": st, "dots": dots}
@@ -209,7 +292,7 @@ def main():
 
 
 
-def source_line(name, data, kept, refs):
+def source_line(name, data, kept, refs, stamps=None):
     """**نسبُ الوحدة المولَّدة** — من أيّ طبقتين بُنيت وببصمتهما.
 
     ويحمل **وحدةَ السطر** (`line.unit` — ارتفاعُ الألف في فضاء التطبيق) لأنّ
@@ -228,6 +311,7 @@ def source_line(name, data, kept, refs):
         "scale": round(data["scale"], 4),
         "line": {"unit": r1(data["unit"]), "base": LINE, "cell": CELL},
         "kept": kept,
+        **(stamps or {}),
         "why": "كلُّ ما هو مكتوبٌ من الفونت (مرسومُ ٢٤ أغسطس ٢٠٢٦)، والكيفيةُ من"
                " قواعد المالك (٢٥ أغسطس): ضربةٌ لكلِّ جسمِ حبر، واليدُ ترجع على أثرها"
                " — **والرجوعُ يُعلَن طيّةً** (`folds`) فيقرؤه المحرّكُ مشياً لا انعكاساً.",
@@ -239,10 +323,14 @@ def emit():
     """يكتب `app/js/paths.js` و`word_paths.js` من الوسيط — بدمجٍ يحفظ ما لم يُحصَد."""
     data = json.loads((TOOLS / "swap_material.json").read_text(encoding="utf-8"))
     src = """
-    import { PATHS } from './app/js/paths.js';
-    import { WORD_PATHS } from './app/js/word_paths.js';
+    import { PATHS } from 'BASE/paths.js';
+    import { WORD_PATHS } from 'BASE/word_paths.js';
     console.log(JSON.stringify({ p: PATHS, w: Object.keys(WORD_PATHS) }));
     """
+    base = base_copy()
+    src = src.replace("BASE", base.as_posix())
+    base = base_copy()
+    src = src.replace("BASE", base.as_posix())
     r = subprocess.run(["node", "--input-type=module", "-e", src],
                        capture_output=True, text=True, cwd=ROOT)
     old = json.loads(r.stdout)
@@ -289,9 +377,23 @@ def emit():
         "//   python3 tools/hand_layer.py --build && python3 tools/swap_material.py --write\n\n"
         "export const WORD_PATHS = {\n")
     wbody = [f'  "{key}": {{\n' + js_ref(ref, 3) + "\n  }" for key, ref in words.items()]
+    # **وشاراتُ العلامات تُنقَل كما هي**: `MARK_PATHS` بطاقاتُ تعريفٍ لا مادّةَ كتابة
+    # (لا تشكيلَ في اكتب)، فلا يمسّها تبديلُ المادّة — ويُنقَل نصُّها من البناء السابق.
+    prev = subprocess.run(["git", "show", "HEAD:app/js/word_paths.js"],
+                          capture_output=True, text=True, cwd=ROOT).stdout
+    cut = prev.find("export const MARK_PATHS")
+    end = prev.find("\n};", cut) + 3 if cut >= 0 else -1
+    marks = ("\n\n" + prev[cut:end] + "\n") if cut >= 0 and end > cut else ""
+    # **وبصمتا المنهج والكتلة تُصدَّران** (عهدُ «لا تُمَسّ الوحدةُ بيد بعد بنائها»):
+    # الأولى تحمرّ يومَ تتبدّل كلمةٌ تُنسَخ بلا إعادة بناء، والثانيةُ يومَ يُحرَّر
+    # الملفُّ بيد. وتُحسبان بدالّتي `make_paths` نفسِها لا بنسخةٍ ثانية.
+    sys.path.insert(0, str(TOOLS))
+    import make_paths as mp  # noqa: E402
+    block = "export const WORD_PATHS = {\n" + ",\n".join(wbody) + "\n};"
+    stamps = {"curriculum": mp.material_sha(), "body": mp.body_sha(block)}
     WORDS.write_text(head_w + ",\n".join(wbody) + "\n};\n\n"
-                     + source_line("WORD_PATHS_SOURCE", data, 0, list(words.values())),
-                     encoding="utf-8")
+                     + source_line("WORD_PATHS_SOURCE", data, 0, list(words.values()), stamps)
+                     + marks, encoding="utf-8")
     print(f"كُتب: paths.js ({sum(len(v) for v in letters.values())} شكلاً، منها {kept} من القديم)"
           f" · word_paths.js ({len(words)} مدخلاً)")
     return 0

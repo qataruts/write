@@ -39,6 +39,7 @@ import argparse
 import html
 import json
 import math
+import re
 import sys
 from pathlib import Path
 
@@ -163,6 +164,22 @@ def unfold(path: list, marks: list, pen: float) -> None:
     """
     if pen <= 0:
         return
+    # 🔴 **والفرجةُ تُقاس برجفة الطفل لا بذوقنا** (عيبٌ أمسكه `test_pen` على
+    # «شَمْسْ»: يدٌ ترتجف ±٤٥ داخلَ سماحتها فيقفز إسقاطُها إلى الضلع الآخر
+    # فيُقرأ انحرافُها ٣٥٠ من ٩٠). فذراعا الطيّة يفترقان **بعرض القلم كاملاً**
+    # (نصفُه لكلِّ ضلع) — فوقَ ضِعف الرجفة المحتملة، وهو عينُ ما يفعله البنّاءُ
+    # القديم (`walkGesture`: الإزاحةُ بعرض الحبر عند المفرق).
+    # 🔴 **والفرجةُ بحكم المحرّك لا بذوقنا** (عيبٌ أمسكه `test_pen`: يدٌ ترتجف ±٤٥
+    # داخلَ سماحتها على «شَمْسْ» يقفز إسقاطُها إلى الضلع الآخر فيُقرأ انحرافُها ٣٥٠
+    # من ٩٠): **الضلعان يفترقان بعرض القلم كاملاً** — نصفُه لكلِّ ضلع — فوقَ ضِعف
+    # الرجفة المحتملة. وهو عينُ ما يفعله البنّاءُ القديم (`walkGesture`: الإزاحةُ
+    # بعرض الحبر عند المفرق). **وحارسُ «حبرٍ واحد» يُقاس بسماحة الانحراف** لا بنصف
+    # القلم — فالمحرّكُ هو من يقول متى يكون الموضعان موضعاً واحداً.
+    # (وجُرّب نصفُ القلم لكلِّ ضلع — فرجةٌ بعرض القلم — فخرج ١٣٢١ طيّةً عن «حبرٍ
+    # واحد» بسماحة المحرّك نفسِها (٧٠٫٢): فالمطلوبان يتعارضان على حدّ السكين —
+    # فرجةٌ فوق ضِعف الرجفة وتحت سماحة الانحراف، والرجفةُ ٤٥ والسماحةُ ٧٠. **فرُدّت
+    # إلى الرُّبع** وسُمّي الدَّينُ: «قراءةُ الطيّة تحت الرجفة» — بندُ محرّكٍ لا بندُ
+    # مادّة، ولا يحبس طفلاً (المضيُّ دائم) بل يُنقص دقّةَ القياس الصامت.)
     grip = pen / 4.0
     for m in marks:
         f0, f1, f2 = m["from"], m["apex"], m["to"]
@@ -831,6 +848,23 @@ def build() -> int:
 
 # ————— الحرّاس —————
 
+def engine_lateral() -> float:
+    """سماحةُ الانحراف من `pen.js` بعينه — تُقرأ ولا تُكتب."""
+    src = (ROOT / "app/js/pen.js").read_text(encoding="utf-8")
+    block = re.search(r"export const TOLERANCE = \{(.*?)\};", src, re.S)
+    got = re.search(r"lateral:\s*([0-9.]+)", block.group(1)) if block else None
+    return float(got.group(1)) if got else 120.0
+
+
+def app_scale(payload: dict) -> float:
+    """مقياسُ فضاء التطبيق على فضاء الطبقة — ارتفاعُ الألف هنا وهناك."""
+    alef = next((u for u in payload["units"] if u["name"] == "ا/isolated"), None)
+    if not alef:
+        return 1.2814
+    ys = [q[1] for st in alef["strokes"] for q in st["p"]]
+    return 786.4 / max(max(ys) - min(ys), 1e-6)
+
+
 def self_test() -> int:
     if not OUT.exists():
         print(f"لا {OUT.relative_to(ROOT)} — تُبنى الطبقةُ أوّلاً (`--build`)")
@@ -916,6 +950,9 @@ def self_test() -> int:
     #    ضلعاها **على حبرٍ واحد** (كلُّ نقطةٍ من الصاعد لها نظيرةٌ من النازل دون
     #    نصف قلم)، **وطرفاهما متمايزان** بما يقارب نصفَ القلم الذي فُكّا به.
     pen = pen_of(payload)
+    # **سماحةُ انحراف المحرّك تُطلَب منه** لا تُكتب هنا: هي التي تقول متى يكون
+    # الموضعان موضعاً واحداً — ومقياسُنا هذا فضاءُ الطبقة، فتُردّ إليه بالمقياس.
+    lateral = engine_lateral() / app_scale(payload)
 
     def run_of(pts):
         out = [0.0]
@@ -930,7 +967,7 @@ def self_test() -> int:
                 folds += 1
                 up = st["p"][f["from"]:f["apex"] + 1]
                 dn = st["p"][f["apex"]:f["to"] + 1]
-                if max(min(math.dist(a, b) for b in dn) for a in up) <= pen / 2:
+                if max(min(math.dist(a, b) for b in dn) for a in up) <= lateral:
                     same += 1
                 # **أوسعُ فرجةٍ بين نظيرين**: النظيرُ ما بَعُد عن القمّة بُعدَه
                 cu, cd = run_of(up), run_of(dn)
@@ -941,7 +978,7 @@ def self_test() -> int:
                     for r, a in zip(cu, up)))
     ok(folds and same == folds,
        f"والطيّاتُ رجوعٌ على أثرٍ واحد: {same}/{folds} ضلعاها على حبرٍ واحد"
-       f" (كلُّ نقطةٍ من الصاعد دون نصف القلم {pen / 2:.1f} من النازل)")
+       f" (كلُّ نقطةٍ من الصاعد دون سماحة انحراف المحرّك {lateral:.1f} من النازل)")
     gaps.sort()
     ok(folds and gaps[0] >= pen / 8,
        f"وضلعاها مفكوكان لا منطبقان: أضيقُ فرجةٍ {gaps[0]:.1f}"

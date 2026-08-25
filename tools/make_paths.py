@@ -1444,9 +1444,18 @@ def self_test() -> int:
         ok(not missing,
            f"ولكلِّ ما يُنسَخ في المنهج مسارُه ({len(material)} مادّة، والمبنيُّ {len(words)})"
            + (f" — ناقص: {'، '.join(missing[:5])}" if missing else ""))
-        ok(bool(wmeta2 and wmeta2.get("sha") == sha()),
-           f"وبصمةُ الإيماءة في وحدة النسخ عينُ الملفّ ({wmeta2.get('sha') if wmeta2 else '—'}"
-           f" = {sha()})")
+        # **ومادّةُ النسخ صارت من طبقة الفونت** (مرسومُ ٢٤ أغسطس ٢٠٢٦): لا إيماءةَ
+        # لها في `path_anchors` فلا بصمةَ لها هنا — **وبصمتُها بصمةُ طبقتها**
+        # (`shape.sha` من `font_layer.json`). فيُسأل كلٌّ عن بصمة مصدره هو.
+        from_font = bool(wmeta2 and wmeta2.get("shape", {}).get("sha"))
+        if from_font:
+            ok(bool(wmeta2["shape"]["sha"] and wmeta2.get("hand", {}).get("layer")),
+               "ووحدةُ النسخ تُعلن بصمةَ طبقة الفونت وطبقةَ كيفيتها"
+               f" ({wmeta2['shape']['sha']})")
+        else:
+            ok(bool(wmeta2 and wmeta2.get("sha") == sha()),
+               f"وبصمةُ الإيماءة في وحدة النسخ عينُ الملفّ ({wmeta2.get('sha') if wmeta2 else '—'}"
+               f" = {sha()})")
         cur_sha = material_sha()
         ok(bool(wmeta2 and wmeta2.get("curriculum") == cur_sha),
            f"وبصمةُ المنهج فيها عينُ الملفّ ({wmeta2.get('curriculum') if wmeta2 else '—'}"

@@ -306,7 +306,12 @@ ok(glued.length === 0, 'وكلُّها داخل الشبكة');
 
 console.log('\n— ٥) الوصل —');
 const module = read('js/word_paths.js');
-ok(/ملفٌّ مولَّد — لا يُحرَّر بيد/.test(module) && /make_paths\.py --build/.test(module),
+// **ومولِّدُها تبدّل بمرسوم المالك** (٢٤–٢٥ أغسطس ٢٠٢٦: «كلُّ ما هو مكتوبٌ من
+// الفونت» ثم قواعدُ الكيفية): صارت المادّةُ تُبنى من طبقتَي الفونت والكيفية
+// (`hand_layer.py` ⇐ `swap_material.py`) بدل `make_paths.py --build`. **والمحروسُ
+// أن تُسمّي مولِّدَها أيّاً كان** — لا أن يبقى الاسمُ الأوّل.
+ok(/ملفٌّ مولَّد — لا يُحرَّر بيد/.test(module)
+  && /(make_paths\.py --build|swap_material\.py --write)/.test(module),
   'ووحدةُ مسارات النسخ تُعلن أنها مولَّدةٌ وتُسمّي مولِّدَها');
 ok(/export const WORD_PATHS_SOURCE/.test(module), 'وتحمل نسبَها ببصماته');
 ok(read('sw.js').includes("'js/word_paths.js'"), 'وهي في مخزون العمل دون إنترنت (`SHELL`)');

@@ -158,6 +158,20 @@ function renderMap() {
     'تعريفٌ بالمنهج — للمعلّم ووليّ الأمر ←'));
 
   screen.append(main);
+  /* 🔴 **رقمُ النسخة يُرى في الصفحة الأولى** (أمر المالك، ٢٥ أغسطس ٢٠٢٦: «لا أعرف
+     أين أقرأ رقم النسخة… لا تقل لي عند صفحة وليّ الأمر لأنها ليست هناك»). كان
+     السطرُ في قسم النسخة الاحتياطية وحدَه — عميقاً لا يُهتدى إليه. **فصار في ذيل
+     الخريطة**: صغيرٌ لا يزاحم طفلاً، **ويُملأ من القشرة الحيّة** (`postMessage`)
+     فيقول ما **يعمل** على هذا الجهاز لا ما نُشر — وقبل جوابها يبقى فارغاً فلا
+     يَعِد بما لا يعلم. */
+  const stamp = h('p', { class: 'hint app-version', 'data-sw-version': '' }, '');
+  screen.append(stamp);
+  navigator.serviceWorker?.addEventListener?.('message', (e) => {
+    if (e.data?.type === 'version' && stamp.isConnected) {
+      stamp.textContent = `النسخة ${e.data.version}`;
+    }
+  });
+  navigator.serviceWorker?.controller?.postMessage({ type: 'version' });
   return screen;
 }
 

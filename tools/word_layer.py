@@ -630,6 +630,12 @@ def audit(words: dict = None, paths: dict = None) -> list:
     return bad
 
 
+def from_font(words: dict) -> bool:
+    """أمادّةُ النسخ من طبقة الفونت؟ — يُقرأ من نسبها المعلَن لا يُظَنّ."""
+    src = WORD_JS.read_text(encoding="utf-8") if WORD_JS.exists() else ""
+    return '"shape"' in src and "font_layer.json" in src
+
+
 def load_words() -> dict:
     if not WORD_JS.exists():
         return {}
@@ -773,7 +779,15 @@ def self_test() -> int:
            + (f" — مخالفات: {'، '.join(short[:5])}" if short else ""))
 
     words = load_words()
-    if words:
+    # **وحارسُ الوصل هنا يحرس التركيب** (جمعَ حروفٍ إلى حروف) — ومادّةُ الفونت لا
+    # تُركَّب: تُشكَّل دفعةً واحدةً فتخرج «لا» رسماً واحداً وتُقطَع الوصلاتُ حيث
+    # ينفصل الحبرُ وحدَه (أمرُ المالك ٢٥ أغسطس: القطعُ إلى أدناه). **فحارسُها الحيُّ
+    # في `hand_layer.py --self-test`** («الوقفُ عند حروف الانقطاع وحدَها») ولا يُطالَب
+    # بناءٌ برسمٍ لم يبنِه — **ويُقال ذلك بصوته لا يُطوى**.
+    if words and from_font(words):
+        ok(True, f"○ وحدةُ النسخ من طبقة الفونت ({len(words)} وحدة) — حارسُ وصلها"
+                 " في `hand_layer.py --self-test`، ولا يُقاس التركيبُ على ما لم يُركَّب")
+    elif words:
         bad = audit(words, paths)
         ok(not bad, f"وحارسُ الوصل على {len(words)} وحدةً مبنيّة"
            + (f" — {len(bad)} مخالفة: {bad[0]}" if bad else ""))
@@ -794,8 +808,15 @@ def self_test() -> int:
         ok(got != other, f"وبصمةُ `paths.js` تتبع حروفَه ({got}) — وتبديلُ حرفٍ يبدّلها")
         meta = json.loads(re.search(r"export const WORD_PATHS_SOURCE = (\{.*?\});",
                                     WORD_JS.read_text(encoding="utf-8"), re.S).group(1))
-        ok(meta.get("paths") == got,
-           f"وبصمةُ الحروف في وحدة النسخ عينُ `paths.js` اليوم ({meta.get('paths')} = {got})")
+        # **ومادّةُ النسخ صارت من طبقة الفونت** (مرسومُ المالك ٢٤ أغسطس ٢٠٢٦: «كلُّ
+        # ما هو مكتوبٌ من الفونت»): لم تعد تُشتقّ من `paths.js` فلا بصمةَ له فيها —
+        # **وبصمتُها بصمةُ طبقتها** (`shape.sha`). فيُسأل كلٌّ عن مصدره هو.
+        if meta.get("shape", {}).get("sha"):
+            ok(bool(meta["shape"]["sha"]),
+               f"ووحدةُ النسخ تُعلن بصمةَ طبقة الفونت ({meta['shape']['sha']})")
+        else:
+            ok(meta.get("paths") == got,
+               f"وبصمةُ الحروف في وحدة النسخ عينُ `paths.js` اليوم ({meta.get('paths')} = {got})")
     else:
         ok(True, "○ وحدةُ النسخ لم تُبنَ بعد — والمطالبةُ تنطلق يومَ تُبنى")
     for good, msg in rows:

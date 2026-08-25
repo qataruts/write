@@ -1860,3 +1860,13 @@ main.lesson-letter .hint, main.warmup .hint { min-height: 2.8em; }
 
 /* هدفا لمسٍ بالغان — و`DESIGN §٤` يشترط ≥٤٨ بكسلاً للثانويّ */
 .firstrun .btn { min-height: 3rem; }
+
+/* **رقمُ النسخة في ذيل الخريطة** (أمر المالك ٢٥ أغسطس ٢٠٢٦): يُرى لمن يبحث عنه
+   ولا يزاحم طفلاً — رماديٌّ صغيرٌ في الوسط، ويختفي إن لم تُجب القشرة. */
+.app-version {
+  text-align: center;
+  font-size: .8rem;
+  opacity: .55;
+  margin: 1.2rem 0 .4rem;
+  font-variant-numeric: tabular-nums;
+}
