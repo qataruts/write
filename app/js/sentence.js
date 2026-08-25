@@ -38,6 +38,9 @@ import { starsForReview } from './progress.js';
 import * as audio from './audio.js';
 import { SENTENCES, SPOKEN_SENTENCES } from './curriculum.js';
 import { WORD_PATHS } from './word_paths.js';
+// **وقارئُ الجملة هو قارئُ الكلمة نفسُه** — ملفٌّ واحدٌ يعرف الشبكة، وبإذنٍ وحدَه.
+import { readInk, verdictOf } from './reader.js';
+import { readingAllowed } from './consent.js';
 import { penSurface, MODES } from './pen.js';
 // **وضعُ الدعم — شاشةُ اكتساب** (جلسة د): سماحةٌ موسَّعة في أوّل لقاءٍ بالمهارة،
 // **ووسمُ العون يمضي إلى القياس** فلا يُحتسب الملقَّنُ إتقاناً.
@@ -316,9 +319,18 @@ export function renderNode(node) {
       // صامتاً (النسبةُ والوصفُ لوليّ الأمر وليتنر) ويمضي دائماً.
       h('button', {
         class: 'btn btn--primary next',
-        onclick: () => {
+        onclick: async () => {
           audio.stop();
           const m = live?.measure?.();
+          // **والجملةُ تُقرأ كالكلمة حيث أَذِن وليُّ الأمر** (أمر المالك ٢٥ أغسطس
+          // ٢٠٢٦) — وبلا إذنٍ أو إنترنتٍ يبقى حكمُ الشكل ويمضي الطفلُ كما كان.
+          if (m && readingAllowed()) {
+            const said = verdictOf(await readInk(live.raw?.() || [], live.area?.()), unit.text);
+            if (said) {
+              m.clean = said.ok;
+              m.read = said;
+            }
+          }
           if (m) {
             if (!m.clean && m.shape?.why) progress.recordFault(unit.text, m.shape.why);
             if (step.kind) progress.recordQuality(unit.text, progress.SENTENCE_FORM, step.kind,

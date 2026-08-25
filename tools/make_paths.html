@@ -233,8 +233,12 @@ const send = () => fetch('/result', {
 async function loadFont() {
   // العدّةُ تُخدَم من جذر التطبيق (سائقُها `make_paths.py`)، وتُفتح كذلك من جذر
   // المستودع بخادمٍ بسيط — فيُجرَّب البابان ولا يُفترض واحد.
-  const tries = ['/fonts/NotoNaskhArabic-arabic.woff2', '/app/fonts/NotoNaskhArabic-arabic.woff2',
-    '../app/fonts/NotoNaskhArabic-arabic.woff2'];
+  // 🔴 **وخطُّ مادّة النسخ يُختار** (حكم المالك ٢٥ أغسطس ٢٠٢٦: «Noto Sans Arabic»):
+  // الحروفُ تبقى على النسخ (بوابةُ الميدان معايَرةٌ عليها)، **والكلماتُ تُحصَد
+  // بالخطّ الذي يختاره المالك** — يُمرَّر `?font=` فيُقرأ هنا، ولا يُكتب في مكانين.
+  const pick = qs.get('font') === 'sans' ? 'NotoSansArabic-arabic.woff2'
+    : 'NotoNaskhArabic-arabic.woff2';
+  const tries = [`/fonts/${pick}`, `/app/fonts/${pick}`, `../app/fonts/${pick}`];
   for (const url of tries) {
     try {
       const face = new FontFace(FAMILY, `url(${url})`);

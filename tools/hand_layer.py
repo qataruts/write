@@ -197,7 +197,14 @@ def unfold(path: list, marks: list, pen: float) -> None:
         vx, vy = apex[0] - fork[0], apex[1] - fork[1]
         span = math.hypot(vx, vy)
         if span < 1e-6:
-            continue
+            # **وطيّةٌ مفرقُها قمّتُها** (تقع في الخطوط الهندسية كـ`Noto Sans`):
+            # لا محورَ لها فتُفتح على **وتر الضلع النازل** — ولولا ذلك بقي ضلعاها
+            # منطبقين انطباقاً تامّاً فيحمرّ حارسُ «مفكوكان لا منطبقان».
+            end = path[min(f2, len(path) - 1)]
+            vx, vy = end[0] - apex[0], end[1] - apex[1]
+            span = math.hypot(vx, vy)
+            if span < 1e-6:
+                continue
         nx, ny = -vy / span, vx / span
         vote = 0.0
         if f0 > 0:
@@ -220,6 +227,20 @@ def unfold(path: list, marks: list, pen: float) -> None:
                     continue
                 path[j] = [path[j][0] + sign * grip * hold * nx,
                            path[j][1] + sign * grip * hold * ny]
+
+    # **وما لم ينفتح ضلعاه ليس طيّةً تُعلَن** (قِيس بعد تبديل الخطّ: طيّتان من
+    # ٤٦٠١ إحداهما ثلاثُ نقاطٍ لا غير): إعلانُ طيّةٍ لا يفرّق المحرّكُ ضلعيها
+    # **كذبٌ عليه** — فتُحذف من الإعلان، والحبرُ باقٍ كما هو لا يُمَسّ.
+    marks[:] = [m for m in marks if fold_gap(path, m) >= grip]
+
+
+def fold_gap(path: list, mark: dict) -> float:
+    """أوسعُ ما بين ضلعي الطيّة — مقياسُ «هل يفرّق المحرّكُ بينهما؟»."""
+    up = path[mark["from"]:mark["apex"] + 1]
+    down = path[mark["apex"]:mark["to"] + 1]
+    if len(up) < 2 or len(down) < 2:
+        return 0.0
+    return max(min(math.dist(a, b) for b in down) for a in up)
 
 
 def walk(nodes: dict, edges: list, spots: list, start: int, pen: float = 0.0) -> list:
@@ -923,9 +944,14 @@ def self_test() -> int:
 
     # ٣) الأجسامُ على قاعدة الوصل — والقطعُ عند حروف الانقطاع بطبيعته
     marks = {u["name"]: u["bodies"] for u in units if u["kind"] == "letter"}
+    # 🔴 **والزيادةُ وحدَها تحمرّ** (نصُّ المالك ٢٥ أغسطس ٢٠٢٦: «الضرباتُ أقلَّ من
+    # ضرباتي لا مشكلة **لكن ليس أكثر**»): فأجسامٌ أقلُّ ممّا تتوقّعه القاعدةُ **قطعٌ
+    # أقلّ** وهو المطلوب — يقع حين يلصق الخطُّ حرفين متجاورين فيصير حبرُهما واحداً
+    # (ظهر عند تبديل الخطّ إلى `Noto Sans Arabic` بأمره: «الشلال…» ٩ حيث تتوقّع
+    # القاعدةُ ١٠). **وأكثرُ منها رفعُ قلمٍ لا يوجبه الرسم** — وذلك وحدَه العيب.
     wrong = [(u["name"], need_bodies(u["text"], marks), u["bodies"])
              for u in units
-             if u["kind"] != "letter" and u["bodies"] != need_bodies(u["text"], marks)]
+             if u["kind"] != "letter" and u["bodies"] > need_bodies(u["text"], marks)]
     ok(not wrong, f"والوقفُ عند حروف الانقطاع وحدَها — أجسامُ {len(units)} وحدةٍ"
                   f" على قاعدة المالك" + (f" (خالفت: {wrong[:4]})" if wrong else ""))
 

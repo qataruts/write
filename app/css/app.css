@@ -11,6 +11,14 @@
 /* ملفا Noto وBaloo متغيّرا الوزن: ملف واحد يغطي 400–700. */
 
 @font-face {
+  font-family: 'Noto Sans Arabic';
+  src: url('../fonts/NotoSansArabic-arabic.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+  unicode-range: U+0600-06FF, U+0750-077F, U+FB50-FDFF, U+FE70-FEFF;
+}
+
+@font-face {
   font-family: 'Noto Naskh Arabic';
   src: url('../fonts/NotoNaskhArabic-arabic.woff2') format('woff2');
   font-weight: 400 700;
@@ -1873,10 +1881,15 @@ main.lesson-letter .hint, main.warmup .hint { min-height: 2.8em; }
 
 /* **طبقةُ الفونت تحت حبر الكلمة** (حكم المالك ٢٥ أغسطس ٢٠٢٦): نصُّ الكلمة بخطّ
    النسخ خافتاً، والطفلُ يكتب فوقه — ولا مسارَ ولا مبدأَ ولا سهمَ في الكلمات. */
+/* **وخطُّ طبقة الكلمة `Noto Sans Arabic`** (اختيارُ المالك ٢٥ أغسطس ٢٠٢٦ من لوحة
+   المقارنة): أوضحُ للطفل، ومفتوحُ الرخصة يجوز شحنُه — بخلاف خطّ آبل الذي يكتب به.
+   **والحروفُ تبقى على النسخ** (بوابةُ الميدان معايَرةٌ عليها). */
 .pen-ghost text {
-  font-family: 'Noto Naskh Arabic', serif;
-  fill: var(--model, #c9c4b4);
-  opacity: .38;
+  font-family: 'Noto Sans Arabic', 'Noto Naskh Arabic', serif;
+  /* **ولونُه لونُ اللوح** لا لونٌ يُكتب هنا (عهدُ «لا لونَ خارج اللوح»): حبرُ
+     النموذج نفسُه بخفوتٍ — فالطبقةُ تحت حبر الطفل تُرى ولا تزاحمه. */
+  fill: var(--ink);
+  opacity: .18;
 }
 .pen-box--free .pen-ghost { opacity: 1; }
 .pen-start--off, .pen-box--free .pen-ghost ~ .pen-guide .pen-arrow { display: none; }

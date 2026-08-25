@@ -16,6 +16,7 @@ import * as install from './install.js';
 import * as probe from './probe.js';
 // **بطاقةُ أوّل تشغيل** (بلاغ «ثبّت أوّلاً ثم امتحن»، ١٧ أغسطس ٢٠٢٦): تقف في صدر
 // الخريطة على رحلةٍ بكرٍ وحدَها، وتردّ `null` فيما سواها — فلا فراغَ محجوز.
+import { consentCard } from './consent_card.js';
 import { firstRunCard } from './firstrun.js';
 import { renderReview, releaseReview } from './review.js';
 import { renderGate } from './gate.js';
@@ -86,6 +87,13 @@ function renderMap() {
 
   // **وبطاقةُ وليّ الأمر أوّلُ ما في الصدر** — وهي لا تقع إلا على رحلةٍ بكر: لا
   // مراجعةَ يومئذٍ ولا نجمة، فلا تزاحم درسَ طفلٍ يمشي (ومَن مشى لا يراها أصلاً).
+  /* 🔴 **بطاقةُ الإذن أوّلُ ما يُرى عند أول تشغيل** (أمر المالك ٢٥ أغسطس ٢٠٢٦:
+     «ننبّه المستخدم أنّ التطبيق يستخدم الإنترنت لتقييم الكتابة، نطلب قبولَه عند
+     أول مرّة يفتح التطبيق»): **قبل بطاقةِ التثبيت وبطاقةِ اللحاق** — لأنّها
+     تُسأل مرّةً وتُجاب مرّة، والافتراضُ «لا» حتى يقول وليُّ الأمر نعم. */
+  const ask = consentCard(render);
+  if (ask) main.append(ask);
+
   const first = firstRunCard(render);
   if (first) main.append(first);
 

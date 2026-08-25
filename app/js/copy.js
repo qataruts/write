@@ -45,6 +45,9 @@ import * as audio from './audio.js';
 import { WORDS, SPOKEN_WORDS, markInfo, PATHS } from './curriculum.js';
 import { WORD_PATHS, MARK_PATHS } from './word_paths.js';
 import { penSurface, refGlyph, MODES, FREE } from './pen.js';
+// **وقارئُ الكلمة ملفٌّ مستقلّ** — فيبقى `pen.js` نظيفَ الشبكة كما يحرسه فاحصُه.
+import { readInk, verdictOf } from './reader.js';
+import { readingAllowed } from './consent.js';
 // **وضعُ الدعم — شاشةُ اكتساب** (جلسة د): سماحةٌ موسَّعة في أوّل لقاءٍ بالكلمة،
 // **ووسمُ العون يمضي إلى القياس** فلا يُحتسب الملقَّنُ إتقاناً.
 import { easeFor, demoPace } from './support.js';
@@ -486,7 +489,7 @@ export function renderNode(node) {
     // و«تَابِعْ» الأزرقُ الأولُ هو القياسُ والبابُ الواحد — يُسأل الحَكَمُ
     // عنده مرةً (نسبةُ النجاح والوصفُ لوليّ الأمر وليتنر) ويمضي دائماً.
     // وفي الدرجة الحرّة لا زرَّ «شاهِدْ» — النموذجُ محجوبٌ بوعد الدرجة.
-    const measureOn = () => {
+    const measureOn = async () => {
       audio.stop();
       /* 🔴 **وقياسُ الطريقة مرفوعٌ عن الكلمات** (حكم المالك ٢٥ أغسطس ٢٠٢٦، بعد شحن
          مادّة الفونت: «الأنميشن في الكلمات لا تمشي بشكل صحيح ولا يمكن القياسُ بهذه
@@ -497,6 +500,19 @@ export function renderNode(node) {
          الطريقة**: لا شكوى اتجاهٍ تُكتب على كلمةٍ حتى يُعالَج المحرّك. والحرفُ على
          حاله: بوابةُ الميدان تحكمه وهي خضراء. */
       const m = live?.measure?.();
+      /* 🔴 **وقارئُ الكلمة يُسأل حيث أَذِن وليُّ الأمر** (أمر المالك ٢٥ أغسطس ٢٠٢٦:
+         «نستخدم أدوات دخل غوغل لتقييم الطفل وإعطاء النجوم وتحديث أداء الطفل على
+         صفحة وليّ الأمر»): تُرسَل حركةُ القلم فتُقرأ الكلمة — **فإن قُرئت كما
+         طُلبت فهي نظيفةٌ مهما زاغ موضعُها على اللوح**، وهذا ما لا يبلغه قياسُ
+         الانطباق على نموذجٍ في موضعه. **وبلا إذنٍ أو بلا إنترنت أو عند التأخّر**
+         يبقى حكمُ الشكل كما كان: لا انتظارَ ولا حبس (مرسومُ المضيّ). */
+      if (m && readingAllowed()) {
+        const said = verdictOf(await readInk(live.raw?.() || [], live.area?.()), unit.text);
+        if (said) {
+          m.clean = said.ok;
+          m.read = said;
+        }
+      }
       if (m) {
         if (!m.clean && m.shape?.why) progress.recordFault(unit.text, m.shape.why);
         if (step.kind) progress.recordQuality(unit.text, progress.WORD_FORM, step.kind,

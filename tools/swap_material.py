@@ -214,12 +214,43 @@ def convert(unit, scale, base_y, cell_line, left=None, centre_w=None, back=0.0,
         cap = max(floor, min(back, poly_len(pts) * head)) * 0.9
         pts, folds = thin(pts, folds, max(cap, 1.0))
         pts, folds = densify(pts, folds, max(cap, 1.0))
+        # **ولا نقطتين متطابقتين** (`check_paths`: «نقطتان متطابقتان»): الإزاحةُ
+        # والتقريبُ قد يجعلان جارتين واحدةً — تُطرح الثانيةُ **وتُردّ فهارسُ الطيّة**.
+        clean, drop = [], {}
+        for i, q in enumerate(pts):
+            if clean and math.dist(clean[-1], q) < 0.12:
+                drop[i] = len(clean) - 1
+                continue
+            drop[i] = len(clean)
+            clean.append(q)
+        if len(clean) >= 2 and len(clean) != len(pts):
+            pts = clean
+            folds = [{"from": drop[f["from"]], "apex": drop[f["apex"]], "to": drop[f["to"]]}
+                     for f in (folds or [])]
+            folds = [f for f in folds if f["from"] < f["apex"] < f["to"]]
         folds = sound_folds(pts, folds, back, lateral)
         one = {"start": pts[0], "points": pts}
         if folds:
             one["folds"] = folds
         strokes.append(one)
-    dots = [{"at": put([d[0], d[1]]), "count": 1, "after": True} for d in unit["dots"]]
+    # 🔴 **والنقطتان الملتحمتان تُفصلان بالقياس** (ظهر بتبديل الخطّ إلى `Noto Sans`
+    # بأمر المالك): الخطُّ يُدني نقطتَي التاء والقاف حتى يلتحم حبرُهما، فيقرؤهما
+    # الحصادُ **نقطةً واحدةً بيضيّة** فينقص العددُ عن الحقيقة الإملائية (قِيس:
+    # «الدلو تحت الصنبور…» ١٠ والحقيقةُ ١١). ⇐ **يُقرأ عددُها من امتدادها**: ما
+    # عرضُه ضِعفُ ارتفاعه نقطتان، وثلاثةُ أضعافٍ ثلاث — **ولا رقمَ يُكتب**، فنسبةُ
+    # الامتداد هي الشاهد. وتُفصَل مواضعُها على عرضها فتصير مواضعَ منفصلةً كما تقتضي
+    # القاعدةُ («النقاطُ مواضعُ منفصلة لا نقراتٌ في موضع»).
+    dots = []
+    for d in unit["dots"]:
+        rx, ry = (d[2] if len(d) > 2 else 0), (d[3] if len(d) > 3 else 0)
+        many = 3 if (ry and rx / ry >= 2.4) else (2 if (ry and rx / ry >= 1.6) else 1)
+        if many == 1:
+            dots.append({"at": put([d[0], d[1]]), "count": 1, "after": True})
+            continue
+        step = (2 * rx) / many
+        first = d[0] - rx + step / 2
+        for k in range(many):
+            dots.append({"at": put([first + k * step, d[1]]), "count": 1, "after": True})
     return strokes, dots, (x1 - x0) * scale
 
 

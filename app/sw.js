@@ -137,7 +137,7 @@
 //   مبدأ ط، وف المعزولة ترتفع أوّلاً. **ووحدةٌ تبدّلت تحت اسمها فبلا الرفعة يبقى
 //   جهازٌ مثبَّتٌ يرسم القديمَ** — وهو ما وقع فعلاً: رأى المالكُ ٢ و٣ من اليسار بعد
 //   النشر لأنّ قشرتَه المخزونة v32 تحمل `paths.js` القديم. **الرفعةُ شرطُ الوصول.**
-const VERSION = 'v56';
+const VERSION = 'v57';
 const SHELL_CACHE = `uktub-shell-${VERSION}`;
 const AUDIO_CACHE = 'uktub-audio';          // ثابتٌ عمداً — لا يحمل VERSION
 const KEEP = [SHELL_CACHE, AUDIO_CACHE];
@@ -148,6 +148,8 @@ const SHELL = [
   'manifest.webmanifest',
   'css/app.css',
   'fonts/NotoNaskhArabic-arabic.woff2',
+  // **وخطُّ طبقة الكلمة** (اختيارُ المالك ٢٥ أغسطس ٢٠٢٦) — يُخزَن كأخواته فيعمل دون إنترنت.
+  'fonts/NotoSansArabic-arabic.woff2',
   'fonts/NotoNaskhArabic-latin.woff2',
   'fonts/BalooBhaijaan2-arabic.woff2',
   'fonts/BalooBhaijaan2-latin.woff2',
@@ -167,6 +169,12 @@ const SHELL = [
   'js/lesson.js',
   'js/main.js',
   'js/parent.js',
+  // **وقارئُ الكلمة وإذنُه في المخزون** (أمر المالك ٢٥ أغسطس ٢٠٢٦): الإذنُ يُقرأ
+  // ويُبدَّل دون إنترنت، **والقارئُ نفسُه لا ينادي إلا بإذنٍ وشبكة** — وخزنُه يمنع
+  // شاشةً بيضاء لو فُتح التطبيقُ بلا شبكةٍ بعد تحديث.
+  'js/consent.js',
+  'js/consent_card.js',
+  'js/reader.js',
   'js/paths.js',
   'js/pen.js',
   'js/pendev.js',

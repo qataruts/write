@@ -26,6 +26,7 @@ import {
 // خصوصية القلم يمنع `https://` في حاملي مسار الطفل — **فلا يجمعهما ملفٌ أبداً**،
 // وتبقى هذه اللوحةُ صفرَ عناوين. تُستدعى ولا يُكتب رابطُها هنا.
 import { feedbackSection } from './feedback.js';
+import { consentState, setConsent, NOTICE } from './consent.js';
 // **بوابةُ اللحاق** (`FAMILY §١٠/هـ`، قرارُ المالك ١٦ أغسطس ٢٠٢٦): امتحانُ تحديد
 // مستوىً اختياريّ — **بابُه هذه اللوحةُ حصراً ولا زرَّ له في شاشة طفل** (القيد ١).
 import { openCatchup, lastResult, ladder, PASS_PERCENT } from './catchup.js';
@@ -673,6 +674,36 @@ function sectionLabelOf(step) {
   return sectionLabel(step.section, sections.indexOf(step.section));
 }
 
+/**
+ * **مفتاحُ تقييم الكلمات** — إذنُ وليّ الأمر يُقرأ ويُبدَّل من هنا.
+ *
+ * **سندُه أمرُ المالك** (٢٥ أغسطس ٢٠٢٦): «نستخدم أدوات دخل غوغل لتقييم الطفل
+ * وإعطاء النجوم وتحديث أداء الطفل على صفحة وليّ الأمر» · «ننبّه المستخدم…».
+ * **والحروفُ لا يمسّها هذا**: تُقاس داخل الجهاز ولا تغادره أبداً.
+ */
+function readerSection(rerender) {
+  const now = consentState();
+  const say = h('p', { class: 'hint' }, NOTICE);
+  const state = h('p', { class: 'hint' },
+    now === 'yes' ? 'الحالُ الآن: **مفتوح** — تُقيَّم الكلماتُ والجملُ بالإنترنت.'
+      : now === 'no' ? 'الحالُ الآن: مغلق — يكتب الطفلُ ويتدرّب بلا تقييمٍ للكلمات.'
+        : 'لم يُسأل بعدُ — والافتراضُ مغلق.');
+  const flip = (value) => { setConsent(value); rerender(); };
+  return [
+    say,
+    state,
+    h('div', { class: 'row' },
+      h('button', {
+        class: `btn ${now === 'yes' ? 'btn--ghost' : 'btn--primary'}`,
+        onclick: () => flip('yes'),
+      }, 'افتحْ التقييم'),
+      h('button', {
+        class: `btn ${now === 'no' ? 'btn--ghost' : 'btn--primary'}`,
+        onclick: () => flip('no'),
+      }, 'أغلقْه')),
+  ];
+}
+
 function backupSection(rerender) {
   const slot = h('div', { class: 'confirm-slot' });
   const storage = h('p', { class: 'hint' }, 'التخزين على هذا الجهاز: جارٍ الفحص…');
@@ -1066,6 +1097,10 @@ function dashboard(rerender = () => {}) {
         : 'أتمّ كل عقد الخريطة.'),
       h('p', { class: 'hint' },
         `بانتظار التثبيت الآن: ${arNum(due.length)} من ${arNum(progress.skills().length)} مهارة سُجّلت.`)),
+
+    // **ومفتاحُ تقييم الكلمات هنا** (أمر المالك ٢٥ أغسطس ٢٠٢٦): يُسأل مرّةً في أول
+    // تشغيل، **ويُبدَّل متى شاء وليُّ الأمر** — والافتراضُ «لا» حتى يأذن.
+    ...section('تقييمُ الكلمات — يستعمل الإنترنت', readerSection(rerender)),
 
     ...section('نسخة احتياطية من تقدّمه', backupSection(rerender)),
 

@@ -62,7 +62,11 @@ import ports  # noqa: E402
 OUT = TOOLS / "font_layer.json"
 PANEL = TOOLS / "font_panel.html"
 CACHE = ROOT / "scratch" / "build" / "font_units.json"
-FONT = ROOT / "app" / "fonts" / "NotoNaskhArabic-arabic.woff2"
+# **وخطُّ الحصاد يُختار بأمر المالك** (٢٥ أغسطس ٢٠٢٦: «Noto Sans Arabic» للكلمات):
+# يُمرَّر `--font sans` فيُحصَد به ويُختَم في البصمة — فلا تختلط مادّتان بلا علامة.
+FONTS = {"naskh": "NotoNaskhArabic-arabic.woff2", "sans": "NotoSansArabic-arabic.woff2"}
+FONT_PICK = "naskh"
+FONT = ROOT / "app" / "fonts" / FONTS[FONT_PICK]
 FORMS = ["isolated", "initial", "medial", "final"]
 FORM_AR = {"isolated": "معزول", "initial": "ابتدائي", "medial": "وسطي", "final": "نهائي"}
 HARAKA = re.compile(r"[ً-ْٰـ]")
@@ -208,7 +212,8 @@ def build(port: int, timeout: int, chunk: int, fresh: bool) -> int:
             json.dump(batch, fh, ensure_ascii=False)
             items = Path(fh.name)
         try:
-            got = make_paths.drive("?part=fontskel", port, timeout,
+            got = make_paths.drive(f"?part=fontskel{'&font=sans' if FONT_PICK == 'sans' else ''}",
+                                   port, timeout,
                                    pages={"/__font_items.json": items})
         finally:
             items.unlink(missing_ok=True)
@@ -303,7 +308,12 @@ def guards(payload: dict) -> list:
         need = need_of(unit["text"] if not unit["form"] else unit["text"], joins)
         if unit["form"] in ("medial", "final"):
             need = 1          # الشكلُ الموصولُ أوّلُه جسمٌ واحدٌ بحكم موضعه
-        if unit["bodies"] < need:
+        # 🔴 **وخطُّ الكلمات قد يُلصِق جارين فيصير حبرُهما جسماً واحداً** (ظهر بتبديل
+        # الخطّ إلى `Noto Sans Arabic` بأمر المالك ٢٥ أغسطس ٢٠٢٦: «الشلال…» ٩ حيث
+        # تتوقّع القاعدةُ ١٠). **وذلك قطعٌ أقلُّ وهو المطلوب** بنصّ حكمه: «الضرباتُ
+        # أقلَّ من ضرباتي لا مشكلة لكن ليس أكثر». ⇐ فلا يحمرّ إلا **نقصٌ في الحروف**
+        # المفردة (حيث لا جارَ يلتصق به) أو **زيادةٌ** في أيّ وحدة.
+        if unit["bodies"] < need and unit["kind"] == "letter":
             short.append(f"«{unit['name']}» ({unit['bodies']}<{need})")
     out.append((not short, f"وكلُّ قاطعٍ يقطع فعلاً في {len(units)} وحدةً محصودة"
                 + (f" — مخالفات: {'، '.join(short[:5])}" if short else "")))
@@ -354,6 +364,15 @@ def self_test() -> int:
         print(f"لا {OUT.relative_to(ROOT)} — يُبنى أولاً (`--build`)")
         return 1
     payload = json.loads(OUT.read_text(encoding="utf-8"))
+    # **وخطُّ الحصاد يُقرأ من بصمة الملفّ لا يُفترض** (بعد تبديل خطّ الكلمات بأمر
+    # المالك): لكلِّ خطٍّ بصمتُه، فيُختار الذي تطابق بصمتُه — وإلا احمرّ الحارسُ
+    # على تبديلٍ صحيح. **وإن لم تطابق واحدةً منهما فذلك التبديلُ بلا حصاد** وهو
+    # عينُ ما يحرسه.
+    global FONT_PICK, FONT
+    for pick in FONTS:
+        FONT_PICK, FONT = pick, ROOT / "app" / "fonts" / FONTS[pick]
+        if stamp() == payload.get("stamp"):
+            break
     fails = 0
 
     def ok(cond, msg):
@@ -408,8 +427,12 @@ def self_test() -> int:
     # **ومجرَّبٌ سالباً**: وحدةٌ يُنقَص جسمُها تحمرّ، ولام-ألفٍ تُكسَر تحمرّ
     hurt = json.loads(json.dumps(payload))
     joins = joins_of()
+    # **والشاهدُ حرفٌ لا كلمة** (بعد تبديل الخطّ): نقصُ الأجسام في الكلمة صار
+    # مسموحاً (الخطُّ يُلصِق جارين، وهو قطعٌ أقلُّ لا أكثر بنصّ حكم المالك) —
+    # **فالحارسُ يبقى قاطعاً في الحروف**، وعليها يُجرَّب سالباً.
     victim = next((u for u in hurt["units"]
-                   if not u["form"] and need_of(u["text"], joins) > 1), None)
+                   if u["kind"] == "letter" and u["form"] not in ("medial", "final")
+                   and need_of(u["text"], joins) > 1), None)
     if victim:
         victim["bodies"] = need_of(victim["text"], joins) - 1
         ok(not guards(hurt)[0][0],
@@ -611,6 +634,8 @@ def panel() -> int:
 def main() -> int:
     ap = argparse.ArgumentParser(description="طبقةُ الفونت: هياكلُ المادّة كلِّها")
     ap.add_argument("--build", action="store_true", help="حصادُ المادّة كلِّها")
+    ap.add_argument("--font", choices=list(FONTS), default="naskh",
+                    help="خطُّ الحصاد — naskh (الحروف) أو sans (الكلمات بأمر المالك)")
     ap.add_argument("--self-test", action="store_true", help="الحرّاسُ الأربعة بلا متصفّح")
     ap.add_argument("--panel", action="store_true", help="لوحةُ المراجعة الشاملة")
     ap.add_argument("--list", action="store_true", help="جردُ المادّة قبل الحصاد")
@@ -620,6 +645,9 @@ def main() -> int:
     ap.add_argument("--port", type=int, default=ports.port_of("font_layer"))
     ap.add_argument("--timeout", type=int, default=900)
     args = ap.parse_args()
+    global FONT_PICK, FONT
+    FONT_PICK = args.font
+    FONT = ROOT / "app" / "fonts" / FONTS[FONT_PICK]
     if args.list:
         units = material()
         by = {}
