@@ -29,6 +29,32 @@ WLINE = 1344.7
 MARGIN = 81.0
 
 
+# **حجمُ الكلمة على اللوح** (أمر المالك ٢٥ أغسطس ٢٠٢٦) — و**قلمُ الخطّ مقيسٌ**
+# من ساق الألف حبراً في الخطّ المحصود (١٠١٫٩ من جسم ١٠٠٠)، به يُوزَن حبرُ الطفل
+# فيقارب الفونتَ تحته: «الحبرُ أقلُّ بكثير من الكلمة التي تحته — يفضّل أن يكون قريباً».
+# **والمقياسُ مشتقٌّ من نسبتين نصَّهما المالك** (٢٥ أغسطس ٢٠٢٦: «اجعل الحبرَ ٥٪
+# والفونتَ ٧٪ أو بالأكثر ٨٪ … وعمّمه على التطبيق») — والنسبةُ من **ارتفاع الألف**
+# وهو المقياسُ الذي عُرضت عليه به الأرقام (الحبرُ كان ٣٫٣٪ والفونتُ ١٦٪).
+# ⇐ سماكةُ الخطّ تتبع حجمَه، فحجمُ الكلمة **يُحسب** ليقع قلمُها في ٧٫٥٪:
+#     WORD_SIZE = (٠٫٠٧٥ × ارتفاع الألف) ÷ (قلمُ الخطّ × المقياس)
+# ولا يُكتب رقماً — فيومَ يتبدّل الخطُّ أو الألفُ يتبدّل معهما من نفسه.
+FONT_SHARE = 0.075          # سماكةُ قلم الفونت من ارتفاع الألف — وسطُ ٧٪–٨٪
+PEN_EM = 101.9              # ساقُ الألف حبراً في الخطّ المحصود (جسم ١٠٠٠)
+
+
+def shrink(strokes, dots, factor, base_y, centre_x):
+    """يصغّر الكتابةَ عن خطّ أساسها ووسط لوحها — والصندوقُ لا يُمَسّ."""
+    put = lambda q: [r1(centre_x + (q[0] - centre_x) * factor),
+                     r1(base_y + (q[1] - base_y) * factor)]
+    out = []
+    for st in strokes:
+        one = {"start": put(st["start"]), "points": [put(p) for p in st["points"]]}
+        if st.get("folds"):
+            one["folds"] = st["folds"]
+        out.append(one)
+    return out, [{**d, "at": put(d["at"])} for d in dots]
+
+
 def base_copy() -> Path:
     """ينسخ مادّةَ `HEAD` إلى مجلّدٍ مؤقّت **فتُقرأ الأصولُ ولو كانت الشجرةُ مكسورة**.
 
@@ -74,6 +100,17 @@ def old_material():
     head = re.search(r"const HEAD_RATIO = ([0-9.]+)", (ROOT / "app/js/pen.js").read_text(encoding="utf-8"))
     out["head"] = float(head.group(1)) if head else 0.1
     return out
+
+
+def engine_tolerance(value: float) -> dict:
+    """**الحدُّ من الدالّة الحاكمة لا بضربٍ خطّيّ** (قاعدةُ «الحدّ العامل»):
+    `resolveTolerance` ليست خطّيةً بالضرورة، فتقديرُها ضرباً يُخطئ بقدرٍ صغيرٍ
+    يكفي لأن يمرّ ضلعُ طيّةٍ من تحت الحارس (قِيس: قُدِّرت ٣٢٫٦ وهي ٣٥)."""
+    src = ("import { resolveTolerance } from './app/js/pen.js';"
+           f"console.log(JSON.stringify(resolveTolerance({value})));")
+    r = subprocess.run(["node", "--input-type=module", "-e", src],
+                       capture_output=True, text=True, cwd=ROOT)
+    return json.loads(r.stdout) if r.returncode == 0 else {}
 
 
 def bbox(pts):
@@ -260,6 +297,11 @@ def js_ref(ref, indent):
     pad = " " * indent
     out = [f'{pad}"box": [{r1(ref["box"][0])}, {r1(ref["box"][1])}]',
            f'{pad}"line": {r1(ref["line"])}']
+    # **وجسمُ طبقة الفونت وقلمُها يخرجان مع المرجع** — تقرؤهما الشاشةُ فتنطبق
+    # الطبقةُ على الحبر، ولا يُكتب مقاسٌ في شيفرةٍ فيشيخ يومَ يتبدّل الحجم.
+    for key in ("em", "ink"):
+        if ref.get(key) is not None:
+            out.append(f'{pad}"{key}": {ref[key]}')
     if ref.get("tolerance") is not None:
         out.append(f'{pad}"tolerance": {ref["tolerance"]}')
     sts = []
@@ -287,6 +329,14 @@ def main():
     ah = bbox([q for st in alef["strokes"] for q in st["p"]])
     scale = old["alef"] / max(ah[3] - ah[1], 1e-6)
     base_y = hand["space"]["baseline"]
+    word_size = (FONT_SHARE * old["alef"]) / (PEN_EM * scale)
+    print(f"حجمُ الكلمة محسوبٌ من نسبة المالك: قلمُ الفونت {FONT_SHARE:.1%} من ألفٍ"
+          f" {old['alef']:.0f} ⇒ {word_size:.3f} من مقاسها الطبيعيّ")
+    wtol = engine_tolerance(round(word_size, 4))
+    # **وسماحةُ المحرّك الخام** — يقرؤها الفاحصُ ويشدّها خطّياً، فنقرؤها كما يقرأ.
+    raw = engine_tolerance(1)
+    print(f"سماحةُ المحرّك عند مقياس الكلمة: انحراف {wtol.get('lateral', 0):.1f}"
+          f" · ارتداد {wtol.get('back', 0):.1f} · بداية {wtol.get('start', 0):.1f}")
     print(f"المقياسُ المقيس: ارتفاعُ ألف التطبيق {old['alef']:.0f} ÷ ألف الطبقة "
           f"{ah[3] - ah[1]:.0f} = {scale:.4f}")
 
@@ -302,11 +352,44 @@ def main():
                 "box": [CELL, CELL], "line": LINE,
                 "tolerance": old["tol"].get(u["name"]), "strokes": st, "dots": dots}
         else:
-            st, dots, w = convert(u, scale, base_y, WLINE, left=MARGIN,
-                                  lateral=old["wlat"], back=old["wback"],
+            # **والتصغيرُ يقع في المقياس لا بعده**: لو صُغِّرت الكتابةُ بعد تنقية
+            # النقاط وتكثيفها لَقصُرت قطعُها تحت نافذة الرتابة (قِيس: ١٣٣٦ مخالفة)
+            # — فالمقياسُ يحمل النسبةَ، والحدودُ تُحسب على المقاس النهائيّ.
+            full = (max(q[0] for st0 in u["strokes"] for q in st0["p"])
+                    - min(q[0] for st0 in u["strokes"] for q in st0["p"])) * scale
+            box_w = full + 2 * MARGIN
+            st, dots, w = convert(u, scale * word_size, base_y, WLINE,
+                                  left=(box_w - full * word_size) / 2,
+                                  # **والحدودُ بمقياس المادّة أيضاً** — فالسماحةُ
+                                  # صارت `word_size`، فتُضرب فيها كما يضربها
+                                  # المحرّك (`resolveTolerance`) عند الحكم.
+                                  # **ويُؤخَذ الأشدُّ من الحدّين**: المحرّكُ يحسب
+                                  # سماحتَه بدالّته (٣٢٫٦) والفاحصُ يشدّها خطّياً
+                                  # بمقياس المادّة (٣٥) — فما جاز عند الأوّل قد
+                                  # يحمرّ عند الثاني، والصوابُ ألّا نُصدِّر إلا ما
+                                  # يمرّ عليهما معاً.
+                                  lateral=max(wtol.get("lateral", 0), raw["lateral"] * word_size),
+                                  back=max(wtol.get("back", 0), raw["back"] * word_size),
                                   head=old["head"], floor=old["step"])
-            words[u["text"]] = {"box": [w + 2 * MARGIN, WCELL], "line": WLINE,
-                                "tolerance": 1, "strokes": st, "dots": dots}
+            # 🔴 **وحجمُ الكلمة ٦٠٪ واللوحُ على حاله** (أمر المالك ٢٥ أغسطس ٢٠٢٦:
+            # «حجمُ الكلمات كبير — ليصبح تقريباً ٦٠٪ على مستوى التطبيق»): تُصغَّر
+            # **الكتابةُ** عن خطّ أساسها وعن وسط لوحها، **ويبقى الصندوقُ كما كان** —
+            # ولو صُغِّر معها لَعادت كما هي (اللوحُ يملأ صندوقَ مادّته فيكبّرها).
+            words[u["text"]] = {"box": [box_w, WCELL], "line": WLINE,
+                                # 🔴 **والسماحةُ تتبع مقياسَ المادّة** (قاعدةُ
+                                # المشروع: الحدُّ العامل يُضرب في مقياس مادّته):
+                                # لمّا صغُرت الكتابةُ إلى نسبة المالك صغُرت معها
+                                # المسافاتُ — فسماحةُ بدايةٍ ثابتةٌ تخلط مبدأَ
+                                # الجسم بنقطته (قِيس في «تمر»: ١١٣ دون ١٢٠).
+                                # **وجسمُ طبقة الفونت وعرضُ قلمها مقيسان** — تقرؤهما
+                                # الشاشةُ فتنطبق الطبقةُ على الحبر ولا يُكتب رقمٌ.
+                                "em": r1(1000 * scale * word_size),
+                                "ink": r1(PEN_EM * scale * word_size),
+                                # **والسماحةُ تُصدَّر بدقّتها لا مقرَّبةً** (عطبٌ
+                                # وقع: صُدِّرت ٠٫٥ وحُسب بـ٠٫٤٦٥ فاختلف حدُّ
+                                # الفاحص عن حدِّ العدّة بثلاث وحدات).
+                                "tolerance": round(word_size, 4),
+                                "strokes": st, "dots": dots}
     folds = (sum(len(st.get("folds") or []) for forms in letters.values()
                  for ref in forms.values() for st in ref["strokes"])
              + sum(len(st.get("folds") or []) for ref in words.values()

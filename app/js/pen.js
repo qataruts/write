@@ -2254,7 +2254,10 @@ export function penSurface(config) {
     // سطر المادّة نفسِه** فينطبق على حبرها: جسمُ الخطّ ٠٫٦١ من ارتفاع خليّة السطر.
     const base = ref.line ?? bh * 0.63;
     const text = sv('text', {
-      x: bw - GHOST_PAD, y: base, 'font-size': Math.round(bh * 0.6),
+      // **وجسمُ الطبقة مقيسٌ من المادّة** (`ref.em` تكتبه عدّةُ التبديل من مقياسها
+      // الفعليّ): فتنطبق الطبقةُ على حبر مادّتها مهما صُغِّرت — ولا رقمَ يُكتب هنا
+      // فيشيخ يومَ يتبدّل حجمُ الكلمة (أمرُ المالك: «ليصبح تقريباً ٦٠٪»).
+      x: bw - GHOST_PAD, y: base, 'font-size': Math.round(ref.em || bh * 0.6),
       'text-anchor': 'start', direction: 'rtl',
     });
     text.textContent = ghost;

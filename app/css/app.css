@@ -1436,7 +1436,11 @@ main.lesson-letter .hint, main.warmup .hint { min-height: 2.8em; }
 .pen-stroke {
   fill: none;
   stroke: var(--ink);
-  stroke-width: calc(26 * var(--ink-weight, 1) * var(--ink-scale, 1));
+  /* **ونموذجُ الحرف بسماكة قلم الخطّ** (أمر المالك ٢٥ أغسطس ٢٠٢٦: «اجعل الحبر ٥٪
+     والفونت ٧٪ أو بالأكثر ٨٪… وعمّمه على التطبيق» — ثم «كلّ» حين سُئل أيشمل
+     الحروف): ٥٥ وحدةً = ٧٪ من ارتفاع ألفِ التطبيق (٧٨٦)، فيقع نموذجُ الحرف
+     ونموذجُ الكلمة على سماكةٍ واحدة، والحبرُ ٥٪ تحتهما قريباً منهما. */
+  stroke-width: calc(55 * var(--ink-weight, 1) * var(--ink-scale, 1));
   stroke-linecap: round;
   stroke-linejoin: round;
   opacity: .18;
@@ -1465,10 +1469,17 @@ main.lesson-letter .hint, main.warmup .hint { min-height: 2.8em; }
 }
 
 /* حبرُ الطفل — يظهر تحت إصبعه دائماً، حتى في المحاولة التي لا تُقبل */
+/* 🔴 **وسماكتُه تقارب قلمَ الخطّ** (أمر المالك ٢٥ أغسطس ٢٠٢٦: «الحبرُ أقلُّ بكثير
+   من الكلمة التي تحته — يفضّل أن يكون قريباً» · «كبّره قليلاً ليس كثيراً واجعل
+   الحبرَ وعرضَ الخطّ قريبين»). **والمقيسُ الذي بُني عليه**: قلمُ الخطّ ١٦٪ من
+   ارتفاع الألف، وحبرُ الطفل كان ٣٫٣٪ — أي **خُمسَه**. **فنصَّ المالكُ النسبتين**:
+   «اجعل الحبرَ ٥٪ والفونتَ ٧٪ أو بالأكثر ٨٪ … وعمّمه على التطبيق».
+   ⇐ الحبرُ **٣٩ وحدةً** (٥٪ من ألفِ ٧٨٦)، وقلمُ الفونت يقع في ٧٫٥٪ بحساب حجم
+   الكلمة في `swap_material.py` — فيلتقيان قريبين كما أراد، بلا حبلٍ يطمس الشكل. */
 .pen-line {
   fill: none;
   stroke: var(--pen-accent);
-  stroke-width: calc(22 * var(--ink-weight, 1) * var(--ink-scale, 1));
+  stroke-width: calc(39 * var(--ink-weight, 1) * var(--ink-scale, 1));
   stroke-linecap: round;
   stroke-linejoin: round;
   transition: opacity .5s ease;

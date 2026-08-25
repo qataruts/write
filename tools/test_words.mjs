@@ -126,7 +126,10 @@ ok(wrongVerdict.length === 0, `الكلماتُ ${judged}: الصحيحُ يُق
 const stubborn = entries.filter(([, ref]) => !pen.judge(ref,
   [...[...ref.strokes].reverse()
     .map((s) => walk(s.points, { from: 1, to: 0, step: stepFor(ref) })), ...taps(ref)],
-  { tolerance: 2 }).accepted);
+  // **والمضاعفةُ من سماحة المادّة لا من رقمٍ ثابت** (بعد أن صغُرت الكتابةُ إلى
+  // نسبة المالك): سماحةُ الكلمة اليومَ ٠٫٤٦٥، فـ«٢» ليست ضِعفَها بل أربعةَ
+  // أضعافها — وعند ذلك يمرّ المعكوسُ فيُقرأ العطبُ حيث لا عطب.
+  { tolerance: (ref.tolerance ?? 1) * 2 }).accepted);
 ok(stubborn.length === entries.length,
   `والمعكوسُ يُرَدّ ولو ضوعفت السماحة (${stubborn.length}/${entries.length})`);
 
@@ -298,7 +301,11 @@ ok(gapless.length === 0, 'وكلُّ جملةٍ تمتدّ على سطرها ا�
 const glued = pairs.filter(([text, ref]) => {
   const [right] = text.split(' ');
   const rightEnd = Math.min(...ref.strokes.flatMap((s) => s.points).map((p) => p[0]));
-  return right.length && rightEnd > pen.GRID;      // حارسٌ صوريّ: النقاط داخل الشبكة
+  // **والشبكةُ صندوقُ الوحدة لا رقمٌ ثابت** (بعد أن صغُرت الكتابةُ إلى نسبة
+  // المالك ٢٥ أغسطس ٢٠٢٦: «اجعل الحبر ٥٪ والفونت ٧٪»): الكتابةُ تتوسّط لوحَها
+  // فيبدأ حبرُها بعد الشبكة القديمة وهي في موضعها — **والمحروسُ ألّا تخرج عن
+  // صندوقها هي**.
+  return right.length && rightEnd > (ref.box?.[0] ?? pen.GRID);
 });
 ok(glued.length === 0, 'وكلُّها داخل الشبكة');
 
