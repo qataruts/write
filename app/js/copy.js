@@ -514,9 +514,15 @@ export function renderNode(node) {
         }
       }
       if (m) {
-        if (!m.clean && m.shape?.why) progress.recordFault(unit.text, m.shape.why);
+        /* 🔴 **وحيث حكم القارئُ لا تُكتب شكوى شكلٍ** (تصحيحُ عهدٍ، ٢٥ أغسطس ٢٠٢٦):
+           كلمةٌ قرأها القارئُ غيرَ المطلوب قد يكون **شكلُها سليماً** وإنما زاغ
+           موضعُها أو التبس حرفٌ — فكتابةُ سببٍ من أسباب الشكل على لوحة وليّ الأمر
+           **شهادةٌ بما لم يُقَس**. فتُكتب القراءةُ نفسُها وصفاً (`read:…`)، ويبقى
+           سببُ الشكل لمن حكم فيه الشكلُ وحدَه (بلا إذنٍ أو بلا إنترنت). */
+        if (!m.clean && !m.read && m.shape?.why) progress.recordFault(unit.text, m.shape.why);
         if (step.kind) progress.recordQuality(unit.text, progress.WORD_FORM, step.kind,
-          m.clean ? [...new Set(m.shape.guides || [])] : ['passed-on']);
+          m.clean ? [...new Set(m.shape.guides || [])]
+            : (m.read ? [`read:${m.read.top || '—'}`] : ['passed-on']));
         score(step, unit, m.clean);
         // **وإنتاجٌ حرٌّ نظيفٌ غيرُ مكشوفٍ يُنضج الكلمة** (ب١ — كما كان في
         // مسلك الإتمام القديم): طريقُها إلى الإملاء يمرّ من هنا.

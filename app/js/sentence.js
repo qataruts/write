@@ -332,7 +332,9 @@ export function renderNode(node) {
             }
           }
           if (m) {
-            if (!m.clean && m.shape?.why) progress.recordFault(unit.text, m.shape.why);
+            // **وحيث حكم القارئُ لا تُكتب شكوى شكلٍ** (كما في الكلمات): القراءةُ
+            // شهادةٌ على ما كُتب، وسببُ الشكل لمن حكم فيه الشكلُ وحدَه.
+            if (!m.clean && !m.read && m.shape?.why) progress.recordFault(unit.text, m.shape.why);
             if (step.kind) progress.recordQuality(unit.text, progress.SENTENCE_FORM, step.kind,
               // **وقياسُ الطريقة مرفوعٌ عن الجمل كما رُفع عن الكلمات** (حكم المالك
               // ٢٥ أغسطس ٢٠٢٦): مادّةُ النسخ تعود على أثرها، والماشي يقرأ الرجوعَ
