@@ -1440,7 +1440,9 @@ main.lesson-letter .hint, main.warmup .hint { min-height: 2.8em; }
      والفونت ٧٪ أو بالأكثر ٨٪… وعمّمه على التطبيق» — ثم «كلّ» حين سُئل أيشمل
      الحروف): ٥٥ وحدةً = ٧٪ من ارتفاع ألفِ التطبيق (٧٨٦)، فيقع نموذجُ الحرف
      ونموذجُ الكلمة على سماكةٍ واحدة، والحبرُ ٥٪ تحتهما قريباً منهما. */
-  stroke-width: calc(55 * var(--ink-weight, 1) * var(--ink-scale, 1));
+  /* **ومادّةُ الكلمة تحمل قلمَها** (`--pen-model` يكتبه `pen.js` من `ref.ink`):
+     نموذجُها بسماكة قلم الفونت الذي اشتُقّ منه، ونموذجُ الحرف على ٥٥ = ٧٪. */
+  stroke-width: calc(var(--pen-model, 55) * var(--ink-weight, 1) * var(--ink-scale, 1));
   stroke-linecap: round;
   stroke-linejoin: round;
   opacity: .18;
@@ -1479,7 +1481,10 @@ main.lesson-letter .hint, main.warmup .hint { min-height: 2.8em; }
 .pen-line {
   fill: none;
   stroke: var(--pen-accent);
-  stroke-width: calc(39 * var(--ink-weight, 1) * var(--ink-scale, 1));
+  /* 🔴 **وحبرُ الكلمة من مادّتها** (`--pen-ink` من `ref.pen`، بلاغُ ٢٦ أغسطس:
+     «الحبرُ كبير»): ثلثا قلمِ الفونت تحته بنصّ المالك (٥ : ٧٫٥) — فيقاربه ولا
+     يعلوه. وحبرُ الحرف على ٣٩ = ٥٪ من ألفِ التطبيق كما هو. */
+  stroke-width: calc(var(--pen-ink, 39) * var(--ink-weight, 1) * var(--ink-scale, 1));
   stroke-linecap: round;
   stroke-linejoin: round;
   transition: opacity .5s ease;

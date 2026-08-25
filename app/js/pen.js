@@ -993,6 +993,14 @@ const GHOST_EM = 1281;
 const GHOST_PAD = 81;
 
 /**
+ * 🔴 **حصّةُ الكتابة من ارتفاع اللوح في الكلمات** (بلاغُ المالك ٢٦ أغسطس ٢٠٢٦:
+ * «الكلامُ الآن صغير»): خليّةُ الكلمة سطرٌ كاملٌ لا تشغل كتابتُها منه إلا ٢٢٪،
+ * فتُقرَّب نافذةُ اللوح عليها لتبلغ هذه الحصّةَ حين يحدّ الارتفاعُ العرضَ — والكلمةُ
+ * الطويلة يحدّها عرضُها قبل ذلك فتأخذ اللوحَ عرضاً كما تأخذه كرّاسةُ السطر.
+ */
+const LINE_FILL = 0.55;
+
+/**
  * **صندوقُ المادّة — مربّعٌ للحرف والكلمة، وسطرٌ عريضٌ للجملة** (حكمُ المدير، ١٣
  * أغسطس ٢٠٢٦): «كلُّ شكلٍ يملأ صندوقَه» (قرارُ الجلسة ٢) يسري على الجملة كما سرى
  * على الحرف — **وصندوقُ السطر سطر**، فلا يُحشَر في مربّعٍ يخنق مقياسَ حروفه.
@@ -2165,11 +2173,30 @@ export function penSurface(config) {
   // **ومقاييسُ الإرشاد بمقياس المادّة** (بلاغُ عين المالك، ١٣ أغسطس): تُقرأ من
   // المسار نفسِه فتصغر النقطةُ والحلقةُ والسهمُ حيث يصغر الحرف — انظر `GUIDE` أعلاه.
   const g = guideOf(ref);
+  /**
+   * 🔴 **نافذةُ اللوح تُقرَّب على سطر الكتابة في الكلمات** (بلاغُ المالك ٢٦ أغسطس
+   * ٢٠٢٦: «الكلامُ الآن صغير»).
+   *
+   * **والعلّةُ مقيسةٌ لا مظنونة**: خليّةُ الكلمة **سطرٌ كامل** (٢١٢٥ وحدة: صعودٌ
+   * ونزولٌ وفراغُ سطرٍ)، وكتابتُها لا تشغل منه إلا ٤٧٥ — أي **٢٢٪**. واللوحُ يُلبِس
+   * الخليّةَ كاملةً (`meet`)، فيرسم الكلمةَ في خُمس ارتفاعه ويترك الباقي بياضاً:
+   * قِيس على آيباد عرضيّ أنّ «با» تخرج ١٠٨ بكسلاً في لوحٍ عرضُه ٩٢٤.
+   *
+   * ⇐ فتُقرَّب النافذةُ على **حبر المادّة** بحصّةٍ معلومة (`LINE_FILL`) بدل الخليّة
+   * كلِّها — والمادّةُ لا تُمَسّ ولا إحداثيّ: الزاويةُ هي التي تدنو. **والحكمُ معها**
+   * (`toGrid` يقرأ النافذةَ نفسَها)، فلا يفترق ما يُرى عمّا يُقاس.
+   *
+   * **وللحرف خليّتُه كما هي**: مربّعٌ يملؤه شكلُه أصلاً، فلا نافذةَ تُقرَّب عليه.
+   */
+  const seatBox = ref?.pen ? inkBox([refPoints(ref)]) : null;
+  const view = seatBox && seatBox.h > 0
+    ? { x: 0, y: seatBox.cy - (seatBox.h / LINE_FILL) / 2, w: bw, h: seatBox.h / LINE_FILL }
+    : { x: 0, y: 0, w: bw, h: bh };
   const box = document.createElement('div');
   // **واللوحُ يتبع صندوقَ مادّته**: مربّعٌ للحرف والكلمة، **وسطرٌ للجملة** — يُعلَن
   // صنفاً ونسبةَ أبعادٍ معاً، فيرسم المتصفّحُ سطراً حيث المادّةُ سطر.
-  box.className = `pen-box pen-box--${mode}${bw !== bh ? ' pen-box--line' : ''}`;
-  if (bw !== bh) box.style.setProperty('--pen-ratio', String(bw / bh));
+  box.className = `pen-box pen-box--${mode}${view.w !== view.h ? ' pen-box--line' : ''}`;
+  if (view.w !== view.h) box.style.setProperty('--pen-ratio', String(view.w / view.h));
   // **وسُمكُ الحبر نسبةٌ من اللوح لا رقمٌ مطلق** (بلاغُ ميدانٍ من المالك على آيباد،
   // ١٩ أغسطس ٢٠٢٦: «الخطُّ رقيقٌ جداً والطفلُ لا يستطيع بإصبعه»). **وعلّتُه مقيسة**:
   // عرضُ الحبر ٢٢ كُتب يومَ كانت الشبكةُ ١٠٠٠، **فلمّا صارت خليّةُ السطر ٢١٦٣٫٥**
@@ -2182,17 +2209,38 @@ export function penSurface(config) {
    * فصار من **وحدة العرض الحقيقية** (بكسل لكل وحدة شبكة، بقاعدة `meet`)
    * ليثبت السُّمكُ المرئيّ على قيمته في خلية الحرف مهما اتسع الصندوق.
    */
-  const setInk = () => {
-    const r = box.getBoundingClientRect();
-    if (!r.width || !r.height) return;
-    const unit = Math.min(r.width / bw, r.height / bh);
-    const letterUnit = Math.min(r.width, r.height) / GRID;
-    box.style.setProperty('--ink-scale', String(letterUnit / Math.max(unit, 1e-6)));
-  };
-  box.style.setProperty('--ink-scale', String(Math.max(bw, bh) / GRID));
-  if (typeof ResizeObserver !== 'undefined') new ResizeObserver(setInk).observe(box);
+  /**
+   * 🔴 **ومادّةٌ تحمل قلمَها تُعفى من معامل البكسل** (بلاغُ المالك ٢٦ أغسطس ٢٠٢٦:
+   * «الكلامُ الآن صغير والحبرُ كبير»).
+   *
+   * **والعلّةُ مقيسة**: `--ink-scale` يثبّت سماكةَ الحبر **بالبكسل** — وهو صوابٌ
+   * ما دامت المادّةُ تملأ خليّتَها بنسبة الشبكة. فلمّا صغُرت كتابةُ الكلمة في
+   * خليّةٍ لم تصغر معها، **ضرب المعاملُ حبرَ الطفل ٢٫١٢٥ ولم يمسّ طبقةَ الفونت**:
+   * فصار الحبرُ ٨٢٫٩ وحدةً وقلمُ الفونت تحته ٥٩ — **الحبرُ أسمنُ ممّا يكتب عليه**.
+   *
+   * ⇐ فما حمل قلمَه في مادّته (`ref.pen` و`ref.ink` تكتبهما عدّةُ التبديل بوحدات
+   * المادّة) **يُؤخذ منه كما هو**، ويبقى المعاملُ لِما لا قلمَ له (الحروفُ: خليّتُها
+   * الشبكةُ نفسُها فمعاملُها واحدٌ أصلاً).
+   */
+  if (ref?.pen) {
+    box.style.setProperty('--pen-ink', String(ref.pen));
+    box.style.setProperty('--pen-model', String(ref.ink || ref.pen));
+    box.style.setProperty('--ink-scale', '1');
+  } else {
+    const setInk = () => {
+      const r = box.getBoundingClientRect();
+      if (!r.width || !r.height) return;
+      const unit = Math.min(r.width / bw, r.height / bh);
+      const letterUnit = Math.min(r.width, r.height) / GRID;
+      box.style.setProperty('--ink-scale', String(letterUnit / Math.max(unit, 1e-6)));
+    };
+    box.style.setProperty('--ink-scale', String(Math.max(bw, bh) / GRID));
+    if (typeof ResizeObserver !== 'undefined') new ResizeObserver(setInk).observe(box);
+  }
   const svg = sv('svg', {
-    class: 'pen-surface', viewBox: `0 0 ${bw} ${bh}`, role: 'img', 'aria-label': label,
+    class: 'pen-surface', viewBox: [view.x, view.y, view.w, view.h]
+      .map((n) => Math.round(n * 10) / 10).join(' '),
+    role: 'img', 'aria-label': label,
   });
   /**
    * **سطرُ الكرّاسة — من المادّة لا من زينة** (محطةُ النسخ، `METHOD.md §٤`: «الجلوسُ
@@ -2202,7 +2250,7 @@ export function penSurface(config) {
    */
   const rule = sv('g', { class: 'pen-rule', 'aria-hidden': 'true' });
   const seat = baseline ?? ref?.line ?? null;
-  const hair = Math.max(1, Math.round(bh / GRID * 3));
+  const hair = Math.max(1, Math.round(view.h / GRID * 3));
   if (seat != null) {
     // **وغِلَظُ السطر بمقياس لوحه** (بند ص٢/ب ٤): خليّةُ الحرف صارت مربّعَ السطر
     // (٢٠٣٥ وحدة) وخليّةُ الكلمة ألفٌ — **فخيطٌ بغِلَظٍ ثابتٍ يدقّ في أحدهما
@@ -2253,12 +2301,21 @@ export function penSurface(config) {
     // **والنصُّ يُنشأ ثم يُملأ** (`sv` تضع السماتِ ولا تأخذ محتوى)، **ومقاسُه من
     // سطر المادّة نفسِه** فينطبق على حبرها: جسمُ الخطّ ٠٫٦١ من ارتفاع خليّة السطر.
     const base = ref.line ?? bh * 0.63;
+    /**
+     * 🔴 **والطبقةُ تنطبق على هيكلها لا على حافّة اللوح** (بلاغُ المالك ٢٦ أغسطس
+     * ٢٠٢٦). **والعلّةُ مقيسة**: كان النصُّ يُسنَد إلى يمين الخليّة (`bw - GHOST_PAD`)
+     * والكتابةُ **موسَّطةٌ** فيها بعد تصغيرها — فافترقا **٥٢٠ وحدة** في «دَرَسْ»،
+     * أي أكثرَ من نصف عرض الكلمة: يكتب الطفلُ على الفونت **فيُقاس على غيره**.
+     * ⇐ يُوسَّط النصُّ على **وسط حبر المادّة** نفسِه، فما يُرى هو ما يُحكَم به.
+     */
+    const seat = inkBox([refPoints(ref)]);
     const text = sv('text', {
       // **وجسمُ الطبقة مقيسٌ من المادّة** (`ref.em` تكتبه عدّةُ التبديل من مقياسها
       // الفعليّ): فتنطبق الطبقةُ على حبر مادّتها مهما صُغِّرت — ولا رقمَ يُكتب هنا
       // فيشيخ يومَ يتبدّل حجمُ الكلمة (أمرُ المالك: «ليصبح تقريباً ٦٠٪»).
-      x: bw - GHOST_PAD, y: base, 'font-size': Math.round(ref.em || bh * 0.6),
-      'text-anchor': 'start', direction: 'rtl',
+      x: seat ? seat.cx : bw - GHOST_PAD, y: base,
+      'font-size': Math.round(ref.em || bh * 0.6),
+      'text-anchor': seat ? 'middle' : 'start', direction: 'rtl',
     });
     text.textContent = ghost;
     ghostLayer.append(text);
@@ -2474,10 +2531,12 @@ export function penSurface(config) {
 
   /** إحداثيُّ الإصبع على شبكة المادّة — **بصندوقها هي** لا بمربّعٍ مفترَض. */
   function toGrid(event) {
-    const unit = Math.min(rect.width / bw, rect.height / bh) || 1;
-    const ox = rect.left + (rect.width - bw * unit) / 2;
-    const oy = rect.top + (rect.height - bh * unit) / 2;
-    return [(event.clientX - ox) / unit, (event.clientY - oy) / unit];
+    // **والنافذةُ هي المرجع** (لا الخليّة): إن قُرِّبت على سطر الكتابة قُرِّب الحكمُ
+    // معها — فما تحت الإصبع هو ما يُقاس، ولا يفترق المرئيُّ عن المحكوم به.
+    const unit = Math.min(rect.width / view.w, rect.height / view.h) || 1;
+    const ox = rect.left + (rect.width - view.w * unit) / 2;
+    const oy = rect.top + (rect.height - view.h * unit) / 2;
+    return [view.x + (event.clientX - ox) / unit, view.y + (event.clientY - oy) / unit];
   }
 
   /** الرسمُ والحكمُ في `requestAnimationFrame` — لا في كل حدثِ حركة (`METHOD.md §٣.٦`). */

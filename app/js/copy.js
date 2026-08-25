@@ -218,11 +218,14 @@ export function renderNode(node) {
   const dots = h('ol', { class: 'dots' });
   const strip = h('ol', { class: 'unit-strip unit-strip--words' });
   /**
-   * **نموذجُ الدرجة الحرّة — يُرى فوق اللوح ولا يُتَّكأ عليه** (ب١): الكلمةُ مرسومةً
-   * **من مسارها المرجعيّ نفسِه** (`refGlyph`) لا بخطّ نصّ — فما يراه هو ما يُحكَم به
-   * (`METHOD.md §٣.٢`). ويسقط في سائر الخطوات: هناك النموذجُ في اللوح.
+   * 🔴 **ونموذجُ «فوق اللوح» نُزع** (بلاغُ المالك ٢٦ أغسطس ٢٠٢٦: «الأزرارُ مختفيةٌ
+   * جزءٌ منها تحت مع أنّ لدينا مساحة»). **وعلّتان مقيستان**:
+   *   · **أنّه صار مكرَّراً**: يومَ صارت الكلمةُ طبقتين (فونتٌ وفوقه حبر) صار اللوحُ
+   *     نفسُه يحمل الكلمةَ مرسومةً في كل درجاته — فنموذجٌ ثانٍ فوقه يعرض الشيءَ مرتين.
+   *   · **وأنّه كان يقطع الأزرار**: عدّةُ المقاسات (`--device`) أحصت فائضاً رأسياً
+   *     في محطة الوصل على الآيبادات العرضية الثلاثة (٢٦ و١ و٣٨ بكسلاً) — **وهو
+   *     وحدَه ٤٫٨rem** (نموذجٌ ٣٫٦ وحاشيةٌ وإطار). فبنزعه تسع الشاشةُ ويُرى «تَابِعْ».
    */
-  const model = h('div', { class: 'copy-model' });
   const board = h('div', { class: 'lesson-board' });
   const foot = h('div', { class: 'row foot' });
   const hint = h('p', { class: 'hint' });
@@ -282,11 +285,6 @@ export function renderNode(node) {
     const unit = units[state.unit];
     const step = STEPS[state.index];
     state.stepFaults = 0;
-    // **النموذجُ فوق اللوح في الدرجة الحرّة وحدَها** — وفي غيرها اللوحُ يحمله،
-    // **ويُفرَغ قبل كل شيء** فلا يبقى نموذجُ كلمةٍ سابقة فوق بطاقةِ علامةٍ أو ختام.
-    model.replaceChildren(...(step.mode === MODES.FREE
-      ? [refGlyph(unit.ref, 'ref-glyph copy-model-glyph')] : []));
-
     // بطاقةُ العلامة تسبق الكتابة — تُعرَض مرّةً واحدة ثم تُغلَق بيد الطفل
     const pending = state.index === 0 ? cardsFor(unit) : [];
     if (pending.length) {
@@ -432,7 +430,6 @@ export function renderNode(node) {
     const trace = live?.ink() ?? [];
     releaseCopy();
     state.done = true;
-    model.replaceChildren();          // الختامُ احتفالٌ لا لوحَ نسخٍ فوقه نموذج
     const stars = starsForReview(state.faults, writingSteps);
     progress.setStars(node.id, stars);
     paintDots();
@@ -549,7 +546,7 @@ export function renderNode(node) {
   }
 
   const main = h('main', { class: 'screen lesson-letter lesson-copy' },
-    strip, dots, model, board, hint, foot);
+    strip, dots, board, hint, foot);
   screen.append(main);
   mount();
   return screen;

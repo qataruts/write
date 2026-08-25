@@ -198,11 +198,33 @@ function watchNetwork(win) {
         if (unit === units[0] && step === 1) {
           ok(Boolean(doc.querySelector('main .pen-box--free')),
             'والخطوةُ الثالثة **صندوقٌ فارغ** — نسخٌ حرٌّ لا تتبّعٌ خافت');
-          const glyph = doc.querySelector('main .copy-model .ref-glyph');
-          ok(Boolean(glyph),
-            'ونموذجُها **فوق اللوح** مرسومٌ من مسارها — يُرى ولا يُتَّكأ عليه');
-          ok(Boolean(glyph) && glyph.querySelectorAll('.ref-stroke, .ref-dot').length > 0,
-            'وأجزاؤه من المسار نفسِه لا خطُّ نصّ');
+          // 🔴 **ولا نموذجَ فوق اللوح بعد اليوم** (بلاغُ المالك ٢٦ أغسطس ٢٠٢٦):
+          // اللوحُ نفسُه يحمل الكلمةَ طبقةَ فونتٍ في كل درجاته، فنموذجٌ ثانٍ فوقه
+          // تكرارٌ **كان يقطع أزرارَ الشاشة** على الآيبادات العرضية.
+          ok(!doc.querySelector('main .copy-model .ref-glyph'),
+            'ولا نموذجَ مكرَّرٌ فوق اللوح — اللوحُ يحمل الكلمة');
+          const ghost = doc.querySelector('main .pen-box--free .pen-ghost text');
+          ok(Boolean(ghost) && ghost.textContent.trim().length > 0,
+            `وطبقةُ الفونت على اللوح هي النموذج (${ghost?.textContent || 'لا طبقة'})`);
+          // **والطبقةُ منطبقةٌ على هيكلها**: الطفلُ يكتب على الفونت ويُقاس بالمسار،
+          // فافتراقُهما أفقياً يقيس غيرَ ما يُرى (قِيس ٥٢٠ وحدةً قبل الإصلاح).
+          const svg = doc.querySelector('main .pen-box--free .pen-surface');
+          const marks = [...svg.querySelectorAll('.pen-model path')]
+            .flatMap((el) => (el.getAttribute('d').match(/-?\d+(\.\d+)?/g) || [])
+              .filter((_, i) => i % 2 === 0).map(Number));
+          const mid = (Math.min(...marks) + Math.max(...marks)) / 2;
+          const anchor = Number(ghost.getAttribute('x'));
+          const span = Math.max(...marks) - Math.min(...marks);
+          ok(Math.abs(anchor - mid) < span * 0.08,
+            `ووسطُ الطبقة على وسط هيكلها (${Math.round(Math.abs(anchor - mid))} `
+            + `وحدةً من ${Math.round(span)})`);
+          // **وحبرُ الطفل من مادّته لا من بكسل اللوح**: يقرؤه `pen.js` من `ref.pen`
+          // فيبقى ثلثَي قلم الفونت تحته مهما تبدّل حجمُ الكلمة (نصُّ المالك ٥ : ٧٫٥).
+          const boxEl = doc.querySelector('main .pen-box--free');
+          const penInk = Number(boxEl.style.getPropertyValue('--pen-ink'));
+          const penModel = Number(boxEl.style.getPropertyValue('--pen-model'));
+          ok(penInk > 0 && penModel > 0 && Math.abs(penInk / penModel - 2 / 3) < 0.02,
+            `وحبرُها ثلثا قلمِ فونتها (${penInk} من ${penModel})`);
           const labels = [...doc.querySelectorAll('main .foot .btn')]
             .map((b) => b.textContent.trim());
           ok(!labels.some((t) => t.includes('شَاهِدْ')),
