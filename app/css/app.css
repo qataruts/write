@@ -1870,3 +1870,13 @@ main.lesson-letter .hint, main.warmup .hint { min-height: 2.8em; }
   margin: 1.2rem 0 .4rem;
   font-variant-numeric: tabular-nums;
 }
+
+/* **طبقةُ الفونت تحت حبر الكلمة** (حكم المالك ٢٥ أغسطس ٢٠٢٦): نصُّ الكلمة بخطّ
+   النسخ خافتاً، والطفلُ يكتب فوقه — ولا مسارَ ولا مبدأَ ولا سهمَ في الكلمات. */
+.pen-ghost text {
+  font-family: 'Noto Naskh Arabic', serif;
+  fill: var(--model, #c9c4b4);
+  opacity: .38;
+}
+.pen-box--free .pen-ghost { opacity: 1; }
+.pen-start--off, .pen-box--free .pen-ghost ~ .pen-guide .pen-arrow { display: none; }

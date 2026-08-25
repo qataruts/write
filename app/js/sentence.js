@@ -73,7 +73,9 @@ export const SPOKEN = [...Object.values(SAY), ...SPOKEN_SENTENCES];
  * **فليتنر هو الذي يجعلها إملاءً حقّاً**: يعيد السطرَ متباعداً في المراجعة بعد أيام.
  */
 export const STEPS = [
-  { id: 'copy', mode: MODES.GUIDED, title: 'اِنْسَخْ', say: SAY.copy, kind: progress.KINDS.COPY },
+  // **والجملةُ حرّةٌ كالكلمة** (حكم المالك ٢٥ أغسطس ٢٠٢٦): لا مسارَ يُعرَض عليها،
+  // فالنصُّ المكتوبُ فوق اللوح مرجعُها — والعرضُ المتحرك للحروف وحدَها.
+  { id: 'copy', mode: MODES.FREE, title: 'اِنْسَخْ', say: SAY.copy, kind: progress.KINDS.COPY },
   { id: 'dictate', mode: MODES.FREE, title: 'سَمَاعاً', say: SAY.dictate, kind: progress.KINDS.DICTATE },
 ];
 
@@ -189,6 +191,9 @@ export function renderNode(node) {
     const surface = penSurface({
       ref: unit.ref,
       mode: step.mode,
+      // **وطبقةُ الفونت هي مرجعُ الكلمة** (حكم المالك ٢٥ أغسطس ٢٠٢٦): نصُّها
+      // مجرَّداً من التشكيل — فالطفلُ يكتب حروفاً لا حركات.
+      ghost: (unit.text || '').replace(/[\u064B-\u0652\u0670]/g, ''),
       judge: 'defer',   // **التقاطٌ صامتٌ والقياسُ عند «تَابِعْ»** (مرسوم ٢٤ أغسطس)
       // **سماحةُ الجملة من مسارها** — مقياسُ حروفها فيها (`METHOD.md §٣.٥`)
       tolerance: aid.tolerance,

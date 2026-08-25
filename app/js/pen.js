@@ -987,6 +987,11 @@ const pathD = (points) => (points.length === 1
 /** أنماطُ العرض — خطواتُ حلقة الدرس (`METHOD.md §٥`). */
 export const MODES = { GUIDED: 'guided', FAINT: 'faint', FREE: 'free' };
 
+/** **طبقةُ الفونت في الكلمات**: جسمُ الخطّ في فضاء التطبيق (ألفُ ٧٨٦ ÷ ٠٫٦١ من
+ *  جسم نوتو نسخ)، وهامشُها هامشُ مادّة النسخ نفسُه (٨١) — فتنطبق على الحبر. */
+const GHOST_EM = 1281;
+const GHOST_PAD = 81;
+
 /**
  * **صندوقُ المادّة — مربّعٌ للحرف والكلمة، وسطرٌ عريضٌ للجملة** (حكمُ المدير، ١٣
  * أغسطس ٢٠٢٦): «كلُّ شكلٍ يملأ صندوقَه» (قرارُ الجلسة ٢) يسري على الجملة كما سرى
@@ -2143,7 +2148,7 @@ export function refGlyph(ref, className = 'ref-glyph') {
  */
 export function penSurface(config) {
   const {
-    ref, mode = MODES.GUIDED, tolerance, bounds = false, baseline = null, veil = 0,
+    ref, mode = MODES.GUIDED, tolerance, bounds = false, baseline = null, veil = 0, ghost = null,
     onFault, onPart, onDone, onTry, onStuck, label = 'لوحُ الكتابة', pace = 1,
     /**
      * 🔴 **«نقيس ولا نرفض» — مرسومُ المالك الثاني (٢٤ أغسطس ٢٠٢٦)**: «تقبل
@@ -2233,7 +2238,29 @@ export function penSurface(config) {
   const trailed = sv('g', { class: 'pen-trail' });     // ما تلوّن تحت القلم
   const guide = sv('g', { class: 'pen-guide' });
   const inkLayer = sv('g', { class: 'pen-ink' });
-  svg.append(rule, fence, model, trailed, guide, inkLayer);
+  /**
+   * 🔴 **طبقتان في الكلمات: فونتٌ حقيقيٌّ وفوقه حبر** (حكم المالك ٢٥ أغسطس ٢٠٢٦:
+   * «الكلماتُ كأنها فونتٌ حقيقيّ والظاهرُ منه هو خطُّ الحبر، وألغِ كلَّ الوصل
+   * والبدايات وكلَّ شيء — فقط فونتٌ فوقه حبر» · «فقط الحروف تعليم والباقي حرّ»).
+   *
+   * **وعلّتُه رآها بعينه**: مؤشّرُ التقدّم على مسار الكلمة يتردّد عند مواضع رجوع
+   * اليد على أثرها (القطعُ إلى أدناه بأمره) **فيشتّت الطفل**. ⇐ في الكلمة **لا
+   * مسارَ ولا مبدأَ ولا سهم**: نصُّها بخطّ النسخ نفسِه خافتاً، والطفلُ يكتب فوقه.
+   * **والحرفُ على حاله** — تعليمُ الكتابة موضعُه الحرفُ وحدَه.
+   */
+  const ghostLayer = sv('g', { class: 'pen-ghost' });
+  if (ghost) {
+    // **والنصُّ يُنشأ ثم يُملأ** (`sv` تضع السماتِ ولا تأخذ محتوى)، **ومقاسُه من
+    // سطر المادّة نفسِه** فينطبق على حبرها: جسمُ الخطّ ٠٫٦١ من ارتفاع خليّة السطر.
+    const base = ref.line ?? bh * 0.63;
+    const text = sv('text', {
+      x: bw - GHOST_PAD, y: base, 'font-size': Math.round(bh * 0.6),
+      'text-anchor': 'start', direction: 'rtl',
+    });
+    text.textContent = ghost;
+    ghostLayer.append(text);
+  }
+  svg.append(rule, fence, ghostLayer, model, trailed, guide, inkLayer);
   box.append(svg);
 
   /**
@@ -2305,7 +2332,9 @@ export function penSurface(config) {
   }
 
   // نقطةُ البداية وسهمُ الاتجاه — وهما لسانُ الإرشاد كلُّه (`METHOD.md §٣.٤`)
-  const startMark = sv('circle', { class: 'pen-start', r: g.start });
+  // **وفي الكلمة لا مبدأَ يُعرَض** (حكم المالك: «ألغِ كلَّ الوصل والبدايات وكلَّ
+  // شيء — فقط فونتٌ فوقه حبر») — فالعلاماتُ كلُّها تُخفى حيث تُعرض طبقةُ الفونت.
+  const startMark = sv('circle', { class: `pen-start${ghost ? ' pen-start--off' : ''}`, r: g.start });
   const arrow = sv('path', { class: 'pen-arrow' });
   // **رأسُ القلم يُخفى بالصنف لا بسمة `hidden`**: أمسكته لقطةُ اللوح — السمةُ لا
   // تُخفي عنصرَ SVG على كل متصفّح، فظهرت نقطةٌ في زاوية اللوح عند (٠،٠). وإخفاؤه
